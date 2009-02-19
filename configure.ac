@@ -120,7 +120,7 @@ CXXFLAGS_OPTIM_SPEED="-O"
 # "-g" may not work with some compilers, but end users shouldn't be
 if test "$enable_debugging" = yes; then
 	CXXFLAGS_OPTIM_SPEED="-O0"
-	CXXFLAGS="$CXXFLAGS -Wall -g -Wreturn-type -Wunused -Wredundant-decls -Wcast-align -Wcomment -Wextra"
+	CXXFLAGS="$CXXFLAGS -Wall -pedantic -ansi -Werror -g -Wreturn-type -Wunused -Wredundant-decls -Wcast-align -Wcomment -Wextra"
 fi
 
 #DJZ allow turning off NDEBUG only
