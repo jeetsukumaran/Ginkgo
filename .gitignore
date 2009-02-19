@@ -1,0 +1,12 @@
+*Makefile.in
+aclocal.m4
+autom4te.cache/
+build/
+config.h.in
+configure
+db_build/
+debug/
+*.DS_Store
+*.deps/
+*Makefile
+
