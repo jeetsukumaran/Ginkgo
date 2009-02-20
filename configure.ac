@@ -4,7 +4,7 @@
 AC_PREREQ(2.59)
 AC_INIT([carch], [0.01], [jeet@ku.edu])
 
-AC_CONFIG_SRCDIR([gingko-cpp/carch_main.cpp])
+AC_CONFIG_SRCDIR([gingkocc/carch_main.cpp])
 AC_CONFIG_HEADER([config.h])
 
 #	Directory that contains install-sh and other auxiliary files
@@ -219,7 +219,7 @@ AC_SUBST(CPPFLAGS)
 
 AC_CONFIG_FILES([
 	Makefile 			\
-	gingko-cpp/Makefile		\
+	gingkocc/Makefile		\
 	])
 
 AC_OUTPUT

@@ -2,9 +2,9 @@ ACLOCAL_AMFLAGS = -I config
 
 EXTRA_DIST = \
     doc \
-    gingko-python \
+    gingkopy \
 	README
 
-SUBDIRS = gingko-cpp
+SUBDIRS = gingkocc
 
 
