@@ -4,7 +4,7 @@
 AC_PREREQ(2.59)
 AC_INIT([carch], [0.01], [jeet@ku.edu])
 
-AC_CONFIG_SRCDIR([gingko-cpp/carch_main.cpp])
+AC_CONFIG_SRCDIR([gingkocc/carch_main.cpp])
 AC_CONFIG_HEADER([config.h])
 
 #	Directory that contains install-sh and other auxiliary files
@@ -120,7 +120,7 @@ CXXFLAGS_OPTIM_SPEED="-O"
 # "-g" may not work with some compilers, but end users shouldn't be
 if test "$enable_debugging" = yes; then
 	CXXFLAGS_OPTIM_SPEED="-O0"
-	CXXFLAGS="$CXXFLAGS -Wall -Werror -pedantic -ansi -g -Wreturn-type -Wunused -Wredundant-decls -Wcast-align -Wcomment -Wextra"
+	CXXFLAGS="$CXXFLAGS -Wall -pedantic -ansi -Werror -g -Wreturn-type -Wunused -Wredundant-decls -Wcast-align -Wcomment -Wextra"
 fi
 
 #DJZ allow turning off NDEBUG only
@@ -219,7 +219,7 @@ AC_SUBST(CPPFLAGS)
 
 AC_CONFIG_FILES([
 	Makefile 			\
-	gingko-cpp/Makefile		\
+	gingkocc/Makefile		\
 	])
 
 AC_OUTPUT
