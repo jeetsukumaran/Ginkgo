@@ -212,7 +212,11 @@ void Species::initialize_population(Population* popPtr, Cell* cell, int mean_siz
 /// Of course, given no pop gen component right now, the latter does not hold.
 Population& Species::reproduce(Population& cur_gen) const {
     static Population next_gen;
-    unsigned int next_gen_size = poisson_variate(cur_gen.size());
+    // we assume that each individual produces a Poisson distributed number
+    // of offspring with mean of 2; as there are cur_gen.size() individuals
+    // the total number of offspring is cur_gen.size() * Poisson(2); the sum
+    // of n Poisson variables with mean M = Poisson(n*M).
+    unsigned int next_gen_size = poisson_variate(cur_gen.size() * 2);
     next_gen.assign(next_gen_size, Individual());
 //    next_gen.reserve(next_gen_size);
 //     if (cur_gen.size() > next_gen.size()) {
