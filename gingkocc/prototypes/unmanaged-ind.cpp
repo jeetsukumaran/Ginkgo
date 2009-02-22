@@ -32,7 +32,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // SUPPORT FUNCTIONS
 
-double random_uniform() {
+double uniform_rv() {
     return (double)rand()/double(RAND_MAX);
 }
 
@@ -47,7 +47,7 @@ int poisson_rv(int rate) {
     double k = 0.0;    
     while (p >= L) {
         k += 1.0;
-        p *= random_uniform();
+        p *= uniform_rv();
     }
     return k - 1.0;
 }
@@ -104,10 +104,13 @@ class Population {
             : species(sp),
               cell(c) {
         }
+        void reserve_individuals(const unsigned int& count) {
+            this->individuals.reserve(count);
+        }
         void add_individual(const Individual& individual) {
             this->individuals.push_back(individual);
         }
-        int size() {
+        int size() const {
             return this->individuals.size(); 
         }
     
@@ -127,6 +130,7 @@ class Species {
         }
         virtual ~Species() {}
         virtual Population get_population(Cell* cell=NULL, int mean_size=0, int max_size=0) const;
+        virtual Population reproduce(const Population& cur_gen);
         
     private:
         std::string label;
@@ -159,6 +163,17 @@ Population Species::get_population(Cell* cell, int mean_size, int max_size) cons
         }
     }
     return p;
+}
+
+/// Returns next generation.
+/// Derived classes should override this to implement different reproduction
+/// models. 
+Population Species::reproduce(const Population& cur_gen) {
+    static Population next_gen;
+    if (cur_gen.size() > next_gen.size()) {
+        next_gen.reserve_individuals(next_gen.size());
+    }
+    return next_gen;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -200,6 +215,7 @@ typedef std::vector<Cell>::iterator CellIterator;
 
 // creates slots for populations, corresponding to species
 void Cell::initialize_populations() {
+    this->populations.reserve(this->species->size());
     for (SpeciesConstIterator sp=this->species->begin(); 
             sp != this->species->end();
             sp++) {
@@ -249,7 +265,7 @@ void World::generate_landscape(int dim_x, int dim_y) {
     this->dim_x = dim_x;
     this->dim_y = dim_y;
     int num_cells = dim_x * dim_y;
-    // this->cells.reserve(num_cells);
+    this->cells.reserve(num_cells);
     for (int i=0; i < num_cells; ++i) {                    
         this->cells.push_back(Cell(&this->species)); // Cell objects created here, ownership = World.cells
     }
