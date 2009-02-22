@@ -1,0 +1,23 @@
+With empty Individuals:
+
+In Species::get_population, when adding individuals to the new populations:
+using assign     8.57 sec.
+using push_back 14.8 sec
+using push_back with reserve  8.62 sec
+
+
+Using genotype length of 10:
+I suspect that when you get to steps that involve looping over individuals, it
+	will be more expensive to use a vector rather than an array with a length
+	that is known at compile-time.  Right now, they are about the same, but with
+	interesting differences in whether the time is user time or system time:
+
+with vector:
+		real	0m13.134s
+		user	0m10.966s
+		sys	0m2.115s
+	
+with -DSTATIC_GENOTYPE_LENGTH:
+	real	0m14.611s
+	user	0m1.435s
+	sys	0m13.126s

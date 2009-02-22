@@ -73,6 +73,9 @@ class Individual {
         /// default constructor
         Individual() {
             // TODO!
+#			if !defined(STATIC_GENOTYPE_LENGTH)
+            	genotype.resize(genotypeLen);
+#			endif
         }            
                    
         /// instantiates individual with given genotype
@@ -107,7 +110,16 @@ class Population {
         void add_individual(const Individual& individual) {
             this->individuals.push_back(individual);
         }
-        int size() {
+        void assign(const unsigned n, const Individual & individual) {
+        	this->individuals.assign(n, individual);
+        }
+        void reserve(const unsigned n) {
+        	this->individuals.reserve(n);
+        }
+        void resize(const unsigned n) {
+        	this->individuals.resize(n);
+        }
+        int size() const {
             return this->individuals.size(); 
         }
     
@@ -154,9 +166,19 @@ Population Species::get_population(Cell* cell, int mean_size, int max_size) cons
         while ((max_size > 0) and (n > max_size)) {
             n = poisson_rv(mean_size);
         }
-        for (; n > 0; --n) {
-            p.add_individual(Individual());
-        }
+#		if 0
+		//@Jeet, it is much more efficient to use assign, or some "range insertion" 
+		//	rather than a loop with push_back.  If you do lots of push_backs it is
+		//	usually a good idea to call reserve to make sure the vector is big 
+		//	enough before you start pushing back
+			//p.reserve(n);
+			for (; n > 0; --n) {
+				p.add_individual(Individual());
+			}
+#		else 
+			p.assign(n, Individual());
+			//p.resize(n);
+#		endif
     }
     return p;
 }

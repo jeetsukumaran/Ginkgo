@@ -31,9 +31,11 @@ AM_INIT_AUTOMAKE([1.9 foreign dist-tarZ tar-ustar filename-length-max=299])
 # Checks for programs.
 AC_PROG_CC
 AC_PROG_CPP
-AC_PROG_CXX
 
 # Initialize CXXFLAGS to prevent it from defaulting to "-g -O2"
+USER_CXXFLAGS="$CXXFLAGS"
+AC_PROG_CXX
+CXXFLAGS="$USER_CXXFLAGS"
 
 
 
