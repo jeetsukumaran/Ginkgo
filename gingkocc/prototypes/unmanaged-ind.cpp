@@ -63,10 +63,15 @@ double standard_normal_variate() {
         s = pow(v1, 2) + pow(v2, 2);
     }
     
-    double x1 = v1 * sqrt( (-2 * log(s)) / s );
-    stored_variate = v2 * sqrt( (-2 * log(s)) / s );
+    double polar = sqrt( (-2 * log(s)) / s );
+    double x1 = v1 * polar;
+    stored_variate = v2 * polar;
     
     return x1;
+}
+
+double normal_variate(double mean, double sd) {
+    return standard_normal_variate() * sd + mean;
 }
 
 int poisson_variate(int rate) {
