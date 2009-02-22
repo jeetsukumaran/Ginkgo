@@ -62,13 +62,14 @@ class Individual {
 /// their species.
 class Population {
     public:
-        Population(const Species& sp)
-            : species(sp) {
+        Population(const Species* sp=NULL, const Cell* c=NULL)
+            : species(sp),
+              cell(c) {
         }
     
     private:
-        const Species&    species; // the species to which this population belongs
-        Cell*             cell;    // the current location of this population
+        const Species*    species; // the species to which this population belongs
+        const Cell*       cell;    // the current location of this population
         std::vector<Individual> individuals; // members of this population        
 }; // Population
 
@@ -77,7 +78,7 @@ class Population {
 class Species {
     public:
         Species() {}
-        Species(const std::string& sp_label) 
+        Species(const char* sp_label) 
             : label(sp_label) {       
         }
         const Population get_population();
@@ -89,11 +90,7 @@ class Species {
 
 typedef std::vector<Species> SpeciesContainer;
 typedef std::vector<Species>::iterator SpeciesIterator;
-
-/// creates and returns a new population object
-const Population Species::get_population() {
-    return Population(*this);
-}
+typedef std::vector<Species>::const_iterator SpeciesConstIterator;
 
 ///////////////////////////////////////////////////////////////////////////////
 // SPATIAL FRAMEWORK
@@ -102,7 +99,7 @@ const Population Species::get_population() {
 class Cell {
     public:
     
-        Cell(const SpeciesContainer& sp)
+        Cell(const SpeciesContainer* sp)
             : species(sp) {}
             
         Cell(const Cell& c)
@@ -115,17 +112,26 @@ class Cell {
             this->carrying_capacity = cc;
         }
         
-        void add_species(Species& sp);
+        void initialize_populations();
     
     private:
-        int     carrying_capacity;
-        const SpeciesContainer&     species;
-        std::vector<Population*>    populations;    
+        int                        carrying_capacity;
+        const SpeciesContainer*    species;
+        std::vector<Population>    populations;    
 
 }; // Cell
 
 typedef std::vector<Cell> Cells;
 typedef std::vector<Cell>::iterator CellIterator;
+
+// creates slots for populations, corresponding to species
+void Cell::initialize_populations() {
+    for (SpeciesConstIterator sp=this->species->begin(); 
+            sp != this->species->end();
+            sp++) {
+        this->populations.push_back(Population(&(*sp), this)); 
+    }            
+}
 
 /// The world.
 class World {
@@ -136,6 +142,7 @@ class World {
         void generate_landscape(int dim_x, int dim_y);
         void set_cell_carrying_capacity(int carrying_capacity);
         void add_species(const Species& sp);
+        void initialize_biota();
         
     private:
         int                 dim_x;
@@ -160,8 +167,8 @@ void World::generate_landscape(int dim_x, int dim_y) {
     this->dim_y = dim_y;
     int num_cells = dim_x * dim_y;
     // this->cells.reserve(num_cells);
-    for (int i=0; i < num_cells; ++i) {
-        this->cells.push_back(Cell(this->species));
+    for (int i=0; i < num_cells; ++i) {                    
+        this->cells.push_back(Cell(&this->species)); // Cell objects created here, ownership = World.cells
     }
 }
 
@@ -173,10 +180,18 @@ void World::set_cell_carrying_capacity(int carrying_capacity) {
     }
 }
 
-/// adds a species to the World, and creates slots for populations of that 
-/// species in Cells
+/// adds a species to the World
 void World::add_species(const Species& sp) {
     this->species.push_back(sp);
+}
+
+/// initializes biota over landscape
+/// must be called after landscape has been generated and species
+/// list populated
+void World::initialize_biota() {
+    for (CellIterator i=this->cells.begin(); i != this->cells.end(); ++i) {
+        i->initialize_populations();
+    }
 }
 
 ///////////////////////////////////////////////////////////////////////////////
