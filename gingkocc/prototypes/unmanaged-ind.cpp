@@ -157,9 +157,7 @@ class Individual {
 /// A single population of a particular species.
 /// Responsible for managing collections of individuals, and relating them to 
 /// their species.
-/// *** PROBABLY SHOULD INHERIT FROM std::vector<Individual> instead of 
-/// composition ***
-class Population {
+class Population : public std::vector<Individual> {
     public:
         Population(const Species* sp=NULL, const Cell* c=NULL)
             : species(sp),
@@ -168,28 +166,11 @@ class Population {
         void setCell(const Cell * c) {
         	this->cell = c;
         }
-        void add_individual(const Individual& individual) {
-            this->individuals.push_back(individual);
-        }
-        void assign(const unsigned n, const Individual & individual) {
-        	this->individuals.assign(n, individual);
-        }
-        void reserve(const unsigned n) {
-        	this->individuals.reserve(n);
-        }
-        void resize(const unsigned n) {
-        	this->individuals.resize(n);
-        }
-        int size() const {
-            return this->individuals.size(); 
-        }
-		size_t ind_capacity() const {
-			return this->individuals.capacity();
-		}
+
     private:
         const Species*    species; // the species to which this population belongs
         const Cell*       cell;    // the current location of this population
-        std::vector<Individual> individuals; // members of this population        
+     
 }; // Population
 
 /// A collection of Populations sharing the same ecologies (e.g. movement, 
@@ -296,7 +277,7 @@ class Cell {
             return this->populations[0].size();
         }
         int ind_capacity() {
-            return this->populations[0].ind_capacity();
+            return this->populations[0].capacity();
         }
     
     private:
