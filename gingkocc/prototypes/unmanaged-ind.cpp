@@ -297,7 +297,7 @@ class World {
             }
             out << "Total individuals = " << indCount << '\n';
             out << "Total individual capacity = " << indCapacityCount << '\n';
-            out << "Size of individual in bytes = " << sizeof(Individual) << std::endl;
+            out << "Size of individual in bytes = " << SIZE_OF_INDIVIDUAL << std::endl;
             out << "Min. possible memory used for individuals = " << indCount*SIZE_OF_INDIVIDUAL << std::endl;
             out << "Memory used for individuals = " << indCapacityCount*SIZE_OF_INDIVIDUAL << std::endl;
         }
