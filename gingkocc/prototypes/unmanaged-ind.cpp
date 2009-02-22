@@ -254,12 +254,16 @@ Population& Species::reproduce(Population& cur_gen) const {
     // of offspring with mean of 2; as there are cur_gen.size() individuals
     // the total number of offspring is cur_gen.size() * Poisson(2); the sum
     // of n Poisson variables with mean M = Poisson(n*M).
-    unsigned int next_gen_size = poisson_variate(cur_gen.size() * 2);
+    // seems to only work when num_gens < 7 ... (at least, with no carrying
+    // capacity enforced.
+//     unsigned int next_gen_size = poisson_variate(cur_gen.size() * 2);
+//     next_gen.assign(next_gen_size, Individual());
+
+    // tweak: next gen population size is normally distributed with mean =
+    // current pop size, and sd = 10% of current pop size
+    unsigned int next_gen_size = normal_variate(cur_gen.size(), cur_gen.size()/10);
     next_gen.assign(next_gen_size, Individual());
-//    next_gen.reserve(next_gen_size);
-//     if (cur_gen.size() > next_gen.size()) {
-//         next_gen.reserve(next_gen.size());
-//     }
+
     cur_gen = next_gen;
     return cur_gen; // return copy right?
 }
