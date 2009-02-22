@@ -30,10 +30,43 @@
 #include <cmath>
 
 ///////////////////////////////////////////////////////////////////////////////
-// SUPPORT FUNCTIONS
+// SUPPORT FUNCTIONS: WILL BE PLACED IN CLASS RandomVariate
 
 double uniform_variate() {
-    return (double)rand()/double(RAND_MAX);
+    return double(rand())/double(RAND_MAX);
+}
+
+// from Knuth, The Art of Computer Programming, Sec 3.4.1, Algorithm P
+double standard_normal_variate() {
+
+    // since this method generates two variates at a time,
+    // we store the second one to be returned on the next call
+    static double stored_variate = 0;
+    static bool return_stored=false;    
+
+    if (return_stored) {
+        return_stored = false;
+        return stored_variate;
+    }
+
+    double u1;
+    double u2;
+    double v1;
+    double v2;
+    double s = 1; 
+    
+    while (s >= 1.0) {
+        u1 = uniform_variate();
+        u2 = uniform_variate();
+        v1 = 2.0 * u1 - 1.0;
+        v2 = 2.0 * u2 - 1.0;
+        s = pow(v1, 2) + pow(v2, 2);
+    }
+    
+    double x1 = v1 * sqrt( (-2 * log(s)) / s );
+    stored_variate = v2 * sqrt( (-2 * log(s)) / s );
+    
+    return x1;
 }
 
 int poisson_variate(int rate) {
