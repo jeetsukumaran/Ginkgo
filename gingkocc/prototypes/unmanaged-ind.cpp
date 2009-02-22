@@ -32,24 +32,29 @@
 ///////////////////////////////////////////////////////////////////////////////
 // SUPPORT FUNCTIONS
 
-double uniform_rv() {
+double uniform_variate() {
     return (double)rand()/double(RAND_MAX);
 }
 
-int poisson_rv(int rate) {
+int poisson_variate(int rate) {
     const int MAX_EXPECTATION = 64;
     if (rate > MAX_EXPECTATION) {
         double r = rate/2.0;
-        return poisson_rv(r) + poisson_rv(r);
+        return poisson_variate(r) + poisson_variate(r);
     }
     double L = exp(-1.0 * rate);
     double p = 1.0;
     double k = 0.0;    
     while (p >= L) {
         k += 1.0;
-        p *= uniform_rv();
+        p *= uniform_variate();
     }
     return k - 1.0;
+}
+
+template <typename T>
+T random_sample(const std::vector<T>& v) {
+    return v[rand() % v.size()];
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -114,6 +119,8 @@ class Individual {
 /// A single population of a particular species.
 /// Responsible for managing collections of individuals, and relating them to 
 /// their species.
+/// *** PROBABLY SHOULD INHERIT FROM std::vector<Individual> instead of 
+/// composition ***
 class Population {
     public:
         Population(const Species* sp=NULL, const Cell* c=NULL)
@@ -157,7 +164,7 @@ class Species {
         }
         virtual ~Species() {}
         virtual Population get_population(Cell* cell=NULL, int mean_size=0, int max_size=0) const;
-        virtual Population reproduce(const Population& cur_gen);
+        virtual Population& reproduce(Population& cur_gen) const;
         virtual void initialize_population(Population* popPtr, Cell* cell, int mean_size, int max_size) const;
         
     private:
@@ -187,9 +194,9 @@ void Species::initialize_population(Population* popPtr, Cell* cell, int mean_siz
     Population & p = *popPtr;
 	p.setCell(cell);
     if (mean_size > 0) {
-        int n = poisson_rv(mean_size);
+        int n = poisson_variate(mean_size);
         while ((max_size > 0) and (n > max_size)) {
-            n = poisson_rv(mean_size);
+            n = poisson_variate(mean_size);
         }
         p.assign(n, Individual());
     }
@@ -198,12 +205,21 @@ void Species::initialize_population(Population* popPtr, Cell* cell, int mean_siz
 /// Returns next generation.
 /// Derived classes should override this to implement different reproduction
 /// models. 
-Population Species::reproduce(const Population& cur_gen) {
+/// Current model: next gen population size is a Poisson distributed random
+/// variate with mean equal to current population size. 
+//  Each offspring in the next generation randomly selects two parents 
+//  from the current generation.
+/// Of course, given no pop gen component right now, the latter does not hold.
+Population& Species::reproduce(Population& cur_gen) const {
     static Population next_gen;
-    if (cur_gen.size() > next_gen.size()) {
-        next_gen.reserve(next_gen.size());
-    }
-    return next_gen;
+    unsigned int next_gen_size = poisson_variate(cur_gen.size());
+    next_gen.assign(next_gen_size, Individual());
+//    next_gen.reserve(next_gen_size);
+//     if (cur_gen.size() > next_gen.size()) {
+//         next_gen.reserve(next_gen.size());
+//     }
+    cur_gen = next_gen;
+    return cur_gen; // return copy right?
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -227,6 +243,7 @@ class Cell {
         }
         
         void initialize_populations();
+        void reproduce_populations();
         
         // for debugging
         int num_individuals() {
@@ -243,14 +260,23 @@ class Cell {
 
 }; // Cell
 
-// creates slots for populations, corresponding to species
-	void Cell::initialize_populations() {
-		this->populations.resize(this->species->size());
-		SpeciesConstIterator spIt = this->species->begin();
-		VecPopIterator pIt = this->populations.begin();
-		for (; spIt != this->species->end(); ++pIt, ++spIt)
-			spIt->initialize_population(&(*pIt), this, this->carrying_capacity/2, this->carrying_capacity);
-	}
+/// creates slots for populations, corresponding to species
+void Cell::initialize_populations() {
+    this->populations.resize(this->species->size());
+    SpeciesConstIterator spIt = this->species->begin();
+    VecPopIterator pIt = this->populations.begin();
+    for (; spIt != this->species->end(); ++pIt, ++spIt)
+        spIt->initialize_population(&(*pIt), this, this->carrying_capacity/2, this->carrying_capacity);
+}
+
+/// gets the next generation for each population
+void Cell::reproduce_populations() {
+    this->populations.resize(this->species->size());
+    SpeciesConstIterator spIt = this->species->begin();
+    VecPopIterator pIt = this->populations.begin();
+    for (; spIt != this->species->end(); ++pIt, ++spIt)
+        spIt->reproduce(*pIt);
+}
 	
 /// The world.
 class World {
@@ -262,6 +288,7 @@ class World {
         void set_cell_carrying_capacity(int carrying_capacity);
         void add_species(const Species& sp);
         void initialize_biota();
+        void cycle();
         
         // for debugging
         void dump(std::ostream& out) {
@@ -332,17 +359,31 @@ void World::initialize_biota() {
     }
 }
 
+/// runs a single iteration of a lifecycle 
+void World::cycle() {
+    // survival
+    // competition
+    // reproduction
+    for (CellIterator cell_iter=this->cells.begin(); 
+            cell_iter != this->cells.end(); 
+            ++cell_iter) {
+        cell_iter->reproduce_populations();
+    }    
+    // migration
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // TEST
 
 int main(int argc, char * argv[]) {
-    if (argc < 4) {
-        std::cout << "usage: " << argv[0] <<  " <DIM-X> <DIM-Y> <CELL-CARRYING-CAPACITY>\n";
+    if (argc < 5) {
+        std::cout << "usage: " << argv[0] <<  " <DIM-X> <DIM-Y> <CELL-CARRYING-CAPACITY> <NUM-GENS>\n";
         exit(1);
     }
     int dim_x = atoi(argv[1]);
     int dim_y = atoi(argv[2]);
     int cc = atoi(argv[3]);
+    int num_gens = atoi(argv[4]);
     
     // build world
     World world;   	
@@ -350,6 +391,9 @@ int main(int argc, char * argv[]) {
 	world.set_cell_carrying_capacity(cc);
 	world.add_species(Species("snail"));
 	world.initialize_biota();
+	for (int i=1; i <= num_gens; ++i) {
+	    world.cycle();
+	}
 	world.dump(std::cout);
 	return 0;
 }
