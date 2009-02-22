@@ -105,6 +105,12 @@ class Individual {
 
 }; // Individual
 
+#if defined(STATIC_GENOTYPE_LENGTH)
+	const unsigned SIZE_OF_INDIVIDUAL = sizeof(Individual);
+#else
+	const unsigned SIZE_OF_INDIVIDUAL = sizeof(Individual) +  genotypeLen*sizeof(float) ; // we have to take into account the size of the vector's internal storage
+#endif
+
 /// A single population of a particular species.
 /// Responsible for managing collections of individuals, and relating them to 
 /// their species.
@@ -132,7 +138,9 @@ class Population {
         int size() const {
             return this->individuals.size(); 
         }
-    
+		size_t ind_capacity() const {
+			return this->individuals.capacity();
+		}
     private:
         const Species*    species; // the species to which this population belongs
         const Cell*       cell;    // the current location of this population
@@ -224,6 +232,9 @@ class Cell {
         int num_individuals() {
             return this->populations[0].size();
         }
+        int ind_capacity() {
+            return this->populations[0].ind_capacity();
+        }
     
     private:
         int                        carrying_capacity;
@@ -238,7 +249,7 @@ class Cell {
 		SpeciesConstIterator spIt = this->species->begin();
 		VecPopIterator pIt = this->populations.begin();
 		for (; spIt != this->species->end(); ++pIt, ++spIt)
-				spIt->initialize_population(&(*pIt), this, this->carrying_capacity/2, this->carrying_capacity);
+			spIt->initialize_population(&(*pIt), this, this->carrying_capacity/2, this->carrying_capacity);
 	}
 	
 /// The world.
@@ -255,10 +266,20 @@ class World {
         // for debugging
         void dump(std::ostream& out) {
             int count=1;
+            long indCount = 0;
+            long indCapacityCount = 0;
             for (CellIterator i=this->cells.begin(); 
                 i != this->cells.end(); ++i, ++count) {
-                    out << count << ": " << i->num_individuals() << "\n";
-            }            
+                	const unsigned ni = i->num_individuals();
+                    out << count << ": " << ni << "\n";
+                    indCount += ni;
+                    indCapacityCount += i->ind_capacity();
+            }
+            out << "Total individuals = " << indCount << '\n';
+            out << "Total individual capacity = " << indCapacityCount << '\n';
+            out << "Size of individual in bytes = " << SIZE_OF_INDIVIDUAL << std::endl;
+            out << "Min. possible memory used for individuals = " << indCount*SIZE_OF_INDIVIDUAL << std::endl;
+            out << "Memory used for individuals = " << indCapacityCount*SIZE_OF_INDIVIDUAL << std::endl;
         }
         
     private:
