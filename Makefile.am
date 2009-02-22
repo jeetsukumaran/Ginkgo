@@ -5,6 +5,6 @@ EXTRA_DIST = \
     gingkopy \
 	README
 
-SUBDIRS = gingkocc
+SUBDIRS = gingkocc/prototypes
 
 

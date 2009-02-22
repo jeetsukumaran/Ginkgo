@@ -2,9 +2,13 @@
 # This file was written by hand (by mth using PAUP's configure.ac and http://autotoolset.sourceforge.net/tutorial.html as guides).
 
 AC_PREREQ(2.59)
-AC_INIT([carch], [0.01], [jeet@ku.edu])
+AC_INIT([gingko], [0.01], [jeet@ku.edu])
 
-AC_CONFIG_SRCDIR([gingkocc/carch_main.cpp])
+# AC_CONFIG_SRCDIR (UNIQUE-FILE-IN-SOURCE-DIR) UNIQUE-FILE-IN-SOURCE-DIR
+# is some file that is in the package's source directory; `configure'
+# checks for this file's existence to make sure that the directory that it
+# is told contains the source code in fact does.
+AC_CONFIG_SRCDIR([gingkocc/prototypes/unmanaged-ind.cpp])
 AC_CONFIG_HEADER([config.h])
 
 #	Directory that contains install-sh and other auxiliary files
@@ -219,7 +223,7 @@ AC_SUBST(CPPFLAGS)
 
 AC_CONFIG_FILES([
 	Makefile 			\
-	gingkocc/Makefile		\
+	gingkocc/prototypes/Makefile		\
 	])
 
 AC_OUTPUT
