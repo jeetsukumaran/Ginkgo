@@ -52,7 +52,6 @@ int poisson_rv(int rate) {
     return k - 1.0;
 }
 
-
 ///////////////////////////////////////////////////////////////////////////////
 // POPULATION ECOLOGY AND GENETICS
 
@@ -152,7 +151,6 @@ Population Species::get_population(Cell* cell, int max_size) const {
     Population p = Population(this, cell);
     if (max_size > 0) {
         int n = poisson_rv(max_size);
-        std::cout << n << std::endl;
         for (; n > 0; --n) {
             p.add_individual(Individual());
         }
@@ -293,6 +291,7 @@ int main(int argc, char * argv[]) {
 	world.generate_landscape(dim_x, dim_y);
 	world.set_cell_carrying_capacity(cc);
 	world.add_species(Species("snail"));
+	world.initialize_biota();
 	world.dump(std::cout);
 	return 0;
 }
