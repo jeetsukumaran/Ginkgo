@@ -25,6 +25,7 @@
 #include <vector>
 #include <list>
 #include <iostream>
+#include <string>
 
 ///////////////////////////////////////////////////////////////////////////////
 // POPULATION ECOLOGY AND GENETICS
@@ -75,8 +76,13 @@ class Population {
 /// fitness/survival functions, breeding pool)
 class Species {
     public:
-    
-//     private:
+        Species() {}
+        Species(const std::string& sp_label) 
+            : label(sp_label) {       
+        }
+        
+    private:
+        std::string      label;
 //         std::list<Population*> populations;
 }; // Species
 
@@ -90,10 +96,6 @@ typedef std::vector<Species>::iterator SpeciesIterator;
 class Cell {
     public:
     
-        static void set_carrying_capacity(Cell& cell) {
-            cell.set_carrying_capacity(4);
-        }
-        
         void set_carrying_capacity(int cc) {
             this->carrying_capacity = cc;
         }
@@ -112,9 +114,11 @@ typedef std::vector<Cell>::iterator CellIterator;
 class World {
 
     public:
+        World();
         World(int dim_x, int dim_y, const SpeciesContainer& spp);
-        void initialize(int dim_x, int dim_y);
-        void set_carrying_capacity(int carrying_capacity);
+        void generate_landscape(int dim_x, int dim_y);
+        void set_cell_carrying_capacity(int carrying_capacity);
+        void add_species(const Species& sp);
         
     private:
         int                 dim_x;
@@ -124,13 +128,17 @@ class World {
         
 }; // World
 
+// default constructor
+World::World() {}
+
 // constructor: calls landscape initializer
 World::World(int dim_x, int dim_y, const SpeciesContainer& spp)
     : species(spp) {   
-    this->initialize(dim_x, dim_y);
+    this->generate_landscape(dim_x, dim_y);
 }
 
-void World::initialize(int dim_x, int dim_y) {
+// generates the spatial framework
+void World::generate_landscape(int dim_x, int dim_y) {
     this->dim_x = dim_x;
     this->dim_y = dim_y;
     int num_cells = dim_x * dim_y;
@@ -140,9 +148,17 @@ void World::initialize(int dim_x, int dim_y) {
     }
 }
 
-void World::set_carrying_capacity(int carrying_capacity) {
+// sets the carrying capacity for all cells
+void World::set_cell_carrying_capacity(int carrying_capacity) {
     // std::for_each(this->cells.begin(), this->cells.end(), Cell::set_carrying_capacity());
-    carrying_capacity++;
+    for (CellIterator i=this->cells.begin(); i != this->cells.end(); ++i) {
+        i->set_carrying_capacity(carrying_capacity);
+    }
+}
+
+// adds a species to the World
+void World::add_species(const Species& sp) {
+    this->species.push_back(sp);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -155,13 +171,13 @@ int main(int argc, char * argv[]) {
     }
     int dim_x = atoi(argv[1]);
     int dim_y = atoi(argv[2]);
-    //int cc = atoi(argv[3]);
+    int cc = atoi(argv[3]);
     
-    Species sp1;
-    SpeciesContainer spp;
-    spp.push_back(sp1);
-   
-	World world(dim_x, dim_y, spp);
+    // build world
+    World world;   	
+	world.generate_landscape(dim_x, dim_y);
+	world.set_cell_carrying_capacity(cc);
+	world.add_species(Species("snail"));
 	return 0;
 }
 
