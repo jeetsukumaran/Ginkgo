@@ -126,7 +126,7 @@ class Species {
             : label(sp_label) {       
         }
         virtual ~Species() {}
-        virtual Population get_population(Cell* cell=NULL, int max_size=0) const;
+        virtual Population get_population(Cell* cell=NULL, int mean_size=0, int max_size=0) const;
         
     private:
         std::string label;
@@ -140,17 +140,20 @@ typedef std::vector<Species>::const_iterator SpeciesConstIterator;
 /// Returns a Population object with the Population object's Species pointer
 /// set to self.
 /// If Cell* is given, then the Population object's Cell pointer is set.
-/// If max_size > 0, then individuals are created and added to the population,
+/// If mean_size > 0, then individuals are created and added to the population,
 /// with the number of individuals >= 0 and <= max_size.
 /// The exact number of individuals is currently implemented as a Poisson 
-/// distributed random number with mean of max_size. 
+/// distributed random number with mean of size. 
 /// Future implementations and/or derived classes will take into account the 
 /// environment of cell, with favorable environments resulting in greater 
 /// numbers of individuals.
-Population Species::get_population(Cell* cell, int max_size) const {
+Population Species::get_population(Cell* cell, int mean_size, int max_size) const {
     Population p = Population(this, cell);
-    if (max_size > 0) {
-        int n = poisson_rv(max_size);
+    if (mean_size > 0) {
+        int n = poisson_rv(mean_size);
+        while ((max_size > 0) and (n > max_size)) {
+            n = poisson_rv(mean_size);
+        }
         for (; n > 0; --n) {
             p.add_individual(Individual());
         }
@@ -200,7 +203,7 @@ void Cell::initialize_populations() {
     for (SpeciesConstIterator sp=this->species->begin(); 
             sp != this->species->end();
             sp++) {
-        this->populations.push_back(sp->get_population(this, this->carrying_capacity)); 
+        this->populations.push_back(sp->get_population(this, this->carrying_capacity/2, this->carrying_capacity)); 
     }            
 }
 
