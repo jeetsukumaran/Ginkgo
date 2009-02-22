@@ -1,0 +1,81 @@
+################################################################################
+Avoid lots of push_back calls.
+
+(times below with empty Individuals)
+
+In Species::get_population, when adding individuals to the new populations:
+using assign     8.57 sec.
+using push_back 14.8 sec
+using push_back with reserve  8.62 sec
+
+
+################################################################################
+Using genotype length of 10:
+I suspect that when you get to steps that involve looping over individuals, it
+	will be more expensive to use a vector rather than an array with a length
+	that is known at compile-time.  Right now, they are about the same, but with
+	interesting differences in whether the time is user time or system time:
+
+with vector:
+		real	0m13.134s
+		user	0m10.966s
+		sys	0m2.115s
+	
+with -DSTATIC_GENOTYPE_LENGTH:
+	real	0m14.611s
+	user	0m1.435s
+	sys	0m13.126s
+
+################################################################################
+When possible either:
+	1.	create individuals as needed (have rich constructors), or
+	2. create "empty" individuals in their containers and then complete initialization 
+		on the individuals in the containers
+rather than:
+	3.	Creating individuals, initializing them, then copying them to their container:
+	
+
+
+These times are from void Cell::initialize_populations()
+################################
+This code is strategy 3:
+	void Cell::initialize_populations() {
+		for (SpeciesConstIterator sp=this->species->begin(); 
+				sp != this->species->end();
+				sp++) {
+			this->populations.push_back(sp->get_population(this, this->carrying_capacity/2, this->carrying_capacity)); 
+		}
+	}
+	times:
+		real	0m13.705s
+		user	0m11.101s
+		sys	0m2.252s
+################################
+This is code for strategy 2:
+	void Cell::initialize_populations() {
+		for (SpeciesConstIterator sp=this->species->begin(); 
+				sp != this->species->end();
+				sp++) {
+	        this->populations.push_back(Population());
+    	    Population & population = *this->populations.rbegin();
+        	sp->initialize_population(&population, this, this->carrying_capacity/2, this->carrying_capacity);
+    	}
+    }
+	times:
+		real	0m8.084s
+		user	0m5.614s
+		sys	0m2.171s
+################################
+I think that this is even better strategy 2:
+	void Cell::initialize_populations() {
+		this->populations.resize(this->species->size());
+		SpeciesConstIterator spIt = this->species->begin();
+		VecPopIterator pIt = this->populations.begin();
+		for (; spIt != this->species->end(); ++pIt, ++spIt)
+				spIt->initialize_population(&(*pIt), this, this->carrying_capacity/2, this->carrying_capacity);
+	}
+	times:
+		real	0m8.155s
+		user	0m5.631s
+		sys	0m2.228s
+################################################################################

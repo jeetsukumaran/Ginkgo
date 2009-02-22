@@ -58,6 +58,13 @@ int poisson_rv(int rate) {
 class Species;
 class Population;
 class Cell;
+typedef std::vector<Cell> Cells;
+typedef std::vector<Cell>::iterator CellIterator;
+typedef std::vector<Species> SpeciesContainer;
+typedef std::vector<Species>::iterator SpeciesIterator;
+typedef std::vector<Species>::const_iterator SpeciesConstIterator;
+typedef std::vector<Population>::iterator VecPopIterator;
+
 
 const unsigned genotypeLen = 10;
 #if defined(STATIC_GENOTYPE_LENGTH)
@@ -73,6 +80,9 @@ class Individual {
         /// default constructor
         Individual() {
             // TODO!
+#			if !defined(STATIC_GENOTYPE_LENGTH)
+            	genotype.resize(genotypeLen);
+#			endif
         }            
                    
         /// instantiates individual with given genotype
@@ -104,11 +114,20 @@ class Population {
             : species(sp),
               cell(c) {
         }
-        void reserve_individuals(const unsigned int& count) {
-            this->individuals.reserve(count);
+        void setCell(const Cell * c) {
+        	this->cell = c;
         }
         void add_individual(const Individual& individual) {
             this->individuals.push_back(individual);
+        }
+        void assign(const unsigned n, const Individual & individual) {
+        	this->individuals.assign(n, individual);
+        }
+        void reserve(const unsigned n) {
+        	this->individuals.reserve(n);
+        }
+        void resize(const unsigned n) {
+        	this->individuals.resize(n);
         }
         int size() const {
             return this->individuals.size(); 
@@ -131,15 +150,12 @@ class Species {
         virtual ~Species() {}
         virtual Population get_population(Cell* cell=NULL, int mean_size=0, int max_size=0) const;
         virtual Population reproduce(const Population& cur_gen);
+        virtual void initialize_population(Population* popPtr, Cell* cell, int mean_size, int max_size) const;
         
     private:
         std::string label;
 //         std::list<Population*> populations;
 }; // Species
-
-typedef std::vector<Species> SpeciesContainer;
-typedef std::vector<Species>::iterator SpeciesIterator;
-typedef std::vector<Species>::const_iterator SpeciesConstIterator;
 
 /// Returns a Population object with the Population object's Species pointer
 /// set to self.
@@ -153,16 +169,22 @@ typedef std::vector<Species>::const_iterator SpeciesConstIterator;
 /// numbers of individuals.
 Population Species::get_population(Cell* cell, int mean_size, int max_size) const {
     Population p = Population(this, cell);
+    this->initialize_population(&p, cell, mean_size, max_size);
+    return p;
+}
+
+void Species::initialize_population(Population* popPtr, Cell* cell, int mean_size, int max_size) const {
+	if (popPtr == 0L)
+		return;
+    Population & p = *popPtr;
+	p.setCell(cell);
     if (mean_size > 0) {
         int n = poisson_rv(mean_size);
         while ((max_size > 0) and (n > max_size)) {
             n = poisson_rv(mean_size);
         }
-        for (; n > 0; --n) {
-            p.add_individual(Individual());
-        }
+        p.assign(n, Individual());
     }
-    return p;
 }
 
 /// Returns next generation.
@@ -171,7 +193,7 @@ Population Species::get_population(Cell* cell, int mean_size, int max_size) cons
 Population Species::reproduce(const Population& cur_gen) {
     static Population next_gen;
     if (cur_gen.size() > next_gen.size()) {
-        next_gen.reserve_individuals(next_gen.size());
+        next_gen.reserve(next_gen.size());
     }
     return next_gen;
 }
@@ -210,19 +232,15 @@ class Cell {
 
 }; // Cell
 
-typedef std::vector<Cell> Cells;
-typedef std::vector<Cell>::iterator CellIterator;
-
 // creates slots for populations, corresponding to species
-void Cell::initialize_populations() {
-    this->populations.reserve(this->species->size());
-    for (SpeciesConstIterator sp=this->species->begin(); 
-            sp != this->species->end();
-            sp++) {
-        this->populations.push_back(sp->get_population(this, this->carrying_capacity/2, this->carrying_capacity)); 
-    }            
-}
-
+	void Cell::initialize_populations() {
+		this->populations.resize(this->species->size());
+		SpeciesConstIterator spIt = this->species->begin();
+		VecPopIterator pIt = this->populations.begin();
+		for (; spIt != this->species->end(); ++pIt, ++spIt)
+				spIt->initialize_population(&(*pIt), this, this->carrying_capacity/2, this->carrying_capacity);
+	}
+	
 /// The world.
 class World {
 
