@@ -1,13 +1,10 @@
 #include <iostream>
 #include "carch_defs.h"
-#include "greet.h"
-
 
 class Population;
 class Cell;
 
 typedef std::vector<float> Genotype;
-
 
 class Individual 
 	{
