@@ -23,6 +23,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include <vector>
+#include <cstring>
 #include <list>
 #include <iostream>
 #include <string>
@@ -59,8 +60,12 @@ class Species;
 class Population;
 class Cell;
 
-typedef std::vector<float> Genotype;
-
+const unsigned genotypeLen = 10;
+#if defined(STATIC_GENOTYPE_LENGTH)
+	typedef float Genotype[genotypeLen];
+#else
+	typedef std::vector<float> Genotype;
+#endif
 /// A single organism of a population of a particular species.
 /// Responsible for tracking (non-neutral) genotype and neutral marker 
 /// histories. 
@@ -72,13 +77,18 @@ class Individual {
         }            
                    
         /// instantiates individual with given genotype
-        Individual(const Genotype& g)
-            : genotype(g) {
-        }            
+#		if defined(STATIC_GENOTYPE_LENGTH)
+			Individual(const Genotype& g) {
+				memcpy(this->genotype, g, sizeof(Genotype));
+			}            
+#		else
+			Individual(const Genotype& g)
+				:genotype(g)
+				{}
+#		endif
                 
     private:
         Genotype genotype;   /// non-neutral genotype: maps to fitness phenotype
-        
         /// returns individual's genotype; private to disable copying
         const Genotype& get_genotype() const {
             return this->genotype;
