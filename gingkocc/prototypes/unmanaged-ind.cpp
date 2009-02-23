@@ -29,8 +29,10 @@
 #include <string>
 #include <cmath>
 
+/************************* SUPPORT CLASSES AND METHODS ***********************/
+ 
 ///////////////////////////////////////////////////////////////////////////////
-// SUPPORT FUNCTIONS: WILL BE PLACED IN CLASS RandomVariate
+//! Wraps random number generator seed etc.
 
 double uniform_variate() {
     return double(rand())/double(RAND_MAX);
@@ -95,9 +97,8 @@ T random_sample(const std::vector<T>& v) {
     return v[rand() % v.size()];
 }
 
-///////////////////////////////////////////////////////////////////////////////
-// POPULATION ECOLOGY AND GENETICS
-
+/*********************** POPULATION ECOLOGY AND GENETICS *********************/
+ 
 class Species;
 class Population;
 class Cell;
@@ -108,19 +109,20 @@ typedef std::vector<Species>::iterator SpeciesIterator;
 typedef std::vector<Species>::const_iterator SpeciesConstIterator;
 typedef std::vector<Population>::iterator VecPopIterator;
 
-
 const unsigned genotypeLen = 10;
 #if defined(STATIC_GENOTYPE_LENGTH)
 	typedef float Genotype[genotypeLen];
 #else
 	typedef std::vector<float> Genotype;
 #endif
-/// A single organism of a population of a particular species.
-/// Responsible for tracking (non-neutral) genotype and neutral marker 
-/// histories. 
+
+///////////////////////////////////////////////////////////////////////////////
+//! A single organism of a population of a particular species.
+//! Responsible for tracking (non-neutral) genotype and neutral marker 
+//! histories. 
 class Individual {
     public:
-        /// default constructor
+        //! default constructor
         Individual() {
             // TODO!
 #			if !defined(STATIC_GENOTYPE_LENGTH)
@@ -128,7 +130,7 @@ class Individual {
 #			endif
         }            
                    
-        /// instantiates individual with given genotype
+        //! instantiates individual with given genotype
 #		if defined(STATIC_GENOTYPE_LENGTH)
 			Individual(const Genotype& g) {
 				memcpy(this->genotype, g, sizeof(Genotype));
@@ -140,8 +142,8 @@ class Individual {
 #		endif
                 
     private:
-        Genotype genotype;   /// non-neutral genotype: maps to fitness phenotype
-        /// returns individual's genotype; private to disable copying
+        Genotype genotype;   //! non-neutral genotype: maps to fitness phenotype
+        //! returns individual's genotype; private to disable copying
         const Genotype& get_genotype() const {
             return this->genotype;
         }
@@ -154,9 +156,10 @@ class Individual {
 	const unsigned SIZE_OF_INDIVIDUAL = sizeof(Individual) +  genotypeLen*sizeof(float) ; // we have to take into account the size of the vector's internal storage
 #endif
 
-/// A single population of a particular species.
-/// Responsible for managing collections of individuals, and relating them to 
-/// their species.
+///////////////////////////////////////////////////////////////////////////////
+//! A single population of a particular species.
+//! Responsible for managing collections of individuals, and relating them to 
+//! their species.
 class Population : public std::vector<Individual> {
     public:
         Population(const Species* sp=NULL, const Cell* c=NULL)
@@ -173,8 +176,8 @@ class Population : public std::vector<Individual> {
      
 }; // Population
 
-/// A collection of Populations sharing the same ecologies (e.g. movement, 
-/// fitness/survival functions, breeding pool)
+//! A collection of Populations sharing the same ecologies (e.g. movement, 
+//! fitness/survival functions, breeding pool)
 class Species {
     public:
         Species() {}
@@ -191,16 +194,16 @@ class Species {
 //         std::list<Population*> populations;
 }; // Species
 
-/// Returns a Population object with the Population object's Species pointer
-/// set to self.
-/// If Cell* is given, then the Population object's Cell pointer is set.
-/// If mean_size > 0, then individuals are created and added to the population,
-/// with the number of individuals >= 0 and <= max_size.
-/// The exact number of individuals is currently implemented as a Poisson 
-/// distributed random number with mean of size. 
-/// Future implementations and/or derived classes will take into account the 
-/// environment of cell, with favorable environments resulting in greater 
-/// numbers of individuals.
+//! Returns a Population object with the Population object's Species pointer
+//! set to self.
+//! If Cell* is given, then the Population object's Cell pointer is set.
+//! If mean_size > 0, then individuals are created and added to the population,
+//! with the number of individuals >= 0 and <= max_size.
+//! The exact number of individuals is currently implemented as a Poisson 
+//! distributed random number with mean of size. 
+//! Future implementations and/or derived classes will take into account the 
+//! environment of cell, with favorable environments resulting in greater 
+//! numbers of individuals.
 Population Species::get_population(Cell* cell, int mean_size, int max_size) const {
     Population p = Population(this, cell);
     this->initialize_population(&p, cell, mean_size, max_size);
@@ -221,14 +224,14 @@ void Species::initialize_population(Population* popPtr, Cell* cell, int mean_siz
     }
 }
 
-/// Returns next generation.
-/// Derived classes should override this to implement different reproduction
-/// models. 
-/// Current model: next gen population size is a Poisson distributed random
-/// variate with mean equal to current population size. 
+//! Returns next generation.
+//! Derived classes should override this to implement different reproduction
+//! models. 
+//! Current model: next gen population size is a Poisson distributed random
+//! variate with mean equal to current population size. 
 //  Each offspring in the next generation randomly selects two parents 
 //  from the current generation.
-/// Of course, given no pop gen component right now, the latter does not hold.
+//! Of course, given no pop gen component right now, the latter does not hold.
 Population& Species::reproduce(Population& cur_gen) const {
     static Population next_gen;
     // we assume that each individual produces a Poisson distributed number
@@ -254,10 +257,10 @@ Population& Species::reproduce(Population& cur_gen) const {
     return cur_gen; 
 }
 
-///////////////////////////////////////////////////////////////////////////////
-// SPATIAL FRAMEWORK
+/********************* SPATIAL AND ENVIRONMENTAL FRAMWORK ********************/
 
-/// The fundamental atomic spatial unit of the world.
+///////////////////////////////////////////////////////////////////////////////
+//! The fundamental atomic spatial unit of the world.
 class Cell {
     public:
     
@@ -292,7 +295,7 @@ class Cell {
 
 }; // Cell
 
-/// creates slots for populations, corresponding to species
+//! creates slots for populations, corresponding to species
 void Cell::initialize_populations() {
     this->populations.resize(this->species->size());
     SpeciesConstIterator spIt = this->species->begin();
@@ -301,7 +304,7 @@ void Cell::initialize_populations() {
         spIt->initialize_population(&(*pIt), this, this->carrying_capacity/2, this->carrying_capacity);
 }
 
-/// gets the next generation for each population
+//! gets the next generation for each population
 void Cell::reproduce_populations() {
     this->populations.resize(this->species->size());
     SpeciesConstIterator spIt = this->species->begin();
@@ -310,7 +313,8 @@ void Cell::reproduce_populations() {
         spIt->reproduce(*pIt);
 }
 	
-/// The world.
+///////////////////////////////////////////////////////////////////////////////	
+//! The world.
 class World {
 
     public:
@@ -349,16 +353,16 @@ class World {
         
 }; // World
 
-/// default constructor
+//! default constructor
 World::World() {}
 
-/// constructor: calls landscape initializer
+//! constructor: calls landscape initializer
 World::World(int dim_x, int dim_y, const SpeciesContainer& spp)
     : species(spp) {   
     this->generate_landscape(dim_x, dim_y);
 }
 
-/// generates the spatial framework
+//! generates the spatial framework
 void World::generate_landscape(int dim_x, int dim_y) {
     this->dim_x = dim_x;
     this->dim_y = dim_y;
@@ -369,7 +373,7 @@ void World::generate_landscape(int dim_x, int dim_y) {
     }
 }
 
-/// sets the carrying capacity for all cells
+//! sets the carrying capacity for all cells
 void World::set_cell_carrying_capacity(int carrying_capacity) {
     // std::for_each(this->cells.begin(), this->cells.end(), Cell::set_carrying_capacity());
     for (CellIterator i=this->cells.begin(); i != this->cells.end(); ++i) {
@@ -377,21 +381,21 @@ void World::set_cell_carrying_capacity(int carrying_capacity) {
     }
 }
 
-/// adds a species to the World
+//! adds a species to the World
 void World::add_species(const Species& sp) {
     this->species.push_back(sp);
 }
 
-/// initializes biota over landscape
-/// must be called after landscape has been generated and species
-/// list populated
+//! initializes biota over landscape
+//! must be called after landscape has been generated and species
+//! list populated
 void World::initialize_biota() {
     for (CellIterator i=this->cells.begin(); i != this->cells.end(); ++i) {
         i->initialize_populations();
     }
 }
 
-/// runs a single iteration of a lifecycle 
+//! runs a single iteration of a lifecycle 
 void World::cycle() {
     // survival
     // competition
