@@ -28,18 +28,53 @@
 #include <iostream>
 #include <string>
 #include <cmath>
+#include <ctime>
 
 /************************* SUPPORT CLASSES AND METHODS ***********************/
  
 ///////////////////////////////////////////////////////////////////////////////
 //! Wraps random number generator seed etc.
+class RandomNumberGenerator {
 
-double uniform_variate() {
+    public:
+        RandomNumberGenerator();
+        RandomNumberGenerator(unsigned int seed);
+        void set_seed(unsigned int seed);
+                
+        double uniform();   // [0, 1)
+        double standard_normal();
+        double normal(double mean, double sd);
+        unsigned int poisson(int rate);
+        
+    private:
+        unsigned int seed;
+
+};
+
+//! seeds using time
+RandomNumberGenerator::RandomNumberGenerator() {
+    this->set_seed(time(0));
+}
+
+//! seeds using given seed
+RandomNumberGenerator::RandomNumberGenerator(unsigned int seed) {
+    this->set_seed(seed);
+}
+
+//! seeds using given seed
+void RandomNumberGenerator::set_seed(unsigned int seed) {
+    this->seed = seed;
+    srand(seed);
+}
+
+//! returns a uniform random number between 0 and 1
+double RandomNumberGenerator::uniform() {
     return double(rand())/double(RAND_MAX);
 }
 
-// from Knuth, The Art of Computer Programming, Sec 3.4.1, Algorithm P
-double standard_normal_variate() {
+//! Gaussian distribution with mean=1 and sd=0
+//! from Knuth, The Art of Computer Programming, Sec 3.4.1, Algorithm P
+double RandomNumberGenerator::standard_normal() {
 
     // since this method generates two variates at a time,
     // we store the second one to be returned on the next call
@@ -58,8 +93,8 @@ double standard_normal_variate() {
     double s = 1; 
     
     while (s >= 1.0) {
-        u1 = uniform_variate();
-        u2 = uniform_variate();
+        u1 = this->uniform();
+        u2 = this->uniform();
         v1 = 2.0 * u1 - 1.0;
         v2 = 2.0 * u2 - 1.0;
         s = pow(v1, 2) + pow(v2, 2);
@@ -72,22 +107,24 @@ double standard_normal_variate() {
     return x1;
 }
 
-double normal_variate(double mean, double sd) {
-    return standard_normal_variate() * sd + mean;
+//! Gaussian with given mean and sd
+double RandomNumberGenerator::normal(double mean, double sd) {
+    return this->standard_normal() * sd + mean;
 }
 
-int poisson_variate(int rate) {
+//! Poisson r.v. with given rate
+unsigned int RandomNumberGenerator::poisson(int rate) {
     const int MAX_EXPECTATION = 64;
     if (rate > MAX_EXPECTATION) {
         double r = rate/2.0;
-        return poisson_variate(r) + poisson_variate(r);
+        return this->poisson(r) + this->poisson(r);
     }
     double L = exp(-1.0 * rate);
     double p = 1.0;
     double k = 0.0;    
     while (p >= L) {
         k += 1.0;
-        p *= uniform_variate();
+        p *= this->uniform();
     }
     return k - 1.0;
 }
@@ -98,10 +135,13 @@ T random_sample(const std::vector<T>& v) {
 }
 
 /*********************** POPULATION ECOLOGY AND GENETICS *********************/
+/***********************        (DECLARATION)           **********************/
  
 class Species;
 class Population;
 class Cell;
+class World;
+
 typedef std::vector<Cell> Cells;
 typedef std::vector<Cell>::iterator CellIterator;
 typedef std::vector<Species> SpeciesContainer;
@@ -176,23 +216,130 @@ class Population : public std::vector<Individual> {
      
 }; // Population
 
+
+///////////////////////////////////////////////////////////////////////////////
 //! A collection of Populations sharing the same ecologies (e.g. movement, 
 //! fitness/survival functions, breeding pool)
 class Species {
     public:
+        // lifecycle
         Species() {}
         Species(const char* sp_label) 
             : label(sp_label) {       
         }
         virtual ~Species() {}
-        virtual Population get_population(Cell* cell=NULL, int mean_size=0, int max_size=0) const;
-        virtual Population& reproduce(Population& cur_gen) const;
-        virtual void initialize_population(Population* popPtr, Cell* cell, int mean_size, int max_size) const;
+        
+        // accessors
+        void set_world(World& world);
+        void set_index(int index);
+               
+        // operations
+        virtual Population new_population(Cell* cell=NULL, int mean_size=0, int max_size=0) const;        
+        virtual void populate(Population* popPtr, Cell* cell, int mean_size, int max_size) const;        
+        virtual Population& reproduce(Population& cur_gen) const;        
+
         
     private:
-        std::string label;
+        std::string     label;
+        int             index;
+        World*          world;
+        
 //         std::list<Population*> populations;
 }; // Species
+
+/********************* SPATIAL AND ENVIRONMENTAL FRAMWORK ********************/
+/***********************        (DECLARATION)           **********************/
+
+class Cell;
+class World;
+
+///////////////////////////////////////////////////////////////////////////////
+//! The fundamental atomic spatial unit of the world.
+class Cell {
+    public:
+    
+        // lifecycle
+        Cell(World& host);
+        Cell(const Cell& cell);
+        
+        // operators
+        const Cell& operator=(const Cell& cell);
+
+        // accessors
+        void set_carrying_capacity(int cc) {
+            this->carrying_capacity = cc;
+        }
+        
+        // operations
+        void populates();
+        void reproduce_populations();
+        
+        // for debugging
+        int num_individuals() {
+            return this->populations[0].size();
+        }
+        int ind_capacity() {
+            return this->populations[0].capacity();
+        }
+    
+    private:
+        World&                     world;
+        int                        carrying_capacity;
+        std::vector<Population>    populations;    
+
+}; // Cell
+
+///////////////////////////////////////////////////////////////////////////////	
+//! The world.
+class World {
+
+    public:
+        // lifecycle
+        World();
+        World(unsigned int seed);
+
+        // accessors
+        SpeciesContainer& get_species() { 
+            return this->species;
+        }
+        RandomNumberGenerator& get_rng() { 
+            return this->rng;
+        }
+        
+        // set up
+        void generate_landscape(int dim_x, int dim_y);
+        void set_cell_carrying_capacity(int carrying_capacity);
+        void add_species(const Species& sp);
+        void initialize_biota();
+        
+        // run
+        void cycle();
+        
+        // debug
+        void dump(std::ostream& out);
+        
+    private:
+        int                     dim_x;
+        int                     dim_y;
+        std::vector<Cell>       cells;
+        SpeciesContainer        species;
+        RandomNumberGenerator   rng;
+        
+}; // World
+
+
+/*********************** POPULATION ECOLOGY AND GENETICS *********************/
+/***********************        (IMPLEMENTATION         **********************/
+
+//! sets the host world for this species
+void Species::set_world(World& world) {
+    this->world = &world;    
+}
+
+//! sets the host world for this species
+void Species::set_index(int index) {
+    this->index = index;    
+}
 
 //! Returns a Population object with the Population object's Species pointer
 //! set to self.
@@ -204,21 +351,21 @@ class Species {
 //! Future implementations and/or derived classes will take into account the 
 //! environment of cell, with favorable environments resulting in greater 
 //! numbers of individuals.
-Population Species::get_population(Cell* cell, int mean_size, int max_size) const {
+Population Species::new_population(Cell* cell, int mean_size, int max_size) const {
     Population p = Population(this, cell);
-    this->initialize_population(&p, cell, mean_size, max_size);
+    this->populate(&p, cell, mean_size, max_size);
     return p;
 }
 
-void Species::initialize_population(Population* popPtr, Cell* cell, int mean_size, int max_size) const {
+void Species::populate(Population* popPtr, Cell* cell, int mean_size, int max_size) const {
 	if (popPtr == 0L)
 		return;
     Population & p = *popPtr;
 	p.setCell(cell);
     if (mean_size > 0) {
-        int n = poisson_variate(mean_size);
+        int n = this->world->get_rng().poisson(mean_size);
         while ((max_size > 0) and (n > max_size)) {
-            n = poisson_variate(mean_size);
+            n = this->world->get_rng().poisson(mean_size);
         }
         p.assign(n, Individual());
     }
@@ -245,7 +392,7 @@ Population& Species::reproduce(Population& cur_gen) const {
 
     // tweak: next gen population size is normally distributed with mean =
     // current pop size, and sd = 10% of current pop size
-    unsigned int next_gen_size = normal_variate(cur_gen.size(), cur_gen.size()/10);
+    unsigned int next_gen_size = this->world->get_rng().normal(cur_gen.size(), cur_gen.size()/10);
     next_gen.assign(next_gen_size, Individual());
 
     // ok, direct assignment to cur_gen would be more efficient here
@@ -258,119 +405,70 @@ Population& Species::reproduce(Population& cur_gen) const {
 }
 
 /********************* SPATIAL AND ENVIRONMENTAL FRAMWORK ********************/
+/***********************        (IMPLEMENTATION)        **********************/
+
 
 ///////////////////////////////////////////////////////////////////////////////
-//! The fundamental atomic spatial unit of the world.
-class Cell {
-    public:
-    
-        Cell(const SpeciesContainer* sp)
-            : species(sp) {}
-            
-        Cell(const Cell& c)
-            : species(c.species),
-              populations(c.populations) {
-            this->carrying_capacity = c.carrying_capacity;
-        }            
-    
-        void set_carrying_capacity(int cc) {
-            this->carrying_capacity = cc;
-        }
-        
-        void initialize_populations();
-        void reproduce_populations();
-        
-        // for debugging
-        int num_individuals() {
-            return this->populations[0].size();
-        }
-        int ind_capacity() {
-            return this->populations[0].capacity();
-        }
-    
-    private:
-        int                        carrying_capacity;
-        const SpeciesContainer*    species;
-        std::vector<Population>    populations;    
+// Cell (IMPLEMENTATION)
 
-}; // Cell
+//! constructor: needs reference to World
+Cell::Cell(World& host)
+    : world(host) {
+}
+
+//! copy constructor
+Cell::Cell(const Cell& cell)
+    : world(cell.world) {
+    this->carrying_capacity = cell.carrying_capacity;
+    this->populations = cell.populations;
+}
+
+//! assignment
+const Cell& Cell::operator=(const Cell& cell) {
+    this->world = cell.world; // is this kosher?
+    this->carrying_capacity = cell.carrying_capacity;
+    this->populations = cell.populations;
+    return *this;
+}
 
 //! creates slots for populations, corresponding to species
-void Cell::initialize_populations() {
-    this->populations.resize(this->species->size());
-    SpeciesConstIterator spIt = this->species->begin();
+void Cell::populates() {
+    this->populations.resize(this->world.get_species().size());
+    SpeciesConstIterator spIt = this->world.get_species().begin();
     VecPopIterator pIt = this->populations.begin();
-    for (; spIt != this->species->end(); ++pIt, ++spIt)
-        spIt->initialize_population(&(*pIt), this, this->carrying_capacity/2, this->carrying_capacity);
+    for (; spIt != this->world.get_species().end(); ++pIt, ++spIt)
+        spIt->populate(&(*pIt), this, this->carrying_capacity/2, this->carrying_capacity);
 }
 
 //! gets the next generation for each population
 void Cell::reproduce_populations() {
-    this->populations.resize(this->species->size());
-    SpeciesConstIterator spIt = this->species->begin();
+    this->populations.resize(this->world.get_species().size());
+    SpeciesConstIterator spIt = this->world.get_species().begin();
     VecPopIterator pIt = this->populations.begin();
-    for (; spIt != this->species->end(); ++pIt, ++spIt)
+    for (; spIt != this->world.get_species().end(); ++pIt, ++spIt)
         spIt->reproduce(*pIt);
 }
+
+///////////////////////////////////////////////////////////////////////////////
+// World (IMPLEMENTATION)
 	
-///////////////////////////////////////////////////////////////////////////////	
-//! The world.
-class World {
-
-    public:
-        World();
-        World(int dim_x, int dim_y, const SpeciesContainer& spp);
-        void generate_landscape(int dim_x, int dim_y);
-        void set_cell_carrying_capacity(int carrying_capacity);
-        void add_species(const Species& sp);
-        void initialize_biota();
-        void cycle();
-        
-        // for debugging
-        void dump(std::ostream& out) {
-            int count=1;
-            long indCount = 0;
-            long indCapacityCount = 0;
-            for (CellIterator i=this->cells.begin(); 
-                i != this->cells.end(); ++i, ++count) {
-                	const unsigned ni = i->num_individuals();
-                    out << count << ": " << ni << "\n";
-                    indCount += ni;
-                    indCapacityCount += i->ind_capacity();
-            }
-            out << "Total individuals = " << indCount << '\n';
-            out << "Total individual capacity = " << indCapacityCount << '\n';
-            out << "Size of individual in bytes = " << SIZE_OF_INDIVIDUAL << std::endl;
-            out << "Min. possible memory used for individuals = " << indCount*SIZE_OF_INDIVIDUAL << std::endl;
-            out << "Memory used for individuals = " << indCapacityCount*SIZE_OF_INDIVIDUAL << std::endl;
-        }
-        
-    private:
-        int                 dim_x;
-        int                 dim_y;
-        std::vector<Cell>   cells;
-        SpeciesContainer    species;   
-        
-}; // World
-
 //! default constructor
-World::World() {}
-
-//! constructor: calls landscape initializer
-World::World(int dim_x, int dim_y, const SpeciesContainer& spp)
-    : species(spp) {   
-    this->generate_landscape(dim_x, dim_y);
+World::World()
+    : rng(time(0)) {
 }
+
+//! constructor: calls
+World::World(unsigned int seed) 
+    : rng(seed) {
+    
+}           
 
 //! generates the spatial framework
 void World::generate_landscape(int dim_x, int dim_y) {
     this->dim_x = dim_x;
     this->dim_y = dim_y;
     int num_cells = dim_x * dim_y;
-    this->cells.reserve(num_cells);
-    for (int i=0; i < num_cells; ++i) {                    
-        this->cells.push_back(Cell(&this->species)); // Cell objects created here, ownership = World.cells
-    }
+    this->cells.assign(num_cells, Cell(*this)); // Cell objects created here, ownership = World.cells
 }
 
 //! sets the carrying capacity for all cells
@@ -384,6 +482,9 @@ void World::set_cell_carrying_capacity(int carrying_capacity) {
 //! adds a species to the World
 void World::add_species(const Species& sp) {
     this->species.push_back(sp);
+    Species& world_sp = this->species.back();
+    world_sp.set_world(*this);
+    world_sp.set_index(this->species.size() - 1);
 }
 
 //! initializes biota over landscape
@@ -391,7 +492,7 @@ void World::add_species(const Species& sp) {
 //! list populated
 void World::initialize_biota() {
     for (CellIterator i=this->cells.begin(); i != this->cells.end(); ++i) {
-        i->initialize_populations();
+        i->populates();
     }
 }
 
@@ -406,6 +507,25 @@ void World::cycle() {
         cell_iter->reproduce_populations();
     }    
     // migration
+}
+
+// for debugging
+void World::dump(std::ostream& out) {
+    int count=1;
+    long indCount = 0;
+    long indCapacityCount = 0;
+    for (CellIterator i=this->cells.begin(); 
+        i != this->cells.end(); ++i, ++count) {
+            const unsigned ni = i->num_individuals();
+            out << count << ": " << ni << "\n";
+            indCount += ni;
+            indCapacityCount += i->ind_capacity();
+    }
+    out << "Total individuals = " << indCount << '\n';
+    out << "Total individual capacity = " << indCapacityCount << '\n';
+    out << "Size of individual in bytes = " << SIZE_OF_INDIVIDUAL << std::endl;
+    out << "Min. possible memory used for individuals = " << indCount*SIZE_OF_INDIVIDUAL << std::endl;
+    out << "Memory used for individuals = " << indCapacityCount*SIZE_OF_INDIVIDUAL << std::endl;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
