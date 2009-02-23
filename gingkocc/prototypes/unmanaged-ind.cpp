@@ -245,8 +245,8 @@ Population& Species::reproduce(Population& cur_gen) const {
     unsigned int next_gen_size = normal_variate(cur_gen.size(), cur_gen.size()/10);
     next_gen.assign(next_gen_size, Individual());
 
-    cur_gen = next_gen;
-    return cur_gen; // return copy right?
+    cur_gen = next_gen; // copy vals
+    return cur_gen; 
 }
 
 ///////////////////////////////////////////////////////////////////////////////
