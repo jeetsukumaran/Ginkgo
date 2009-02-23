@@ -250,8 +250,6 @@ class Species {
 /********************* SPATIAL AND ENVIRONMENTAL FRAMWORK ********************/
 /***********************        (DECLARATION)           **********************/
 
-class Cell;
-class World;
 
 ///////////////////////////////////////////////////////////////////////////////
 //! The fundamental atomic spatial unit of the world.
@@ -259,7 +257,7 @@ class Cell {
     public:
     
         // lifecycle
-        Cell(World& host);
+        Cell(World& world);
         Cell(const Cell& cell);
         
         // operators
@@ -283,7 +281,7 @@ class Cell {
         }
     
     private:
-        World&                     world;
+        World*                     world;
         int                        carrying_capacity;
         std::vector<Population>    populations;    
 
@@ -294,9 +292,10 @@ class Cell {
 class World {
 
     public:
+
         // lifecycle
         World();
-        World(unsigned int seed);
+        World(unsigned int seed);    
 
         // accessors
         SpeciesContainer& get_species() { 
@@ -407,25 +406,24 @@ Population& Species::reproduce(Population& cur_gen) const {
 /********************* SPATIAL AND ENVIRONMENTAL FRAMWORK ********************/
 /***********************        (IMPLEMENTATION)        **********************/
 
-
 ///////////////////////////////////////////////////////////////////////////////
 // Cell (IMPLEMENTATION)
 
 //! constructor: needs reference to World
-Cell::Cell(World& host)
-    : world(host) {
+Cell::Cell(World& world){
+    this->world = &world;
 }
 
 //! copy constructor
-Cell::Cell(const Cell& cell)
-    : world(cell.world) {
+Cell::Cell(const Cell& cell) {
+    this->world = world;
     this->carrying_capacity = cell.carrying_capacity;
     this->populations = cell.populations;
 }
 
 //! assignment
 const Cell& Cell::operator=(const Cell& cell) {
-    this->world = cell.world; // is this kosher?
+    this->world = cell.world;
     this->carrying_capacity = cell.carrying_capacity;
     this->populations = cell.populations;
     return *this;
@@ -433,19 +431,19 @@ const Cell& Cell::operator=(const Cell& cell) {
 
 //! creates slots for populations, corresponding to species
 void Cell::populates() {
-    this->populations.resize(this->world.get_species().size());
-    SpeciesConstIterator spIt = this->world.get_species().begin();
+    this->populations.resize(this->world->get_species().size());
+    SpeciesConstIterator spIt = this->world->get_species().begin();
     VecPopIterator pIt = this->populations.begin();
-    for (; spIt != this->world.get_species().end(); ++pIt, ++spIt)
+    for (; spIt != this->world->get_species().end(); ++pIt, ++spIt)
         spIt->populate(&(*pIt), this, this->carrying_capacity/2, this->carrying_capacity);
 }
 
 //! gets the next generation for each population
 void Cell::reproduce_populations() {
-    this->populations.resize(this->world.get_species().size());
-    SpeciesConstIterator spIt = this->world.get_species().begin();
+    this->populations.resize(this->world->get_species().size());
+    SpeciesConstIterator spIt = this->world->get_species().begin();
     VecPopIterator pIt = this->populations.begin();
-    for (; spIt != this->world.get_species().end(); ++pIt, ++spIt)
+    for (; spIt != this->world->get_species().end(); ++pIt, ++spIt)
         spIt->reproduce(*pIt);
 }
 
