@@ -391,15 +391,15 @@ Population& Species::reproduce(Population& cur_gen) const {
 
     // tweak: next gen population size is normally distributed with mean =
     // current pop size, and sd = 10% of current pop size
-    unsigned int next_gen_size = this->world->get_rng().normal(cur_gen.size(), cur_gen.size()/10);
-    next_gen.assign(next_gen_size, Individual());
+//     unsigned int next_gen_size = this->world->get_rng().normal(cur_gen.size(), cur_gen.size()/10);
+//     next_gen.assign(next_gen_size, Individual());
 
     // ok, direct assignment to cur_gen would be more efficient here
     // but I'm assuming that in a real implementation, the populating
     // of next_gen will be more complex, and require references to cur_gen
     // individuals; hence this construct, which replicates the final step,
     // where the current generation is set to the next gen
-    cur_gen = next_gen; // copy vals
+//     cur_gen = next_gen; // copy vals
     return cur_gen; 
 }
 
