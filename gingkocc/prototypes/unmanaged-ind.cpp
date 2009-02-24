@@ -351,7 +351,7 @@ class Cell {
         Cell(const Cell& cell);
         
         // operators
-        Cell& operator=(const Cell& cell);
+        const Cell& operator=(const Cell& cell);
 
         // accessors
         void set_carrying_capacity(int cc) {
@@ -377,6 +377,17 @@ class Cell {
         std::vector<Population>    populations;    
 
 }; // Cell
+
+///////////////////////////////////////////////////////////////////////////////	
+//! The landscape.
+// class Landscape {
+// 
+//     public:
+//         Landscape(World& world);
+//         Landscape(const Landscape& landscape);
+//         Landscape& operator=
+// 
+// }
 
 ///////////////////////////////////////////////////////////////////////////////	
 //! The world.
@@ -476,7 +487,7 @@ Cell::Cell(const Cell& cell) {
 }
 
 //! assignment
-Cell& Cell::operator=(const Cell& cell) {   
+const Cell& Cell::operator=(const Cell& cell) {   
     this->world = cell.world;
     this->carrying_capacity = cell.carrying_capacity;
     this->populations = cell.populations;
