@@ -589,12 +589,7 @@ void Species::reproduce() const {
 Population& Species::breed(std::vector<Individual*>& female_ptrs,
                            std::vector<Individual*>& male_ptrs,                           
                            Population& offspring) const {
-    std::cout << "(m=" << male_ptrs.size() << ", f=" << female_ptrs.size() << ")" << std::endl;                           
     if (female_ptrs.size() == 0 or male_ptrs.size() == 0) {
-        
-        // debug
-//         std::cout << "extinction (m=" << male_ptrs.size() << ", f=" << female_ptrs.size() << ")" << std::endl;
-        
         return offspring;
     }
     for (std::vector<Individual*>::iterator female = female_ptrs.begin();
