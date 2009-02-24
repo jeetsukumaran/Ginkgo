@@ -181,7 +181,6 @@ class Individual {
         Individual(Population& population) {
             this->population = &population;
             this->sex = Individual::random_sex(this->get_rng());
-//             this->sex = this->population->get_species()->get_world()->get_rng()->
             
 #			if !defined(STATIC_GENOTYPE_LENGTH)
             	genotype.resize(genotypeLen);
@@ -198,6 +197,15 @@ class Individual {
         void set_population(Population& pop) {
             this->population = &pop;
         }
+        
+        bool is_male() const {
+            return this->sex == Individual::Male;
+        }
+        
+        bool is_female() const {
+            return this->sex == Individual::Female;
+        }
+        
         
         RandomNumberGenerator& get_rng();
 
@@ -269,6 +277,23 @@ class Population {
         }        
         unsigned int size() {
             return this->individuals.size();
+        }
+        void partition_by_gender(std::vector<Individual*>& males,
+            std::vector<Individual*>& females) {
+            males.clear();
+            females.clear();
+//             unsigned int est_size = static_cast<unsigned int>(this->individuals.size()/2);
+//             males.reserve(est_size);
+//             females.reserve(est_size);
+            for (std::vector<Individual>::iterator ind = this->individuals.begin();
+                    ind != this->individuals.end();
+                    ++ind) {
+                if (ind->is_male()) {
+                    males.push_back(&(*ind));
+                } else {
+                    females.push_back(&(*ind));
+                }
+            }
         }
                                      
     private:
