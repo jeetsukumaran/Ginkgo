@@ -522,7 +522,7 @@ RandomNumberGenerator& Individual::get_rng() {
     return this->population->get_species().get_world().get_rng();
 }
 
-Individual::Individual(const Individual& male, const Individual& female) {
+Individual::Individual(const Individual& female, const Individual& male) {
     this->population = female.population;
     this->population->get_world();
     this->sex = Individual::random_sex(this->get_rng());
@@ -580,16 +580,21 @@ void Species::reproduce() const {
         this->offspring.clear();
         this->offspring.set_cell(*cell);
         this->offspring.set_species(*this);
-        cell->repopulate(*this, this->breed(male_ptrs, female_ptrs, offspring));
+        cell->repopulate(*this, this->breed(female_ptrs, male_ptrs, offspring));
     }
 }    
 
 //! Derived classes should override this to implement different reproduction
 //! models. 
-Population& Species::breed(std::vector<Individual*>& male_ptrs,
-                           std::vector<Individual*>& female_ptrs,
+Population& Species::breed(std::vector<Individual*>& female_ptrs,
+                           std::vector<Individual*>& male_ptrs,                           
                            Population& offspring) const {
+    std::cout << "(m=" << male_ptrs.size() << ", f=" << female_ptrs.size() << ")" << std::endl;                           
     if (female_ptrs.size() == 0 or male_ptrs.size() == 0) {
+        
+        // debug
+//         std::cout << "extinction (m=" << male_ptrs.size() << ", f=" << female_ptrs.size() << ")" << std::endl;
+        
         return offspring;
     }
     for (std::vector<Individual*>::iterator female = female_ptrs.begin();
@@ -598,7 +603,7 @@ Population& Species::breed(std::vector<Individual*>& male_ptrs,
         // sampling with replacement            
         Individual* male = this->world->get_rng().choice(male_ptrs);
         for (int i=0; i < 2; ++i) {
-            offspring.add(Individual(*male, **female));
+            offspring.add(Individual(*(*female), *male));
         }            
     }
     return offspring;   
