@@ -163,31 +163,49 @@ const unsigned genotypeLen = 10;
 //! histories. 
 class Individual {
     public:
-        //! default constructor
-        Individual() {
-            // TODO!
+    
+        enum Sex {
+            Male,
+            Female
+        };
+    
+        Individual(Population& population) {
+            this->population = &population;
+//             this->sex = this->population->get_species()->get_world()->get_rng()->
+            
 #			if !defined(STATIC_GENOTYPE_LENGTH)
             	genotype.resize(genotypeLen);
 #			endif
-        }            
+        }
+        
+        // clones an individual
+        Individual(const Individual& ind)
+            : genotype(ind.genotype) {
+            this->population = ind.population;
+            this->sex = ind.sex;
+        }
                    
-        //! instantiates individual with given genotype
-#		if defined(STATIC_GENOTYPE_LENGTH)
-			Individual(const Genotype& g) {
-				memcpy(this->genotype, g, sizeof(Genotype));
-			}            
-#		else
-			Individual(const Genotype& g)
-				:genotype(g)
-				{}
-#		endif
+        void set_population(Population& pop) {
+            this->population = &pop;
+        }
+        
+        RandomNumberGenerator& get_rng();
+
+// #		if defined(STATIC_GENOTYPE_LENGTH)
+// 			Individual(const Genotype& g) {
+// 				memcpy(this->genotype, g, sizeof(Genotype));
+// 			}            
+// #		else
+// 			Individual(const Genotype& g)
+// 				:genotype(g)
+// 				{}
+// #		endif
                 
     private:
-        Genotype genotype;   //! non-neutral genotype: maps to fitness phenotype
-        //! returns individual's genotype; private to disable copying
-        const Genotype& get_genotype() const {
-            return this->genotype;
-        }
+        Population*     population; // host population
+        Genotype        genotype;   // non-neutral genotype: maps to fitness phenotype
+        Individual::Sex sex;
+        
 
 }; // Individual
 
@@ -205,17 +223,36 @@ class Population {
     public:
     
         // lifecycle
-        Population(const Species* sp=NULL, const Cell* c=NULL) {
-            this->species = sp;
-            this->cell = c;
+        Population(const Species& sp, const Cell& c) {
+            this->species = &sp;
+            this->cell = &c;
         }       
         
         // accessors
-        void set_cell(const Cell * c) {
-        	this->cell = c;
+        void set_cell(const Cell& cell) {
+        	this->cell = &cell;
+        }
+        const Cell& get_cell() {
+        	return *(this->cell);
+        }
+        void set_species(const Species& sp) {
+        	this->species = &sp;
+        }
+        const Species& get_species() {
+        	return *(this->species);
+        }        
+        World& get_world();
+        
+        void assign(unsigned int n) {
+            // need to set reference to this population to each individual,
+            Individual ind(*this);
+            this->individuals.assign(n, ind);                        
         }        
         void assign(unsigned int n, const Individual& ind) {
-            this->individuals.assign(n, ind);
+            // need to set reference to this population to each individual,
+            Individual ind_copy(ind);
+            ind_copy.set_population(*this);
+            this->individuals.assign(n, ind);                        
         }
         unsigned int capacity() {
             return this->individuals.capacity();
@@ -243,16 +280,16 @@ class Species {
         virtual ~Species() {}
         
         // accessors
-        World* get_world() {
-            return this->world;    
+        World& get_world() const {
+            return *(this->world);    
         }        
-        void set_world(World* world) {
-            this->world = world;    
+        void set_world(World& world) {
+            this->world = &world;    
         }        
         void set_index(int index) {
             this->index = index;    
         }
-        int get_index() {
+        int get_index() const {
             return this->index;    
         }            
                        
@@ -275,7 +312,7 @@ class Cell {
     public:
     
         // lifecycle
-        Cell(World* world);
+        Cell(World& world);
         Cell(const Cell& cell);
         
         // operators
@@ -288,7 +325,7 @@ class Cell {
         
         // operations
         void initialize_biota();
-        void seed_population(Species* sp, unsigned int size);
+        void seed_population(Species& sp, unsigned int size);
         void reproduce_populations();
         
         // for debugging
@@ -352,6 +389,20 @@ class World {
 /*********************** POPULATION ECOLOGY AND GENETICS *********************/
 /***********************        (IMPLEMENTATION         **********************/
 
+RandomNumberGenerator& Individual::get_rng() {
+    return this->population->get_species().get_world().get_rng();
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// Population (IMPLEMENTATION)
+
+World& Population::get_world() {
+    return this->species->get_world();
+}  
+
+///////////////////////////////////////////////////////////////////////////////
+// Species (IMPLEMENTATION)
+
 //! default constructor: assigns dummy values
 Species::Species() {
     this->label = "Sp";
@@ -364,49 +415,9 @@ Species::Species(const char* sp_label)
     this->index = -1;
 }
 
-// void Species::populate(Population* popPtr, Cell* cell, int mean_size, int max_size) const {
-// 	if (popPtr == 0L)
-// 		return;
-//     Population & p = *popPtr;
-// 	p.set_cell(cell);
-//     if (mean_size > 0) {
-//         int n = this->world->get_rng().poisson(mean_size);
-//         while ((max_size > 0) and (n > max_size)) {
-//             n = this->world->get_rng().poisson(mean_size);
-//         }
-//         p.assign(n, Individual());
-//     }
-// }
-
 //! Derived classes should override this to implement different reproduction
 //! models. 
-//! Current model: next gen population size is a Poisson distributed random
-//! variate with mean equal to current population size. 
-//! Each offspring in the next generation randomly selects two parents 
-//! from the current generation.
-//! Of course, given no pop gen component right now, the latter does not hold.
 Population& Species::reproduce(Population& cur_gen) const {
-    static Population next_gen;
-    // we assume that each individual produces a Poisson distributed number
-    // of offspring with mean of 2; as there are cur_gen.size() individuals
-    // the total number of offspring is cur_gen.size() * Poisson(2); the sum
-    // of n Poisson variables with mean M = Poisson(n*M).
-    // seems to only work when num_gens < 7 ... (at least, with no carrying
-    // capacity enforced.
-//     unsigned int next_gen_size = poisson_variate(cur_gen.size() * 2);
-//     next_gen.assign(next_gen_size, Individual());
-
-    // tweak: next gen population size is normally distributed with mean =
-    // current pop size, and sd = 10% of current pop size
-//     unsigned int next_gen_size = this->world->get_rng().normal(cur_gen.size(), cur_gen.size()/10);
-//     next_gen.assign(next_gen_size, Individual());
-
-    // ok, direct assignment to cur_gen would be more efficient here
-    // but I'm assuming that in a real implementation, the populating
-    // of next_gen will be more complex, and require references to cur_gen
-    // individuals; hence this construct, which replicates the final step,
-    // where the current generation is set to the next gen
-//     cur_gen = next_gen; // copy vals
     return cur_gen; 
 }
 
@@ -417,8 +428,8 @@ Population& Species::reproduce(Population& cur_gen) const {
 // Cell (IMPLEMENTATION)
 
 //! constructor: needs reference to World
-Cell::Cell(World* world){
-    this->world = world;
+Cell::Cell(World& world){
+    this->world = &world;
     this->carrying_capacity = 0;
 }
 
@@ -443,22 +454,20 @@ void Cell::initialize_biota() {
     for (SpeciesConstIterator spIt = this->world->get_species().begin();
             spIt != this->world->get_species().end();
             ++spIt) {
-        this->populations.push_back(Population(&(*spIt), this));
+        this->populations.push_back(Population(*spIt, *this));
     }        
 }
 
 //! Adds new individuals to the population of the specified species in this
 //! cell.
-void Cell::seed_population(Species* sp, unsigned int size) {
-    assert(sp->get_index() >= 0);
-    assert(sp->get_index() <= this->populations.size());
-    this->populations.at(sp->get_index()).assign(size, Individual());    
+void Cell::seed_population(Species& sp, unsigned int size) {
+    assert(sp.get_index() >= 0);
+    assert(sp.get_index() <= this->populations.size());
+    this->populations.at(sp.get_index()).assign(size);    
 }
-
 
 //! gets the next generation for each population
 void Cell::reproduce_populations() {
-    this->populations.resize(this->world->get_species().size());
     SpeciesConstIterator spIt = this->world->get_species().begin();
     VecPopIterator pIt = this->populations.begin();
     for (; spIt != this->world->get_species().end(); ++pIt, ++spIt)
@@ -484,7 +493,7 @@ void World::generate_landscape(int dim_x, int dim_y) {
     this->dim_x = dim_x;
     this->dim_y = dim_y;
     int num_cells = dim_x * dim_y;
-    this->cells.assign(num_cells, Cell(this)); // Cell objects created here, ownership = World.cells
+    this->cells.assign(num_cells, Cell(*this)); // Cell objects created here, ownership = World.cells
 }
 
 //! sets the carrying capacity for all cells
@@ -499,7 +508,7 @@ void World::set_cell_carrying_capacity(int carrying_capacity) {
 void World::add_species(const Species& sp) {
     this->species.push_back(sp);
     Species& world_sp = this->species.back();
-    world_sp.set_world(this);
+    world_sp.set_world(*this);
     world_sp.set_index(this->species.size() - 1);
 }
 
@@ -570,7 +579,7 @@ int main(int argc, char * argv[]) {
 	    for (SpeciesIterator sp = world.get_species().begin();
 	            sp != world.get_species().end();
 	            ++sp) {
-	            cell->seed_population(&(*sp), cc);
+	            cell->seed_population(*sp, cc);
         }	            
     }	
 	
