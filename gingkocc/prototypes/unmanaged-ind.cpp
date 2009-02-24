@@ -597,7 +597,7 @@ Population& Species::breed(std::vector<Individual*>& male_ptrs,
             ++female) {
         // sampling with replacement            
         Individual* male = this->world->get_rng().choice(male_ptrs);
-        for (int i=0; i < this->world->get_rng().randint(0,5); ++i) {
+        for (int i=0; i < 2; ++i) {
             offspring.add(Individual(*male, **female));
         }            
     }
