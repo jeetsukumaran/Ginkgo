@@ -203,23 +203,23 @@ class Individual {
 //! their species.
 class Population {
     public:
+    
+        // lifecycle
         Population(const Species* sp=NULL, const Cell* c=NULL) {
             this->species = sp;
             this->cell = c;
-        }
+        }       
         
+        // accessors
         void set_cell(const Cell * c) {
         	this->cell = c;
-        }
-        
+        }        
         void assign(unsigned int n, const Individual& ind) {
             this->individuals.assign(n, ind);
         }
-
         unsigned int capacity() {
             return this->individuals.capacity();
-        }
-        
+        }        
         unsigned int size() {
             return this->individuals.size();
         }
@@ -257,8 +257,6 @@ class Species {
         }            
                        
         // operations
-//         virtual Population new_population(Cell* cell=NULL, int mean_size=0, int max_size=0) const;        
-        virtual void populate(Population* popPtr, Cell* cell, int mean_size, int max_size) const;        
         virtual Population& reproduce(Population& cur_gen) const;        
 
     private:
@@ -366,19 +364,19 @@ Species::Species(const char* sp_label)
     this->index = -1;
 }
 
-void Species::populate(Population* popPtr, Cell* cell, int mean_size, int max_size) const {
-	if (popPtr == 0L)
-		return;
-    Population & p = *popPtr;
-	p.set_cell(cell);
-    if (mean_size > 0) {
-        int n = this->world->get_rng().poisson(mean_size);
-        while ((max_size > 0) and (n > max_size)) {
-            n = this->world->get_rng().poisson(mean_size);
-        }
-        p.assign(n, Individual());
-    }
-}
+// void Species::populate(Population* popPtr, Cell* cell, int mean_size, int max_size) const {
+// 	if (popPtr == 0L)
+// 		return;
+//     Population & p = *popPtr;
+// 	p.set_cell(cell);
+//     if (mean_size > 0) {
+//         int n = this->world->get_rng().poisson(mean_size);
+//         while ((max_size > 0) and (n > max_size)) {
+//             n = this->world->get_rng().poisson(mean_size);
+//         }
+//         p.assign(n, Individual());
+//     }
+// }
 
 //! Derived classes should override this to implement different reproduction
 //! models. 
