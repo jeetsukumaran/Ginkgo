@@ -178,6 +178,10 @@ class Individual {
                 return Individual::Female;
             }
         }
+        static Individual new_individual(const Individual&, const Individual& female) {
+            Individual offspring(*female.population);
+            return offspring;
+        }
     
         Individual(Population& population) {
             this->population = &population;
@@ -241,6 +245,10 @@ class Individual {
 class Population {
     public:
     
+        // special case: for the static 
+        Population() {        
+        }
+    
         // lifecycle
         Population(const Species& sp, const Cell& c) {
             this->species = &sp;
@@ -272,6 +280,9 @@ class Population {
             Individual ind_copy(ind);
             ind_copy.set_population(*this);
             this->individuals.assign(n, ind);                        
+        }
+        void clear() {
+            this->individuals.clear();
         }
         unsigned int capacity() {
             return this->individuals.capacity();
@@ -330,14 +341,24 @@ class Species {
         }            
                        
         // operations
-        virtual Population& reproduce(Population& cur_gen) const;        
+        virtual void reproduce() const; // reproduce all 
+        virtual Population& breed(std::vector<Individual*>& male_ptrs,
+                                  std::vector<Individual*>& female_ptrs,
+                                  Population& offspring) const;
 
     private:
         std::string     label;
         int             index;
         World*          world;
+        static std::vector<Individual*> male_ptrs;
+        static std::vector<Individual*> female_ptrs;
+        static Population               offspring;          
 
 }; // Species
+
+std::vector<Individual*> Species::male_ptrs;
+std::vector<Individual*> Species::female_ptrs;
+Population               Species::offspring;
 
 /********************* SPATIAL AND ENVIRONMENTAL FRAMWORK ********************/
 /***********************        (DECLARATION)           **********************/
@@ -359,7 +380,7 @@ class Cell {
             this->carrying_capacity = cc;
         }
         void set_landscape(Landscape& landscape);
-        
+        void repopulate(const Species& species, const Population& population);
         
         // operations
         void initialize_biota();
@@ -492,8 +513,44 @@ Species::Species(const char* sp_label)
 
 //! Derived classes should override this to implement different reproduction
 //! models. 
-Population& Species::reproduce(Population& cur_gen) const {
-    return cur_gen; 
+void Species::reproduce() const {
+          
+    for (CellIterator cell = this->world->get_cells().begin();
+            cell != this->world->get_cells().end();
+            ++cell) {        
+        // assuming these delete without actually resizing capacity
+        this->male_ptrs.clear();
+        this->female_ptrs.clear();
+        this->offspring.clear();
+        this->offspring.set_cell(*cell);
+        this->offspring.set_species(*this);
+//         pop = cell->get_population_for_species(*this);
+        // divide pop into male and female vectors (by copying pointers)
+        // ... 
+        // ...
+        // may be more efficient to have these pre-allocated and managed
+        // by Population
+
+        cell->repopulate(*this, this->breed(male_ptrs, female_ptrs, offspring));
+    }
+}    
+
+//! Derived classes should override this to implement different reproduction
+//! models. 
+Population& Species::breed(std::vector<Individual*>& male_ptrs,
+                           std::vector<Individual*>& female_ptrs,
+                           Population& offspring) const {
+    if (female_ptrs.size() == 0 or male_ptrs.size() == 0) {
+        return offspring;
+    }
+    for (std::vector<Individual*>::iterator female = female_ptrs.begin();
+            female != female_ptrs.end();
+            ++female) {
+        // sampling with replacement            
+//         Individual* male = this->world->get_rng().random_sample(male_ptrs);        
+        
+    }
+    return offspring;
 }
 
 /********************* SPATIAL AND ENVIRONMENTAL FRAMWORK ********************/
@@ -546,12 +603,9 @@ void Cell::seed_population(Species& sp, unsigned int size) {
     this->populations.at(sp.get_index()).assign(size);    
 }
 
-//! gets the next generation for each population
-void Cell::reproduce_populations() {
-    SpeciesConstIterator spIt = this->world->get_species().begin();
-    VecPopIterator pIt = this->populations.begin();
-    for (; spIt != this->world->get_species().end(); ++pIt, ++spIt)
-        spIt->reproduce(*pIt);
+//! redefines a population (typically with the next gener
+void Cell::repopulate(const Species& sp, const Population& population) {
+    this->populations.at(sp.get_index()) = population;      
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -627,10 +681,10 @@ void World::cycle() {
     // survival
     // competition
     // reproduction
-    for (CellIterator cell_iter=this->get_cells().begin(); 
-            cell_iter != this->get_cells().end(); 
-            ++cell_iter) {
-        cell_iter->reproduce_populations();
+    for (SpeciesIterator sp_iter=this->species.begin(); 
+            sp_iter != this->species.end(); 
+            ++sp_iter) {
+        sp_iter->reproduce();
     }    
     // migration
 }
