@@ -281,7 +281,7 @@ class Cell {
         }
         
         // operations
-        void populates();
+        void start_populations();
         void reproduce_populations();
         
         // for debugging
@@ -442,7 +442,7 @@ Cell& Cell::operator=(const Cell& cell) {
 }
 
 //! creates slots for populations, corresponding to species
-void Cell::populates() {
+void Cell::start_populations() {
     this->populations.resize(this->world->get_species().size());
     SpeciesConstIterator spIt = this->world->get_species().begin();
     VecPopIterator pIt = this->populations.begin();
@@ -502,7 +502,7 @@ void World::add_species(const Species& sp) {
 //! list populated
 void World::initialize_biota() {
     for (CellIterator i=this->cells.begin(); i != this->cells.end(); ++i) {
-        i->populates();
+        i->start_populations();
     }
 }
 
@@ -550,9 +550,7 @@ int main(int argc, char * argv[]) {
     int dim_y = atoi(argv[2]);
     int cc = atoi(argv[3]);
     int num_gens = atoi(argv[4]);
-    ++cc;
-    ++dim_x;
-    ++dim_y;
+
     // build world
     World world;   	
 	world.generate_landscape(dim_x, dim_y);
