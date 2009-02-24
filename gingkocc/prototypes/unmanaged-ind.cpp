@@ -200,19 +200,33 @@ class Individual {
 //! A single population of a particular species.
 //! Responsible for managing collections of individuals, and relating them to 
 //! their species.
-class Population : public std::vector<Individual> {
+class Population {
     public:
-        Population(const Species* sp=NULL, const Cell* c=NULL)
-            : species(sp),
-              cell(c) {
+        Population(const Species* sp=NULL, const Cell* c=NULL) {
+            this->species = sp;
+            this->cell = c;
         }
-        void setCell(const Cell * c) {
+        
+        void set_cell(const Cell * c) {
         	this->cell = c;
         }
+        
+        void assign(unsigned int n, const Individual& ind) {
+            this->individuals.assign(n, ind);
+        }
 
+        unsigned int capacity() {
+            return this->individuals.capacity();
+        }
+        
+        unsigned int size() {
+            return this->individuals.size();
+        }
+                                     
     private:
-        const Species*    species; // the species to which this population belongs
-        const Cell*       cell;    // the current location of this population
+        const Species*          species; // the species to which this population belongs
+        const Cell*             cell;    // the current location of this population
+        std::vector<Individual> individuals; // the individuals of this population
      
 }; // Population
 
@@ -261,7 +275,7 @@ class Cell {
         Cell(const Cell& cell);
         
         // operators
-        const Cell& operator=(const Cell& cell);
+        Cell& operator=(const Cell& cell);
 
         // accessors
         void set_carrying_capacity(int cc) {
@@ -274,10 +288,12 @@ class Cell {
         
         // for debugging
         int num_individuals() {
-            return this->populations[0].size();
+//             return this->populations[0].size(); // bus error
+            return this->populations.at(0).size();            
         }
         int ind_capacity() {
-            return this->populations[0].capacity();
+//             return this->populations[0].capacity(); // bus error
+            return this->populations.at(0).size();
         }
     
     private:
@@ -360,7 +376,7 @@ void Species::populate(Population* popPtr, Cell* cell, int mean_size, int max_si
 	if (popPtr == 0L)
 		return;
     Population & p = *popPtr;
-	p.setCell(cell);
+	p.set_cell(cell);
     if (mean_size > 0) {
         int n = this->world->get_rng().poisson(mean_size);
         while ((max_size > 0) and (n > max_size)) {
@@ -416,13 +432,13 @@ Cell::Cell(World& world){
 
 //! copy constructor
 Cell::Cell(const Cell& cell) {
-    this->world = world;
+    this->world = cell.world;
     this->carrying_capacity = cell.carrying_capacity;
     this->populations = cell.populations;
 }
 
 //! assignment
-const Cell& Cell::operator=(const Cell& cell) {
+Cell& Cell::operator=(const Cell& cell) {   
     this->world = cell.world;
     this->carrying_capacity = cell.carrying_capacity;
     this->populations = cell.populations;
@@ -514,7 +530,7 @@ void World::dump(std::ostream& out) {
     long indCapacityCount = 0;
     for (CellIterator i=this->cells.begin(); 
         i != this->cells.end(); ++i, ++count) {
-            const unsigned ni = i->num_individuals();
+            const unsigned ni =  i->num_individuals();
             out << count << ": " << ni << "\n";
             indCount += ni;
             indCapacityCount += i->ind_capacity();
@@ -538,7 +554,9 @@ int main(int argc, char * argv[]) {
     int dim_y = atoi(argv[2]);
     int cc = atoi(argv[3]);
     int num_gens = atoi(argv[4]);
-    
+    ++cc;
+    ++dim_x;
+    ++dim_y;
     // build world
     World world;   	
 	world.generate_landscape(dim_x, dim_y);
