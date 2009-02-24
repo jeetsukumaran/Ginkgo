@@ -244,7 +244,7 @@ class Species {
         virtual ~Species() {}
         
         // accessors
-        void set_world(World& world);
+        void set_world(World* world);
         void set_index(int index);
                
         // operations
@@ -252,13 +252,11 @@ class Species {
         virtual void populate(Population* popPtr, Cell* cell, int mean_size, int max_size) const;        
         virtual Population& reproduce(Population& cur_gen) const;        
 
-        
     private:
         std::string     label;
         int             index;
         World*          world;
-        
-//         std::list<Population*> populations;
+
 }; // Species
 
 /********************* SPATIAL AND ENVIRONMENTAL FRAMWORK ********************/
@@ -271,7 +269,7 @@ class Cell {
     public:
     
         // lifecycle
-        Cell(World& world);
+        Cell(World* world);
         Cell(const Cell& cell);
         
         // operators
@@ -288,11 +286,9 @@ class Cell {
         
         // for debugging
         int num_individuals() {
-//             return this->populations[0].size(); // bus error
             return this->populations.at(0).size();            
         }
         int ind_capacity() {
-//             return this->populations[0].capacity(); // bus error
             return this->populations.at(0).size();
         }
     
@@ -347,8 +343,8 @@ class World {
 /***********************        (IMPLEMENTATION         **********************/
 
 //! sets the host world for this species
-void Species::set_world(World& world) {
-    this->world = &world;    
+void Species::set_world(World* world) {
+    this->world = world;    
 }
 
 //! sets the host world for this species
@@ -426,8 +422,8 @@ Population& Species::reproduce(Population& cur_gen) const {
 // Cell (IMPLEMENTATION)
 
 //! constructor: needs reference to World
-Cell::Cell(World& world){
-    this->world = &world;
+Cell::Cell(World* world){
+    this->world = world;
 }
 
 //! copy constructor
@@ -482,7 +478,7 @@ void World::generate_landscape(int dim_x, int dim_y) {
     this->dim_x = dim_x;
     this->dim_y = dim_y;
     int num_cells = dim_x * dim_y;
-    this->cells.assign(num_cells, Cell(*this)); // Cell objects created here, ownership = World.cells
+    this->cells.assign(num_cells, Cell(this)); // Cell objects created here, ownership = World.cells
 }
 
 //! sets the carrying capacity for all cells
@@ -497,7 +493,7 @@ void World::set_cell_carrying_capacity(int carrying_capacity) {
 void World::add_species(const Species& sp) {
     this->species.push_back(sp);
     Species& world_sp = this->species.back();
-    world_sp.set_world(*this);
+    world_sp.set_world(this);
     world_sp.set_index(this->species.size() - 1);
 }
 
