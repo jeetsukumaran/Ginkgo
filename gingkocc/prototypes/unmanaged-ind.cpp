@@ -290,9 +290,13 @@ class Population {
         World& get_world();
         
         void assign(unsigned int n) {
-            // need to set reference to this population to each individual,
-            Individual ind(*this);
-            this->individuals.assign(n, ind);                        
+            // need to set reference to this population to each individual
+            this->individuals.clear();
+            this->individuals.reserve(n);
+            for (unsigned int i = 0; i < n; ++i) {            
+                Individual ind(*this);
+                this->individuals.push_back(ind);  
+            }                
         }        
         void assign(unsigned int n, const Individual& ind) {
             // need to set reference to this population to each individual,
@@ -312,7 +316,7 @@ class Population {
         unsigned int size() {
             return this->individuals.size();
         }
-        void partition_by_gender(std::vector<Individual*>& males,
+        void partition_by_sex(std::vector<Individual*>& males,
             std::vector<Individual*>& females) {
             males.clear();
             females.clear();
@@ -321,7 +325,7 @@ class Population {
 //             females.reserve(est_size);
             for (std::vector<Individual>::iterator ind = this->individuals.begin();
                     ind != this->individuals.end();
-                    ++ind) {
+                    ++ind) {                
                 if (ind->is_male()) {
                     males.push_back(&(*ind));
                 } else {
@@ -402,6 +406,10 @@ class Cell {
             this->carrying_capacity = cc;
         }
         void set_landscape(Landscape& landscape);
+        std::vector<Population>& get_populations() {
+            return this->populations;
+        }
+        
         void repopulate(const Species& species, const Population& population);
         
         // operations
@@ -567,6 +575,8 @@ void Species::reproduce() const {
         // assuming these delete without actually resizing capacity
         this->male_ptrs.clear();
         this->female_ptrs.clear();
+        cell->get_populations().at(this->index).partition_by_sex(this->male_ptrs, 
+                this->female_ptrs);
         this->offspring.clear();
         this->offspring.set_cell(*cell);
         this->offspring.set_species(*this);
@@ -589,7 +599,7 @@ Population& Species::breed(std::vector<Individual*>& male_ptrs,
         Individual* male = this->world->get_rng().choice(male_ptrs);
         offspring.add(Individual(*male, **female));
     }
-    return offspring;
+    return offspring;   
 }
 
 /********************* SPATIAL AND ENVIRONMENTAL FRAMWORK ********************/
@@ -737,11 +747,11 @@ void World::dump(std::ostream& out) {
             i != this->get_cells().end(); 
             ++i, ++count) {
         const unsigned ni =  i->num_individuals();
-        out << count << ": " << ni << "\n";
+//         out << ni << " ";
         indCount += ni;
         indCapacityCount += i->ind_capacity();
     }
-    out << "Total individuals = " << indCount << '\n';
+    out << "\nTotal individuals = " << indCount << '\n';
     out << "Total individual capacity = " << indCapacityCount << '\n';
     out << "Size of individual in bytes = " << SIZE_OF_INDIVIDUAL << std::endl;
     out << "Min. possible memory used for individuals = " << indCount*SIZE_OF_INDIVIDUAL << std::endl;
