@@ -41,16 +41,26 @@ class RandomNumberGenerator {
         RandomNumberGenerator();
         RandomNumberGenerator(unsigned int seed);
         void set_seed(unsigned int seed);
-                
+
         double uniform();   // [0, 1)
+        double randint(int a, int b);
         double standard_normal();
         double normal(double mean, double sd);
         unsigned int poisson(int rate);
         
         template <typename T>
-        inline T random_sample(const std::vector<T>& v) {
+        inline T& choice(std::vector<T>& v) {
             return v[rand() % v.size()];
         }
+        
+        template <typename T>        
+        inline T& choice(T& a, T&b) {
+            if (this->uniform() < 0.5) {
+                return a;
+            } else {
+                return b;
+            }
+        }        
         
     private:
         unsigned int seed;
@@ -73,9 +83,14 @@ void RandomNumberGenerator::set_seed(unsigned int seed) {
     srand(seed);
 }
 
-//! returns a uniform random number between 0 and 1
+//! returns a uniform random real between 0 and 1
 double RandomNumberGenerator::uniform() {
-    return double(rand())/double(RAND_MAX);
+    return static_cast<double>(rand())/static_cast<double>(RAND_MAX);
+}
+
+//! returns a uniform random integer between >= a and <= b
+double RandomNumberGenerator::randint(int a, int b) {
+    return (rand() % (b-a+1)) + a;
 }
 
 //! Gaussian distribution with mean=1 and sd=0
@@ -170,6 +185,7 @@ class Individual {
             Male,
             Female
         };
+        
         static Individual::Sex random_sex(RandomNumberGenerator& rng, 
                 float female_threshold=0.5) {
             if (rng.uniform() < female_threshold) {
@@ -178,18 +194,22 @@ class Individual {
                 return Individual::Female;
             }
         }
-        static Individual new_individual(const Individual&, const Individual& female) {
-            Individual offspring(*female.population);
-            return offspring;
-        }
+        
+        // construct a new ind from two existing ones1
+        Individual(const Individual&, const Individual& female);
     
+        // construct an individual de novo
         Individual(Population& population) {
             this->population = &population;
             this->sex = Individual::random_sex(this->get_rng());
             
-#			if !defined(STATIC_GENOTYPE_LENGTH)
-            	genotype.resize(genotypeLen);
-#			endif
+#if !defined(STATIC_GENOTYPE_LENGTH)
+            this->genotype.assign(genotypeLen, 0.0);
+#else
+            for (float* g=this->genotype; g < STATIC_GENOTYPE_LEN; ++g) {
+                *g = 0.0;
+            }
+#endif
         }
         
         // clones an individual
@@ -209,8 +229,7 @@ class Individual {
         
         bool is_female() const {
             return this->sex == Individual::Female;
-        }
-        
+        }                
         
         RandomNumberGenerator& get_rng();
 
@@ -488,8 +507,33 @@ class World {
 /*********************** POPULATION ECOLOGY AND GENETICS *********************/
 /***********************        (IMPLEMENTATION         **********************/
 
+///////////////////////////////////////////////////////////////////////////////
+// Individual (IMPLEMENTATION)
+
 RandomNumberGenerator& Individual::get_rng() {
     return this->population->get_species().get_world().get_rng();
+}
+
+Individual::Individual(const Individual& male, const Individual& female) {
+    this->population = female.population;
+    this->population->get_world();
+    this->sex = Individual::random_sex(this->get_rng());
+
+    assert(male.genotype.size() == female.genotype.size());
+    this->genotype.reserve(female.genotype.size());
+    Genotype::const_iterator male_g = male.genotype.begin();
+    Genotype::const_iterator female_g = female.genotype.begin();
+    for ( ; female_g != female.genotype.end(); ++male_g, ++female_g) {
+        float val = this->get_rng().choice(*male_g, *female_g);
+        
+        // here is where we mutate genotype
+        // pretty simple for now
+        if (this->get_rng().uniform() < 0.1) {
+            val += (get_rng().uniform() - 0.5); // i.e., -0.5 to +0.5
+        } 
+        
+        this->genotype.push_back(val);
+    }
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -516,8 +560,7 @@ Species::Species(const char* sp_label)
 
 //! Derived classes should override this to implement different reproduction
 //! models. 
-void Species::reproduce() const {
-          
+void Species::reproduce() const {          
     for (CellIterator cell = this->world->get_cells().begin();
             cell != this->world->get_cells().end();
             ++cell) {        
@@ -527,13 +570,6 @@ void Species::reproduce() const {
         this->offspring.clear();
         this->offspring.set_cell(*cell);
         this->offspring.set_species(*this);
-//         pop = cell->get_population_for_species(*this);
-        // divide pop into male and female vectors (by copying pointers)
-        // ... 
-        // ...
-        // may be more efficient to have these pre-allocated and managed
-        // by Population
-
         cell->repopulate(*this, this->breed(male_ptrs, female_ptrs, offspring));
     }
 }    
@@ -550,8 +586,8 @@ Population& Species::breed(std::vector<Individual*>& male_ptrs,
             female != female_ptrs.end();
             ++female) {
         // sampling with replacement            
-        Individual* male = this->world->get_rng().random_sample(male_ptrs);
-        offspring.add(Individual::new_individual(*male, **female));
+        Individual* male = this->world->get_rng().choice(male_ptrs);
+        offspring.add(Individual(*male, **female));
     }
     return offspring;
 }
@@ -741,11 +777,11 @@ int main(int argc, char * argv[]) {
 	            cell->seed_population(*sp, cc);
         }	            
     }	
-	num_gens++;
-// 	for (int i=1; i <= num_gens; ++i) {
-// 	    world.cycle();
-// 	}
-// 	
+	
+	for (int i=1; i <= num_gens; ++i) {
+	    world.cycle();
+	}
+	
 	world.dump(std::cout);
 	return 0;
 }
