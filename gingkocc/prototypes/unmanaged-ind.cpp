@@ -281,6 +281,9 @@ class Population {
             ind_copy.set_population(*this);
             this->individuals.assign(n, ind);                        
         }
+        void add(const Individual& ind) {
+            this->individuals.push_back(ind);
+        }
         void clear() {
             this->individuals.clear();
         }
@@ -547,8 +550,8 @@ Population& Species::breed(std::vector<Individual*>& male_ptrs,
             female != female_ptrs.end();
             ++female) {
         // sampling with replacement            
-//         Individual* male = this->world->get_rng().random_sample(male_ptrs);        
-        
+        Individual* male = this->world->get_rng().random_sample(male_ptrs);
+        offspring.add(Individual::new_individual(*male, **female));
     }
     return offspring;
 }
@@ -738,11 +741,11 @@ int main(int argc, char * argv[]) {
 	            cell->seed_population(*sp, cc);
         }	            
     }	
-	
-	for (int i=1; i <= num_gens; ++i) {
-	    world.cycle();
-	}
-	
+	num_gens++;
+// 	for (int i=1; i <= num_gens; ++i) {
+// 	    world.cycle();
+// 	}
+// 	
 	world.dump(std::cout);
 	return 0;
 }
