@@ -141,6 +141,7 @@ unsigned int RandomNumberGenerator::poisson(int rate) {
  
 class Species;
 class Population;
+class Landscape;
 class Cell;
 class World;
 
@@ -347,7 +348,7 @@ class Cell {
     public:
     
         // lifecycle
-        Cell(World& world);
+        Cell(Landscape& landscape);
         Cell(const Cell& cell);
         
         // operators
@@ -357,6 +358,8 @@ class Cell {
         void set_carrying_capacity(int cc) {
             this->carrying_capacity = cc;
         }
+        void set_landscape(Landscape& landscape);
+        
         
         // operations
         void initialize_biota();
@@ -372,6 +375,7 @@ class Cell {
         }
     
     private:
+        Landscape*                 landscape;
         World*                     world;
         int                        carrying_capacity;
         std::vector<Population>    populations;    
@@ -380,14 +384,33 @@ class Cell {
 
 ///////////////////////////////////////////////////////////////////////////////	
 //! The landscape.
-// class Landscape {
-// 
-//     public:
-//         Landscape(World& world);
-//         Landscape(const Landscape& landscape);
-//         Landscape& operator=
-// 
-// }
+class Landscape {
+
+    public:
+        Landscape();
+        Landscape(World& world, int dim_x, int dim_y);
+        Landscape(const Landscape& landscape);
+        const Landscape& operator=(const Landscape& landscape);
+        
+        Cells& get_cells() {
+            return this->cells;
+        }
+        
+        World& get_world() {
+            return *(this->world);
+        }               
+        
+        void set_cell_carrying_capacity(int carrying_capacity);
+        
+        void generate(World& world, int dim_x, int dim_y);
+        
+    private:
+        int      dim_x;
+        int      dim_y;            
+        Cells    cells;
+        World*   world;
+
+};
 
 ///////////////////////////////////////////////////////////////////////////////	
 //! The world.
@@ -403,11 +426,18 @@ class World {
         SpeciesContainer& get_species() { 
             return this->species;
         }
+        
         RandomNumberGenerator& get_rng() { 
             return this->rng;
         }
+        
+        
+        Landscape& get_landscape() {
+            return this->landscape;
+        }        
+        
         Cells& get_cells() {
-            return this->cells;
+            return this->landscape.get_cells();
         }
         
         // set up
@@ -423,9 +453,8 @@ class World {
         void dump(std::ostream& out);
         
     private:
-        int                     dim_x;
-        int                     dim_y;
-        Cells                   cells;
+        Cells*                  cells;
+        Landscape               landscape;
         SpeciesContainer        species;
         RandomNumberGenerator   rng;
         
@@ -474,24 +503,29 @@ Population& Species::reproduce(Population& cur_gen) const {
 // Cell (IMPLEMENTATION)
 
 //! constructor: needs reference to World
-Cell::Cell(World& world){
-    this->world = &world;
+Cell::Cell(Landscape& landscape){
+    this->set_landscape(landscape);
     this->carrying_capacity = 0;
 }
 
 //! copy constructor
 Cell::Cell(const Cell& cell) {
-    this->world = cell.world;
-    this->carrying_capacity = cell.carrying_capacity;
+    this->set_landscape(*cell.landscape);
     this->populations = cell.populations;
 }
 
 //! assignment
 const Cell& Cell::operator=(const Cell& cell) {   
-    this->world = cell.world;
+    this->set_landscape(*cell.landscape);
     this->carrying_capacity = cell.carrying_capacity;
     this->populations = cell.populations;
     return *this;
+}
+
+//! binds to landscape
+void Cell::set_landscape(Landscape& landscape) {
+    this->landscape = &landscape;
+    this->world = &this->landscape->get_world();        
 }
 
 //! creates slots for populations, corresponding to #'s of species
@@ -521,6 +555,33 @@ void Cell::reproduce_populations() {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+// Landscape (IMPLEMENTATION)
+
+Landscape::Landscape() {
+
+}
+
+Landscape::Landscape(World& world, int dim_x, int dim_y) {
+    this->generate(world, dim_x, dim_y);
+}
+
+void Landscape::generate(World& world, int dim_x, int dim_y) {
+    this->world = &world;
+    this->dim_x = dim_x;
+    this->dim_y = dim_y;
+    int num_cells = dim_x * dim_y;
+    this->cells.assign(num_cells, Cell(*this)); // Cell objects created here
+}
+
+//! sets the carrying capacity for all cells
+void Landscape::set_cell_carrying_capacity(int carrying_capacity) {
+    // std::for_each(this->cells.begin(), this->cells.end(), Cell::set_carrying_capacity());
+    for (CellIterator i=this->cells.begin(); i != this->cells.end(); ++i) {
+        i->set_carrying_capacity(carrying_capacity);
+    }
+}
+	
+///////////////////////////////////////////////////////////////////////////////
 // World (IMPLEMENTATION)
 	
 //! default constructor
@@ -530,24 +591,18 @@ World::World()
 
 //! constructor: calls
 World::World(unsigned int seed) 
-    : rng(seed) {
-    
+    : rng(seed) {  
 }           
 
-//! generates the spatial framework
+//! generates a new landscape
 void World::generate_landscape(int dim_x, int dim_y) {
-    this->dim_x = dim_x;
-    this->dim_y = dim_y;
-    int num_cells = dim_x * dim_y;
-    this->cells.assign(num_cells, Cell(*this)); // Cell objects created here, ownership = World.cells
+    this->landscape.generate(*this, dim_x, dim_y);
+    this->cells = &landscape.get_cells();
 }
 
-//! sets the carrying capacity for all cells
+//! sets the carrying capacity for each cell
 void World::set_cell_carrying_capacity(int carrying_capacity) {
-    // std::for_each(this->cells.begin(), this->cells.end(), Cell::set_carrying_capacity());
-    for (CellIterator i=this->cells.begin(); i != this->cells.end(); ++i) {
-        i->set_carrying_capacity(carrying_capacity);
-    }
+    this->landscape.set_cell_carrying_capacity(carrying_capacity);
 }
 
 //! adds a species to the World
@@ -562,7 +617,7 @@ void World::add_species(const Species& sp) {
 //! must be called after landscape has been generated and species
 //! list populated
 void World::initialize_biota() {
-    for (CellIterator i=this->cells.begin(); i != this->cells.end(); ++i) {
+    for (CellIterator i=this->get_cells().begin(); i != this->get_cells().end(); ++i) {
         i->initialize_biota();
     }
 }
@@ -572,8 +627,8 @@ void World::cycle() {
     // survival
     // competition
     // reproduction
-    for (CellIterator cell_iter=this->cells.begin(); 
-            cell_iter != this->cells.end(); 
+    for (CellIterator cell_iter=this->get_cells().begin(); 
+            cell_iter != this->get_cells().end(); 
             ++cell_iter) {
         cell_iter->reproduce_populations();
     }    
@@ -585,12 +640,13 @@ void World::dump(std::ostream& out) {
     int count=1;
     long indCount = 0;
     long indCapacityCount = 0;
-    for (CellIterator i=this->cells.begin(); 
-        i != this->cells.end(); ++i, ++count) {
-            const unsigned ni =  i->num_individuals();
-            out << count << ": " << ni << "\n";
-            indCount += ni;
-            indCapacityCount += i->ind_capacity();
+    for (CellIterator i=this->get_cells().begin(); 
+            i != this->get_cells().end(); 
+            ++i, ++count) {
+        const unsigned ni =  i->num_individuals();
+        out << count << ": " << ni << "\n";
+        indCount += ni;
+        indCapacityCount += i->ind_capacity();
     }
     out << "Total individuals = " << indCount << '\n';
     out << "Total individual capacity = " << indCapacityCount << '\n';
