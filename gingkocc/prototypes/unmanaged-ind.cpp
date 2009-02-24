@@ -47,6 +47,11 @@ class RandomNumberGenerator {
         double normal(double mean, double sd);
         unsigned int poisson(int rate);
         
+        template <typename T>
+        inline T random_sample(const std::vector<T>& v) {
+            return v[rand() % v.size()];
+        }
+        
     private:
         unsigned int seed;
 
@@ -130,10 +135,6 @@ unsigned int RandomNumberGenerator::poisson(int rate) {
     return k - 1.0;
 }
 
-template <typename T>
-T random_sample(const std::vector<T>& v) {
-    return v[rand() % v.size()];
-}
 
 /*********************** POPULATION ECOLOGY AND GENETICS *********************/
 /***********************        (DECLARATION)           **********************/
@@ -168,9 +169,18 @@ class Individual {
             Male,
             Female
         };
+        static Individual::Sex random_sex(RandomNumberGenerator& rng, 
+                float female_threshold=0.5) {
+            if (rng.uniform() < female_threshold) {
+                return Individual::Male;
+            } else {
+                return Individual::Female;
+            }
+        }
     
         Individual(Population& population) {
             this->population = &population;
+            this->sex = Individual::random_sex(this->get_rng());
 //             this->sex = this->population->get_species()->get_world()->get_rng()->
             
 #			if !defined(STATIC_GENOTYPE_LENGTH)
