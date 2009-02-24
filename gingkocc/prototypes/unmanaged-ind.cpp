@@ -29,6 +29,7 @@
 #include <string>
 #include <cmath>
 #include <ctime>
+#include <cassert>
 
 /************************* SUPPORT CLASSES AND METHODS ***********************/
  
@@ -237,18 +238,26 @@ class Population {
 class Species {
     public:
         // lifecycle
-        Species() {}
-        Species(const char* sp_label) 
-            : label(sp_label) {       
-        }
+        Species();
+        Species(const char* sp_label);
         virtual ~Species() {}
         
         // accessors
-        void set_world(World* world);
-        void set_index(int index);
-               
+        World* get_world() {
+            return this->world;    
+        }        
+        void set_world(World* world) {
+            this->world = world;    
+        }        
+        void set_index(int index) {
+            this->index = index;    
+        }
+        int get_index() {
+            return this->index;    
+        }            
+                       
         // operations
-        virtual Population new_population(Cell* cell=NULL, int mean_size=0, int max_size=0) const;        
+//         virtual Population new_population(Cell* cell=NULL, int mean_size=0, int max_size=0) const;        
         virtual void populate(Population* popPtr, Cell* cell, int mean_size, int max_size) const;        
         virtual Population& reproduce(Population& cur_gen) const;        
 
@@ -261,7 +270,6 @@ class Species {
 
 /********************* SPATIAL AND ENVIRONMENTAL FRAMWORK ********************/
 /***********************        (DECLARATION)           **********************/
-
 
 ///////////////////////////////////////////////////////////////////////////////
 //! The fundamental atomic spatial unit of the world.
@@ -281,7 +289,8 @@ class Cell {
         }
         
         // operations
-        void start_populations();
+        void initialize_biota();
+        void seed_population(Species* sp, unsigned int size);
         void reproduce_populations();
         
         // for debugging
@@ -316,6 +325,9 @@ class World {
         RandomNumberGenerator& get_rng() { 
             return this->rng;
         }
+        Cells& get_cells() {
+            return this->cells;
+        }
         
         // set up
         void generate_landscape(int dim_x, int dim_y);
@@ -332,7 +344,7 @@ class World {
     private:
         int                     dim_x;
         int                     dim_y;
-        std::vector<Cell>       cells;
+        Cells                   cells;
         SpeciesContainer        species;
         RandomNumberGenerator   rng;
         
@@ -342,30 +354,16 @@ class World {
 /*********************** POPULATION ECOLOGY AND GENETICS *********************/
 /***********************        (IMPLEMENTATION         **********************/
 
-//! sets the host world for this species
-void Species::set_world(World* world) {
-    this->world = world;    
+//! default constructor: assigns dummy values
+Species::Species() {
+    this->label = "Sp";
+    this->index = -1;
 }
 
-//! sets the host world for this species
-void Species::set_index(int index) {
-    this->index = index;    
-}
-
-//! Returns a Population object with the Population object's Species pointer
-//! set to self.
-//! If Cell* is given, then the Population object's Cell pointer is set.
-//! If mean_size > 0, then individuals are created and added to the population,
-//! with the number of individuals >= 0 and <= max_size.
-//! The exact number of individuals is currently implemented as a Poisson 
-//! distributed random number with mean of size. 
-//! Future implementations and/or derived classes will take into account the 
-//! environment of cell, with favorable environments resulting in greater 
-//! numbers of individuals.
-Population Species::new_population(Cell* cell, int mean_size, int max_size) const {
-    Population p = Population(this, cell);
-    this->populate(&p, cell, mean_size, max_size);
-    return p;
+//! apart from setting label, ensures index is unassigned
+Species::Species(const char* sp_label) 
+    : label(sp_label) {
+    this->index = -1;
 }
 
 void Species::populate(Population* popPtr, Cell* cell, int mean_size, int max_size) const {
@@ -382,13 +380,12 @@ void Species::populate(Population* popPtr, Cell* cell, int mean_size, int max_si
     }
 }
 
-//! Returns next generation.
 //! Derived classes should override this to implement different reproduction
 //! models. 
 //! Current model: next gen population size is a Poisson distributed random
 //! variate with mean equal to current population size. 
-//  Each offspring in the next generation randomly selects two parents 
-//  from the current generation.
+//! Each offspring in the next generation randomly selects two parents 
+//! from the current generation.
 //! Of course, given no pop gen component right now, the latter does not hold.
 Population& Species::reproduce(Population& cur_gen) const {
     static Population next_gen;
@@ -424,6 +421,7 @@ Population& Species::reproduce(Population& cur_gen) const {
 //! constructor: needs reference to World
 Cell::Cell(World* world){
     this->world = world;
+    this->carrying_capacity = 0;
 }
 
 //! copy constructor
@@ -441,14 +439,24 @@ Cell& Cell::operator=(const Cell& cell) {
     return *this;
 }
 
-//! creates slots for populations, corresponding to species
-void Cell::start_populations() {
-    this->populations.resize(this->world->get_species().size());
-    SpeciesConstIterator spIt = this->world->get_species().begin();
-    VecPopIterator pIt = this->populations.begin();
-    for (; spIt != this->world->get_species().end(); ++pIt, ++spIt)
-        spIt->populate(&(*pIt), this, this->carrying_capacity/2, this->carrying_capacity);
+//! creates slots for populations, corresponding to #'s of species
+void Cell::initialize_biota() {
+    this->populations.reserve(this->world->get_species().size());
+    for (SpeciesConstIterator spIt = this->world->get_species().begin();
+            spIt != this->world->get_species().end();
+            ++spIt) {
+        this->populations.push_back(Population(&(*spIt), this));
+    }        
 }
+
+//! Adds new individuals to the population of the specified species in this
+//! cell.
+void Cell::seed_population(Species* sp, unsigned int size) {
+    assert(sp->get_index() >= 0);
+    assert(sp->get_index() <= this->populations.size());
+    this->populations.at(sp->get_index()).assign(size, Individual());    
+}
+
 
 //! gets the next generation for each population
 void Cell::reproduce_populations() {
@@ -502,7 +510,7 @@ void World::add_species(const Species& sp) {
 //! list populated
 void World::initialize_biota() {
     for (CellIterator i=this->cells.begin(); i != this->cells.end(); ++i) {
-        i->start_populations();
+        i->initialize_biota();
     }
 }
 
@@ -557,9 +565,21 @@ int main(int argc, char * argv[]) {
 	world.set_cell_carrying_capacity(cc);
 	world.add_species(Species("snail"));
 	world.initialize_biota();
+	
+	for (CellIterator cell = world.get_cells().begin();
+	        cell != world.get_cells().end();
+	        ++cell) {
+	    for (SpeciesIterator sp = world.get_species().begin();
+	            sp != world.get_species().end();
+	            ++sp) {
+	            cell->seed_population(&(*sp), cc);
+        }	            
+    }	
+	
 	for (int i=1; i <= num_gens; ++i) {
 	    world.cycle();
 	}
+	
 	world.dump(std::cout);
 	return 0;
 }
