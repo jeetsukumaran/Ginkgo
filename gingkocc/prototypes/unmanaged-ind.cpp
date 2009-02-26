@@ -288,6 +288,9 @@ class Population {
         void add(const Individual& ind) {
             this->individuals.push_back(ind);
         }
+        void reserve(unsigned int n) {
+            this->individuals.reserve(n);
+        }        
         void clear() {
             this->individuals.clear();
         }
@@ -607,14 +610,17 @@ void Species::environmental_selection() const {
         Population& pop = cell->get_populations().at(this->index);
         EnvironmentFactors& env = cell->get_environment();
         Individuals& individuals = pop.get_individuals();
+        Population survivors = Population(*this, *cell);
+        survivors.reserve(individuals.size());
         for (Individuals::iterator i = individuals.begin();
                 i != individuals.end();
-                ++i) {            
-            float fitness = this->calc_fitness(*i, env);     
-            if (this->rng->uniform() > this->calc_prob_survival(fitness)) {
-                // kill
-            }
+                ++i) {                     
+            float fitness = this->calc_fitness(*i, env);   
+            if (this->rng->uniform() <= this->calc_prob_survival(fitness)) {
+                survivors.add(*i);
+            }         
         }                
+        cell->repopulate(*this, survivors);           
     }            
 } 
 
@@ -647,7 +653,7 @@ float Species::calc_fitness(Individual& individual, EnvironmentFactors& env) con
     if (env.at(0) < 0 or env.at(0) > 10) {
         fitness = 0;
     } else {
-        float fitness = 0;
+        fitness = 5; // magic number!
         EnvironmentFactors::const_iterator eiter = env.begin();
         Individual::Genotype::const_iterator giter = gen.begin();
         for ( ; eiter != env.end(); ++eiter, ++giter) {
@@ -661,7 +667,9 @@ float Species::calc_fitness(Individual& individual, EnvironmentFactors& env) con
 }
 
 float Species::calc_prob_survival(float fitness) const {
-    return 1.0 / (1 + exp(-fitness)) ;
+    float p =  1.0 / (1 + exp(-fitness));
+//     std::cout << "fitness=" << fitness << ", prob=" << p << "\n";
+    return p;
 }
 
 //! Derived classes should override this to implement different mating
