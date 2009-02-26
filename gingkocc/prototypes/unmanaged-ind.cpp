@@ -42,10 +42,10 @@ class RandomNumberGenerator {
         RandomNumberGenerator(unsigned int seed);
         void set_seed(unsigned int seed);
 
-        double uniform();   // [0, 1)
-        double randint(int a, int b);
-        double standard_normal();
-        double normal(double mean, double sd);
+        float uniform();   // [0, 1)
+        float randint(int a, int b);
+        float standard_normal();
+        float normal(float mean, float sd);
         unsigned int poisson(int rate);
         
         template <typename T>
@@ -84,22 +84,22 @@ void RandomNumberGenerator::set_seed(unsigned int seed) {
 }
 
 //! returns a uniform random real between 0 and 1
-double RandomNumberGenerator::uniform() {
-    return static_cast<double>(rand())/static_cast<double>(RAND_MAX);
+float RandomNumberGenerator::uniform() {
+    return static_cast<float>(rand())/static_cast<float>(RAND_MAX);
 }
 
 //! returns a uniform random integer between >= a and <= b
-double RandomNumberGenerator::randint(int a, int b) {
+float RandomNumberGenerator::randint(int a, int b) {
     return (rand() % (b-a+1)) + a;
 }
 
 //! Gaussian distribution with mean=1 and sd=0
 //! from Knuth, The Art of Computer Programming, Sec 3.4.1, Algorithm P
-double RandomNumberGenerator::standard_normal() {
+float RandomNumberGenerator::standard_normal() {
 
     // since this method generates two variates at a time,
     // we store the second one to be returned on the next call
-    static double stored_variate = 0;
+    static float stored_variate = 0;
     static bool return_stored=false;    
 
     if (return_stored) {
@@ -107,11 +107,11 @@ double RandomNumberGenerator::standard_normal() {
         return stored_variate;
     }
 
-    double u1;
-    double u2;
-    double v1;
-    double v2;
-    double s = 1; 
+    float u1;
+    float u2;
+    float v1;
+    float v2;
+    float s = 1; 
     
     while (s >= 1.0) {
         u1 = this->uniform();
@@ -121,15 +121,15 @@ double RandomNumberGenerator::standard_normal() {
         s = pow(v1, 2) + pow(v2, 2);
     }
     
-    double polar = sqrt( (-2 * log(s)) / s );
-    double x1 = v1 * polar;
+    float polar = sqrt( (-2 * log(s)) / s );
+    float x1 = v1 * polar;
     stored_variate = v2 * polar;
     
     return x1;
 }
 
 //! Gaussian with given mean and sd
-double RandomNumberGenerator::normal(double mean, double sd) {
+float RandomNumberGenerator::normal(float mean, float sd) {
     return this->standard_normal() * sd + mean;
 }
 
@@ -137,12 +137,12 @@ double RandomNumberGenerator::normal(double mean, double sd) {
 unsigned int RandomNumberGenerator::poisson(int rate) {
     const int MAX_EXPECTATION = 64;
     if (rate > MAX_EXPECTATION) {
-        double r = rate/2.0;
+        float r = rate/2.0;
         return this->poisson(r) + this->poisson(r);
     }
-    double L = exp(-1.0 * rate);
-    double p = 1.0;
-    double k = 0.0;    
+    float L = exp(-1.0 * rate);
+    float p = 1.0;
+    float k = 0.0;    
     while (p >= L) {
         k += 1.0;
         p *= this->uniform();
@@ -153,7 +153,8 @@ unsigned int RandomNumberGenerator::poisson(int rate) {
 
 /*********************** POPULATION ECOLOGY AND GENETICS *********************/
 /***********************        (DECLARATION)           **********************/
- 
+
+class Individual;
 class Species;
 class Population;
 class Landscape;
@@ -164,6 +165,7 @@ typedef int EnvironmentFactor;
 typedef std::vector<EnvironmentFactor> EnvironmentFactors;
 typedef std::vector<Cell> Cells;
 typedef std::vector<Species> SpeciesContainer;
+typedef std::vector<Individual> Individuals;
 
 const unsigned GENOTYPE_LEN = 10;
 
@@ -197,6 +199,22 @@ class Individual {
                    
         void set_population(const Population& pop);
         
+        Genotype& get_genotype() {
+            return this->genotype;
+        }
+        
+        void set_fitness(float fitness) {
+            this->fitness = fitness;
+        }
+        
+        void clear_fitness() {
+            this->fitness = -1;
+        }                
+        
+        float get_fitness() const {
+            return this->fitness;
+        }
+        
         bool is_male() const {
             return this->sex == Individual::Male;
         }
@@ -210,7 +228,8 @@ class Individual {
         RandomNumberGenerator *rng; 
         Genotype              genotype;   // non-neutral genotype: maps to fitness phenotype
         Individual::Sex       sex;        // male or female
-        int                   movement;   // movement "currency" available        
+        int                   movement;   // movement "currency" available (reset every round)
+        float                 fitness;    // individual's fitness (calc. and cached every round)
 
 }; // Individual
 
@@ -244,7 +263,12 @@ class Population {
         const Species& get_species() const {
         	return *(this->species);
         }        
+        
         World& get_world();
+        
+        Individuals& get_individuals() {
+            return this->individuals;
+        }
         
         void assign(unsigned int n) {
             // need to set reference to this population to each individual
@@ -280,7 +304,7 @@ class Population {
 //             unsigned int est_size = static_cast<unsigned int>(this->individuals.size()/2);
 //             males.reserve(est_size);
 //             females.reserve(est_size);
-            for (std::vector<Individual>::iterator ind = this->individuals.begin();
+            for (Individuals::iterator ind = this->individuals.begin();
                     ind != this->individuals.end();
                     ++ind) {                
                 if (ind->is_male()) {
@@ -294,7 +318,7 @@ class Population {
     private:
         const Species*          species; // the species to which this population belongs
         const Cell*             cell;    // the current location of this population
-        std::vector<Individual> individuals; // the individuals of this population
+        Individuals individuals; // the individuals of this population
      
 }; // Population
 
@@ -308,14 +332,7 @@ class Species {
         Species();
         Species(const char* sp_label);
         virtual ~Species() {}
-        
-        // accessors
-        World& get_world() const {
-            return *(this->world);    
-        }        
-        void set_world(World& world) {
-            this->world = &world;    
-        }        
+       
         void set_index(int index) {
             this->index = index;    
         }
@@ -323,11 +340,18 @@ class Species {
             return this->index;    
         }            
                        
+        World& get_world() const;
+        void set_world(World& world);
+                       
         // life history framework
         void environmental_selection() const;
         void density_dependent_selection() const;
         void population_reproduction() const;     
         void population_migration() const;
+        
+        // fitness/survival/competition
+        virtual float calc_fitness(Individual& individual, EnvironmentFactors& env) const;
+        float calc_prob_survival(float fitness) const;
         
         // species-specific models
         virtual Population& spawn_offspring(std::vector<Individual*>& male_ptrs,
@@ -340,9 +364,11 @@ class Species {
         static Population               offspring;          
 
     private:
-        std::string                     label;
-        int                             index;
-        World*                          world;
+        std::string                     label;          // arbitrary identifier
+        int                             index;          // "slot" in cell's pop vector
+        int                             movement_rate;  // cells per "round"
+        World*                          world;          // pointer to world
+        RandomNumberGenerator*          rng;            // pointer to rng
         
 }; // Species
 
@@ -497,6 +523,7 @@ Individual::Individual(const Population& population) {
     this->sex = Individual::random_sex(*this->rng);
     this->genotype.assign(GENOTYPE_LEN, 0.0);
     this->movement = 0;
+    this->fitness = -1;
 }
 
 Individual::Individual(const Individual& ind)
@@ -524,6 +551,8 @@ Individual::Individual(const Individual& female, const Individual& male) {
         }         
         this->genotype.push_back(val);
     }
+    this->movement = 0;
+    this->fitness = -1;
 }
 
 const Individual& Individual::operator=(const Individual& ind) {
@@ -531,6 +560,7 @@ const Individual& Individual::operator=(const Individual& ind) {
     this->genotype = ind.genotype;
     this->sex = ind.sex;
     this->movement = ind.movement;
+    this->fitness = ind.fitness;
     return *this;
 }
 
@@ -561,7 +591,31 @@ Species::Species(const char* sp_label)
     this->index = -1;
 }
 
+World& Species::get_world() const {
+    return *(this->world);    
+}        
+
+void Species::set_world(World& world) {
+    this->world = &world;
+    this->rng = &world.get_rng();
+} 
+
 void Species::environmental_selection() const {
+    for (Cells::iterator cell = this->world->get_cells().begin();
+            cell != this->world->get_cells().end();
+            ++cell) {
+        Population& pop = cell->get_populations().at(this->index);
+        EnvironmentFactors& env = cell->get_environment();
+        Individuals& individuals = pop.get_individuals();
+        for (Individuals::iterator i = individuals.begin();
+                i != individuals.end();
+                ++i) {            
+            float fitness = this->calc_fitness(*i, env);     
+            if (this->rng->uniform() > this->calc_prob_survival(fitness)) {
+                // kill
+            }
+        }                
+    }            
 } 
 
 void Species::density_dependent_selection() const {
@@ -585,6 +639,30 @@ void Species::population_reproduction() const {
 
 void Species::population_migration() const {
 } 
+
+
+float Species::calc_fitness(Individual& individual, EnvironmentFactors& env) const {
+    float fitness = 0;
+    Individual::Genotype& gen = individual.get_genotype();
+    if (env.at(0) < 0 or env.at(0) > 10) {
+        fitness = 0;
+    } else {
+        float fitness = 0;
+        EnvironmentFactors::const_iterator eiter = env.begin();
+        Individual::Genotype::const_iterator giter = gen.begin();
+        for ( ; eiter != env.end(); ++eiter, ++giter) {
+            // TODO: 'Species' to have weighting coefficients or powers 
+            // that will be added here
+            fitness += *eiter * *giter;
+        }
+    }
+    individual.set_fitness(fitness);
+    return fitness;
+}
+
+float Species::calc_prob_survival(float fitness) const {
+    return 1.0 / (1 + exp(-fitness)) ;
+}
 
 //! Derived classes should override this to implement different mating
 //! and reproduction models. 
@@ -710,7 +788,7 @@ void World::generate_landscape(int dim_x, int dim_y) {
     this->cells = &landscape.get_cells();
     	
 	// actual implementation will load from file
-	this->num_environment_factors = 8;
+	this->num_environment_factors = 4;
     for (Cells::iterator cell = this->get_cells().begin();
         cell != this->get_cells().end();
         ++cell) {
