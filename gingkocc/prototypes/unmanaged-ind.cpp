@@ -160,19 +160,12 @@ class Landscape;
 class Cell;
 class World;
 
+typedef int EnvironmentFactor;
+typedef std::vector<EnvironmentFactor> EnvironmentFactors;
 typedef std::vector<Cell> Cells;
-typedef std::vector<Cell>::iterator CellIterator;
 typedef std::vector<Species> SpeciesContainer;
-typedef std::vector<Species>::iterator SpeciesIterator;
-typedef std::vector<Species>::const_iterator SpeciesConstIterator;
-typedef std::vector<Population>::iterator VecPopIterator;
 
-const unsigned genotypeLen = 10;
-#if defined(STATIC_GENOTYPE_LENGTH)
-	typedef float Genotype[genotypeLen];
-#else
-	typedef std::vector<float> Genotype;
-#endif
+const unsigned GENOTYPE_LEN = 10;
 
 ///////////////////////////////////////////////////////////////////////////////
 //! A single organism of a population of a particular species.
@@ -180,6 +173,8 @@ const unsigned genotypeLen = 10;
 //! histories. 
 class Individual {
     public:
+    
+        typedef std::vector<float> Genotype;
     
         enum Sex {
             Male,
@@ -195,33 +190,12 @@ class Individual {
             }
         }
         
-        // construct a new ind from two existing ones1
-        Individual(const Individual&, const Individual& female);
-    
-        // construct an individual de novo
-        Individual(Population& population) {
-            this->population = &population;
-            this->sex = Individual::random_sex(this->get_rng());
-            
-#if !defined(STATIC_GENOTYPE_LENGTH)
-            this->genotype.assign(genotypeLen, 0.0);
-#else
-            for (float* g=this->genotype; g < STATIC_GENOTYPE_LEN; ++g) {
-                *g = 0.0;
-            }
-#endif
-        }
-        
-        // clones an individual
-        Individual(const Individual& ind)
-            : genotype(ind.genotype) {
-            this->population = ind.population;
-            this->sex = ind.sex;
-        }
+        Individual(const Individual&, const Individual& female); // offspring
+        Individual(const Population& population);                // de novo
+        Individual(const Individual& ind);                       // copy
+        const Individual& operator=(const Individual& ind);      // assignment
                    
-        void set_population(Population& pop) {
-            this->population = &pop;
-        }
+        void set_population(const Population& pop);
         
         bool is_male() const {
             return this->sex == Individual::Male;
@@ -230,32 +204,15 @@ class Individual {
         bool is_female() const {
             return this->sex == Individual::Female;
         }                
-        
-        RandomNumberGenerator& get_rng();
 
-// #		if defined(STATIC_GENOTYPE_LENGTH)
-// 			Individual(const Genotype& g) {
-// 				memcpy(this->genotype, g, sizeof(Genotype));
-// 			}            
-// #		else
-// 			Individual(const Genotype& g)
-// 				:genotype(g)
-// 				{}
-// #		endif
-                
     private:
-        Population*     population; // host population
-        Genotype        genotype;   // non-neutral genotype: maps to fitness phenotype
-        Individual::Sex sex;
-        
+        const Population*     population; // host population
+        RandomNumberGenerator *rng; 
+        Genotype              genotype;   // non-neutral genotype: maps to fitness phenotype
+        Individual::Sex       sex;        // male or female
+        int                   movement;   // movement "currency" available        
 
 }; // Individual
-
-#if defined(STATIC_GENOTYPE_LENGTH)
-	const unsigned SIZE_OF_INDIVIDUAL = sizeof(Individual);
-#else
-	const unsigned SIZE_OF_INDIVIDUAL = sizeof(Individual) +  genotypeLen*sizeof(float) ; // we have to take into account the size of the vector's internal storage
-#endif
 
 ///////////////////////////////////////////////////////////////////////////////
 //! A single population of a particular species.
@@ -278,13 +235,13 @@ class Population {
         void set_cell(const Cell& cell) {
         	this->cell = &cell;
         }
-        const Cell& get_cell() {
+        const Cell& get_cell() const {
         	return *(this->cell);
         }
         void set_species(const Species& sp) {
         	this->species = &sp;
         }
-        const Species& get_species() {
+        const Species& get_species() const {
         	return *(this->species);
         }        
         World& get_world();
@@ -366,20 +323,27 @@ class Species {
             return this->index;    
         }            
                        
-        // operations
-        virtual void reproduce() const; // reproduce all 
-        virtual Population& breed(std::vector<Individual*>& male_ptrs,
-                                  std::vector<Individual*>& female_ptrs,
-                                  Population& offspring) const;
+        // life history framework
+        void environmental_selection() const;
+        void density_dependent_selection() const;
+        void population_reproduction() const;     
+        void population_migration() const;
+        
+        // species-specific models
+        virtual Population& spawn_offspring(std::vector<Individual*>& male_ptrs,
+                                            std::vector<Individual*>& female_ptrs,
+                                            Population& offspring) const;
 
-    private:
-        std::string     label;
-        int             index;
-        World*          world;
+    protected:        
         static std::vector<Individual*> male_ptrs;
         static std::vector<Individual*> female_ptrs;
         static Population               offspring;          
 
+    private:
+        std::string                     label;
+        int                             index;
+        World*                          world;
+        
 }; // Species
 
 std::vector<Individual*> Species::male_ptrs;
@@ -410,6 +374,10 @@ class Cell {
             return this->populations;
         }
         
+        EnvironmentFactors& get_environment() {
+            return this->environment;
+        }
+        
         void repopulate(const Species& species, const Population& population);
         
         // operations
@@ -426,10 +394,11 @@ class Cell {
         }
     
     private:
-        Landscape*                 landscape;
-        World*                     world;
-        int                        carrying_capacity;
-        std::vector<Population>    populations;    
+        int                         carrying_capacity;  // max # ind
+        std::vector<Population>     populations;        // list of local pops
+        EnvironmentFactors          environment;        // environmental factors
+        Landscape*                  landscape;          // host landscape
+        World*                      world;              // host world
 
 }; // Cell
 
@@ -491,6 +460,10 @@ class World {
             return this->landscape.get_cells();
         }
         
+        int get_num_environment_factors() {
+            return this->num_environment_factors;
+        }
+                        
         // set up
         void generate_landscape(int dim_x, int dim_y);
         void set_cell_carrying_capacity(int carrying_capacity);
@@ -508,6 +481,7 @@ class World {
         Landscape               landscape;
         SpeciesContainer        species;
         RandomNumberGenerator   rng;
+        int                     num_environment_factors;
         
 }; // World
 
@@ -517,31 +491,52 @@ class World {
 
 ///////////////////////////////////////////////////////////////////////////////
 // Individual (IMPLEMENTATION)
+    
+Individual::Individual(const Population& population) {
+    this->set_population(population);
+    this->sex = Individual::random_sex(*this->rng);
+    this->genotype.assign(GENOTYPE_LEN, 0.0);
+    this->movement = 0;
+}
 
-RandomNumberGenerator& Individual::get_rng() {
-    return this->population->get_species().get_world().get_rng();
+Individual::Individual(const Individual& ind)
+    : genotype(ind.genotype) {
+    *this = ind; // genotype initialized twice?
 }
 
 Individual::Individual(const Individual& female, const Individual& male) {
-    this->population = female.population;
-    this->population->get_world();
-    this->sex = Individual::random_sex(this->get_rng());
-
+    this->set_population(*female.population);
+    
+    // sex assignment
+    this->sex = Individual::random_sex(*this->rng);
+    
+    // genotype inheritance
     assert(male.genotype.size() == female.genotype.size());
     this->genotype.reserve(female.genotype.size());
     Genotype::const_iterator male_g = male.genotype.begin();
     Genotype::const_iterator female_g = female.genotype.begin();
     for ( ; female_g != female.genotype.end(); ++male_g, ++female_g) {
-        float val = this->get_rng().choice(*male_g, *female_g);
-        
-        // here is where we mutate genotype
-        // pretty simple for now
-        if (this->get_rng().uniform() < 0.1) {
-            val += (get_rng().uniform() - 0.5); // i.e., -0.5 to +0.5
-        } 
-        
+        float val = this->rng->choice(*male_g, *female_g);        
+        // here is where we mutate genotype: pretty simple for now
+        // and some magic numbers
+        if (this->rng->uniform() < 0.1) {
+            val += (this->rng->uniform() - 0.5); // i.e., -0.5 to +0.5
+        }         
         this->genotype.push_back(val);
     }
+}
+
+const Individual& Individual::operator=(const Individual& ind) {
+    this->population = ind.population;
+    this->genotype = ind.genotype;
+    this->sex = ind.sex;
+    this->movement = ind.movement;
+    return *this;
+}
+
+void Individual::set_population(const Population& pop) {
+    this->population = &pop;
+    this->rng = &this->population->get_species().get_world().get_rng(); 
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -566,10 +561,14 @@ Species::Species(const char* sp_label)
     this->index = -1;
 }
 
-//! Derived classes should override this to implement different reproduction
-//! models. 
-void Species::reproduce() const {          
-    for (CellIterator cell = this->world->get_cells().begin();
+void Species::environmental_selection() const {
+} 
+
+void Species::density_dependent_selection() const {
+} 
+
+void Species::population_reproduction() const {          
+    for (Cells::iterator cell = this->world->get_cells().begin();
             cell != this->world->get_cells().end();
             ++cell) {        
         // assuming these delete without actually resizing capacity
@@ -580,13 +579,16 @@ void Species::reproduce() const {
         this->offspring.clear();
         this->offspring.set_cell(*cell);
         this->offspring.set_species(*this);
-        cell->repopulate(*this, this->breed(female_ptrs, male_ptrs, offspring));
+        cell->repopulate(*this, this->spawn_offspring(female_ptrs, male_ptrs, offspring));
     }
 }    
 
-//! Derived classes should override this to implement different reproduction
-//! models. 
-Population& Species::breed(std::vector<Individual*>& female_ptrs,
+void Species::population_migration() const {
+} 
+
+//! Derived classes should override this to implement different mating
+//! and reproduction models. 
+Population& Species::spawn_offspring(std::vector<Individual*>& female_ptrs,
                            std::vector<Individual*>& male_ptrs,                           
                            Population& offspring) const {
     if (female_ptrs.size() == 0 or male_ptrs.size() == 0) {
@@ -598,6 +600,9 @@ Population& Species::breed(std::vector<Individual*>& female_ptrs,
         // sampling with replacement            
         Individual* male = this->world->get_rng().choice(male_ptrs);
         for (int i=0; i < 2; ++i) {
+            // change to (*female)->add_offspring())
+            // then migrate
+            // then recreate new populations from females in-situ
             offspring.add(Individual(*(*female), *male));
         }            
     }
@@ -639,7 +644,7 @@ void Cell::set_landscape(Landscape& landscape) {
 //! creates slots for populations, corresponding to #'s of species
 void Cell::initialize_biota() {
     this->populations.reserve(this->world->get_species().size());
-    for (SpeciesConstIterator spIt = this->world->get_species().begin();
+    for (SpeciesContainer::const_iterator spIt = this->world->get_species().begin();
             spIt != this->world->get_species().end();
             ++spIt) {
         this->populations.push_back(Population(*spIt, *this));
@@ -681,7 +686,7 @@ void Landscape::generate(World& world, int dim_x, int dim_y) {
 //! sets the carrying capacity for all cells
 void Landscape::set_cell_carrying_capacity(int carrying_capacity) {
     // std::for_each(this->cells.begin(), this->cells.end(), Cell::set_carrying_capacity());
-    for (CellIterator i=this->cells.begin(); i != this->cells.end(); ++i) {
+    for (Cells::iterator i=this->cells.begin(); i != this->cells.end(); ++i) {
         i->set_carrying_capacity(carrying_capacity);
     }
 }
@@ -703,6 +708,14 @@ World::World(unsigned int seed)
 void World::generate_landscape(int dim_x, int dim_y) {
     this->landscape.generate(*this, dim_x, dim_y);
     this->cells = &landscape.get_cells();
+    	
+	// actual implementation will load from file
+	this->num_environment_factors = 8;
+    for (Cells::iterator cell = this->get_cells().begin();
+        cell != this->get_cells().end();
+        ++cell) {
+        cell->get_environment().assign(this->num_environment_factors, 1);
+    }      
 }
 
 //! sets the carrying capacity for each cell
@@ -722,22 +735,44 @@ void World::add_species(const Species& sp) {
 //! must be called after landscape has been generated and species
 //! list populated
 void World::initialize_biota() {
-    for (CellIterator i=this->get_cells().begin(); i != this->get_cells().end(); ++i) {
-        i->initialize_biota();
+    for (Cells::iterator cell=this->get_cells().begin(); 
+            cell != this->get_cells().end(); 
+            ++cell) {
+        cell->initialize_biota();
     }
 }
 
 //! runs a single iteration of a lifecycle 
 void World::cycle() {
+
     // survival
-    // competition
-    // reproduction
-    for (SpeciesIterator sp_iter=this->species.begin(); 
+    for (SpeciesContainer::iterator sp_iter=this->species.begin(); 
             sp_iter != this->species.end(); 
             ++sp_iter) {
-        sp_iter->reproduce();
+        sp_iter->environmental_selection();
+    }          
+    
+    // competition
+    for (SpeciesContainer::iterator sp_iter=this->species.begin(); 
+            sp_iter != this->species.end(); 
+            ++sp_iter) {
+        sp_iter->density_dependent_selection();
+    }       
+    
+    // reproduction
+    for (SpeciesContainer::iterator sp_iter=this->species.begin(); 
+            sp_iter != this->species.end(); 
+            ++sp_iter) {
+        sp_iter->population_reproduction();
     }    
+    
     // migration
+    for (SpeciesContainer::iterator sp_iter=this->species.begin(); 
+            sp_iter != this->species.end(); 
+            ++sp_iter) {
+        sp_iter->population_migration();
+    }          
+        
 }
 
 // for debugging
@@ -745,7 +780,7 @@ void World::dump(std::ostream& out) {
     int count=1;
     long indCount = 0;
     long indCapacityCount = 0;
-    for (CellIterator i=this->get_cells().begin(); 
+    for (Cells::iterator i=this->get_cells().begin(); 
             i != this->get_cells().end(); 
             ++i, ++count) {
         const unsigned ni =  i->num_individuals();
@@ -755,9 +790,6 @@ void World::dump(std::ostream& out) {
     }
     out << "\nTotal individuals = " << indCount << '\n';
     out << "Total individual capacity = " << indCapacityCount << '\n';
-    out << "Size of individual in bytes = " << SIZE_OF_INDIVIDUAL << std::endl;
-    out << "Min. possible memory used for individuals = " << indCount*SIZE_OF_INDIVIDUAL << std::endl;
-    out << "Memory used for individuals = " << indCapacityCount*SIZE_OF_INDIVIDUAL << std::endl;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -780,10 +812,12 @@ int main(int argc, char * argv[]) {
 	world.add_species(Species("snail"));
 	world.initialize_biota();
 	
-	for (CellIterator cell = world.get_cells().begin();
+	
+	
+	for (Cells::iterator cell = world.get_cells().begin();
 	        cell != world.get_cells().end();
 	        ++cell) {
-	    for (SpeciesIterator sp = world.get_species().begin();
+	    for (SpeciesContainer::iterator sp = world.get_species().begin();
 	            sp != world.get_species().end();
 	            ++sp) {
 	            cell->seed_population(*sp, cc);
