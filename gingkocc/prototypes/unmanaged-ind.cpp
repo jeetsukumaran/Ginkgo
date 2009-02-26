@@ -31,6 +31,13 @@
 #include <ctime>
 #include <cassert>
 
+#if defined(NDEBUG)
+    #define DEBUG_BLOCK(y) y;
+#else
+    #define DEBUG_BLOCK(y)
+#endif    
+
+
 /************************* SUPPORT CLASSES AND METHODS ***********************/
  
 ///////////////////////////////////////////////////////////////////////////////
@@ -492,6 +499,12 @@ class World {
         int get_num_environment_factors() {
             return this->num_environment_factors;
         }
+        
+        unsigned long get_current_generation() {
+            return this->current_generation;
+        }
+        
+        void run_cycles(unsigned long num_generations);
                         
         // set up
         void generate_landscape(int dim_x, int dim_y);
@@ -511,6 +524,7 @@ class World {
         SpeciesContainer        species;
         RandomNumberGenerator   rng;
         int                     num_environment_factors;
+        unsigned long           current_generation;                
         
 }; // World
 
@@ -604,6 +618,10 @@ void Species::set_world(World& world) {
 } 
 
 void Species::environmental_selection() const {
+
+//##DEBUG##
+DEBUG_BLOCK( std::cout << "\n*** GENERATION " << this->world->get_current_generation() << " ***\n\n"; )
+
     for (Cells::iterator cell = this->world->get_cells().begin();
             cell != this->world->get_cells().end();
             ++cell) {
@@ -612,6 +630,11 @@ void Species::environmental_selection() const {
         Individuals& individuals = pop.get_individuals();
         Population survivors = Population(*this, *cell);
         survivors.reserve(individuals.size());
+        
+//##DEBUG##
+DEBUG_BLOCK( std::cout << individuals.size() << " "; )
+        
+        
         for (Individuals::iterator i = individuals.begin();
                 i != individuals.end();
                 ++i) {                     
@@ -621,7 +644,11 @@ void Species::environmental_selection() const {
             }         
         }                
         cell->repopulate(*this, survivors);           
-    }            
+    }    
+    
+//##DEBUG##
+DEBUG_BLOCK( std::cout << std::endl; )    
+    
 } 
 
 void Species::density_dependent_selection() const {
@@ -783,11 +810,13 @@ void Landscape::set_cell_carrying_capacity(int carrying_capacity) {
 //! default constructor
 World::World()
     : rng(time(0)) {
+    this->current_generation = 0;
 }
 
 //! constructor: calls
 World::World(unsigned int seed) 
-    : rng(seed) {  
+    : rng(seed) { 
+    this->current_generation = 0;    
 }           
 
 //! generates a new landscape
@@ -826,6 +855,7 @@ void World::initialize_biota() {
             ++cell) {
         cell->initialize_biota();
     }
+    this->current_generation = 1;
 }
 
 //! runs a single iteration of a lifecycle 
@@ -859,6 +889,14 @@ void World::cycle() {
         sp_iter->population_migration();
     }          
         
+}
+
+// run multiple cycles
+void World::run_cycles(unsigned long num_generations) {
+    for ( ; this->current_generation < num_generations; 
+            ++this->current_generation) {
+        this->cycle();
+    }        
 }
 
 // for debugging
@@ -910,9 +948,7 @@ int main(int argc, char * argv[]) {
         }	            
     }	
 	
-	for (int i=1; i <= num_gens; ++i) {
-	    world.cycle();
-	}
+	world.run_cycles(num_gens);
 	
 	world.dump(std::cout);
 	return 0;
