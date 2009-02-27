@@ -175,8 +175,6 @@ typedef std::vector<Cell> Cells;
 typedef std::vector<Species> SpeciesContainer;
 typedef std::vector<Individual> Individuals;
 
-const unsigned GENOTYPE_LEN = 10;
-
 ///////////////////////////////////////////////////////////////////////////////
 //! A single organism of a population of a particular species.
 //! Responsible for tracking (non-neutral) genotype and neutral marker 
@@ -233,6 +231,7 @@ class Individual {
 
     private:
         const Population*     population; // host population
+        const Species*        species;    // species
         RandomNumberGenerator *rng; 
         int                   num_environment_factors;
         Genotype              genotype;   // non-neutral genotype: maps to fitness phenotype
@@ -490,7 +489,6 @@ class World {
             return this->rng;
         }
         
-        
         Landscape& get_landscape() {
             return this->landscape;
         }        
@@ -543,7 +541,7 @@ class World {
 Individual::Individual(const Population& population) {
     this->set_population(population);
     this->sex = Individual::random_sex(*this->rng);
-    this->genotype.assign(GENOTYPE_LEN, 0.0);
+    this->genotype.assign(this->num_environment_factors, 0.0);
     this->movement_reserve = 0;
     this->fitness = -1;
 }
@@ -578,7 +576,7 @@ Individual::Individual(const Individual& female, const Individual& male) {
 }
 
 const Individual& Individual::operator=(const Individual& ind) {
-    this->population = ind.population;
+    this->set_population(*ind.population);
     this->genotype = ind.genotype;
     this->sex = ind.sex;
     this->movement_reserve = ind.movement_reserve;
@@ -588,7 +586,8 @@ const Individual& Individual::operator=(const Individual& ind) {
 
 void Individual::set_population(const Population& pop) {
     this->population = &pop;
-    this->rng = &this->population->get_species().get_world().get_rng(); 
+    this->species = &this->population->get_species();
+    this->rng = &this->species->get_world().get_rng(); 
     this->num_environment_factors = this->population->get_species().get_world().get_num_environment_factors();
 }
 
