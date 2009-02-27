@@ -39,6 +39,7 @@
 
 
 /************************* SUPPORT CLASSES AND METHODS ***********************/
+
  
 ///////////////////////////////////////////////////////////////////////////////
 //! Wraps random number generator seed etc.
@@ -233,10 +234,12 @@ class Individual {
     private:
         const Population*     population; // host population
         RandomNumberGenerator *rng; 
+        int                   num_environment_factors;
         Genotype              genotype;   // non-neutral genotype: maps to fitness phenotype
         Individual::Sex       sex;        // male or female
-        int                   movement;   // movement "currency" available (reset every round)
+        int                   movement_reserve;   // movement "currency" available (reset every round)
         float                 fitness;    // individual's fitness (calc. and cached every round)
+        
 
 }; // Individual
 
@@ -355,13 +358,11 @@ class Species {
                        
         // life history framework
         void environmental_selection() const;
-        void density_dependent_selection() const;
         void population_reproduction() const;     
         void population_migration() const;
         
         // fitness/survival/competition
         virtual float calc_fitness(Individual& individual, EnvironmentFactors& env) const;
-        float calc_prob_survival(float fitness) const;
         
         // species-specific models
         virtual Population& spawn_offspring(std::vector<Individual*>& male_ptrs,
@@ -374,11 +375,12 @@ class Species {
         static Population               offspring;          
 
     private:
-        std::string                     label;          // arbitrary identifier
-        int                             index;          // "slot" in cell's pop vector
-        int                             movement_rate;  // cells per "round"
-        World*                          world;          // pointer to world
-        RandomNumberGenerator*          rng;            // pointer to rng
+        std::string                     label;                  // arbitrary identifier
+        int                             index;                  // "slot" in cell's pop vector
+        int                             movement_rate;          // modifier to the movement surface
+        std::vector<float>              selection_strengths;    // weighted_distance = distance / (sel. strength)
+        World*                          world;                  // pointer to world
+        RandomNumberGenerator*          rng;                    // pointer to rng
         
 }; // Species
 
@@ -415,6 +417,7 @@ class Cell {
         }
         
         void repopulate(const Species& species, const Population& population);
+        void density_dependent_selection();
         
         // operations
         void initialize_biota();
@@ -504,6 +507,8 @@ class World {
             return this->current_generation;
         }
         
+        void density_dependent_selection();
+        
         void run_cycles(unsigned long num_generations);
                         
         // set up
@@ -539,7 +544,7 @@ Individual::Individual(const Population& population) {
     this->set_population(population);
     this->sex = Individual::random_sex(*this->rng);
     this->genotype.assign(GENOTYPE_LEN, 0.0);
-    this->movement = 0;
+    this->movement_reserve = 0;
     this->fitness = -1;
 }
 
@@ -568,7 +573,7 @@ Individual::Individual(const Individual& female, const Individual& male) {
         }         
         this->genotype.push_back(val);
     }
-    this->movement = 0;
+    this->movement_reserve = 0;
     this->fitness = -1;
 }
 
@@ -576,7 +581,7 @@ const Individual& Individual::operator=(const Individual& ind) {
     this->population = ind.population;
     this->genotype = ind.genotype;
     this->sex = ind.sex;
-    this->movement = ind.movement;
+    this->movement_reserve = ind.movement_reserve;
     this->fitness = ind.fitness;
     return *this;
 }
@@ -584,6 +589,7 @@ const Individual& Individual::operator=(const Individual& ind) {
 void Individual::set_population(const Population& pop) {
     this->population = &pop;
     this->rng = &this->population->get_species().get_world().get_rng(); 
+    this->num_environment_factors = this->population->get_species().get_world().get_num_environment_factors();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -619,9 +625,6 @@ void Species::set_world(World& world) {
 
 void Species::environmental_selection() const {
 
-//##DEBUG##
-DEBUG_BLOCK( std::cout << "\n*** GENERATION " << this->world->get_current_generation() << " ***\n\n"; )
-
     for (Cells::iterator cell = this->world->get_cells().begin();
             cell != this->world->get_cells().end();
             ++cell) {
@@ -639,7 +642,7 @@ DEBUG_BLOCK( std::cout << individuals.size() << " "; )
                 i != individuals.end();
                 ++i) {                     
             float fitness = this->calc_fitness(*i, env);   
-            if (this->rng->uniform() <= this->calc_prob_survival(fitness)) {
+            if (this->rng->uniform() <= fitness) {
                 survivors.add(*i);
             }         
         }                
@@ -649,9 +652,6 @@ DEBUG_BLOCK( std::cout << individuals.size() << " "; )
 //##DEBUG##
 DEBUG_BLOCK( std::cout << std::endl; )    
     
-} 
-
-void Species::density_dependent_selection() const {
 } 
 
 void Species::population_reproduction() const {          
@@ -691,12 +691,6 @@ float Species::calc_fitness(Individual& individual, EnvironmentFactors& env) con
     }
     individual.set_fitness(fitness);
     return fitness;
-}
-
-float Species::calc_prob_survival(float fitness) const {
-    float p =  1.0 / (1 + exp(-fitness));
-//     std::cout << "fitness=" << fitness << ", prob=" << p << "\n";
-    return p;
 }
 
 //! Derived classes should override this to implement different mating
@@ -776,6 +770,10 @@ void Cell::seed_population(Species& sp, unsigned int size) {
 void Cell::repopulate(const Species& sp, const Population& population) {
     this->populations.at(sp.get_index()) = population;      
 }
+
+//! cross-species competition within each cell
+void Cell::density_dependent_selection() { 
+} 
 
 ///////////////////////////////////////////////////////////////////////////////
 // Landscape (IMPLEMENTATION)
@@ -861,6 +859,9 @@ void World::initialize_biota() {
 //! runs a single iteration of a lifecycle 
 void World::cycle() {
 
+//##DEBUG##
+DEBUG_BLOCK( std::cout << "\n*** GENERATION " << this->get_current_generation() << " ***\n\n"; )
+
     // survival
     for (SpeciesContainer::iterator sp_iter=this->species.begin(); 
             sp_iter != this->species.end(); 
@@ -869,12 +870,12 @@ void World::cycle() {
     }          
     
     // competition
-    for (SpeciesContainer::iterator sp_iter=this->species.begin(); 
-            sp_iter != this->species.end(); 
-            ++sp_iter) {
-        sp_iter->density_dependent_selection();
-    }       
-    
+//     for (SpeciesContainer::iterator sp_iter=this->species.begin(); 
+//             sp_iter != this->species.end(); 
+//             ++sp_iter) {
+//         sp_iter->density_dependent_selection();
+//     }       
+//     
     // reproduction
     for (SpeciesContainer::iterator sp_iter=this->species.begin(); 
             sp_iter != this->species.end(); 
@@ -887,8 +888,11 @@ void World::cycle() {
             sp_iter != this->species.end(); 
             ++sp_iter) {
         sp_iter->population_migration();
-    }          
-        
+    }                  
+}
+
+void World::density_dependent_selection() {
+
 }
 
 // run multiple cycles
@@ -898,6 +902,7 @@ void World::run_cycles(unsigned long num_generations) {
         this->cycle();
     }        
 }
+
 
 // for debugging
 void World::dump(std::ostream& out) {
