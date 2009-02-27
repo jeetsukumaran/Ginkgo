@@ -202,8 +202,8 @@ class Individual {
             return this->genotype;
         }
         
-        void set_fitness(float fitness) {
-            this->fitness = fitness;
+        float set_fitness(float fitness) {
+            return (this->fitness = fitness);
         }
         
         void clear_fitness() {
@@ -352,6 +352,11 @@ class Species {
         void population_migration() const;
         
         // fitness/survival/competition
+        
+        std::vector<float>& get_selection_strengths() {
+            return this->selection_strengths;
+        }
+        
         float calc_fitness(Individual& individual, EnvironmentFactors& env) const;
         
         
@@ -645,7 +650,7 @@ Species::Species() {
     this->index = -1;
     this->world = NULL;
     this->rng = NULL;
-    this->num_environmental_factors = 0;;    
+    this->num_environmental_factors = 0;
 }
 
 //! apart from setting label, ensures index is unassigned
@@ -654,7 +659,7 @@ Species::Species(const char* sp_label)
     this->index = -1;
     this->world = NULL;
     this->rng = NULL;
-    this->num_environmental_factors = 0;;      
+    this->num_environmental_factors = 0;
 }
 
 Species::Species(const Species& species) {
@@ -688,7 +693,8 @@ void Species::set_world(World& world) {
     this->world = &world;
     this->rng = &world.get_rng();
     this->num_environmental_factors = world.get_num_environmental_factors();
-    this->default_genotype.assign(this->num_environmental_factors, 0.0);
+    this->default_genotype.resize(this->num_environmental_factors, 0.0);
+    this->selection_strengths.resize(this->num_environmental_factors, 1.0);        
 } 
 
 void Species::environmental_selection() const {
@@ -742,11 +748,18 @@ void Species::population_migration() const {
 } 
 
 float Species::calc_fitness(Individual& individual, EnvironmentFactors& env) const {
-//     gen = individual.get_genotype();
-//     assert(gen.size() == env.size());
-//     float 
-    float fitness = 0;
-    return fitness;
+    Genotype& gen = individual.get_genotype();
+    assert(this->selection_strengths == gen.size() == env.size());
+    Genotype::const_iterator g = gen.begin();
+    EnvironmentFactors::const_iterator e = env.begin();
+    std::vector<float>::const_iterator s = this->selection_strengths.begin();    
+    float weighted_distance = 0;    
+    for (;
+            g != gen.end();
+            ++g) {
+        weighted_distance += pow((*e - *s), 2) * *s; // each distance weighted by selection strength
+    }
+    return individual.set_fitness(exp(-weighted_distance));
 }
 
 //! Derived classes should override this to implement different mating
