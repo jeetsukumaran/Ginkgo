@@ -929,7 +929,7 @@ void World::generate_landscape(int dim_x, int dim_y) {
     for (Cells::iterator cell = this->get_cells().begin();
         cell != this->get_cells().end();
         ++cell) {
-        cell->get_environment().assign(this->num_environmental_factors, 1);
+        cell->get_environment().assign(this->num_environmental_factors, 0.5);
     }      
 }
 
