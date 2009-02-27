@@ -174,6 +174,7 @@ typedef std::vector<EnvironmentFactor> EnvironmentFactors;
 typedef std::vector<Cell> Cells;
 typedef std::vector<Species> SpeciesContainer;
 typedef std::vector<Individual> Individuals;
+typedef std::vector<Population> Populations;
 typedef std::vector<int> Genotype;
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -283,11 +284,18 @@ class Population {
             ind_copy.set_population(*this);
             this->individuals.assign(n, ind);                        
         }
+
         void add(const Individual& ind) {
             this->individuals.push_back(ind);
         }
         void reserve(unsigned int n) {
             this->individuals.reserve(n);
+        }
+        Individuals::iterator begin() {
+            return this->begin();
+        }
+        Individuals::iterator end() {
+            return this->end();
         }        
         void clear() {
             this->individuals.clear();
@@ -358,8 +366,7 @@ class Species {
         }
         
         float calc_fitness(Individual& individual, EnvironmentFactors& env) const;
-        
-        
+                
         // genetics and inheritance
         Genotype get_default_genotype() const {
             return this->default_genotype;
@@ -451,7 +458,7 @@ class Cell {
             this->carrying_capacity = cc;
         }
         void set_landscape(Landscape& landscape);
-        std::vector<Population>& get_populations() {
+        Populations& get_populations() {
             return this->populations;
         }
         
@@ -477,7 +484,7 @@ class Cell {
     
     private:
         int                         carrying_capacity;  // max # ind
-        std::vector<Population>     populations;        // list of local pops
+        Populations                 populations;        // list of local pops
         EnvironmentFactors          environment;        // environmental factors
         Landscape*                  landscape;          // host landscape
         World*                      world;              // host world
@@ -874,7 +881,16 @@ void Cell::repopulate(const Species& sp, const Population& population) {
 }
 
 //! cross-species competition within each cell
-void Cell::density_dependent_selection() { 
+void Cell::density_dependent_selection() {
+    static std::vector<Individuals> pooled_individuals;
+    pooled_individuals.clear();
+    for (Populations::iterator pop = this->populations.begin();
+            pop != this->populations.end();
+            ++pop) {
+        pooled_individuals.reserve(pooled_individuals.size() + pop->size());
+        std::copy(pop->begin(), pop->end(), 
+            std::back_insert_iterator<Individual>(pooled_individuals));        
+    }            
 } 
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -994,7 +1010,11 @@ DEBUG_BLOCK( std::cout << "\n*** GENERATION " << this->get_current_generation() 
 }
 
 void World::density_dependent_selection() {
-
+    for (Cells::iterator cell=this->get_cells().begin(); 
+            cell != this->get_cells().end(); 
+            ++cell) {
+        cell->density_dependent_selection();
+    }    
 }
 
 // run multiple cycles
@@ -1004,7 +1024,6 @@ void World::run_cycles(unsigned long num_generations) {
         this->cycle();
     }        
 }
-
 
 // for debugging
 void World::dump(std::ostream& out) {
@@ -1037,13 +1056,27 @@ int main(int argc, char * argv[]) {
     int num_gens = atoi(argv[4]);
 
     // build world
-    World world;   	
+    World world;  
+    
+//##DEBUG##
+DEBUG_BLOCK( std::cout << "(generating landscape)\n"; )
+    
 	world.generate_landscape(dim_x, dim_y);
+	
+//##DEBUG##
+DEBUG_BLOCK( std::cout << "(setting carrying capacity)\n"; )
+
 	world.set_cell_carrying_capacity(cc);
+
+//##DEBUG##
+DEBUG_BLOCK( std::cout << "(adding species)\n"; )	
+	
 	world.add_species(Species("snail"));
-	world.initialize_biota();
 	
-	
+//##DEBUG##
+DEBUG_BLOCK( std::cout << "(initializing biota)\n"; )
+
+	world.initialize_biota();		
 	
 	for (Cells::iterator cell = world.get_cells().begin();
 	        cell != world.get_cells().end();
