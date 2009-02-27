@@ -747,6 +747,37 @@ void Species::population_reproduction() const {
 void Species::population_migration() const {
 } 
 
+/**
+ * Fitness is given by the multivariate Gaussian distance between an 
+ * organisms ``genotype'' (actually, an inherited phenotype) and the environment.
+ * 
+ * \f[ Let $\textbf{E}=(e_1, e_2, \dots, e_n)$ be a vector of $n$ real values 
+ * representing distinct environmental factors of a particular cell.
+ * 
+ * Let $\textbf{I}=(i_1, i_2, \dots, i_n)$ be a vector of $n$ real values 
+ * representing a phenotype of an individual, $I$.
+ * 
+ * Let $\textbf{S}=(s_1, s_2, \dots, s_n)$ be a vector of $n$ real values 
+ * representing a selection strengths of environmental factors on this particular 
+ * species, with $s_j$ representing the selection strength of environmental factor
+ * $e_j$.
+ * 
+ * Then the multivariate Euclidean distance between an individual's phenotype 
+ * values and the corresponding environment values, weighted by the 
+ * species-specific selection strength, is given by:
+ * 
+ * \begin{align}
+ * D =   \sum_{j=1}^{n}{ s_j (e_j - i_j)^2 }.
+ * \end{align}
+ * 
+ * The fitness of the phenotype of individual $I$ in a cell with environment $E$ is then defined to be,
+ * 
+ * \begin{align}
+ *     F(\textbf{I}, \textbf{E}) &= e ^{-D} \notag \\
+ *     				     &= e ^ {-\sum_{j=1}^{n}{ s_j (e_j - i_j)^2 }}.
+ * \end{align} \f]
+ *
+ */
 float Species::calc_fitness(Individual& individual, EnvironmentFactors& env) const {
     Genotype& gen = individual.get_genotype();
     assert(this->selection_strengths == gen.size() == env.size());
@@ -757,7 +788,7 @@ float Species::calc_fitness(Individual& individual, EnvironmentFactors& env) con
     for (;
             g != gen.end();
             ++g) {
-        weighted_distance += pow((*e - *s), 2) * *s; // each distance weighted by selection strength
+        weighted_distance += pow((*e - *g), 2) * *s; // each distance weighted by selection strength
     }
     return individual.set_fitness(exp(-weighted_distance));
 }
