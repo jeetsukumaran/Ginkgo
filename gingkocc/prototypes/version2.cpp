@@ -230,18 +230,13 @@ class Organism {
             return this->_genotype;
         }
         
-        // fitness
-        float set_fitness(float fitness) {
-            return (this->_fitness = fitness);
-        }
-        
-        void clear_fitness() {
-            this->_fitness = -1;
-        }                
-        
-        float get_fitness() const {
+        // fitness & survival
+        float &fitness() {
             return this->_fitness;
         }
+        bool &killed() {
+            return this->_killed;
+        }        
         
         // meta-info
         int get_species_index() const {
@@ -260,35 +255,116 @@ class Organism {
         int              _species_index;    // species
         GenotypeFactors  _genotype;         // non-neutral genotype: maps to fitness phenotype
         Organism::Sex    _sex;              // male or female
-        float            _fitness;          // organism's fitness (calc. and cached every round)   
-
+        float            _fitness;          // cache this organism's fitness
+        bool             _killed;           // flag an organism as dead: allowing for use of std::remove_if() and std::resize() or v.erase()
+        
 }; // Organism
 
 ///////////////////////////////////////////////////////////////////////////////
-//! A collection of all interacting organisms in a single cell on the landscape. 
-//! This will include multiple species, and thus defines the ecological 
-//! community of the cell (i.e., the level which competition occurs). When the 
-//! individuals are partitioned into collections of distinct species, each 
-//! collection defines the breeding community of this cell.
-class Community {
+//! A collection of processes and properties that determine the ecologies of
+//! organisms.
+class Species {
 
     public:
     
         // -- lifecycle and assignment --
-        Community(const Cell& cell);
-        Community(const Community& community);
-        ~Community() {};
-        const Community& operator=(const Community& community);
-        
-        // -- core accessors/mutators --        
-        void set_cell(const Cell& cell);
+        Species();
+        Species(const char* label);
+        Species(const Species& species);
+        virtual ~Species() {}        
+        const Species& operator=(const Species& species);
 
     private:
-        const SpeciesCollection*    _species_pool;  // all the species in the landscape
-        const Cell*                 _cell;          // the host cell of this biota
-        Organisms                   _organisms;     // the individual organisms of this biota
+        std::string                 _label;                     // arbitrary identifier
+        int                         _index;                     // "slot" in cell's pop vector
+        int                         _movement_rate;             // modifier to the global movement surface to derive the species-specific movement surface
+        std::vector<float>          _selection_strengths;       // weighted_distance = distance / (sel. strength)
+        std::vector<unsigned>       _movement_surface;          // the movement surface: the "cost" to enter into every cell on the landscape
+        float                       _mutation_rate;             // rate of mutations
+        float                       _max_mutation_size;         // window "size" of mutations
+        int                         _mean_reproductive_rate;    // "base" reproductive rate
+        int                         _reproductive_rate_mutation_size;  // if reprod. rate evolves, size of step
+        GenotypeFactors             _default_genotype;          // genotype of individuals generated de novo
+        World*                      _world;                     // pointer to world
+        RandomNumberGenerator*      _rng;                       // pointer to rng
+        int                         _num_environmental_factors; // so genotypes of appropriate length can be composed        
 
-}; // Community
+}; // Species
+
+/* LANDSCAPE AND SPATIAL RELATIONS *******************************************/
+
+///////////////////////////////////////////////////////////////////////////////
+//! The fundamental atomic spatial unit of the world.
+class Cell {
+    public:
+    
+        // lifecycle and assignment
+        Cell(Landscape& landscape, int index, int x, int y);
+        Cell(const Cell& cell);
+        const Cell& operator=(const Cell& cell);
+
+    private:
+        int                         _carrying_capacity;     // max # ind
+        int                         _index;                 // cell index
+        int                         _x;                     // x-coordinate
+        int                         _y;                     // y-coordinate
+        EnvironmentalFactors        _environment;           // environmental factors
+        Organisms                   _organisms;             // the individual organisms of this biota
+        
+        const SpeciesCollection*    _species_pool;          // all the species in the landscape        
+        Landscape*                  _landscape;             // host landscape
+        World*                      _world;                 // host world
+
+}; // Cell
+
+///////////////////////////////////////////////////////////////////////////////	
+//! The landscape.
+class Landscape {
+
+    public:
+    
+        // --- lifecycle and assignment ---
+        
+        Landscape();
+        Landscape(World& world, int dim_x, int dim_y);
+        Landscape(const Landscape& landscape);
+        const Landscape& operator=(const Landscape& landscape);
+        
+        // --- accessor and mutators ---
+        
+        Cells& cells() {
+            return this->_cells;
+        }
+                
+                                
+        // --- landscape access, control and mutation                                
+        void generate(World& world, int dim_x, int dim_y);        
+        void set_cell_carrying_capacity(int carrying_capacity);        
+        
+    private:
+        int             _size_x;    // size of the landscape in the x dimension
+        int             _size_y;    // size of the landscape in the y dimension        
+        Cells           _cells;     // cells of the landscape
+        World*          _world;     // pointer to the host world
+
+};
+
+///////////////////////////////////////////////////////////////////////////////	
+//! The world.
+class World {
+
+    public:
+
+        
+    private:
+        Cells*                  _cells;
+        Landscape               _landscape;
+        SpeciesCollection       _species_pool;
+        RandomNumberGenerator   _rng;
+        int                     _num_environmental_factors;
+        unsigned long           _current_generation;                
+        
+}; // World
 
 /******************************************************************************
  * DEFINITIONS
@@ -296,35 +372,7 @@ class Community {
 
 /* POPULATION ECOLOGY AND GENETICS *******************************************/
 
-/* Community */
 
-// -- lifecycle and assignment --
-
-Community::Community(const Cell& c) {
-    this->set_cell(c);
-}
-
-Community::Community(const Community& community) {
-    *this = community;
-}
-
-const Community& Community::operator=(const Community& community) {
-    if (community._cell != NULL) {
-        this->set_cell(*community._cell);
-    } else {
-        this->_cell = NULL;
-        this->_species_pool = NULL;    
-    }
-    this->_organisms = community._organisms;
-    return *this;
-}
-
-// -- core accessors/mutators --
-
-void Community::set_cell(const Cell& c) {
-    this->_cell = NULL;
-    this->_species_pool = NULL;
-}
 
 /******************************************************************************
  * MAIN
