@@ -274,9 +274,56 @@ class Species {
         const Species& operator=(const Species& species);
         
         // --- setup and initialization ---
-        void initialize(const char* label);
-        void set_world(World& world);
-
+        void initialize(const char* label);        
+        void set_world(World* world);
+        
+        // --- access and mutation ---
+        int get_index() const {
+            return this->_index;
+        }
+        void set_index(int i) {
+            this->_index = i;
+        }
+        int get_movement_rate() const {
+            return this->_movement_rate;
+        }
+        void set_movement_rate(int i) {
+            this->_movement_rate = i;
+        }        
+        std::vector<float>& selection_strengths() {
+            return this->_selection_strengths;
+        }
+        std::vector<unsigned>& movement_surface() {
+            return this->_movement_surface;
+        }
+        float get_mutation_rate() const {
+            return this->_movement_rate;
+        }
+        void set_mutation_rate(float i) {
+            this->_movement_rate = i;
+        }
+        GenotypeFactor get_max_mutation_size() const {
+            return this->_max_mutation_size;
+        }
+        void set_max_mutation_size(GenotypeFactor i) {
+            this->_max_mutation_size = i;
+        }
+        int get_mean_reproductive_rate() const {
+            return this->_mean_reproductive_rate;
+        }
+        void set_mean_reproductive_rate(int i) {
+            this->_mean_reproductive_rate = i;
+        }
+        int get_reproductive_rate_mutation_size() const {
+            return this->_reproductive_rate_mutation_size;
+        }
+        void set_reproductive_rate_mutation_size(int i) {
+            this->_reproductive_rate_mutation_size = i;
+        }
+        GenotypeFactors& default_genotype() {
+            return this->_default_genotype;
+        }        
+                                
     private:
         std::string                 _label;                     // arbitrary identifier
         int                         _index;                     // "slot" in cell's pop vector
@@ -284,7 +331,7 @@ class Species {
         std::vector<float>          _selection_strengths;       // weighted_distance = distance / (sel. strength)
         std::vector<unsigned>       _movement_surface;          // the movement surface: the "cost" to enter into every cell on the landscape
         float                       _mutation_rate;             // rate of mutations
-        float                       _max_mutation_size;         // window "size" of mutations
+        GenotypeFactor              _max_mutation_size;         // window "size" of mutations
         int                         _mean_reproductive_rate;    // "base" reproductive rate
         int                         _reproductive_rate_mutation_size;  // if reprod. rate evolves, size of step
         GenotypeFactors             _default_genotype;          // genotype of individuals generated de novo
@@ -304,13 +351,13 @@ class Cell {
     public:
     
         // --- lifecycle and assignment ---
-        Cell(Landscape& landscape, long index, long x, long y);
+        Cell(Landscape* landscape, long index, long x, long y);
         Cell(const Cell& cell);
         ~Cell();
         const Cell& operator=(const Cell& cell);
         
         // --- accessors and mutators
-        void set_landscape_ref(Landscape& landscape);
+        void set_landscape(Landscape* landscape);
 
     private:
         long                         _carrying_capacity;    // max # ind
@@ -334,11 +381,11 @@ class Landscape {
     
         // --- lifecycle and assignment ---        
         Landscape();
-        Landscape(World& world, long dim_x, long dim_y);
+        Landscape(World* world, long dim_x, long dim_y);
         ~Landscape();
         
         // --- initialization and set up ---
-        void generate(World& world, long size_x, long size_y); 
+        void generate(World* world, long size_x, long size_y); 
         
         // --- accessor and mutators ---        
         Cells& cells() {
@@ -418,7 +465,7 @@ Species::Species(const Species& species) {
 }
 
 const Species& Species::operator=(const Species& species) {
-    this->set_world(*species._world);
+    this->set_world(species._world);
     this->_label = species._label;
     this->_index = species._index;
     this->_movement_rate = species._movement_rate;
@@ -442,17 +489,17 @@ void Species::initialize(const char* label) {
     this->_reproductive_rate_mutation_size = 1;
 }
 
-void Species::set_world(World& world) {
-    if (&world == NULL) {
+void Species::set_world(World* world) {
+    if (world != NULL) {
+        this->_world = world;
+        this->_landscape = &world->landscape();
+        this->_rng = &world->rng();
+        this->_num_environmental_factors = world->get_num_environmental_factors();                
+    } else {
         this->_world = NULL;
         this->_landscape = NULL;
         this->_rng = NULL;
         this->_num_environmental_factors = NULL;
-    } else {
-        this->_world = &world;
-        this->_landscape = &world.landscape();
-        this->_rng = &world.rng();
-        this->_num_environmental_factors = world.get_num_environmental_factors();                
     }
 }
 
@@ -461,11 +508,11 @@ void Species::set_world(World& world) {
 
 // --- lifecycle and assignment ---
 
-Cell::Cell(Landscape& landscape, long index, long x, long y)
+Cell::Cell(Landscape* landscape, long index, long x, long y)
     : _index(index),
       _x(x),
       _y(y) {
-    this->set_landscape_ref(landscape);      
+    this->set_landscape(landscape);      
 }
 
 Cell::Cell(const Cell& cell) {
@@ -476,7 +523,7 @@ Cell::~Cell() {
 }
 
 const Cell& Cell::operator=(const Cell& cell) {
-    this->set_landscape_ref(*cell._landscape);
+    this->set_landscape(cell._landscape);
     this->_index = cell._index;
     this->_x = cell._x;
     this->_y = cell._y;
@@ -485,10 +532,10 @@ const Cell& Cell::operator=(const Cell& cell) {
 
 // --- accessors and mutators ---
 
-void Cell::set_landscape_ref(Landscape& landscape) {
-    if (&landscape != NULL) {
-        this->_landscape = &landscape;
-        this->_species_pool = &landscape.species_pool();
+void Cell::set_landscape(Landscape* landscape) {
+    if (landscape != NULL) {
+        this->_landscape = landscape;
+        this->_species_pool = &landscape->species_pool();
     } else {
         this->_landscape = NULL;
         this->_species_pool = NULL;
@@ -504,7 +551,7 @@ Landscape::Landscape() {
 
 }
 
-Landscape::Landscape(World& world, long size_x, long size_y) {
+Landscape::Landscape(World* world, long size_x, long size_y) {
     this->generate(world, size_x, size_y);
 }
 
@@ -520,14 +567,14 @@ SpeciesCollection& Landscape::species_pool() {
 
 // --- initialization and set up ---
 
-void Landscape::generate(World& world, long size_x, long size_y) {
-    this->_world = &world;
+void Landscape::generate(World* world, long size_x, long size_y) {
+    this->_world = world;
     this->_size_x = size_x;
     this->_size_y = size_y;
     long num_cells = size_x * size_y;
     for (long x = 0, index = 0; x < size_x; ++x) {
         for (long y = 0; y < size_y; ++y, ++index) {
-            this->_cells.push_back(Cell(*this, index, x, y));
+            this->_cells.push_back(Cell(this, index, x, y));
         }
     }
 }
