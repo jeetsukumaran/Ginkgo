@@ -165,12 +165,12 @@ unsigned int RandomNumberGenerator::poisson(int rate) {
 
 class Organism;
 class Species;
-class Biota;
+class Community;
 typedef int GenotypeFactor;
 typedef std::vector<int> GenotypeFactors;
 typedef std::vector<Organism> Organisms;
 typedef std::vector<Species> SpeciesCollection;
-typedef std::vector<Biota> Biotas;
+typedef std::vector<Community> Communities;
 
 class Landscape;
 class Cell;
@@ -189,7 +189,8 @@ typedef std::vector<Cell> Cells;
 ///////////////////////////////////////////////////////////////////////////////
 //! A single organism of a population of a particular species.
 //! Responsible for tracking (non-neutral) genotype and neutral marker 
-//! histories. 
+//! histories. Very lightweight, with most functionality delegated to other
+//! classes.
 class Organism {
     public:
     
@@ -200,11 +201,29 @@ class Organism {
         };
 
         // lifecycle and assignment
-        Organism(int species_index,                         // from components
-                 const GenotypeFactors& new_genotype, 
-                 Organism::Sex new_sex);
-        Organism(const Organism& ind);                      // clone/copy
-        const Organism& operator=(const Organism& ind);     // assignment
+        
+        Organism(int species_index,
+                           const GenotypeFactors& new_genotype,
+                           Organism::Sex new_sex) 
+            : _species_index(species_index),
+              _genotype(new_genotype),
+              _sex(new_sex),
+              _fitness() {
+        }
+        
+        //! Copy constructor.
+        Organism(const Organism& ind) {
+            *this = ind;
+        }
+        
+        //! Assignment.
+        const Organism& operator=(const Organism& ind) {
+            this->_species_index = ind._species_index;
+            this->_genotype = ind._genotype;
+            this->_sex = ind._sex;
+            this->_fitness = ind._fitness;
+            return *this;
+        }
                    
         // genotype       
         GenotypeFactors& genotype() {
@@ -228,6 +247,7 @@ class Organism {
         int get_species_index() const {
             return this->_species_index;
         }
+        
         bool is_male() const {
             return this->_sex == Organism::Male;
         }
@@ -245,48 +265,65 @@ class Organism {
 }; // Organism
 
 ///////////////////////////////////////////////////////////////////////////////
-//! A collection of all organisms in a single cell on the landscape. This will
-//! include multiple species, and thus defines the ecological community of the
-//! cell (i.e., the level which competition occurs). When the individuals are 
-//! partitioned into collections of distinct species, each collection defines 
-//! the breeding community of this cell.
-class Biota {
+//! A collection of all interacting organisms in a single cell on the landscape. 
+//! This will include multiple species, and thus defines the ecological 
+//! community of the cell (i.e., the level which competition occurs). When the 
+//! individuals are partitioned into collections of distinct species, each 
+//! collection defines the breeding community of this cell.
+class Community {
+
+    public:
+    
+        // -- lifecycle and assignment --
+        Community(const Cell& cell);
+        Community(const Community& community);
+        ~Community() {};
+        const Community& operator=(const Community& community);
+        
+        // -- core accessors/mutators --        
+        void set_cell(const Cell& cell);
 
     private:
-        const Cell*     _cell;          // the host cell of this biota
-        Organisms       _organisms;     // the individual organisms of this biota
+        const SpeciesCollection*    _species_pool;  // all the species in the landscape
+        const Cell*                 _cell;          // the host cell of this biota
+        Organisms                   _organisms;     // the individual organisms of this biota
 
-}; // Biota
+}; // Community
 
 /******************************************************************************
- * DECLARATIONS
+ * DEFINITIONS
  *****************************************************************************/
 
 /* POPULATION ECOLOGY AND GENETICS *******************************************/
 
-//! Instantiates an organism of the specified species, assigning the the
-//! given genotype and sex.
-Organism::Organism(int species_index,
-                   const GenotypeFactors& new_genotype,
-                   Organism::Sex new_sex) 
-    : _species_index(species_index),
-      _genotype(new_genotype),
-      _sex(new_sex),
-      _fitness() {
+/* Community */
+
+// -- lifecycle and assignment --
+
+Community::Community(const Cell& c) {
+    this->set_cell(c);
 }
 
-//! Copy constructor.
-Organism::Organism(const Organism& ind) {
-    *this = ind;
+Community::Community(const Community& community) {
+    *this = community;
 }
 
-//! Assignment.
-const Organism& Organism::operator=(const Organism& ind) {
-    this->_species_index = ind._species_index;
-    this->_genotype = ind._genotype;
-    this->_sex = ind._sex;
-    this->_fitness = ind._fitness;
+const Community& Community::operator=(const Community& community) {
+    if (community._cell != NULL) {
+        this->set_cell(*community._cell);
+    } else {
+        this->_cell = NULL;
+        this->_species_pool = NULL;    
+    }
+    this->_organisms = community._organisms;
     return *this;
+}
+
+// -- core accessors/mutators --
+
+void Community::set_cell(const Cell& c) {
+    this->_cell = NULL;
+    this->_species_pool = NULL;
 }
 
 /******************************************************************************
