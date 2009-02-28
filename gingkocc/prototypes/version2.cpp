@@ -457,7 +457,7 @@ class World {
 // --- lifecycle and assignment ---
 
 Species::Species(const char* label) {
-    this->initialize(label);
+    this->initialize(label);    
 }
 
 Species::Species(const Species& species) {
@@ -639,6 +639,7 @@ int main(int argc, char* argv[]) {
     int cc = atoi(argv[3]);
     int num_cells_init = atoi(argv[4]);
     int num_gens = atoi(argv[5]);
+    int num_env_factors = 4;
     
     World   world;
 
@@ -655,7 +656,10 @@ DEBUG_BLOCK( std::cout << "(setting carrying capacity)\n"; )
 //##DEBUG##
 DEBUG_BLOCK( std::cout << "(adding species)\n"; )	
 	
-	world.add_species(Species("snail"));
+	Species sp("gecko");
+	sp.selection_strengths().assign(num_env_factors, 1);
+	sp.default_genotype().assign(num_env_factors, world.rng().randint(-2, 2));
+	world.add_species(sp);
 	
 //##DEBUG##
 DEBUG_BLOCK( std::cout << "(seeding populations)\n"; )
