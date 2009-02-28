@@ -48,8 +48,8 @@ class RandomNumberGenerator {
 
     public:
         RandomNumberGenerator();
-        RandomNumberGenerator(unsigned int seed);
-        void set_seed(unsigned int seed);
+        RandomNumberGenerator(unsigned long seed);
+        void set_seed(unsigned long seed);
 
         float random();   // [0, 1)
         float randint(int a, int b);
@@ -72,7 +72,7 @@ class RandomNumberGenerator {
         }        
         
     private:
-        unsigned int _seed;
+        unsigned long _seed;
 
 };
 
@@ -82,12 +82,12 @@ RandomNumberGenerator::RandomNumberGenerator() {
 }
 
 //! seeds using given seed
-RandomNumberGenerator::RandomNumberGenerator(unsigned int seed) {
+RandomNumberGenerator::RandomNumberGenerator(unsigned long seed) {
     this->set_seed(seed);
 }
 
 //! seeds using given seed
-void RandomNumberGenerator::set_seed(unsigned int seed) {
+void RandomNumberGenerator::set_seed(unsigned long seed) {
     this->_seed = seed;
     srand(this->_seed);
 }
@@ -160,14 +160,14 @@ unsigned int RandomNumberGenerator::poisson(int rate) {
 }
 
 /******************************************************************************
- * FOREWARD DECLARATIONS AND GLOBAL TYPEDEFS
+ * FORWARD DECLARATIONS AND GLOBAL TYPEDEFS
  *****************************************************************************/
 
 class Organism;
 class Species;
 class Community;
 typedef int GenotypeFactor;
-typedef std::vector<int> GenotypeFactors;
+typedef std::vector<GenotypeFactor> GenotypeFactors;
 typedef std::vector<Organism> Organisms;
 typedef std::vector<Species> SpeciesCollection;
 typedef std::vector<Community> Communities;
@@ -175,7 +175,7 @@ typedef std::vector<Community> Communities;
 class Landscape;
 class Cell;
 class World;
-typedef int EnvironmentalFactor;
+typedef long EnvironmentalFactor;
 typedef std::vector<EnvironmentalFactor> EnvironmentalFactors;
 typedef std::vector<Cell> Cells;
 
@@ -267,12 +267,15 @@ class Species {
 
     public:
     
-        // -- lifecycle and assignment --
-        Species();
-        Species(const char* label);
+        // --- lifecycle and assignment ---        
+        Species(const char* label = "Sp");
         Species(const Species& species);
         virtual ~Species() {}        
         const Species& operator=(const Species& species);
+        
+        // --- setup and initialization ---
+        void initialize(const char* label);
+        void set_world(World& world);
 
     private:
         std::string                 _label;                     // arbitrary identifier
@@ -285,7 +288,9 @@ class Species {
         int                         _mean_reproductive_rate;    // "base" reproductive rate
         int                         _reproductive_rate_mutation_size;  // if reprod. rate evolves, size of step
         GenotypeFactors             _default_genotype;          // genotype of individuals generated de novo
+        
         World*                      _world;                     // pointer to world
+        Landscape*                  _landscape;                 // pointer to landscape
         RandomNumberGenerator*      _rng;                       // pointer to rng
         int                         _num_environmental_factors; // so genotypes of appropriate length can be composed        
 
@@ -298,16 +303,20 @@ class Species {
 class Cell {
     public:
     
-        // lifecycle and assignment
-        Cell(Landscape& landscape, int index, int x, int y);
+        // --- lifecycle and assignment ---
+        Cell(Landscape& landscape, long index, long x, long y);
         Cell(const Cell& cell);
+        ~Cell();
         const Cell& operator=(const Cell& cell);
+        
+        // --- accessors and mutators
+        void set_landscape_ref(Landscape& landscape);
 
     private:
-        int                         _carrying_capacity;     // max # ind
-        int                         _index;                 // cell index
-        int                         _x;                     // x-coordinate
-        int                         _y;                     // y-coordinate
+        long                         _carrying_capacity;    // max # ind
+        long                         _index;                // cell index
+        long                         _x;                    // x-coordinate
+        long                         _y;                    // y-coordinate
         EnvironmentalFactors        _environment;           // environmental factors
         Organisms                   _organisms;             // the individual organisms of this biota
         
@@ -323,30 +332,29 @@ class Landscape {
 
     public:
     
-        // --- lifecycle and assignment ---
-        
+        // --- lifecycle and assignment ---        
         Landscape();
-        Landscape(World& world, int dim_x, int dim_y);
-        Landscape(const Landscape& landscape);
-        const Landscape& operator=(const Landscape& landscape);
+        Landscape(World& world, long dim_x, long dim_y);
+        ~Landscape();
         
-        // --- accessor and mutators ---
+        // --- initialization and set up ---
+        void generate(World& world, long size_x, long size_y); 
         
+        // --- accessor and mutators ---        
         Cells& cells() {
             return this->_cells;
         }
-                
+        
+        SpeciesCollection& species_pool();
                                 
-        // --- landscape access, control and mutation                                
-        void generate(World& world, int dim_x, int dim_y);        
-        void set_cell_carrying_capacity(int carrying_capacity);        
+        // --- landscape access, control and mutation                                       
+        void set_cell_carrying_capacity(long carrying_capacity);        
         
     private:
-        int             _size_x;    // size of the landscape in the x dimension
-        int             _size_y;    // size of the landscape in the y dimension        
+        long            _size_x;   // size of the landscape in the x dimension
+        long            _size_y;   // size of the landscape in the y dimension        
         Cells           _cells;     // cells of the landscape
         World*          _world;     // pointer to the host world
-
 };
 
 ///////////////////////////////////////////////////////////////////////////////	
@@ -354,10 +362,36 @@ class Landscape {
 class World {
 
     public:
-
+    
+        // --- lifecycle --
+        World();
+        World(unsigned long seed);
+        
+        // --- access and mutation ---
+        RandomNumberGenerator& rng() {
+            return this->_rng;
+        }
+        SpeciesCollection& species_pool() {
+            return this->_species_pool;
+        }     
+        Landscape& landscape() {
+            return this->_landscape;
+        }
+        int get_num_environmental_factors() const {
+            return this->_num_environmental_factors;
+        }
+        
+        // --- initialization and set up ---
+        void generate_landscape(long size_x, long size_y);
+        void set_cell_carrying_capacity(long carrying_capacity);
+        void add_species(const Species& species);
+        void seed_population(long x, long y, int species_index, long size);
+        void seed_population(long cell_index, int species_index, long size);
+        
+        // --- simulation cycles ---
+        void cycle();
         
     private:
-        Cells*                  _cells;
         Landscape               _landscape;
         SpeciesCollection       _species_pool;
         RandomNumberGenerator   _rng;
@@ -370,15 +404,221 @@ class World {
  * DEFINITIONS
  *****************************************************************************/
 
-/* POPULATION ECOLOGY AND GENETICS *******************************************/
+///////////////////////////////////////////////////////////////////////////////	
+// Species
+
+// --- lifecycle and assignment ---
+
+Species::Species(const char* label) {
+    this->initialize(label);
+}
+
+Species::Species(const Species& species) {
+    *this = species;
+}
+
+const Species& Species::operator=(const Species& species) {
+    this->set_world(*species._world);
+    this->_label = species._label;
+    this->_index = species._index;
+    this->_movement_rate = species._movement_rate;
+    this->_mutation_rate = species._mutation_rate;
+    this->_max_mutation_size = species._max_mutation_size;
+    this->_mean_reproductive_rate = species._mean_reproductive_rate;
+    this->_reproductive_rate_mutation_size = species._reproductive_rate_mutation_size;    
+    this->_default_genotype = species._default_genotype;
+    return *this;
+}
+
+// --- setup and initialization ---
+
+void Species::initialize(const char* label) {
+    this->_label = label;
+    this->_index = -1;
+    this->_movement_rate = 1;
+    this->_mutation_rate = 0.1;
+    this->_max_mutation_size = 1;
+    this->_mean_reproductive_rate = 6;
+    this->_reproductive_rate_mutation_size = 1;
+}
+
+void Species::set_world(World& world) {
+    if (&world == NULL) {
+        this->_world = NULL;
+        this->_landscape = NULL;
+        this->_rng = NULL;
+        this->_num_environmental_factors = NULL;
+    } else {
+        this->_world = &world;
+        this->_landscape = &world.landscape();
+        this->_rng = &world.rng();
+        this->_num_environmental_factors = world.get_num_environmental_factors();                
+    }
+}
+
+///////////////////////////////////////////////////////////////////////////////	
+// Cell
+
+// --- lifecycle and assignment ---
+
+Cell::Cell(Landscape& landscape, long index, long x, long y)
+    : _index(index),
+      _x(x),
+      _y(y) {
+    this->set_landscape_ref(landscape);      
+}
+
+Cell::Cell(const Cell& cell) {
+    *this = cell;
+}
+
+Cell::~Cell() {
+}
+
+const Cell& Cell::operator=(const Cell& cell) {
+    this->set_landscape_ref(*cell._landscape);
+    this->_index = cell._index;
+    this->_x = cell._x;
+    this->_y = cell._y;
+    return *this;
+}
+
+// --- accessors and mutators ---
+
+void Cell::set_landscape_ref(Landscape& landscape) {
+    if (&landscape != NULL) {
+        this->_landscape = &landscape;
+        this->_species_pool = &landscape.species_pool();
+    } else {
+        this->_landscape = NULL;
+        this->_species_pool = NULL;
+    }
+}
+
+///////////////////////////////////////////////////////////////////////////////	
+// Landscape
+
+// --- lifecycle and assignment --- 
+
+Landscape::Landscape() {
+
+}
+
+Landscape::Landscape(World& world, long size_x, long size_y) {
+    this->generate(world, size_x, size_y);
+}
+
+Landscape::~Landscape() {
+}
+
+// --- accessor and mutators ---        
+
+SpeciesCollection& Landscape::species_pool() {
+    assert(this->_world != NULL);
+    return this->_world->species_pool();
+}
+
+// --- initialization and set up ---
+
+void Landscape::generate(World& world, long size_x, long size_y) {
+    this->_world = &world;
+    this->_size_x = size_x;
+    this->_size_y = size_y;
+    long num_cells = size_x * size_y;
+    for (long x = 0, index = 0; x < size_x; ++x) {
+        for (long y = 0; y < size_y; ++y, ++index) {
+            this->_cells.push_back(Cell(*this, index, x, y));
+        }
+    }
+}
+
+///////////////////////////////////////////////////////////////////////////////	
+// World
+
+// --- lifecycle and assignment --- 
+
+//! default constructor
+World::World()
+    : _rng(time(0)) {
+    this->_current_generation = 0;
+}
+
+//! constructor: calls
+World::World(unsigned long seed) 
+    : _rng(seed) { 
+    this->_current_generation = 0;    
+}    
+
+// --- initialization and set up ---
 
 
+//! Creates a new landscape.
+void World::generate_landscape(long size_x, long size_y) {
+
+}
+
+//! Sets the (uniform) carrying capacity for all the cells on the landscape.
+void World::set_cell_carrying_capacity(long carrying_capacity) {
+
+}
+
+//! Adds a new species definition to this world.
+void World::add_species(const Species& species) {
+
+}
+
+//! Populates the cell at (x,y) with organisms of the given species.
+void World::seed_population(long x, long y, int species_index, long size) {
+
+}
+
+//! Populates the cell cell_index with organisms of the given species.
+void World::seed_population(long cell_index, int species_index, long size) {
+
+}
 
 /******************************************************************************
  * MAIN
  *****************************************************************************/
 
 int main(int argc, char* argv[]) {
+    if (argc < 5) {
+        std::cout << "usage: " << argv[0] <<  " <DIM-X> <DIM-Y> <CELL-CARRYING-CAPACITY> <NUM-CELLS-TO-POPULATE> <NUM-GENS>\n";
+        exit(1);
+    }
+
+    int size_x = atoi(argv[1]);
+    int size_y = atoi(argv[2]);
+    int cc = atoi(argv[3]);
+    int num_cells_init = atoi(argv[4]);
+    int num_gens = atoi(argv[5]);
+    
+    World   world;
+
+//##DEBUG##
+DEBUG_BLOCK( std::cout << "(generating landscape)\n"; )
+    
+	world.generate_landscape(size_x, size_y);
+	
+//##DEBUG##
+DEBUG_BLOCK( std::cout << "(setting carrying capacity)\n"; )
+
+	world.set_cell_carrying_capacity(cc);
+
+//##DEBUG##
+DEBUG_BLOCK( std::cout << "(adding species)\n"; )	
+	
+	world.add_species(Species("snail"));
+	
+//##DEBUG##
+DEBUG_BLOCK( std::cout << "(seeding populations)\n"; )
+
+    for (; num_cells_init > 0; --num_cells_init) {
+        world.seed_population(world.rng().randint(0, size_x-1),
+                              world.rng().randint(0, size_y-1),
+                              cc);
+    }
+    
 
 }
 
