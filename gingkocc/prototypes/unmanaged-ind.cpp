@@ -248,7 +248,16 @@ class Population {
             this->species = &sp;
             this->cell = &c;
         }       
-        
+        Population(const Population& p) {
+            *this = p;
+        }       
+        const Population& operator=(const Population& p) {
+            this->species = p.species;
+            this->cell = p.cell;
+            this->individuals = p.individuals;
+            return *this;
+        }       
+                                
         // accessors
         void set_cell(const Cell& cell) {
         	this->cell = &cell;
@@ -446,11 +455,9 @@ Population               Species::offspring;
 class Cell {
     public:
     
-        // lifecycle
-        Cell(Landscape& landscape);
+        // lifecycle and assignment
+        Cell(Landscape& landscape, int index, int x, int y);
         Cell(const Cell& cell);
-        
-        // operators
         const Cell& operator=(const Cell& cell);
 
         // accessors
@@ -484,6 +491,9 @@ class Cell {
     
     private:
         int                         carrying_capacity;  // max # ind
+        int                         index;              // cell index
+        int                         x;
+        int                         y;
         Populations                 populations;        // list of local pops
         EnvironmentFactors          environment;        // environmental factors
         Landscape*                  landscape;          // host landscape
@@ -830,16 +840,18 @@ Population& Species::spawn_offspring(std::vector<Individual*>& female_ptrs,
 // Cell (IMPLEMENTATION)
 
 //! constructor: needs reference to World
-Cell::Cell(Landscape& landscape){
+Cell::Cell(Landscape& landscape, int index, int x, int y) {
     this->set_landscape(landscape);
     this->carrying_capacity = 0;
+    this->index = index;
+    this->x = x;
+    this->y = y;
 }
 
 //! copy constructor
 Cell::Cell(const Cell& cell) {
     assert(cell.landscape != NULL);
-    this->set_landscape(*cell.landscape);
-    this->populations = cell.populations;
+    *this = cell;
 }
 
 //! assignment
@@ -847,6 +859,9 @@ const Cell& Cell::operator=(const Cell& cell) {
     assert(cell.landscape != NULL);
     this->set_landscape(*cell.landscape);
     this->carrying_capacity = cell.carrying_capacity;
+    this->index = cell.index;
+    this->x = cell.x;
+    this->y = cell.y;
     this->populations = cell.populations;
     return *this;
 }
@@ -883,13 +898,12 @@ void Cell::repopulate(const Species& sp, const Population& population) {
 //! cross-species competition within each cell
 void Cell::density_dependent_selection() {
     static std::vector<Individuals> pooled_individuals;
-    pooled_individuals.clear();
     for (Populations::iterator pop = this->populations.begin();
             pop != this->populations.end();
             ++pop) {
-        pooled_individuals.reserve(pooled_individuals.size() + pop->size());
-        std::copy(pop->begin(), pop->end(), 
-            std::back_insert_iterator<Individual>(pooled_individuals));        
+        Individuals& pop_individuals = pop->get_individuals();            
+        pooled_individuals.resize(pooled_individuals.size() + pop_individuals.size());
+//         std::copy(pop_individuals.begin(), pop_individuals.end(), pooled_individuals.end());        
     }            
 } 
 
@@ -909,7 +923,13 @@ void Landscape::generate(World& world, int dim_x, int dim_y) {
     this->dim_x = dim_x;
     this->dim_y = dim_y;
     int num_cells = dim_x * dim_y;
-    this->cells.assign(num_cells, Cell(*this)); // Cell objects created here
+    this->cells.reserve(num_cells);
+    int index = 0;
+    for (int x = 0; x < dim_x; ++x) {
+        for (int y = 0; y < dim_y; ++y) {
+            this->cells.push_back(Cell(*this, index++, x, y));
+        }
+    }
 }
 
 //! sets the carrying capacity for all cells
