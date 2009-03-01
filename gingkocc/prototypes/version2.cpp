@@ -267,7 +267,8 @@ class Species {
     public:
     
         // --- lifecycle and assignment ---        
-        Species(const char* label, 
+        Species(int index,
+                const char* label, 
                 int num_fitness_factors,
                 RandomNumberGenerator& rng);
         Species(const Species& species);                
@@ -329,9 +330,9 @@ class Species {
                                 
     private:
         const Species& operator=(const Species& species);
-    
+
+        int                         _index;                     // "slot" in cell's pop vector    
         std::string                 _label;                     // arbitrary identifier
-        int                         _index;                     // "slot" in cell's pop vector
         int                         _num_fitness_factors;       // so genotypes of appropriate length can be composed                
         int                         _movement_rate;             // modifier to the global movement surface to derive the species-specific movement surface
         std::vector<float>          _selection_strengths;       // weighted_distance = distance / (sel. strength)
@@ -382,11 +383,11 @@ class Landscape {
     
         // --- lifecycle and assignment ---        
         Landscape();
-        Landscape(World* world, long dim_x, long dim_y);
+        Landscape(long dim_x, long dim_y);
         ~Landscape();
         
         // --- initialization and set up ---
-        void generate(World* world, long size_x, long size_y); 
+        void generate(long size_x, long size_y); 
         
         // --- accessor and mutators ---        
         Cells& cells() {
@@ -400,7 +401,6 @@ class Landscape {
         long            _size_x;   // size of the landscape in the x dimension
         long            _size_y;   // size of the landscape in the y dimension        
         Cells           _cells;     // cells of the landscape
-        World*          _world;     // pointer to the host world
 };
 
 ///////////////////////////////////////////////////////////////////////////////	
@@ -453,10 +453,12 @@ class World {
 
 // --- lifecycle and assignment ---
 
-Species::Species(const char* label, 
+Species::Species(int index,
+                 const char* label, 
                  int num_fitness_factors,
                  RandomNumberGenerator& rng) 
-    : _label(label),
+    : _index(index),
+      _label(label),
       _num_fitness_factors(num_fitness_factors),
       _rng(rng) {
     this->_index = -1;
@@ -468,7 +470,8 @@ Species::Species(const char* label,
 }
 
 Species::Species(const Species& species)
-    : _label(species._label),
+    : _index(species._index),
+      _label(species._label),
       _num_fitness_factors(species._num_fitness_factors),
       _rng(species._rng) {
     *this = species;
@@ -532,8 +535,8 @@ Landscape::Landscape() {
 
 }
 
-Landscape::Landscape(World* world, long size_x, long size_y) {
-    this->generate(world, size_x, size_y);
+Landscape::Landscape(long size_x, long size_y) {
+    this->generate(size_x, size_y);
 }
 
 Landscape::~Landscape() {
@@ -541,8 +544,7 @@ Landscape::~Landscape() {
 
 // --- initialization and set up ---
 
-void Landscape::generate(World* world, long size_x, long size_y) {
-    this->_world = world;
+void Landscape::generate(long size_x, long size_y) {
     this->_size_x = size_x;
     this->_size_y = size_y;
     long num_cells = size_x * size_y;
@@ -593,7 +595,10 @@ void World::set_cell_carrying_capacity(long carrying_capacity) {
 
 //! Adds a new species definition to this world.
 Species& World::new_species(const char* label) {
-    Species* sp = new Species(label, this->_num_environmental_factors, this->_rng);
+    Species* sp = new Species(this->_species_pool.size(),
+                              label, 
+                              this->_num_environmental_factors, 
+                              this->_rng);
     this->_species_pool.push_back(sp);
     return *sp;
 }
