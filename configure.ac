@@ -112,13 +112,13 @@ fi
 #fi
 
 # single precision version (still being tested)
-AC_ARG_ENABLE(single-prec,
-        AC_HELP_STRING([--enable-single-prec],[use single precision floating point variables (EXPERIMENTAL)]), , [enable_single_prec=no])
-if test "$enable_single_prec" = yes; then
-        AC_MSG_NOTICE([
-           *** NOTE: compiling single precision floating point version
-           ])
-fi
+# AC_ARG_ENABLE(single-prec,
+#         AC_HELP_STRING([--enable-single-prec],[use single precision floating point variables (EXPERIMENTAL)]), , [enable_single_prec=no])
+# if test "$enable_single_prec" = yes; then
+#         AC_MSG_NOTICE([
+#            *** NOTE: compiling single precision floating point version
+#            ])
+# fi
 
 # Initialize optimization flag in case it doesn't get set below.
 CXXFLAGS_OPTIM_SPEED="-O"
@@ -171,12 +171,12 @@ elif test "x$GCC" = "xyes" ; then
 fi
 
 #single precision
-if test  "$enable_single_prec" = yes; then
-	CXXFLAGS="$CXXFLAGS -DSINGLE_PRECISION_FLOATS"
-	if test "$CC" = "gcc" ; then
-		CXXFLAGS="$CXXFLAGS -fno-caller-saves"
-	fi
-fi
+# if test  "$enable_single_prec" = yes; then
+# 	CXXFLAGS="$CXXFLAGS -DSINGLE_PRECISION_FLOATS"
+# 	if test "$CC" = "gcc" ; then
+# 		CXXFLAGS="$CXXFLAGS -fno-caller-saves"
+# 	fi
+# fi
 
 #                                                        #
 ##########################################################

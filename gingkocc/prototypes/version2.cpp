@@ -19,7 +19,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 // 
-// You should have received a copy of the GNU General Public License along
+// You should have received a copy of the GNU General Public License aCellIndexType
 // with this program. If not, see <http://www.gnu.org/licenses/>.
 //
 ///////////////////////////////////////////////////////////////////////////////
@@ -34,6 +34,7 @@
 #include <ctime>
 #include <cassert>
 #include <iomanip>
+#include <iterator>
 
 #if defined(NDEBUG)
     #define DEBUG_BLOCK(y) y;
@@ -75,7 +76,6 @@ class RandomNumberGenerator {
         
     private:
         unsigned long _seed;
-
 };
 
 //! seeds using time
@@ -168,8 +168,6 @@ unsigned int RandomNumberGenerator::poisson(int rate) {
 class Organism;
 class Species;
 class Community;
-typedef int GenotypeFactor;
-typedef std::vector<GenotypeFactor> GenotypeFactors;
 typedef std::vector<Species*> SpeciesPool;
 typedef std::vector<Organism> Organisms;
 typedef std::vector<Community> Communities;
@@ -177,9 +175,11 @@ typedef std::vector<Community> Communities;
 class Landscape;
 class Cell;
 class World;
-typedef long EnvironmentalFactor;
-typedef std::vector<EnvironmentalFactor> EnvironmentalFactors;
 typedef std::vector<Cell> Cells;
+typedef unsigned long CellIndexType;
+
+typedef int FitnessFactorType;
+typedef std::vector<FitnessFactorType> FitnessFactors;
 
 
 /******************************************************************************
@@ -205,7 +205,7 @@ class Organism {
         // lifecycle and assignment
         
         Organism(int species_index,
-                           const GenotypeFactors& new_genotype,
+                           const FitnessFactors& new_genotype,
                            Organism::Sex new_sex) 
             : _species_index(species_index),
               _genotype(new_genotype),
@@ -228,7 +228,7 @@ class Organism {
         }
                    
         // genotype       
-        GenotypeFactors& genotype() {
+        FitnessFactors& genotype() {
             return this->_genotype;
         }
         
@@ -255,7 +255,7 @@ class Organism {
 
     private:
         int              _species_index;    // species
-        GenotypeFactors  _genotype;         // non-neutral genotype: maps to fitness phenotype
+        FitnessFactors  _genotype;         // non-neutral genotype: maps to fitness phenotype
         Organism::Sex    _sex;              // male or female
         float            _fitness;          // cache this organism's fitness
         bool             _killed;           // flag an organism as dead: allowing for use of std::remove_if() and std::resize() or v.erase()
@@ -273,8 +273,7 @@ class Species {
         Species(int index,
                 const char* label, 
                 int num_fitness_factors,
-                RandomNumberGenerator& rng);
-        Species(const Species& species);                
+                RandomNumberGenerator& rng);              
         ~Species() {}        
                 
         // --- access and mutation ---
@@ -289,29 +288,23 @@ class Species {
         }
         void set_index(int i) {
             this->_index = i;
-        }        
-        int get_movement_rate() const {
-            return this->_movement_rate;
-        }
-        void set_movement_rate(int i) {
-            this->_movement_rate = i;
-        }        
+        }            
         std::vector<float>& selection_strengths() {
             return this->_selection_strengths;
         }
-        std::vector<unsigned>& movement_surface() {
-            return this->_movement_surface;
+        std::vector<unsigned>& movement_costs() {
+            return this->_movement_costs;
         }
         float get_mutation_rate() const {
-            return this->_movement_rate;
+            return this->_mutation_rate;
         }
         void set_mutation_rate(float i) {
-            this->_movement_rate = i;
+            this->_mutation_rate = i;
         }
-        GenotypeFactor get_max_mutation_size() const {
+        FitnessFactorType get_max_mutation_size() const {
             return this->_max_mutation_size;
         }
-        void set_max_mutation_size(GenotypeFactor i) {
+        void set_max_mutation_size(FitnessFactorType i) {
             this->_max_mutation_size = i;
         }
         int get_mean_reproductive_rate() const {
@@ -326,7 +319,7 @@ class Species {
         void set_reproductive_rate_mutation_size(int i) {
             this->_reproductive_rate_mutation_size = i;
         }
-        GenotypeFactors& default_genotype() {
+        FitnessFactors& default_genotype() {
             return this->_default_genotype;
         }
         
@@ -345,18 +338,18 @@ class Species {
                                 
     private:
         const Species& operator=(const Species& species);
+        Species(const Species& species);          
 
         int                         _index;                     // "slot" in cell's pop vector    
         std::string                 _label;                     // arbitrary identifier
         int                         _num_fitness_factors;       // so genotypes of appropriate length can be composed                
-        int                         _movement_rate;             // modifier to the global movement surface to derive the species-specific movement surface
         std::vector<float>          _selection_strengths;       // weighted_distance = distance / (sel. strength)
-        std::vector<unsigned>       _movement_surface;          // the movement surface: the "cost" to enter into every cell on the landscape
+        std::vector<unsigned>       _movement_costs;          // the movement surface: the "cost" to enter into every cell on the landscape
         float                       _mutation_rate;             // rate of mutations
-        GenotypeFactor              _max_mutation_size;         // window "size" of mutations
+        FitnessFactorType           _max_mutation_size;         // window "size" of mutations
         int                         _mean_reproductive_rate;    // "base" reproductive rate
         int                         _reproductive_rate_mutation_size;  // if reprod. rate evolves, size of step
-        GenotypeFactors             _default_genotype;          // genotype of individuals generated de novo        
+        FitnessFactors             _default_genotype;          // genotype of individuals generated de novo        
         RandomNumberGenerator&      _rng;                       // rng to use
 
 }; // Species
@@ -369,60 +362,54 @@ class Cell {
     public:
     
         // --- lifecycle and assignment ---
-        Cell(long index,
-             long x, 
-             long y, 
+        Cell(CellIndexType index,
+             CellIndexType x, 
+             CellIndexType y, 
              int num_environmental_factors,
              Landscape& landscape, 
              const SpeciesPool& species, 
              RandomNumberGenerator& rng);
-        ~Cell();
+        ~Cell() {};
         
         // --- geospatial ---
-        long get_index() const {
+        CellIndexType get_index() const {
             return this->_index;
         }
-        long get_x() const {
+        CellIndexType get_x() const {
             return this->_x;
         }
-        long get_y() const {
+        CellIndexType get_y() const {
             return this->_y;
         }
         
         // --- abiotic ---
-        long get_carrying_capacity(long cc) const {
+        CellIndexType get_carrying_capacity(CellIndexType cc) const {
             return this->_carrying_capacity;
         }        
-        void set_carrying_capacity(long cc) {
+        void set_carrying_capacity(CellIndexType cc) {
             this->_carrying_capacity = cc;
         }        
-        int add_environment_factor(EnvironmentalFactor e) {
+        int add_environment_factor(FitnessFactorType e) {
             this->_environment.push_back(e);
             return this->_environment.size();
         }
-        void set_environment_factor(int idx, EnvironmentalFactor e) {
+        void set_environment_factor(int idx, FitnessFactorType e) {
             assert(idx < this->_enviroment.size());
             this->_environment[idx] = e;
         }
-        EnvironmentalFactor get_environment_factor(int idx) const {
+        FitnessFactorType get_environment_factor(int idx) const {
             assert(idx < this->_enviroment.size());
             return this->_environment[idx];
         }
         int get_num_environmental_factors() const {
             return this->_environment.size();
-        }
-        int get_movement_cost() const {
-            return this->_movement_cost;
-        }
-        int set_movement_cost(int cost) {
-            this->_movement_cost = cost;
-        }              
+        }            
         
         // --- biotic ---
-        long num_organisms() const {
+        CellIndexType num_organisms() const {
             return this->_organisms.size();
         }
-        void add_new_organisms(int species_index, long num) {
+        void add_new_organisms(int species_index, CellIndexType num) {
             this->_organisms.reserve(this->_organisms.size() + num);
             for ( ; num > 0; --num) {
                 this->_organisms.push_back(this->_species.at(species_index)->new_organism());
@@ -435,12 +422,11 @@ class Cell {
         Cell(const Cell& cell);        
         
     private:        
-        long                         _carrying_capacity;    // max # ind
-        long                         _index;                // cell index
-        long                         _x;                    // x-coordinate
-        long                         _y;                    // y-coordinate
-        EnvironmentalFactors        _environment;           // environmental factors
-        int                         _movement_cost;         // the base movement penalty for entering this cell
+        CellIndexType                _carrying_capacity;    // max # ind
+        CellIndexType                _index;                // cell index
+        CellIndexType                _x;                    // x-coordinate
+        CellIndexType                _y;                    // y-coordinate
+        FitnessFactors        _environment;           // environmental factors
         Organisms                   _organisms;             // the individual organisms of this biota
         
         Landscape&                  _landscape;             // host landscape
@@ -460,41 +446,41 @@ class Landscape {
         ~Landscape();
         
         // --- initialization and set up ---
-        void generate(long size_x, long size_y, int num_environmental_factors); 
+        void generate(CellIndexType size_x, CellIndexType size_y, int num_environmental_factors); 
  
         // --- landscape access, control and mutation ---                                      
-        void set_cell_carrying_capacity(long carrying_capacity);
+        void set_cell_carrying_capacity(CellIndexType carrying_capacity);
         
         // --- cell access and spatial mapping ---
-        Cell& operator()(long x, long y) {
+        Cell& operator()(CellIndexType x, CellIndexType y) {
             return *this->_cells[this->xy_to_index(x, y)];
         }
-        Cell& operator[](long index) {
+        Cell& operator[](CellIndexType index) {
             return *this->_cells[index];
         }            
-        Cell& at(long x, long y) {
+        Cell& at(CellIndexType x, CellIndexType y) {
             return *this->_cells.at(this->xy_to_index(x, y));
         }
-        Cell& at(long index) {
+        Cell& at(CellIndexType index) {
             return *this->_cells.at(index);
         }
-        long index_to_x(long index) const {
+        CellIndexType index_to_x(CellIndexType index) const {
             return index % this->_size_x;          
         }
-        long index_to_y(long index) const {
-            return static_cast<long>(index / this->_size_x);            
+        CellIndexType index_to_y(CellIndexType index) const {
+            return static_cast<CellIndexType>(index / this->_size_x);            
         }
-        long xy_to_index(long x, long y) const {
+        CellIndexType xy_to_index(CellIndexType x, CellIndexType y) const {
             return (y * this->_size_x) + x;
         }
-        long size() const {
+        CellIndexType size() const {
             return this->_size_x * this->_size_y;
         }
         
         // --- debugging ---
         void dump() {
-            for (long y = 0; y < this->_size_y; ++y) {
-                for (long x = 0; x < this->_size_x; ++x) {
+            for (CellIndexType y = 0; y < this->_size_y; ++y) {
+                for (CellIndexType x = 0; x < this->_size_x; ++x) {
                     std::cout <<  this->operator()(x,y).num_organisms() << " ";
                 }
                 std::cout << std::endl;
@@ -502,9 +488,9 @@ class Landscape {
         }
                 
     private:
-        long                        _size_x;                // size of the landscape in the x dimension
-        long                        _size_y;                // size of the landscape in the y dimension        
-        long                        _size;                  // == x * y, cached here
+        CellIndexType               _size_x;                // size of the landscape in the x dimension
+        CellIndexType               _size_y;                // size of the landscape in the y dimension        
+        CellIndexType               _size;                  // == x * y, cached here
         std::vector<Cell*>          _cells;                 // cells of the landscape
         
         const SpeciesPool&          _species;               // species pool
@@ -536,26 +522,26 @@ class World {
         }
         
         // --- initialization and set up ---
+        void generate_landscape(CellIndexType size_x, CellIndexType size_y, int num_environmental_factors);
         
-        // Should be set up in order: 
-        // 1. landscape (with must be generated so cells exist
-        // 2. number of fitness factors (= number of environmental factors
-        //    = number of genotype factors) must be set
-        // 3. movement costs must be defined for each cell 
-        //    so that when species are added the movement surface can be 
-        //    calculated.
-        // 4. carrying capacity should be set,
-        // In actual implementation, will be handled by a "scheduler" object.
+        // actual implementation will load this from a file, as will
+        // cell environment and species travel costs
+        void set_cell_carrying_capacity(CellIndexType carrying_capacity) {
+            for (CellIndexType i = 0; i < this->_landscape.size(); ++i) {
+                this->_landscape[i].set_carrying_capacity(carrying_capacity);
+            }        
+        }
         
-        void generate_landscape(long size_x, long size_y, int num_environmental_factors);
-        void set_environmental_factors(); 
-        void set_movement_costs();                
-        void set_cell_carrying_capacity(long carrying_capacity);
-                        
+        // --- species configuration ---
+        void set_species_movement_costs(int species_index, const std::vector<int>& costs) {
+            assert(costs.size() == this->_landscape.size());
+            // gve to species **********
+        }
+                                
         // to kick start
         Species& new_species(const char *label);        
-        void seed_population(long x, long y, int species_index, long size);
-        void seed_population(long cell_index, int species_index, long size);
+        void seed_population(CellIndexType x, CellIndexType y, int species_index, CellIndexType size);
+        void seed_population(CellIndexType cell_index, int species_index, CellIndexType size);
         
         // --- simulation cycles ---
         void cycle();
@@ -565,7 +551,7 @@ class World {
         RandomNumberGenerator               _rng;
         Landscape                           _landscape;        
         int                                 _num_fitness_factors;
-        unsigned long                       _current_generation;                
+        CellIndexType                       _current_generation;                
         
 }; // World
 
@@ -587,7 +573,6 @@ Species::Species(int index,
       _num_fitness_factors(num_fitness_factors),
       _rng(rng) {
     this->_index = index;
-    this->_movement_rate = 1;
     this->_mutation_rate = 0.1;
     this->_max_mutation_size = 1;
     this->_mean_reproductive_rate = 6;
@@ -605,7 +590,6 @@ Species::Species(const Species& species)
 const Species& Species::operator=(const Species& species) {
     this->_label = species._label;
     this->_index = species._index;
-    this->_movement_rate = species._movement_rate;
     this->_mutation_rate = species._mutation_rate;
     this->_max_mutation_size = species._max_mutation_size;
     this->_mean_reproductive_rate = species._mean_reproductive_rate;
@@ -619,9 +603,9 @@ const Species& Species::operator=(const Species& species) {
 
 // --- lifecycle and assignment ---
 
-Cell::Cell(long index, 
-           long x, 
-           long y, 
+Cell::Cell(CellIndexType index, 
+           CellIndexType x, 
+           CellIndexType y, 
            int num_environmental_factors,
            Landscape& landscape, 
            const SpeciesPool& species, 
@@ -633,7 +617,6 @@ Cell::Cell(long index,
       _species(species),
       _rng(rng) {      
     this->_carrying_capacity = 0;
-    this->_movement_cost = 1;
     this->_environment.assign(num_environmental_factors, 0.0);
 }
 
@@ -661,13 +644,13 @@ Landscape::~Landscape() {
 
 // --- initialization and set up ---
 
-void Landscape::generate(long size_x, long size_y, int num_environmental_factors) {
+void Landscape::generate(CellIndexType size_x, CellIndexType size_y, int num_environmental_factors) {
     this->_size_x = size_x;
     this->_size_y = size_y;
     this->_size = size_x * size_y;
     this->_cells.reserve(this->_size);
-    for (long x = 0, index = 0; x < size_x; ++x) {
-        for (long y = 0; y < size_y; ++y, ++index) {
+    for (CellIndexType x = 0, index = 0; x < size_x; ++x) {
+        for (CellIndexType y = 0; y < size_y; ++y, ++index) {
             Cell* cell = new Cell(index, x, y, num_environmental_factors, *this, this->_species, this->_rng);
             this->_cells.push_back(cell);
         }
@@ -707,21 +690,9 @@ World::~World() {
 // --- initialization and set up ---
 
 //! Creates a new landscape.
-void World::generate_landscape(long size_x, long size_y, int num_environmental_factors) {
+void World::generate_landscape(CellIndexType size_x, CellIndexType size_y, int num_environmental_factors) {
     this->_num_fitness_factors = num_environmental_factors;
     this->_landscape.generate(size_x, size_y, num_environmental_factors);
-}
-
-//! Actual implementation will load from file(s).
-void World::set_environmental_factors() {
-
-}
-
-//! Sets the (uniform) carrying capacity for all the cells on the landscape.
-void World::set_cell_carrying_capacity(long carrying_capacity) {
-    for (long i = 0; i < this->_landscape.size(); ++i) {
-        this->_landscape[i].set_carrying_capacity(carrying_capacity);
-    }        
 }
 
 //! Adds a new species definition to this world.
@@ -735,14 +706,16 @@ Species& World::new_species(const char* label) {
 }
 
 //! Populates the cell at (x,y) with organisms of the given species.
-void World::seed_population(long x, long y, int species_index, long size) {
+void World::seed_population(CellIndexType x, CellIndexType y, int species_index, CellIndexType size) {
     this->_landscape.at(x, y).add_new_organisms(species_index, size);
 }
 
 //! Populates the cell cell_index with organisms of the given species.
-void World::seed_population(long cell_index, int species_index, long size) {
+void World::seed_population(CellIndexType cell_index, int species_index, CellIndexType size) {
     this->_landscape.at(cell_index).add_new_organisms(species_index, size);
 }
+
+// --- species configuration ---
 
 /******************************************************************************
  * MAIN
@@ -783,9 +756,9 @@ DEBUG_BLOCK( std::cout << "(adding species)\n"; )
 //##DEBUG##
 DEBUG_BLOCK( std::cout << "(seeding populations)\n"; )
     
-    long max_index = (size_x * size_y)-1;
-    long cell_index = 0;
-    for (std::set<long> seeded; num_cells_init > 0; --num_cells_init) {
+    CellIndexType max_index = (size_x * size_y)-1;
+    CellIndexType cell_index = 0;
+    for (std::set<CellIndexType> seeded; num_cells_init > 0; --num_cells_init) {
         do {
             cell_index = world.rng().randint(0, max_index);
         } while ((seeded.find(cell_index) != seeded.end()) and seeded.size() < max_index+1);
