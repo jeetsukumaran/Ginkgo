@@ -418,6 +418,12 @@ class Cell {
                 this->_organisms.push_back(this->_species.at(species_index)->new_organism());
             }
         }
+                
+        // --- biogeographical and evolutionary processes ---
+        void survival();
+        void competition();
+        void reproduction();
+        void migration();
         
     private:
         // disable copying/assignment
@@ -477,8 +483,14 @@ class Landscape {
             return (y * this->_size_x) + x;
         }
         CellIndexType size() const {
-            return this->_size_x * this->_size_y;
+            return this->_size;
         }
+        CellIndexType size_x() const {
+            return this->_size_x;
+        }
+        CellIndexType size_y() const {
+            return this->_size_y;
+        }        
         
         // --- debugging ---
         unsigned long dump() {
@@ -626,6 +638,24 @@ Cell::Cell(CellIndexType index,
     this->_environment.assign(num_environmental_factors, 0.0);
 }
 
+// --- biogeographical and evolutionary processes ---
+
+void Cell::survival() {
+
+}
+
+void Cell::competition() {
+
+}
+
+void Cell::reproduction() {
+
+}
+
+void Cell::migration() {
+
+}
+
 ///////////////////////////////////////////////////////////////////////////////	
 // Landscape
 
@@ -726,7 +756,11 @@ void World::seed_population(CellIndexType cell_index, int species_index, CellInd
 
 // --- simulation cycles ---
 void World::cycle() {
-
+    for (CellIndexType i = this->_landscape.size()-1; i > 0; --i) {
+    
+        this->_landscape[i].migration();
+        
+    }
 }
 
 void World::run(unsigned int num_generations) {
