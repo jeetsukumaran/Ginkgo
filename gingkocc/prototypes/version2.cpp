@@ -32,6 +32,7 @@
 #include <cmath>
 #include <ctime>
 #include <cassert>
+#include <iomanip>
 
 #if defined(NDEBUG)
     #define DEBUG_BLOCK(y) y;
@@ -357,6 +358,18 @@ class Cell {
         // --- lifecycle and assignment ---
         Cell(long index, long x, long y, Landscape& landscape, const SpeciesPool& species, RandomNumberGenerator& rng);
         ~Cell();
+        
+        // --- accessors and mutators ---
+        long get_index() const {
+            return this->_index;
+        }
+        long get_x() const {
+            return this->_x;
+        }
+        long get_y() const {
+            return this->_y;
+        }
+        
 
     private:
         const Cell& operator=(const Cell& cell);
@@ -387,8 +400,36 @@ class Landscape {
         // --- initialization and set up ---
         void generate(long size_x, long size_y); 
  
-        // --- landscape access, control and mutation                                       
-        void set_cell_carrying_capacity(long carrying_capacity);        
+        // --- landscape access, control and mutation ---                                      
+        void set_cell_carrying_capacity(long carrying_capacity);
+        
+        // --- cell access ---
+        Cell& operator()(long x, long y) {
+            return *this->_cells.at(this->xy_to_index(x, y));
+        }
+        Cell& operator[](long index) {
+            return *this->_cells.at(index);
+        }       
+        long index_to_x(long index) {
+            return index % this->_size_x;          
+        }
+        long index_to_y(long index) {
+            return static_cast<long>(index / this->_size_x);            
+        }
+        long xy_to_index(long x, long y) {
+            return (y * this->_size_x) + x;
+        }
+        
+        // --- debugging ---
+        void dump() {
+            for (long y = 0; y < this->_size_y; ++y) {
+                for (long x = 0; x < this->_size_x; ++x) {
+                    std::cout << std::setw(4) <<  this->xy_to_index(x, y) << " ";
+                }
+                std::cout << std::endl;
+            }
+        }
+        
         
     private:
         long                        _size_x;                // size of the landscape in the x dimension
@@ -588,7 +629,7 @@ World::~World() {
 
 //! Creates a new landscape.
 void World::generate_landscape(long size_x, long size_y) {
-
+    this->_landscape.generate(size_x, size_y);
 }
 
 //! Sets the (uniform) carrying capacity for all the cells on the landscape.
@@ -661,6 +702,7 @@ DEBUG_BLOCK( std::cout << "(seeding populations)\n"; )
                               cc);
     }
     
+    world.landscape().dump();
 
 }
 
