@@ -169,7 +169,6 @@ class Community;
 typedef int GenotypeFactor;
 typedef std::vector<GenotypeFactor> GenotypeFactors;
 typedef std::vector<Organism> Organisms;
-typedef std::vector<Species> SpeciesCollection;
 typedef std::vector<Community> Communities;
 
 class Landscape;
@@ -268,22 +267,26 @@ class Species {
     public:
     
         // --- lifecycle and assignment ---        
-        Species(const char* label = "Sp");
-        Species(const Species& species);
-        virtual ~Species() {}        
-        const Species& operator=(const Species& species);
+        Species(const char* label, 
+                int num_fitness_factors,
+                RandomNumberGenerator& rng);
+        Species(const Species& species);                
+        ~Species() {}        
         
-        // --- setup and initialization ---
-        void initialize(const char* label);        
-        void set_world(World* world);
         
         // --- access and mutation ---
         int get_index() const {
             return this->_index;
         }
+        void set_num_fitness_factors(int i) {
+            this->_num_fitness_factors = i;
+        }
+        int get_num_fitness_factors() const {
+            return this->_num_fitness_factors;
+        }
         void set_index(int i) {
             this->_index = i;
-        }
+        }        
         int get_movement_rate() const {
             return this->_movement_rate;
         }
@@ -325,8 +328,11 @@ class Species {
         }        
                                 
     private:
+        const Species& operator=(const Species& species);
+    
         std::string                 _label;                     // arbitrary identifier
         int                         _index;                     // "slot" in cell's pop vector
+        int                         _num_fitness_factors;       // so genotypes of appropriate length can be composed                
         int                         _movement_rate;             // modifier to the global movement surface to derive the species-specific movement surface
         std::vector<float>          _selection_strengths;       // weighted_distance = distance / (sel. strength)
         std::vector<unsigned>       _movement_surface;          // the movement surface: the "cost" to enter into every cell on the landscape
@@ -334,12 +340,8 @@ class Species {
         GenotypeFactor              _max_mutation_size;         // window "size" of mutations
         int                         _mean_reproductive_rate;    // "base" reproductive rate
         int                         _reproductive_rate_mutation_size;  // if reprod. rate evolves, size of step
-        GenotypeFactors             _default_genotype;          // genotype of individuals generated de novo
-        
-        World*                      _world;                     // pointer to world
-        Landscape*                  _landscape;                 // pointer to landscape
-        RandomNumberGenerator*      _rng;                       // pointer to rng
-        int                         _num_environmental_factors; // so genotypes of appropriate length can be composed        
+        GenotypeFactors             _default_genotype;          // genotype of individuals generated de novo        
+        RandomNumberGenerator&      _rng;                       // rng to use
 
 }; // Species
 
@@ -367,7 +369,6 @@ class Cell {
         EnvironmentalFactors        _environment;           // environmental factors
         Organisms                   _organisms;             // the individual organisms of this biota
         
-        const SpeciesCollection*    _species_pool;          // all the species in the landscape        
         Landscape*                  _landscape;             // host landscape
         World*                      _world;                 // host world
 
@@ -391,9 +392,7 @@ class Landscape {
         Cells& cells() {
             return this->_cells;
         }
-        
-        SpeciesCollection& species_pool();
-                                
+ 
         // --- landscape access, control and mutation                                       
         void set_cell_carrying_capacity(long carrying_capacity);        
         
@@ -413,14 +412,12 @@ class World {
         // --- lifecycle --
         World();
         World(unsigned long seed);
+        ~World();
         
         // --- access and mutation ---
         RandomNumberGenerator& rng() {
             return this->_rng;
-        }
-        SpeciesCollection& species_pool() {
-            return this->_species_pool;
-        }     
+        }  
         Landscape& landscape() {
             return this->_landscape;
         }
@@ -431,7 +428,7 @@ class World {
         // --- initialization and set up ---
         void generate_landscape(long size_x, long size_y);
         void set_cell_carrying_capacity(long carrying_capacity);
-        void add_species(const Species& species);
+        Species& new_species(const char *label);
         void seed_population(long x, long y, int species_index, long size);
         void seed_population(long cell_index, int species_index, long size);
         
@@ -439,11 +436,11 @@ class World {
         void cycle();
         
     private:
-        Landscape               _landscape;
-        SpeciesCollection       _species_pool;
-        RandomNumberGenerator   _rng;
-        int                     _num_environmental_factors;
-        unsigned long           _current_generation;                
+        Landscape                           _landscape;
+        std::vector<Species*>               _species_pool;
+        RandomNumberGenerator               _rng;
+        int                                 _num_environmental_factors;
+        unsigned long                       _current_generation;                
         
 }; // World
 
@@ -456,16 +453,28 @@ class World {
 
 // --- lifecycle and assignment ---
 
-Species::Species(const char* label) {
-    this->initialize(label);    
+Species::Species(const char* label, 
+                 int num_fitness_factors,
+                 RandomNumberGenerator& rng) 
+    : _label(label),
+      _num_fitness_factors(num_fitness_factors),
+      _rng(rng) {
+    this->_index = -1;
+    this->_movement_rate = 1;
+    this->_mutation_rate = 0.1;
+    this->_max_mutation_size = 1;
+    this->_mean_reproductive_rate = 6;
+    this->_reproductive_rate_mutation_size = 1;    
 }
 
-Species::Species(const Species& species) {
+Species::Species(const Species& species)
+    : _label(species._label),
+      _num_fitness_factors(species._num_fitness_factors),
+      _rng(species._rng) {
     *this = species;
 }
 
 const Species& Species::operator=(const Species& species) {
-    this->set_world(species._world);
     this->_label = species._label;
     this->_index = species._index;
     this->_movement_rate = species._movement_rate;
@@ -475,32 +484,6 @@ const Species& Species::operator=(const Species& species) {
     this->_reproductive_rate_mutation_size = species._reproductive_rate_mutation_size;    
     this->_default_genotype = species._default_genotype;
     return *this;
-}
-
-// --- setup and initialization ---
-
-void Species::initialize(const char* label) {
-    this->_label = label;
-    this->_index = -1;
-    this->_movement_rate = 1;
-    this->_mutation_rate = 0.1;
-    this->_max_mutation_size = 1;
-    this->_mean_reproductive_rate = 6;
-    this->_reproductive_rate_mutation_size = 1;
-}
-
-void Species::set_world(World* world) {
-    if (world != NULL) {
-        this->_world = world;
-        this->_landscape = &world->landscape();
-        this->_rng = &world->rng();
-        this->_num_environmental_factors = world->get_num_environmental_factors();                
-    } else {
-        this->_world = NULL;
-        this->_landscape = NULL;
-        this->_rng = NULL;
-        this->_num_environmental_factors = NULL;
-    }
 }
 
 ///////////////////////////////////////////////////////////////////////////////	
@@ -535,10 +518,8 @@ const Cell& Cell::operator=(const Cell& cell) {
 void Cell::set_landscape(Landscape* landscape) {
     if (landscape != NULL) {
         this->_landscape = landscape;
-        this->_species_pool = &landscape->species_pool();
     } else {
         this->_landscape = NULL;
-        this->_species_pool = NULL;
     }
 }
 
@@ -556,13 +537,6 @@ Landscape::Landscape(World* world, long size_x, long size_y) {
 }
 
 Landscape::~Landscape() {
-}
-
-// --- accessor and mutators ---        
-
-SpeciesCollection& Landscape::species_pool() {
-    assert(this->_world != NULL);
-    return this->_world->species_pool();
 }
 
 // --- initialization and set up ---
@@ -596,8 +570,16 @@ World::World(unsigned long seed)
     this->_current_generation = 0;    
 }    
 
-// --- initialization and set up ---
+//! clean up species pool
+World::~World() {
+    for (std::vector<Species*>::iterator sp = this->_species_pool.begin();
+            sp != this->_species_pool.end();
+            ++sp) {
+        delete *sp;            
+    }            
+}
 
+// --- initialization and set up ---
 
 //! Creates a new landscape.
 void World::generate_landscape(long size_x, long size_y) {
@@ -610,8 +592,10 @@ void World::set_cell_carrying_capacity(long carrying_capacity) {
 }
 
 //! Adds a new species definition to this world.
-void World::add_species(const Species& species) {
-
+Species& World::new_species(const char* label) {
+    Species* sp = new Species(label, this->_num_environmental_factors, this->_rng);
+    this->_species_pool.push_back(sp);
+    return *sp;
 }
 
 //! Populates the cell at (x,y) with organisms of the given species.
@@ -656,10 +640,9 @@ DEBUG_BLOCK( std::cout << "(setting carrying capacity)\n"; )
 //##DEBUG##
 DEBUG_BLOCK( std::cout << "(adding species)\n"; )	
 	
-	Species sp("gecko");
-	sp.selection_strengths().assign(num_env_factors, 1);
-	sp.default_genotype().assign(num_env_factors, world.rng().randint(-2, 2));
-	world.add_species(sp);
+	Species& sp1 = world.new_species("gecko");
+	sp1.selection_strengths().assign(num_env_factors, 1);
+	sp1.default_genotype().assign(num_env_factors, world.rng().randint(-2, 2));
 	
 //##DEBUG##
 DEBUG_BLOCK( std::cout << "(seeding populations)\n"; )
