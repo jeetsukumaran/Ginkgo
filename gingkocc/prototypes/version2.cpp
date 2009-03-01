@@ -369,7 +369,13 @@ class Cell {
     public:
     
         // --- lifecycle and assignment ---
-        Cell(long index, long x, long y, Landscape& landscape, const SpeciesPool& species, RandomNumberGenerator& rng);
+        Cell(long index,
+             long x, 
+             long y, 
+             int num_environmental_factors,
+             Landscape& landscape, 
+             const SpeciesPool& species, 
+             RandomNumberGenerator& rng);
         ~Cell();
         
         // --- geospatial ---
@@ -383,26 +389,58 @@ class Cell {
             return this->_y;
         }
         
+        // --- abiotic ---
+        long get_carrying_capacity(long cc) const {
+            return this->_carrying_capacity;
+        }        
+        void set_carrying_capacity(long cc) {
+            this->_carrying_capacity = cc;
+        }        
+        int add_environment_factor(EnvironmentalFactor e) {
+            this->_environment.push_back(e);
+            return this->_environment.size();
+        }
+        void set_environment_factor(int idx, EnvironmentalFactor e) {
+            assert(idx < this->_enviroment.size());
+            this->_environment[idx] = e;
+        }
+        EnvironmentalFactor get_environment_factor(int idx) const {
+            assert(idx < this->_enviroment.size());
+            return this->_environment[idx];
+        }
+        int get_num_environmental_factors() const {
+            return this->_environment.size();
+        }
+        int get_movement_cost() const {
+            return this->_movement_cost;
+        }
+        int set_movement_cost(int cost) {
+            this->_movement_cost = cost;
+        }              
+        
         // --- biotic ---
         long num_organisms() const {
             return this->_organisms.size();
         }
-        void new_organisms(int species_index, long num) {
+        void add_new_organisms(int species_index, long num) {
             this->_organisms.reserve(this->_organisms.size() + num);
             for ( ; num > 0; --num) {
                 this->_organisms.push_back(this->_species.at(species_index)->new_organism());
             }
         }
         
-
     private:
+        // disable copying/assignment
         const Cell& operator=(const Cell& cell);
         Cell(const Cell& cell);        
+        
+    private:        
         long                         _carrying_capacity;    // max # ind
         long                         _index;                // cell index
         long                         _x;                    // x-coordinate
         long                         _y;                    // y-coordinate
         EnvironmentalFactors        _environment;           // environmental factors
+        int                         _movement_cost;         // the base movement penalty for entering this cell
         Organisms                   _organisms;             // the individual organisms of this biota
         
         Landscape&                  _landscape;             // host landscape
@@ -422,18 +460,24 @@ class Landscape {
         ~Landscape();
         
         // --- initialization and set up ---
-        void generate(long size_x, long size_y); 
+        void generate(long size_x, long size_y, int num_environmental_factors); 
  
         // --- landscape access, control and mutation ---                                      
         void set_cell_carrying_capacity(long carrying_capacity);
         
-        // --- cell access ---
+        // --- cell access and spatial mapping ---
         Cell& operator()(long x, long y) {
-            return *this->_cells.at(this->xy_to_index(x, y));
+            return *this->_cells[this->xy_to_index(x, y)];
         }
         Cell& operator[](long index) {
+            return *this->_cells[index];
+        }            
+        Cell& at(long x, long y) {
+            return *this->_cells.at(this->xy_to_index(x, y));
+        }
+        Cell& at(long index) {
             return *this->_cells.at(index);
-        }       
+        }
         long index_to_x(long index) const {
             return index % this->_size_x;          
         }
@@ -442,6 +486,9 @@ class Landscape {
         }
         long xy_to_index(long x, long y) const {
             return (y * this->_size_x) + x;
+        }
+        long size() const {
+            return this->_size_x * this->_size_y;
         }
         
         // --- debugging ---
@@ -453,11 +500,11 @@ class Landscape {
                 std::cout << std::endl;
             }
         }
-        
-        
+                
     private:
         long                        _size_x;                // size of the landscape in the x dimension
         long                        _size_y;                // size of the landscape in the y dimension        
+        long                        _size;                  // == x * y, cached here
         std::vector<Cell*>          _cells;                 // cells of the landscape
         
         const SpeciesPool&          _species;               // species pool
@@ -471,25 +518,42 @@ class World {
     public:
     
         // --- lifecycle --
+
         World();
         World(unsigned long seed);
         ~World();
         
         // --- access and mutation ---
+
         RandomNumberGenerator& rng() {
             return this->_rng;
         }  
         Landscape& landscape() {
             return this->_landscape;
         }
-        int get_num_environmental_factors() const {
-            return this->_num_environmental_factors;
+        int get_num_fitness_factors() const {
+            return this->_num_fitness_factors;
         }
         
         // --- initialization and set up ---
-        void generate_landscape(long size_x, long size_y);
+        
+        // Should be set up in order: 
+        // 1. landscape (with must be generated so cells exist
+        // 2. number of fitness factors (= number of environmental factors
+        //    = number of genotype factors) must be set
+        // 3. movement costs must be defined for each cell 
+        //    so that when species are added the movement surface can be 
+        //    calculated.
+        // 4. carrying capacity should be set,
+        // In actual implementation, will be handled by a "scheduler" object.
+        
+        void generate_landscape(long size_x, long size_y, int num_environmental_factors);
+        void set_environmental_factors(); 
+        void set_movement_costs();                
         void set_cell_carrying_capacity(long carrying_capacity);
-        Species& new_species(const char *label);
+                        
+        // to kick start
+        Species& new_species(const char *label);        
         void seed_population(long x, long y, int species_index, long size);
         void seed_population(long cell_index, int species_index, long size);
         
@@ -500,7 +564,7 @@ class World {
         SpeciesPool                         _species_pool;
         RandomNumberGenerator               _rng;
         Landscape                           _landscape;        
-        int                                 _num_environmental_factors;
+        int                                 _num_fitness_factors;
         unsigned long                       _current_generation;                
         
 }; // World
@@ -555,35 +619,23 @@ const Species& Species::operator=(const Species& species) {
 
 // --- lifecycle and assignment ---
 
-Cell::Cell(long index, long x, long y, Landscape& landscape, const SpeciesPool& species, RandomNumberGenerator& rng)     
+Cell::Cell(long index, 
+           long x, 
+           long y, 
+           int num_environmental_factors,
+           Landscape& landscape, 
+           const SpeciesPool& species, 
+           RandomNumberGenerator& rng)     
     : _index(index),
       _x(x),
       _y(y),
       _landscape(landscape),
       _species(species),
-      _rng(rng) {    
+      _rng(rng) {      
+    this->_carrying_capacity = 0;
+    this->_movement_cost = 1;
+    this->_environment.assign(num_environmental_factors, 0.0);
 }
-
-Cell::Cell(const Cell& cell)
-    : _index(cell._index),
-      _x(cell._x),
-      _y(cell._y),
-      _landscape(cell._landscape),
-      _species(cell._species),
-      _rng(cell._rng) {
-    *this = cell;
-}
-
-Cell::~Cell() {
-}
-
-const Cell& Cell::operator=(const Cell& cell) {
-    this->_index = cell._index;
-    this->_x = cell._x;
-    this->_y = cell._y;
-    return *this;
-}
-
 
 ///////////////////////////////////////////////////////////////////////////////	
 // Landscape
@@ -593,7 +645,9 @@ const Cell& Cell::operator=(const Cell& cell) {
 Landscape::Landscape(const SpeciesPool& species, RandomNumberGenerator& rng)
     : _species(species),
       _rng(rng) {
-
+    this->_size_x = 0;
+    this->_size_y = 0;
+    this->_size = 0 * 0;
 }
 
 // clean up cells
@@ -607,13 +661,14 @@ Landscape::~Landscape() {
 
 // --- initialization and set up ---
 
-void Landscape::generate(long size_x, long size_y) {
+void Landscape::generate(long size_x, long size_y, int num_environmental_factors) {
     this->_size_x = size_x;
     this->_size_y = size_y;
-    long num_cells = size_x * size_y;
+    this->_size = size_x * size_y;
+    this->_cells.reserve(this->_size);
     for (long x = 0, index = 0; x < size_x; ++x) {
         for (long y = 0; y < size_y; ++y, ++index) {
-            Cell* cell = new Cell(index, x, y, *this, this->_species, this->_rng);
+            Cell* cell = new Cell(index, x, y, num_environmental_factors, *this, this->_species, this->_rng);
             this->_cells.push_back(cell);
         }
     }
@@ -652,20 +707,28 @@ World::~World() {
 // --- initialization and set up ---
 
 //! Creates a new landscape.
-void World::generate_landscape(long size_x, long size_y) {
-    this->_landscape.generate(size_x, size_y);
+void World::generate_landscape(long size_x, long size_y, int num_environmental_factors) {
+    this->_num_fitness_factors = num_environmental_factors;
+    this->_landscape.generate(size_x, size_y, num_environmental_factors);
+}
+
+//! Actual implementation will load from file(s).
+void World::set_environmental_factors() {
+
 }
 
 //! Sets the (uniform) carrying capacity for all the cells on the landscape.
 void World::set_cell_carrying_capacity(long carrying_capacity) {
-
+    for (long i = 0; i < this->_landscape.size(); ++i) {
+        this->_landscape[i].set_carrying_capacity(carrying_capacity);
+    }        
 }
 
 //! Adds a new species definition to this world.
 Species& World::new_species(const char* label) {
     Species* sp = new Species(this->_species_pool.size(),
                               label, 
-                              this->_num_environmental_factors, 
+                              this->_num_fitness_factors, 
                               this->_rng);
     this->_species_pool.push_back(sp);
     return *sp;
@@ -673,12 +736,12 @@ Species& World::new_species(const char* label) {
 
 //! Populates the cell at (x,y) with organisms of the given species.
 void World::seed_population(long x, long y, int species_index, long size) {
-    this->_landscape(x, y).new_organisms(species_index, size);
+    this->_landscape.at(x, y).add_new_organisms(species_index, size);
 }
 
 //! Populates the cell cell_index with organisms of the given species.
 void World::seed_population(long cell_index, int species_index, long size) {
-    this->_landscape[cell_index].new_organisms(species_index, size);
+    this->_landscape.at(cell_index).add_new_organisms(species_index, size);
 }
 
 /******************************************************************************
@@ -703,7 +766,7 @@ int main(int argc, char* argv[]) {
 //##DEBUG##
 DEBUG_BLOCK( std::cout << "(generating landscape)\n"; )
     
-	world.generate_landscape(size_x, size_y);
+	world.generate_landscape(size_x, size_y, num_env_factors);
 	
 //##DEBUG##
 DEBUG_BLOCK( std::cout << "(setting carrying capacity)\n"; )
