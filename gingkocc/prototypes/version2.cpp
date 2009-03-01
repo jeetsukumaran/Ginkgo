@@ -55,7 +55,7 @@ class RandomNumberGenerator {
         void set_seed(unsigned long seed);
 
         float random();   // [0, 1)
-        float randint(int a, int b);
+        long randint(int a, int b);
         float standard_normal();
         float normal(float mean, float sd);
         unsigned int poisson(int rate);
@@ -100,7 +100,7 @@ float RandomNumberGenerator::random() {
 }
 
 //! returns a uniform random integer between >= a and <= b
-float RandomNumberGenerator::randint(int a, int b) {
+long RandomNumberGenerator::randint(int a, int b) {
     return (rand() % (b-a+1)) + a;
 }
 
@@ -386,7 +386,7 @@ class Cell {
         }
         
         // --- abiotic ---
-        CellIndexType get_carrying_capacity(CellIndexType cc) const {
+        CellIndexType get_carrying_capacity() const {
             return this->_carrying_capacity;
         }        
         void set_carrying_capacity(CellIndexType cc) {
@@ -481,14 +481,19 @@ class Landscape {
         }
         
         // --- debugging ---
-        void dump() {
+        unsigned long dump() {
+            unsigned long num = 0;
+            unsigned long total = 0;
             for (CellIndexType y = 0; y < this->_size_y; ++y) {
                 for (CellIndexType x = 0; x < this->_size_x; ++x) {
-                    std::cout <<  this->operator()(x,y).num_organisms() << " ";
+                    num = this->operator()(x,y).num_organisms();
+                    total += num;
+                    std::cout << num << " ";
                 }
                 std::cout << std::endl;
             }
-        }
+            return total;
+        }        
                 
     private:
         CellIndexType               _size_x;                // size of the landscape in the x dimension
@@ -523,6 +528,9 @@ class World {
         int get_num_fitness_factors() const {
             return this->_num_fitness_factors;
         }
+        void set_num_fitness_factors(int num_fitness_factors) {
+            this->_num_fitness_factors = num_fitness_factors;
+        }        
         
         // --- initialization and set up ---
         void generate_landscape(CellIndexType size_x, CellIndexType size_y, int num_environmental_factors);
@@ -559,6 +567,7 @@ class World {
         
         // --- simulation cycles ---
         void cycle();
+        void run(unsigned int num_generations);
         
     private:
         SpeciesPool                         _species_pool;
@@ -591,6 +600,8 @@ Species::Species(int index,
     this->_max_mutation_size = 1;
     this->_mean_reproductive_rate = 6;
     this->_reproductive_rate_mutation_size = 1;
+    this->_selection_strengths.assign(this->_num_fitness_factors, 1);
+    this->_default_genotype.assign(this->_num_fitness_factors, 0.0);
 }
 
 ///////////////////////////////////////////////////////////////////////////////	
@@ -712,12 +723,24 @@ void World::seed_population(CellIndexType cell_index, int species_index, CellInd
 
 // --- species configuration ---
 
+
+// --- simulation cycles ---
+void World::cycle() {
+
+}
+
+void World::run(unsigned int num_generations) {
+    for ( ; num_generations > 0; --num_generations, ++(this->_current_generation)) {
+        this->cycle();        
+    }
+}
+
 /******************************************************************************
  * MAIN
  *****************************************************************************/
 
 int main(int argc, char* argv[]) {
-    if (argc < 5) {
+    if (argc < 6) {
         std::cout << "usage: " << argv[0] <<  " <DIM-X> <DIM-Y> <CELL-CARRYING-CAPACITY> <NUM-CELLS-TO-POPULATE> <NUM-GENS>\n";
         exit(1);
     }
@@ -746,6 +769,16 @@ DEBUG_BLOCK( std::cout << "(adding species)\n"; )
 	
 	Species& sp1 = world.new_species("gecko");
 	
+	std::vector<unsigned> costs;
+	costs.assign(size_x * size_y, 1);
+	sp1.set_movement_costs(costs);
+	
+	std::vector<FitnessFactorType> genotype;
+	genotype.reserve(num_env_factors);
+	for (int i = 0; i < num_env_factors; ++i) {
+	    genotype.push_back(static_cast<FitnessFactorType>(world.rng().randint(-10, 10)));
+	}
+		
 //##DEBUG##
 DEBUG_BLOCK( std::cout << "(seeding populations)\n"; )
     
@@ -764,7 +797,13 @@ DEBUG_BLOCK( std::cout << "(seeding populations)\n"; )
                               cc);
     }
     
-    world.landscape().dump();
+//##DEBUG##
+DEBUG_BLOCK( std::cout << "(running cycles)\n"; )
+    world.run(num_gens);
+
+    
+    unsigned long total = world.landscape().dump();
+    std::cout << "\nTotal organisms: " << total << std::endl;
 
 }
 
