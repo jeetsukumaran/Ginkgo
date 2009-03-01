@@ -25,6 +25,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include <vector>
+#include <set>
 #include <cstring>
 #include <list>
 #include <iostream>
@@ -275,8 +276,7 @@ class Species {
                 RandomNumberGenerator& rng);
         Species(const Species& species);                
         ~Species() {}        
-        
-        
+                
         // --- access and mutation ---
         int get_index() const {
             return this->_index;
@@ -328,7 +328,20 @@ class Species {
         }
         GenotypeFactors& default_genotype() {
             return this->_default_genotype;
-        }        
+        }
+        
+        // --- organism generation and reproduction ---
+        Organism::Sex get_random_sex(float female_threshold=0.5) const {
+            if (this->_rng.random() < female_threshold) {
+                return Organism::Male;
+            } else {
+                return Organism::Female;
+            }
+        }  
+        
+        Organism new_organism() const {
+            return Organism(this->_index, this->_default_genotype, this->get_random_sex());
+        }
                                 
     private:
         const Species& operator=(const Species& species);
@@ -359,7 +372,7 @@ class Cell {
         Cell(long index, long x, long y, Landscape& landscape, const SpeciesPool& species, RandomNumberGenerator& rng);
         ~Cell();
         
-        // --- accessors and mutators ---
+        // --- geospatial ---
         long get_index() const {
             return this->_index;
         }
@@ -368,6 +381,17 @@ class Cell {
         }
         long get_y() const {
             return this->_y;
+        }
+        
+        // --- biotic ---
+        long num_organisms() const {
+            return this->_organisms.size();
+        }
+        void new_organisms(int species_index, long num) {
+            this->_organisms.reserve(this->_organisms.size() + num);
+            for ( ; num > 0; --num) {
+                this->_organisms.push_back(this->_species.at(species_index)->new_organism());
+            }
         }
         
 
@@ -410,13 +434,13 @@ class Landscape {
         Cell& operator[](long index) {
             return *this->_cells.at(index);
         }       
-        long index_to_x(long index) {
+        long index_to_x(long index) const {
             return index % this->_size_x;          
         }
-        long index_to_y(long index) {
+        long index_to_y(long index) const {
             return static_cast<long>(index / this->_size_x);            
         }
-        long xy_to_index(long x, long y) {
+        long xy_to_index(long x, long y) const {
             return (y * this->_size_x) + x;
         }
         
@@ -424,7 +448,7 @@ class Landscape {
         void dump() {
             for (long y = 0; y < this->_size_y; ++y) {
                 for (long x = 0; x < this->_size_x; ++x) {
-                    std::cout << std::setw(4) <<  this->xy_to_index(x, y) << " ";
+                    std::cout <<  this->operator()(x,y).num_organisms() << " ";
                 }
                 std::cout << std::endl;
             }
@@ -498,7 +522,7 @@ Species::Species(int index,
       _label(label),
       _num_fitness_factors(num_fitness_factors),
       _rng(rng) {
-    this->_index = -1;
+    this->_index = index;
     this->_movement_rate = 1;
     this->_mutation_rate = 0.1;
     this->_max_mutation_size = 1;
@@ -649,12 +673,12 @@ Species& World::new_species(const char* label) {
 
 //! Populates the cell at (x,y) with organisms of the given species.
 void World::seed_population(long x, long y, int species_index, long size) {
-
+    this->_landscape(x, y).new_organisms(species_index, size);
 }
 
 //! Populates the cell cell_index with organisms of the given species.
 void World::seed_population(long cell_index, int species_index, long size) {
-
+    this->_landscape[cell_index].new_organisms(species_index, size);
 }
 
 /******************************************************************************
@@ -695,10 +719,19 @@ DEBUG_BLOCK( std::cout << "(adding species)\n"; )
 	
 //##DEBUG##
 DEBUG_BLOCK( std::cout << "(seeding populations)\n"; )
-
-    for (; num_cells_init > 0; --num_cells_init) {
-        world.seed_population(world.rng().randint(0, size_x-1),
-                              world.rng().randint(0, size_y-1),
+    
+    long max_index = (size_x * size_y)-1;
+    long cell_index = 0;
+    for (std::set<long> seeded; num_cells_init > 0; --num_cells_init) {
+        do {
+            cell_index = world.rng().randint(0, max_index);
+        } while ((seeded.find(cell_index) != seeded.end()) and seeded.size() < max_index+1);
+        if (seeded.size() >= max_index+1) {
+            break;
+        }
+        seeded.insert(cell_index);
+        world.seed_population(cell_index,
+                              sp1.get_index(),
                               cc);
     }
     
