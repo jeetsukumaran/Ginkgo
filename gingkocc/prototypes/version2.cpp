@@ -289,12 +289,6 @@ class Species {
         void set_index(int i) {
             this->_index = i;
         }            
-        std::vector<float>& selection_strengths() {
-            return this->_selection_strengths;
-        }
-        std::vector<unsigned>& movement_costs() {
-            return this->_movement_costs;
-        }
         float get_mutation_rate() const {
             return this->_mutation_rate;
         }
@@ -319,9 +313,16 @@ class Species {
         void set_reproductive_rate_mutation_size(int i) {
             this->_reproductive_rate_mutation_size = i;
         }
-        FitnessFactors& default_genotype() {
-            return this->_default_genotype;
+        
+        void set_movement_costs(const std::vector<unsigned>& costs) {
+            this->_movement_costs = costs;
         }
+        void set_selection_strengths(const std::vector<float>& strengths) {
+            this->_selection_strengths = strengths;
+        }
+        void set_default_genotype(const FitnessFactors& genotype) {
+            this->_default_genotype = genotype;
+        }         
         
         // --- organism generation and reproduction ---
         Organism::Sex get_random_sex(float female_threshold=0.5) const {
@@ -337,19 +338,21 @@ class Species {
         }
                                 
     private:
+        // declared as private (and undefined) to prevent copying/assignment
+        Species(const Species& species);    
         const Species& operator=(const Species& species);
-        Species(const Species& species);          
-
+        
+    private:        
         int                         _index;                     // "slot" in cell's pop vector    
         std::string                 _label;                     // arbitrary identifier
         int                         _num_fitness_factors;       // so genotypes of appropriate length can be composed                
         std::vector<float>          _selection_strengths;       // weighted_distance = distance / (sel. strength)
-        std::vector<unsigned>       _movement_costs;          // the movement surface: the "cost" to enter into every cell on the landscape
+        std::vector<unsigned>       _movement_costs;            // the movement surface: the "cost" to enter into every cell on the landscape
         float                       _mutation_rate;             // rate of mutations
         FitnessFactorType           _max_mutation_size;         // window "size" of mutations
         int                         _mean_reproductive_rate;    // "base" reproductive rate
         int                         _reproductive_rate_mutation_size;  // if reprod. rate evolves, size of step
-        FitnessFactors             _default_genotype;          // genotype of individuals generated de novo        
+        FitnessFactors              _default_genotype;          // genotype of individuals generated de novo        
         RandomNumberGenerator&      _rng;                       // rng to use
 
 }; // Species
@@ -533,10 +536,21 @@ class World {
         }
         
         // --- species configuration ---
-        void set_species_movement_costs(int species_index, const std::vector<int>& costs) {
+        void set_species_movement_costs(int species_index, const std::vector<unsigned>& costs) {
+            assert(species_index < this->_species_pool.size());
             assert(costs.size() == this->_landscape.size());
-            // gve to species **********
+            this->_species_pool[species_index]->set_movement_costs(costs);
         }
+        void set_species_selection_strengths(int species_index, const std::vector<float>& strengths) {
+            assert(species_index < this->_species_pool.size());        
+            assert(strengths.size() == this->_num_fitness_factors);
+            this->_species_pool[species_index]->set_selection_strengths(strengths);
+        }
+        void set_species_default_genotype(int species_index, const FitnessFactors& genotype) {
+            assert(species_index < this->_species_pool.size());        
+            assert(genotype.size() == this->_num_fitness_factors);
+            this->_species_pool[species_index]->set_default_genotype(genotype);
+        }        
                                 
         // to kick start
         Species& new_species(const char *label);        
@@ -576,26 +590,7 @@ Species::Species(int index,
     this->_mutation_rate = 0.1;
     this->_max_mutation_size = 1;
     this->_mean_reproductive_rate = 6;
-    this->_reproductive_rate_mutation_size = 1;    
-}
-
-Species::Species(const Species& species)
-    : _index(species._index),
-      _label(species._label),
-      _num_fitness_factors(species._num_fitness_factors),
-      _rng(species._rng) {
-    *this = species;
-}
-
-const Species& Species::operator=(const Species& species) {
-    this->_label = species._label;
-    this->_index = species._index;
-    this->_mutation_rate = species._mutation_rate;
-    this->_max_mutation_size = species._max_mutation_size;
-    this->_mean_reproductive_rate = species._mean_reproductive_rate;
-    this->_reproductive_rate_mutation_size = species._reproductive_rate_mutation_size;    
-    this->_default_genotype = species._default_genotype;
-    return *this;
+    this->_reproductive_rate_mutation_size = 1;
 }
 
 ///////////////////////////////////////////////////////////////////////////////	
@@ -750,8 +745,6 @@ DEBUG_BLOCK( std::cout << "(setting carrying capacity)\n"; )
 DEBUG_BLOCK( std::cout << "(adding species)\n"; )	
 	
 	Species& sp1 = world.new_species("gecko");
-	sp1.selection_strengths().assign(num_env_factors, 1);
-	sp1.default_genotype().assign(num_env_factors, world.rng().randint(-2, 2));
 	
 //##DEBUG##
 DEBUG_BLOCK( std::cout << "(seeding populations)\n"; )
