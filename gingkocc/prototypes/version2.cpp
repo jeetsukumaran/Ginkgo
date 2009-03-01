@@ -168,6 +168,7 @@ class Species;
 class Community;
 typedef int GenotypeFactor;
 typedef std::vector<GenotypeFactor> GenotypeFactors;
+typedef std::vector<Species*> SpeciesPool;
 typedef std::vector<Organism> Organisms;
 typedef std::vector<Community> Communities;
 
@@ -354,15 +355,12 @@ class Cell {
     public:
     
         // --- lifecycle and assignment ---
-        Cell(Landscape* landscape, long index, long x, long y);
-        Cell(const Cell& cell);
+        Cell(long index, long x, long y, Landscape& landscape, const SpeciesPool& species, RandomNumberGenerator& rng);
         ~Cell();
-        const Cell& operator=(const Cell& cell);
-        
-        // --- accessors and mutators
-        void set_landscape(Landscape* landscape);
 
     private:
+        const Cell& operator=(const Cell& cell);
+        Cell(const Cell& cell);        
         long                         _carrying_capacity;    // max # ind
         long                         _index;                // cell index
         long                         _x;                    // x-coordinate
@@ -370,8 +368,9 @@ class Cell {
         EnvironmentalFactors        _environment;           // environmental factors
         Organisms                   _organisms;             // the individual organisms of this biota
         
-        Landscape*                  _landscape;             // host landscape
-        World*                      _world;                 // host world
+        Landscape&                  _landscape;             // host landscape
+        const SpeciesPool&          _species;               // species pool
+        RandomNumberGenerator&      _rng;                   // random number generator
 
 }; // Cell
 
@@ -382,25 +381,22 @@ class Landscape {
     public:
     
         // --- lifecycle and assignment ---        
-        Landscape();
-        Landscape(long dim_x, long dim_y);
+        Landscape(const SpeciesPool& species, RandomNumberGenerator& rng);
         ~Landscape();
         
         // --- initialization and set up ---
         void generate(long size_x, long size_y); 
-        
-        // --- accessor and mutators ---        
-        Cells& cells() {
-            return this->_cells;
-        }
  
         // --- landscape access, control and mutation                                       
         void set_cell_carrying_capacity(long carrying_capacity);        
         
     private:
-        long            _size_x;   // size of the landscape in the x dimension
-        long            _size_y;   // size of the landscape in the y dimension        
-        Cells           _cells;     // cells of the landscape
+        long                        _size_x;                // size of the landscape in the x dimension
+        long                        _size_y;                // size of the landscape in the y dimension        
+        std::vector<Cell*>          _cells;                 // cells of the landscape
+        
+        const SpeciesPool&          _species;               // species pool
+        RandomNumberGenerator&      _rng;                   // random number generator        
 };
 
 ///////////////////////////////////////////////////////////////////////////////	
@@ -436,9 +432,9 @@ class World {
         void cycle();
         
     private:
-        Landscape                           _landscape;
-        std::vector<Species*>               _species_pool;
+        SpeciesPool                         _species_pool;
         RandomNumberGenerator               _rng;
+        Landscape                           _landscape;        
         int                                 _num_environmental_factors;
         unsigned long                       _current_generation;                
         
@@ -494,14 +490,22 @@ const Species& Species::operator=(const Species& species) {
 
 // --- lifecycle and assignment ---
 
-Cell::Cell(Landscape* landscape, long index, long x, long y)
+Cell::Cell(long index, long x, long y, Landscape& landscape, const SpeciesPool& species, RandomNumberGenerator& rng)     
     : _index(index),
       _x(x),
-      _y(y) {
-    this->set_landscape(landscape);      
+      _y(y),
+      _landscape(landscape),
+      _species(species),
+      _rng(rng) {    
 }
 
-Cell::Cell(const Cell& cell) {
+Cell::Cell(const Cell& cell)
+    : _index(cell._index),
+      _x(cell._x),
+      _y(cell._y),
+      _landscape(cell._landscape),
+      _species(cell._species),
+      _rng(cell._rng) {
     *this = cell;
 }
 
@@ -509,37 +513,31 @@ Cell::~Cell() {
 }
 
 const Cell& Cell::operator=(const Cell& cell) {
-    this->set_landscape(cell._landscape);
     this->_index = cell._index;
     this->_x = cell._x;
     this->_y = cell._y;
     return *this;
 }
 
-// --- accessors and mutators ---
-
-void Cell::set_landscape(Landscape* landscape) {
-    if (landscape != NULL) {
-        this->_landscape = landscape;
-    } else {
-        this->_landscape = NULL;
-    }
-}
 
 ///////////////////////////////////////////////////////////////////////////////	
 // Landscape
 
 // --- lifecycle and assignment --- 
 
-Landscape::Landscape() {
+Landscape::Landscape(const SpeciesPool& species, RandomNumberGenerator& rng)
+    : _species(species),
+      _rng(rng) {
 
 }
 
-Landscape::Landscape(long size_x, long size_y) {
-    this->generate(size_x, size_y);
-}
-
+// clean up cells
 Landscape::~Landscape() {
+    for (std::vector<Cell*>::iterator cell = this->_cells.begin();
+            cell != this->_cells.end();
+            ++cell) {
+        delete *cell; 
+    }  
 }
 
 // --- initialization and set up ---
@@ -550,7 +548,8 @@ void Landscape::generate(long size_x, long size_y) {
     long num_cells = size_x * size_y;
     for (long x = 0, index = 0; x < size_x; ++x) {
         for (long y = 0; y < size_y; ++y, ++index) {
-            this->_cells.push_back(Cell(this, index, x, y));
+            Cell* cell = new Cell(index, x, y, *this, this->_species, this->_rng);
+            this->_cells.push_back(cell);
         }
     }
 }
@@ -562,13 +561,17 @@ void Landscape::generate(long size_x, long size_y) {
 
 //! default constructor
 World::World()
-    : _rng(time(0)) {
+    : _species_pool(),
+      _rng(time(0)),
+      _landscape(_species_pool, _rng) {
     this->_current_generation = 0;
 }
 
 //! constructor: calls
 World::World(unsigned long seed) 
-    : _rng(seed) { 
+    : _species_pool(),
+      _rng(seed),
+      _landscape(_species_pool, _rng) {
     this->_current_generation = 0;    
 }    
 
