@@ -666,7 +666,7 @@ class World {
     
         // --- lifecycle --
 
-        World();
+        //World();
         World(unsigned long seed);
         ~World();
         
@@ -723,12 +723,18 @@ class World {
         void run(int num_generations);
         
     private:
+    
+
         SpeciesPool                         _species_pool;
         RandomNumberGenerator               _rng;
         Landscape                           _landscape;        
         unsigned                            _num_fitness_factors;
         CellIndexType                       _current_generation;                
-        
+
+		World(); // declare but do not define -- require seed
+		World(const World &); // declare but do not define -- not copyable
+		World & operator=(const World &); // declare but do not define -- not copyable
+    
 }; // World
 
 /******************************************************************************
@@ -931,14 +937,14 @@ void Landscape::generate(CellIndexType size_x, CellIndexType size_y, unsigned nu
 
 // --- lifecycle and assignment --- 
 
-//! default constructor
+/*! default constructor
 World::World()
     : _species_pool(),
       _rng(time(0)),
       _landscape(_species_pool, _rng) {
     this->_current_generation = 0;
 }
-
+*/
 //! constructor: calls
 World::World(unsigned long seed) 
     : _species_pool(),
@@ -1039,8 +1045,9 @@ int main(int argc, char* argv[]) {
     int num_cells_init = atoi(argv[4]);
     int num_gens = atoi(argv[5]);
     int num_env_factors = 4;
-    
-    World   world;
+    long seed = 10;
+    std::cerr << "Hard coded seed of " << seed << '\n';
+    World   world(seed);
 
 //##DEBUG##
 DEBUG_BLOCK( std::cerr << "(generating landscape)\n"; )
