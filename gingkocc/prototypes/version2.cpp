@@ -491,10 +491,10 @@ class Cell {
         
     
         // --- primary biogeographical and evolutionary processes ---
-        void survival();
-        void competition();
         void reproduction();
         void migration();
+        void survival();
+        void competition();        
         
         // --- supporting biogeographical and evolutionary processes ---
         void extract_breeding_groups(unsigned species_index, 
@@ -787,38 +787,11 @@ Cell::Cell(CellIndexType index,
 
 // --- primary biogeographical and evolutionary processes ---
 
-void Cell::survival() {
-    for (Organisms::iterator og = this->_organisms.begin(); og != this->_organisms.end(); ++og) {
-        assert(og->species_index() < this->_species.size());          
-        assert(!og->is_expired());                
-        Species& sp = *this->_species[og->species_index()];
-        float fitness = sp.calc_fitness(*og, this->_environment);       
-        og->set_fitness(fitness);
-        if (this->_rng.random() > fitness) {
-            og->set_expired(true);
-        }
-    }
-    this->purge_expired_organisms();
-}
-
-void Cell::competition() {
-    // NOTE: ASSUMES THAT FITNESS HAS BEEN CALCULATED FOR THE ORGANISM IN THIS CELL!
-    if (this->_organisms.size() > this->_carrying_capacity) {
-        // defaults to using Organism::operator<(), which also checks that 
-        // fitness has been set (i.e., >= 0)
-        std::sort(this->_organisms.begin(), this->_organisms.end());
-        this->_organisms.erase(this->_organisms.begin()+this->_carrying_capacity, 
-            this->_organisms.end());
-        assert(this->_organisms.size() == this->_carrying_capacity);
-    }
-}
-
 void Cell::reproduction() {
     for (SpeciesPool::const_iterator sp = this->_species.begin(); sp != this->_species.end(); ++sp) {
         Cell::breeding_female_ptrs.clear();
         Cell::breeding_male_ptrs.clear();
         Cell::new_offspring.clear();
-        
         // species-level reproduction rate for now: later this will be at the 
         // organism level and subject to evolution
         unsigned num_offspring = (*sp)->get_mean_reproductive_rate();
@@ -867,6 +840,36 @@ void Cell::migration() {
     }
     this->purge_expired_organisms();
 }
+
+void Cell::survival() {
+    for (Organisms::iterator og = this->_organisms.begin(); og != this->_organisms.end(); ++og) {
+        assert(og->species_index() < this->_species.size());          
+        assert(!og->is_expired());                
+        Species& sp = *this->_species[og->species_index()];
+        float fitness = sp.calc_fitness(*og, this->_environment);       
+        og->set_fitness(fitness);
+        if (this->_rng.random() > fitness) {
+            og->set_expired(true);
+        }
+    }
+    this->purge_expired_organisms();
+}
+
+void Cell::competition() {
+    // NOTE: ASSUMES THAT FITNESS HAS BEEN CALCULATED FOR THE ORGANISM IN THIS CELL!
+//     std::cout << this->_organisms.size() << ", " << this->_carrying_capacity;
+    if (this->_organisms.size() > this->_carrying_capacity) {
+        // defaults to using Organism::operator<(), which also checks that 
+        // fitness has been set (i.e., >= 0)
+        std::sort(this->_organisms.begin(), this->_organisms.end());
+        this->_organisms.erase(this->_organisms.begin()+this->_carrying_capacity, 
+            this->_organisms.end());
+        assert(this->_organisms.size() == this->_carrying_capacity);
+    }
+    assert(this->_organisms.size() <= this->_carrying_capacity);
+//     std::cout << " / " << this->_organisms.size() << ", " << this->_carrying_capacity << std::endl;
+}
+
 
 // --- supporting biogeographical and evolutionary processes ---
 
@@ -986,13 +989,29 @@ void World::seed_population(CellIndexType cell_index, unsigned species_index, Ce
 
 // --- simulation cycles ---
 void World::cycle() {
+
+// Results in inflated population: the migrants get distributed after the 
+// competition phase, resulting in a artificially (>> carrying capacity) 
+// boosted population when entering the next generation's reproduction phase.
+// This leads to a standing population at the end of each generation sometimes
+// an order or more of magnitude above the carrying capacity of the cell.
+//     for (CellIndexType i = this->_landscape.size()-1; i >= 0; --i) {
+//         this->_landscape[i].reproduction(); 
+//         this->_landscape[i].migration();
+//         this->_landscape[i].survival();
+//         this->_landscape[i].competition();
+//     }
+//     this->_landscape.process_migrants();
+
     for (CellIndexType i = this->_landscape.size()-1; i >= 0; --i) {
-        this->_landscape[i].survival();
-        this->_landscape[i].competition();
         this->_landscape[i].reproduction(); 
         this->_landscape[i].migration();
     }
-    this->_landscape.process_migrants();
+    this->_landscape.process_migrants();    
+    for (CellIndexType i = this->_landscape.size()-1; i >= 0; --i) {    
+        this->_landscape[i].survival();
+        this->_landscape[i].competition();        
+    }    
 }
 
 void World::run(int num_generations) {
