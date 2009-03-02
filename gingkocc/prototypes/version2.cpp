@@ -56,7 +56,7 @@ class RandomNumberGenerator {
         long randint(int a, int b);
         float standard_normal();
         float normal(float mean, float sd);
-        unsigned int poisson(int rate);
+        unsigned int poisson(float rate);
         
         template <typename T>
         inline typename T::value_type& choice(T& collection) {
@@ -143,7 +143,7 @@ float RandomNumberGenerator::normal(float mean, float sd) {
 }
 
 //! Poisson r.v. with given rate
-unsigned int RandomNumberGenerator::poisson(int rate) {
+unsigned int RandomNumberGenerator::poisson(float rate) {
     const int MAX_EXPECTATION = 64;
     if (rate > MAX_EXPECTATION) {
         float r = rate/2.0;
@@ -754,7 +754,7 @@ Species::Species(unsigned index,
     this->_mean_reproductive_rate = 6;
     this->_reproductive_rate_mutation_size = 1;
     this->_selection_strengths.assign(this->_num_fitness_factors, 1);
-    this->_default_genotype.assign(this->_num_fitness_factors, 0.0);
+    this->_default_genotype.assign(this->_num_fitness_factors, 0);
     this->_movement_capacity = 1;
 }
 
@@ -782,7 +782,7 @@ Cell::Cell(CellIndexType index,
       _species(species),
       _rng(rng) {      
     this->_carrying_capacity = 0;
-    this->_environment.assign(num_environmental_factors, 0.0);
+    this->_environment.assign(num_environmental_factors, 0);
 }
 
 // --- primary biogeographical and evolutionary processes ---
