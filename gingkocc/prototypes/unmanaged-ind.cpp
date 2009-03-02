@@ -797,7 +797,7 @@ void Species::population_migration() const {
  */
 float Species::calc_fitness(Individual& individual, EnvironmentFactors& env) const {
     Genotype& gen = individual.get_genotype();
-    assert(this->selection_strengths == gen.size() == env.size());
+//     assert(this->selection_strengths == gen.size() == env.size());
     Genotype::const_iterator g = gen.begin();
     EnvironmentFactors::const_iterator e = env.begin();
     std::vector<float>::const_iterator s = this->selection_strengths.begin();    
@@ -886,7 +886,7 @@ void Cell::initialize_biota() {
 //! cell.
 void Cell::seed_population(Species& sp, unsigned int size) {
     assert(sp.get_index() >= 0);
-    assert(sp.get_index() <= this->populations.size());
+//     assert(sp.get_index() <= this->populations.size());
     this->populations.at(sp.get_index()).assign(size);    
 }
 

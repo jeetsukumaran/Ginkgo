@@ -38,11 +38,7 @@
 #include <iterator>
 #include <utility>
 
-#if defined(NDEBUG)
-    #define DEBUG_BLOCK(y) y;
-#else
-    #define DEBUG_BLOCK(y)
-#endif    
+#define DEBUG_BLOCK(y) y;  
 
 
 /************************* SUPPORT CLASSES AND METHODS ***********************/
@@ -211,6 +207,7 @@ class Organism {
               _genotype(new_genotype),
               _sex(new_sex),
               _fitness() {
+            this->_expired = false;              
         }
         
         //! Copy constructor.
@@ -224,6 +221,7 @@ class Organism {
             this->_genotype = ind._genotype;
             this->_sex = ind._sex;
             this->_fitness = ind._fitness;
+            this->_expired = ind._expired;
             return *this;
         }
                    
@@ -327,7 +325,7 @@ class Species {
             this->_movement_costs = costs;
         }
         int movement_cost(CellIndexType i) {
-            assert(i < this->_movement_costs.size());
+            assert( (i >= 0 ) and (static_cast<unsigned>(i) < this->_movement_costs.size()) );
             return this->_movement_costs[i];
         }
         
@@ -412,11 +410,11 @@ class Cell {
             return this->_environment.size();
         }
         void set_environment_factor(unsigned idx, FitnessFactorType e) {
-            assert(idx < this->_enviroment.size());
+            assert(idx < this->_environment.size());
             this->_environment[idx] = e;
         }
         FitnessFactorType get_environment_factor(unsigned idx) const {
-            assert(idx < this->_enviroment.size());
+            assert(idx < this->_environment.size());
             return this->_environment[idx];
         }
         unsigned get_num_environmental_factors() const {
@@ -578,6 +576,7 @@ class Landscape {
                 }
                 output << std::endl;
             }
+            output << "---\nTotal organisms: " << total << std::endl;            
             return total;
         }        
                 
@@ -635,7 +634,7 @@ class World {
         // --- species configuration ---
         void set_species_movement_costs(unsigned species_index, const std::vector<int>& costs) {
             assert(species_index < this->_species_pool.size());
-            assert(costs.size() == this->_landscape.size());
+            assert(costs.size() == static_cast<unsigned long>(this->_landscape.size()));
             this->_species_pool[species_index]->set_movement_costs(costs);
         }
         void set_species_selection_strengths(unsigned species_index, const std::vector<float>& strengths) {
@@ -733,31 +732,27 @@ void Cell::reproduction() {
 void Cell::migration() {
 
     for (Organisms::iterator og = this->_organisms.begin(); og != this->_organisms.end(); ++og) {
-        assert(og->species_index() < this->_species.size());
-        assert(og->is_expired() == false);        
+    
+        assert(og->species_index() < this->_species.size());          
+        assert(!og->is_expired());        
+        
         Species& sp = *this->_species[og->species_index()];
         int movement = sp.get_movement_capacity();
         CellIndexType curr_idx = this->_index;
-        
-// DEBUG_BLOCK( std::cerr << "New organism at " << curr_idx << ": " << movement << "\n"; )
-
+                        
         while (movement > 0) {
-        
-// DEBUG_BLOCK( std::cerr << "Current movement = " << movement << ". From " << curr_idx << " to "; )
-
             CellIndexType dest_idx = this->_landscape.random_neighbor(curr_idx);
-            
-// DEBUG_BLOCK( std::cerr << dest_idx << ", cost = " <<  sp.movement_cost(dest_idx) << ".\n")
-
             movement -= sp.movement_cost(dest_idx);
             if (movement > 0) {
                 curr_idx = dest_idx;
             }
-        }        
+        } 
+        
         if (curr_idx != this->_index) {
-            og->set_expired(true);
             this->_landscape.add_migrant(*og, curr_idx);
+            og->set_expired(true);            
         }
+
     }
     Organisms::iterator end_unexpired = std::remove_if(this->_organisms.begin(), 
         this->_organisms.end(), 
@@ -951,10 +946,8 @@ DEBUG_BLOCK( std::cerr << "(running cycles)\n"; )
     world.run(num_gens);
 
 
-    std::cerr << "\n\n(FINAL STATUS)\n"; 
-    unsigned long total = world.landscape().dump(std::cerr);
-    std::cerr << "\n---\nTotal organisms: " << total << std::endl;
-
+    std::cerr << "\n#### FINAL STATUS ####\n\n"; 
+    world.landscape().dump(std::cerr);
 }
 
 
