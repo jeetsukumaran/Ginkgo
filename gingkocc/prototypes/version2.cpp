@@ -336,6 +336,20 @@ class Species {
             this->_default_genotype = genotype;
         }         
         
+        // --- fitness ---
+        float calc_fitness(const Organism& organism, const FitnessFactors& environment) const {
+            const FitnessFactors genotype = organism.genotype();        
+            assert(genotype.size() == environment.size());        
+            FitnessFactors::const_iterator g = genotype.begin();
+            FitnessFactors::const_iterator e = environment.begin();
+            std::vector<float>::const_iterator s = this->_selection_strengths.begin();
+            float weighted_distance = 0.0;
+            for (; g != genotype.end(); ++g) {
+                weighted_distance += pow((*e - *g), 2) * *s; // each distance weighted by selection strength
+            }
+            return exp(-weighted_distance);
+        }                    
+        
         // --- organism generation and reproduction ---
         Organism::Sex get_random_sex(float female_threshold=0.5) const {
             if (this->_rng.random() < female_threshold) {
@@ -371,8 +385,8 @@ class Species {
                 offspring_genotype.push_back(genotype_value);
             }
             return offspring_genotype;
-        }        
-                                
+        }
+
     private:
         // declared as private (and undefined) to prevent copying/assignment
         Species(const Species& species);    
@@ -455,10 +469,17 @@ class Cell {
                 this->_organisms.push_back(this->_species.at(species_index)->new_organism());
             }
         }
-        void insert_organism(const Organism organism) {
+        void insert_organism(const Organism& organism) {
             this->_organisms.push_back(organism);
+        }        
+        void purge_expired_organisms() {
+            Organisms::iterator end_unexpired = std::remove_if(this->_organisms.begin(), 
+                this->_organisms.end(), 
+                std::mem_fun_ref(&Organism::is_expired));
+            this->_organisms.erase(end_unexpired, this->_organisms.end());
         }
-                
+        
+    
         // --- primary biogeographical and evolutionary processes ---
         void survival();
         void competition();
@@ -756,11 +777,19 @@ Cell::Cell(CellIndexType index,
 // --- primary biogeographical and evolutionary processes ---
 
 void Cell::survival() {
-
+    for (Organisms::iterator og = this->_organisms.begin(); og != this->_organisms.end(); ++og) {
+        assert(og->species_index() < this->_species.size());          
+        assert(!og->is_expired());                
+        Species& sp = *this->_species[og->species_index()];
+        float fitness = sp.calc_fitness(*og, this->_environment);
+        if (this->_rng.random() > fitness) {
+            og->set_expired(true);
+        }
+    }
+    this->purge_expired_organisms();
 }
 
 void Cell::competition() {
-
 }
 
 void Cell::reproduction() {
@@ -787,8 +816,8 @@ void Cell::reproduction() {
             }
             this->_organisms = Cell::new_offspring;        // time ~2.027s 10x10  
 //             this->_organisms.swap(Cell::new_offspring); // time ~2.132s 10x10
-        }         
-    }
+        }
+    }    
 }
 
 void Cell::migration() {
@@ -814,12 +843,8 @@ void Cell::migration() {
             this->_landscape.add_migrant(*og, curr_idx);
             og->set_expired(true);            
         }
-
     }
-    Organisms::iterator end_unexpired = std::remove_if(this->_organisms.begin(), 
-        this->_organisms.end(), 
-        std::mem_fun_ref(&Organism::is_expired));
-    this->_organisms.erase(end_unexpired, this->_organisms.end());
+    this->purge_expired_organisms();
 }
 
 // --- supporting biogeographical and evolutionary processes ---
