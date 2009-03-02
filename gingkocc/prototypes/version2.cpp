@@ -785,8 +785,8 @@ void Cell::reproduction() {
                     this->new_offspring.push_back((*sp)->new_organism(*(*fptr), *male));
                 }                    
             }
-            // this->_organisms.swap = Cell::new_offspring
-            this->_organisms.swap(Cell::new_offspring);
+            this->_organisms = Cell::new_offspring;        // time ~2.027s 10x10  
+//             this->_organisms.swap(Cell::new_offspring); // time ~2.132s 10x10
         }         
     }
 }
