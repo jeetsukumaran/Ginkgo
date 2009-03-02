@@ -915,7 +915,7 @@ DEBUG_BLOCK( std::cerr << "(adding species)\n"; )
 	std::vector<int> costs;
 	costs.assign(size_x * size_y, 1);
 	sp1.set_movement_costs(costs);
-	sp1.set_movement_capacity(10);
+	sp1.set_movement_capacity(2);
 	
 	std::vector<FitnessFactorType> genotype;
 	genotype.reserve(num_env_factors);
