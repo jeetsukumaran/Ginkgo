@@ -1034,7 +1034,7 @@ DEBUG_BLOCK( this->_landscape.dump(std::cout); )
  *****************************************************************************/
 
 int main(int argc, char* argv[]) {
-    long seed = 10;
+    long seed = 0;
 	std::vector<int> args_as_ints;
 	for (int i = 1; i < argc; ++i) {
 		std::string a(argv[i]);
@@ -1062,6 +1062,8 @@ int main(int argc, char* argv[]) {
     int num_cells_init = args_as_ints[3];
     int num_gens = args_as_ints[4];
     int num_env_factors = 4;
+    if (seed < 1)
+    	seed = time(0);
     std::cerr << "Using seed of " << seed << '\n';
     World   world(seed);
 
