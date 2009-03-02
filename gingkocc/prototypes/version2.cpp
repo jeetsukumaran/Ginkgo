@@ -156,7 +156,7 @@ unsigned int RandomNumberGenerator::poisson(float rate) {
         k += 1.0;
         p *= this->random();
     }
-    return k - 1.0;
+    return static_cast<unsigned int>(k - 1.0);
 }
 
 /******************************************************************************
