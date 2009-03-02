@@ -24,6 +24,7 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
+
 #include <algorithm>
 #include <vector>
 #include <set>
@@ -193,6 +194,83 @@ typedef std::vector<FitnessFactorType> EnvironmentalFactors;
  
 /* POPULATION ECOLOGY AND GENETICS *******************************************/
 
+class HaploidGenealogy {
+	public:
+		HaploidGenealogy()
+		:parent(0L),
+		reference_count(1)
+		{}
+		
+		void SetParent(HaploidGenealogy *p) {
+			this->parent = p;
+			if (p)
+				p->incrementCount();
+			//std::cerr << 'c' << this->reference_count << '\n';
+
+		}
+		
+		~HaploidGenealogy() {
+			if (this->parent)
+				this->parent->decrementCount();
+			assert(this->reference_count == 0 || this->reference_count == 1);
+			//std::cerr << '~' << this->reference_count << '\n';
+		}
+		void decrementCount() {
+			if (this->reference_count == 1)
+				delete this; // never do this!!
+			this->reference_count -= 1;
+			//std::cerr << 'd' << this->reference_count << '\n';
+		}
+		void incrementCount() {
+			this->reference_count += 1;
+			//std::cerr << 'i' << this->reference_count << '\n';
+		}
+		HaploidGenealogy *parent;
+		unsigned reference_count;
+		
+};
+
+class DiploidGenealogy {
+	public:
+		DiploidGenealogy()
+		:mother(0L),father(0L),
+		reference_count(1)
+		{}
+		
+		void SetParents(DiploidGenealogy * m, DiploidGenealogy * f) {
+			this->mother = m;
+			this->father = f;
+			if (m)
+				m->incrementCount();
+			if (f)
+				f->incrementCount();
+			//std::cerr << 'c' << this->reference_count << '\n';
+
+		}
+		
+		~DiploidGenealogy() {
+			if (this->mother)
+				this->mother->decrementCount();
+			if (this->father)
+				this->father->decrementCount();
+			assert(this->reference_count == 0 || this->reference_count == 1);
+			//std::cerr << '~' << this->reference_count << '\n';
+		}
+		void decrementCount() {
+			if (this->reference_count == 1)
+				delete this; // never do this!!
+			this->reference_count -= 1;
+			//std::cerr << 'd' << this->reference_count << '\n';
+		}
+		void incrementCount() {
+			this->reference_count += 1;
+			//std::cerr << 'i' << this->reference_count << '\n';
+		}
+		DiploidGenealogy * mother;
+		DiploidGenealogy * father;
+		unsigned reference_count;
+		
+};
 ///////////////////////////////////////////////////////////////////////////////
 //! A single organism of a population of a particular species.
 //! Responsible for tracking (non-neutral) genotype and neutral marker 
@@ -210,7 +288,8 @@ class Organism {
         // lifecycle and assignment
         
         Organism(unsigned species_index, const FitnessFactors& new_genotype, Organism::Sex new_sex) 
-            : _species_index(species_index),
+            : mt_locus(0L), pedigree_node(0L),
+              _species_index(species_index),
 #			  if ! defined(STATIC_GENOTYPE_LENGTH)
               	_genotype(new_genotype),
 #			  endif
@@ -223,8 +302,16 @@ class Organism {
 		}
         
         //! Copy constructor.
-        Organism(const Organism& ind) {
+        Organism(const Organism& ind)
+        	:mt_locus(0L), pedigree_node(0L) {
             *this = ind;
+        }
+
+        ~Organism() {
+            if (this->mt_locus)
+            	this->mt_locus->decrementCount();
+            if (this->pedigree_node)
+            	this->pedigree_node->decrementCount();
         }
         
         //! Assignment.
@@ -238,6 +325,18 @@ class Organism {
             this->_sex = ind._sex;
             this->_fitness = ind._fitness;
             this->_expired = ind._expired;
+            if (this->mt_locus)
+            	this->mt_locus->decrementCount();
+            this->mt_locus = ind.mt_locus;
+            if (this->mt_locus)
+            	this->mt_locus->incrementCount();
+
+            if (this->pedigree_node)
+            	this->pedigree_node->decrementCount();
+            this->pedigree_node = ind.pedigree_node;
+            if (this->pedigree_node)
+            	this->pedigree_node->incrementCount();
+
             return *this;
         }
         
@@ -279,6 +378,19 @@ class Organism {
         bool is_female() const {
             return this->_sex == Organism::Female;
         }                
+		
+		void SetMtParent(HaploidGenealogy *p) {
+			assert(this->mt_locus == 0L);
+			this->mt_locus = new HaploidGenealogy();
+			this->mt_locus->SetParent(p);
+		}
+		void SetParents(DiploidGenealogy *m, DiploidGenealogy *f) {
+			assert(this->pedigree_node == 0L);
+			this->pedigree_node = new DiploidGenealogy();
+			this->pedigree_node->SetParents(m, f);
+		}
+		HaploidGenealogy * mt_locus;
+		DiploidGenealogy * pedigree_node;
 
     private:
         unsigned        _species_index;     // species
@@ -401,7 +513,10 @@ class Species {
         Organism new_organism(const Organism& female, const Organism& male) const {
         	FitnessFactors og;
 			this->compose_offspring_genotype(female.genotype(), male.genotype(), og);
-            return Organism(this->_index, og, this->get_random_sex());
+            Organism o (this->_index, og, this->get_random_sex());
+            //o.SetMtParent(female.mt_locus);
+            o.SetParents(female.pedigree_node, male.pedigree_node);
+            return o;
         }        
         
         void compose_offspring_genotype(const FitnessFactors& female_genotype, 
@@ -853,7 +968,8 @@ void Cell::reproduction() {
                     ++fptr) {
                 for (unsigned n = 0; n <= num_offspring; ++n) {                    
                     const Organism* male = this->_rng.choice(breeding_male_ptrs);
-                    this->new_offspring.push_back((*sp)->new_organism(*(*fptr), *male));
+                    const Organism* female = *fptr;
+                    this->new_offspring.push_back((*sp)->new_organism(*female, *male));
                 }                    
             }
         }
