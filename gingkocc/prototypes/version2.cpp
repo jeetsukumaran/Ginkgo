@@ -177,7 +177,14 @@ typedef std::vector<Cell> Cells;
 typedef long CellIndexType;
 
 typedef int FitnessFactorType;
-typedef std::vector<FitnessFactorType> FitnessFactors;
+#if defined(STATIC_GENOTYPE_LENGTH)
+	const unsigned genotypeLen = 4;
+	typedef FitnessFactorType FitnessFactors[genotypeLen];
+#else
+	typedef std::vector<FitnessFactorType> FitnessFactors;
+#endif
+typedef std::vector<FitnessFactorType> EnvironmentalFactors;
+
 
 
 /******************************************************************************
@@ -204,11 +211,16 @@ class Organism {
         
         Organism(unsigned species_index, const FitnessFactors& new_genotype, Organism::Sex new_sex) 
             : _species_index(species_index),
-              _genotype(new_genotype),
+#			  if ! defined(STATIC_GENOTYPE_LENGTH)
+              	_genotype(new_genotype),
+#			  endif
               _sex(new_sex),
               _fitness(-1),
               _expired(false) {
-        }
+#			if defined(STATIC_GENOTYPE_LENGTH)
+				memcpy(this->_genotype, new_genotype, genotypeLen*sizeof(FitnessFactorType));
+#			endif
+		}
         
         //! Copy constructor.
         Organism(const Organism& ind) {
@@ -218,7 +230,11 @@ class Organism {
         //! Assignment.
         const Organism& operator=(const Organism& ind) {
             this->_species_index = ind._species_index;
-            this->_genotype = ind._genotype;
+#			if defined(STATIC_GENOTYPE_LENGTH)
+				memcpy(this->_genotype, ind._genotype, genotypeLen*sizeof(FitnessFactorType));
+#			else
+				this->_genotype = ind._genotype;
+#			endif
             this->_sex = ind._sex;
             this->_fitness = ind._fitness;
             this->_expired = ind._expired;
@@ -343,18 +359,27 @@ class Species {
             this->_selection_strengths = strengths;
         }
         void set_default_genotype(const FitnessFactors& genotype) {
-            this->_default_genotype = genotype;
+#			if defined(STATIC_GENOTYPE_LENGTH)
+        		memcpy(this->_default_genotype, genotype, genotypeLen*sizeof(FitnessFactorType));
+#			else
+				this->_default_genotype = genotype;
+#			endif
         }         
         
         // --- fitness ---
-        float calc_fitness(const Organism& organism, const FitnessFactors& environment) const {
-            const FitnessFactors genotype = organism.genotype();        
-            assert(genotype.size() == environment.size());        
-            FitnessFactors::const_iterator g = genotype.begin();
-            FitnessFactors::const_iterator e = environment.begin();
+        float calc_fitness(const Organism& organism, const EnvironmentalFactors& environment) const {
+            const FitnessFactors & genotype = organism.genotype();        
+#			if defined(STATIC_GENOTYPE_LENGTH)
+            	const FitnessFactorType * g = genotype;
+#			else
+	            FitnessFactors::const_iterator g = genotype.begin();
+	            assert(genotype.size() == environment.size());        
+	            const unsigned genotypeLen = genotype.size();
+#			endif
+            EnvironmentalFactors::const_iterator e = environment.begin();
             std::vector<float>::const_iterator s = this->_selection_strengths.begin();
             float weighted_distance = 0.0;
-            for (; g != genotype.end(); ++g) {
+            for (unsigned i = 0; i < genotypeLen; ++i, ++g, ++e, ++s) {
                 weighted_distance += pow((*e - *g), 2) * *s; // each distance weighted by selection strength
             }
             return exp(-weighted_distance);
@@ -374,27 +399,37 @@ class Species {
         }
         
         Organism new_organism(const Organism& female, const Organism& male) const {
-            return Organism(this->_index, 
-                            this->compose_offspring_genotype(female.genotype(), male.genotype()),
-                            this->get_random_sex());
+        	FitnessFactors og;
+			this->compose_offspring_genotype(female.genotype(), male.genotype(), og);
+            return Organism(this->_index, og, this->get_random_sex());
         }        
         
-        FitnessFactors compose_offspring_genotype(const FitnessFactors& female_genotype, 
-                const FitnessFactors& male_genotype) const {
-            FitnessFactors offspring_genotype;
-            assert(male_genotype.size() == female_genotype.size());
-            offspring_genotype.reserve(female_genotype.size());
-            FitnessFactors::const_iterator male_g = male_genotype.begin();
-            FitnessFactors::const_iterator female_g = female_genotype.begin();
-            for ( ; female_g != female_genotype.end(); ++male_g, ++female_g) {
-                FitnessFactorType genotype_value = this->_rng.choice(*male_g, *female_g);  
-                if (this->_rng.random() < this->_mutation_rate) {
-                    genotype_value += this->_rng.randint(-this->_max_mutation_size,
-                                                         this->_max_mutation_size);
-                }
-                offspring_genotype.push_back(genotype_value);
-            }
-            return offspring_genotype;
+        void compose_offspring_genotype(const FitnessFactors& female_genotype, 
+                const FitnessFactors& male_genotype, 
+                FitnessFactors & offspring_genotype) const {
+#			if defined(STATIC_GENOTYPE_LENGTH)
+				for (unsigned i = 0; i < genotypeLen; ++i) {
+					FitnessFactorType genotype_value = this->_rng.choice(male_genotype[i], female_genotype[i]);  
+					if (this->_rng.random() < this->_mutation_rate) {
+						genotype_value += this->_rng.randint(-this->_max_mutation_size,
+															 this->_max_mutation_size);
+					}
+					offspring_genotype[i] = genotype_value;
+				}
+#			else
+				assert(male_genotype.size() == female_genotype.size());
+				offspring_genotype.reserve(female_genotype.size());
+				FitnessFactors::const_iterator male_g = male_genotype.begin();
+				FitnessFactors::const_iterator female_g = female_genotype.begin();
+				for ( ; female_g != female_genotype.end(); ++male_g, ++female_g) {
+					FitnessFactorType genotype_value = this->_rng.choice(*male_g, *female_g);  
+					if (this->_rng.random() < this->_mutation_rate) {
+						genotype_value += this->_rng.randint(-this->_max_mutation_size,
+															 this->_max_mutation_size);
+					}
+					offspring_genotype.push_back(genotype_value);
+				}
+#			endif
         }
 
     private:
@@ -511,7 +546,7 @@ class Cell {
         CellIndexType               _index;                 // cell index
         CellIndexType               _x;                     // x-coordinate
         CellIndexType               _y;                     // y-coordinate
-        FitnessFactors              _environment;           // environmental factors
+        EnvironmentalFactors              _environment;           // environmental factors
         Organisms                   _organisms;             // the individual organisms of this biota
         
         Landscape&                  _landscape;             // host landscape
@@ -709,7 +744,9 @@ class World {
         }
         void set_species_default_genotype(unsigned species_index, const FitnessFactors& genotype) {
             assert(species_index < this->_species_pool.size());        
-            assert(genotype.size() == this->_num_fitness_factors);
+#			if ! defined(STATIC_GENOTYPE_LENGTH)
+				assert(genotype.size() == this->_num_fitness_factors);
+#			endif 
             this->_species_pool[species_index]->set_default_genotype(genotype);
         }        
                                 
@@ -760,7 +797,12 @@ Species::Species(unsigned index,
     this->_mean_reproductive_rate = 6;
     this->_reproductive_rate_mutation_size = 1;
     this->_selection_strengths.assign(this->_num_fitness_factors, 1);
-    this->_default_genotype.assign(this->_num_fitness_factors, 0);
+#	if defined(STATIC_GENOTYPE_LENGTH)
+		memset(this->_default_genotype, 0, genotypeLen*sizeof(FitnessFactorType));    
+#	else
+		this->_default_genotype.assign(this->_num_fitness_factors, 0);    
+#	endif 
+
     this->_movement_capacity = 1;
 }
 
@@ -794,10 +836,10 @@ Cell::Cell(CellIndexType index,
 // --- primary biogeographical and evolutionary processes ---
 
 void Cell::reproduction() {
+	Cell::new_offspring.clear();
     for (SpeciesPool::const_iterator sp = this->_species.begin(); sp != this->_species.end(); ++sp) {
-        Cell::breeding_female_ptrs.clear();
-        Cell::breeding_male_ptrs.clear();
-        Cell::new_offspring.clear();
+		Cell::breeding_female_ptrs.clear();
+		Cell::breeding_male_ptrs.clear();
         // species-level reproduction rate for now: later this will be at the 
         // organism level and subject to evolution
         unsigned num_offspring = (*sp)->get_mean_reproductive_rate();
@@ -814,10 +856,10 @@ void Cell::reproduction() {
                     this->new_offspring.push_back((*sp)->new_organism(*(*fptr), *male));
                 }                    
             }
-            this->_organisms = Cell::new_offspring;        // time ~2.027s 10x10  
-//             this->_organisms.swap(Cell::new_offspring); // time ~2.132s 10x10
         }
     }    
+//	this->_organisms = Cell::new_offspring;        // time ~2.027s 10x10  
+	this->_organisms.swap(Cell::new_offspring); // time ~2.132s 10x10
 }
 
 void Cell::migration() {
