@@ -226,7 +226,7 @@ class Organism {
         }
                    
         // genotype       
-        FitnessFactors& genotype() {
+        const FitnessFactors& genotype() const {
             return this->_genotype;
         }
         
@@ -348,6 +348,30 @@ class Species {
         Organism new_organism() const {
             return Organism(this->_index, this->_default_genotype, this->get_random_sex());
         }
+        
+        Organism new_organism(const Organism& female, const Organism& male) const {
+            return Organism(this->_index, 
+                            this->compose_offspring_genotype(female.genotype(), male.genotype()),
+                            this->get_random_sex());
+        }        
+        
+        FitnessFactors compose_offspring_genotype(const FitnessFactors& female_genotype, 
+                const FitnessFactors& male_genotype) const {
+            FitnessFactors offspring_genotype;
+            assert(male_genotype.size() == female_genotype.size());
+            offspring_genotype.reserve(female_genotype.size());
+            FitnessFactors::const_iterator male_g = male_genotype.begin();
+            FitnessFactors::const_iterator female_g = female_genotype.begin();
+            for ( ; female_g != female_genotype.end(); ++male_g, ++female_g) {
+                FitnessFactorType genotype_value = this->_rng.choice(*male_g, *female_g);  
+                if (this->_rng.random() < this->_mutation_rate) {
+                    genotype_value += this->_rng.randint(-this->_max_mutation_size,
+                                                         this->_max_mutation_size);
+                }
+                offspring_genotype.push_back(genotype_value);
+            }
+            return offspring_genotype;
+        }        
                                 
     private:
         // declared as private (and undefined) to prevent copying/assignment
@@ -435,11 +459,16 @@ class Cell {
             this->_organisms.push_back(organism);
         }
                 
-        // --- biogeographical and evolutionary processes ---
+        // --- primary biogeographical and evolutionary processes ---
         void survival();
         void competition();
         void reproduction();
         void migration();
+        
+        // --- supporting biogeographical and evolutionary processes ---
+        void extract_breeding_groups(unsigned species_index, 
+            std::vector<const Organism*>& female_ptrs,
+            std::vector<const Organism*>& male_ptrs) const;
         
     private:
         // disable copying/assignment
@@ -457,6 +486,10 @@ class Cell {
         Landscape&                  _landscape;             // host landscape
         const SpeciesPool&          _species;               // species pool
         RandomNumberGenerator&      _rng;                   // random number generator
+        
+        static std::vector<const Organism*> breeding_female_ptrs;    // scratch space for breeding
+        static std::vector<const Organism*> breeding_male_ptrs;      // scratch space for breeding
+        static Organisms new_offspring;                         // scratch space for next gen
 
 }; // Cell
 
@@ -693,8 +726,13 @@ Species::Species(unsigned index,
     this->_movement_capacity = 1;
 }
 
+
 ///////////////////////////////////////////////////////////////////////////////	
 // Cell
+
+std::vector<const Organism*> Cell::breeding_female_ptrs; // scratch space for breeding
+std::vector<const Organism*> Cell::breeding_male_ptrs;   // scratch space for breeding
+Organisms Cell::new_offspring;             // scratch space for next gen
 
 // --- lifecycle and assignment ---
 
@@ -715,7 +753,7 @@ Cell::Cell(CellIndexType index,
     this->_environment.assign(num_environmental_factors, 0.0);
 }
 
-// --- biogeographical and evolutionary processes ---
+// --- primary biogeographical and evolutionary processes ---
 
 void Cell::survival() {
 
@@ -726,7 +764,31 @@ void Cell::competition() {
 }
 
 void Cell::reproduction() {
-
+    for (SpeciesPool::const_iterator sp = this->_species.begin(); sp != this->_species.end(); ++sp) {
+        Cell::breeding_female_ptrs.clear();
+        Cell::breeding_male_ptrs.clear();
+        Cell::new_offspring.clear();
+        
+        // species-level reproduction rate for now: later this will be at the 
+        // organism level and subject to evolution
+        unsigned num_offspring = (*sp)->get_mean_reproductive_rate();
+        
+        this->extract_breeding_groups((*sp)->get_index(), Cell::breeding_female_ptrs, Cell::breeding_male_ptrs);
+        if ( (Cell::breeding_female_ptrs.size() == 0) or (Cell::breeding_male_ptrs.size() == 0)) {
+            this->_organisms.clear();
+        } else {
+            for (std::vector<const Organism*>::iterator fptr = Cell::breeding_female_ptrs.begin();
+                    fptr != Cell::breeding_female_ptrs.end();
+                    ++fptr) {
+                for (unsigned n = 0; n <= num_offspring; ++n) {                    
+                    const Organism* male = this->_rng.choice(breeding_male_ptrs);
+                    this->new_offspring.push_back((*sp)->new_organism(*(*fptr), *male));
+                }                    
+            }
+            // this->_organisms.swap = Cell::new_offspring
+            this->_organisms.swap(Cell::new_offspring);
+        }         
+    }
 }
 
 void Cell::migration() {
@@ -759,6 +821,24 @@ void Cell::migration() {
         std::mem_fun_ref(&Organism::is_expired));
     this->_organisms.erase(end_unexpired, this->_organisms.end());
 }
+
+// --- supporting biogeographical and evolutionary processes ---
+
+//! Extracts pointers to male and female organisms of a particular species
+void Cell::extract_breeding_groups(unsigned species_index, 
+                                        std::vector<const Organism*>& female_ptrs,
+                                        std::vector<const Organism*>& male_ptrs) const {
+    assert(species_index < this->_species.size());    
+    for (Organisms::const_iterator og = this->_organisms.begin(); og != this->_organisms.end(); ++og) {
+        if (og->species_index() == species_index) {
+            if (og->is_female()) {
+                female_ptrs.push_back(&(*og));
+            } else {
+                male_ptrs.push_back(&(*og));
+            }
+        }
+    }
+}                                         
 
 ///////////////////////////////////////////////////////////////////////////////	
 // Landscape
