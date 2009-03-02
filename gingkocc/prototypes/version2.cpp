@@ -743,7 +743,7 @@ void Cell::migration() {
         while (movement > 0) {
             CellIndexType dest_idx = this->_landscape.random_neighbor(curr_idx);
             movement -= sp.movement_cost(dest_idx);
-            if (movement > 0) {
+            if (movement >= 0) {
                 curr_idx = dest_idx;
             }
         } 
@@ -915,7 +915,7 @@ DEBUG_BLOCK( std::cerr << "(adding species)\n"; )
 	std::vector<int> costs;
 	costs.assign(size_x * size_y, 1);
 	sp1.set_movement_costs(costs);
-	sp1.set_movement_capacity(2);
+	sp1.set_movement_capacity(1);
 	
 	std::vector<FitnessFactorType> genotype;
 	genotype.reserve(num_env_factors);
