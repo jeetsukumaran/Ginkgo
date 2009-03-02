@@ -13,10 +13,7 @@ AM_LDFLAGS  = @LDFLAGS@
 # sources for a library named libmumble++.a should be listed in the
 # libmumble___a_SOURCES variable.
 
-bin_PROGRAMS = unmanaged-ind version2
-
-unmanaged_ind_SOURCES = \
-	unmanaged-ind.cpp
+bin_PROGRAMS = version2
 
 version2_SOURCES = \
     version2.cpp
