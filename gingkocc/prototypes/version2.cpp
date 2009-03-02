@@ -24,6 +24,7 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
+#include <algorithm>
 #include <vector>
 #include <set>
 #include <cstring>
@@ -35,6 +36,7 @@
 #include <cassert>
 #include <iomanip>
 #include <iterator>
+#include <utility>
 
 #if defined(NDEBUG)
     #define DEBUG_BLOCK(y) y;
@@ -204,9 +206,7 @@ class Organism {
 
         // lifecycle and assignment
         
-        Organism(int species_index,
-                           const FitnessFactors& new_genotype,
-                           Organism::Sex new_sex) 
+        Organism(unsigned species_index, const FitnessFactors& new_genotype, Organism::Sex new_sex) 
             : _species_index(species_index),
               _genotype(new_genotype),
               _sex(new_sex),
@@ -236,12 +236,15 @@ class Organism {
         float &fitness() {
             return this->_fitness;
         }
-        bool &killed() {
-            return this->_killed;
-        }        
+        bool is_expired() const {
+            return this->_expired;
+        }
+        void set_expired(bool val) {
+            this->_expired = val;
+        }          
         
         // meta-info
-        int get_species_index() const {
+        unsigned species_index() const {
             return this->_species_index;
         }
         
@@ -254,11 +257,11 @@ class Organism {
         }                
 
     private:
-        int              _species_index;    // species
-        FitnessFactors  _genotype;         // non-neutral genotype: maps to fitness phenotype
-        Organism::Sex    _sex;              // male or female
-        float            _fitness;          // cache this organism's fitness
-        bool             _killed;           // flag an organism as dead: allowing for use of std::remove_if() and std::resize() or v.erase()
+        unsigned        _species_index;     // species
+        FitnessFactors  _genotype;          // non-neutral genotype: maps to fitness phenotype
+        Organism::Sex   _sex;               // male or female
+        float           _fitness;           // cache this organism's fitness
+        bool            _expired;           // flag an organism to be removed allowing for use of std::remove_if() and std::resize() or v.erase()
         
 }; // Organism
 
@@ -270,23 +273,23 @@ class Species {
     public:
     
         // --- lifecycle and assignment ---        
-        Species(int index,
+        Species(unsigned index,
                 const char* label, 
-                int num_fitness_factors,
+                unsigned num_fitness_factors,
                 RandomNumberGenerator& rng);              
         ~Species() {}        
                 
         // --- access and mutation ---
-        int get_index() const {
+        unsigned get_index() const {
             return this->_index;
         }
-        void set_num_fitness_factors(int i) {
+        void set_num_fitness_factors(unsigned i) {
             this->_num_fitness_factors = i;
         }
-        int get_num_fitness_factors() const {
+        unsigned get_num_fitness_factors() const {
             return this->_num_fitness_factors;
         }
-        void set_index(int i) {
+        void set_index(unsigned i) {
             this->_index = i;
         }            
         float get_mutation_rate() const {
@@ -301,22 +304,33 @@ class Species {
         void set_max_mutation_size(FitnessFactorType i) {
             this->_max_mutation_size = i;
         }
-        int get_mean_reproductive_rate() const {
+        unsigned get_mean_reproductive_rate() const {
             return this->_mean_reproductive_rate;
         }
-        void set_mean_reproductive_rate(int i) {
+        void set_mean_reproductive_rate(unsigned i) {
             this->_mean_reproductive_rate = i;
-        }
-        int get_reproductive_rate_mutation_size() const {
+        }     
+        unsigned get_reproductive_rate_mutation_size() const {
             return this->_reproductive_rate_mutation_size;
         }
-        void set_reproductive_rate_mutation_size(int i) {
+        void set_reproductive_rate_mutation_size(unsigned i) {
             this->_reproductive_rate_mutation_size = i;
         }
+        unsigned get_movement_capacity() const {
+            return this->_movement_capacity;
+        }
+        void set_movement_capacity(unsigned i) {
+            this->_movement_capacity = i;
+        }   
         
         void set_movement_costs(const std::vector<unsigned>& costs) {
             this->_movement_costs = costs;
         }
+        int movement_cost(CellIndexType i) {
+            assert(i < this->_movement_costs.size());
+            return this->_movement_costs[i];
+        }
+        
         void set_selection_strengths(const std::vector<float>& strengths) {
             this->_selection_strengths = strengths;
         }
@@ -343,15 +357,16 @@ class Species {
         const Species& operator=(const Species& species);
         
     private:        
-        int                         _index;                     // "slot" in cell's pop vector    
+        unsigned                    _index;                     // "slot" in cell's pop vector    
         std::string                 _label;                     // arbitrary identifier
-        int                         _num_fitness_factors;       // so genotypes of appropriate length can be composed                
+        unsigned                    _num_fitness_factors;       // so genotypes of appropriate length can be composed                
         std::vector<float>          _selection_strengths;       // weighted_distance = distance / (sel. strength)
-        std::vector<unsigned>       _movement_costs;            // the movement surface: the "cost" to enter into every cell on the landscape
         float                       _mutation_rate;             // rate of mutations
         FitnessFactorType           _max_mutation_size;         // window "size" of mutations
-        int                         _mean_reproductive_rate;    // "base" reproductive rate
-        int                         _reproductive_rate_mutation_size;  // if reprod. rate evolves, size of step
+        unsigned                    _mean_reproductive_rate;    // "base" reproductive rate
+        unsigned                    _reproductive_rate_mutation_size;  // if reprod. rate evolves, size of step
+        std::vector<unsigned>       _movement_costs;            // the movement surface: the "cost" to enter into every cell on the landscape
+        unsigned                    _movement_capacity;         // number of cells per round an individual can move
         FitnessFactors              _default_genotype;          // genotype of individuals generated de novo        
         RandomNumberGenerator&      _rng;                       // rng to use
 
@@ -368,7 +383,7 @@ class Cell {
         Cell(CellIndexType index,
              CellIndexType x, 
              CellIndexType y, 
-             int num_environmental_factors,
+             unsigned num_environmental_factors,
              Landscape& landscape, 
              const SpeciesPool& species, 
              RandomNumberGenerator& rng);
@@ -392,19 +407,19 @@ class Cell {
         void set_carrying_capacity(CellIndexType cc) {
             this->_carrying_capacity = cc;
         }        
-        int add_environment_factor(FitnessFactorType e) {
+        unsigned add_environment_factor(FitnessFactorType e) {
             this->_environment.push_back(e);
             return this->_environment.size();
         }
-        void set_environment_factor(int idx, FitnessFactorType e) {
+        void set_environment_factor(unsigned idx, FitnessFactorType e) {
             assert(idx < this->_enviroment.size());
             this->_environment[idx] = e;
         }
-        FitnessFactorType get_environment_factor(int idx) const {
+        FitnessFactorType get_environment_factor(unsigned idx) const {
             assert(idx < this->_enviroment.size());
             return this->_environment[idx];
         }
-        int get_num_environmental_factors() const {
+        unsigned get_num_environmental_factors() const {
             return this->_environment.size();
         }            
         
@@ -412,11 +427,14 @@ class Cell {
         CellIndexType num_organisms() const {
             return this->_organisms.size();
         }
-        void add_new_organisms(int species_index, CellIndexType num) {
+        void generate_new_organisms(unsigned species_index, CellIndexType num) {
             this->_organisms.reserve(this->_organisms.size() + num);
             for ( ; num > 0; --num) {
                 this->_organisms.push_back(this->_species.at(species_index)->new_organism());
             }
+        }
+        void insert_organism(const Organism organism) {
+            this->_organisms.push_back(organism);
         }
                 
         // --- biogeographical and evolutionary processes ---
@@ -431,11 +449,11 @@ class Cell {
         Cell(const Cell& cell);        
         
     private:        
-        CellIndexType                _carrying_capacity;    // max # ind
-        CellIndexType                _index;                // cell index
-        CellIndexType                _x;                    // x-coordinate
-        CellIndexType                _y;                    // y-coordinate
-        FitnessFactors        _environment;           // environmental factors
+        CellIndexType               _carrying_capacity;     // max # ind
+        CellIndexType               _index;                 // cell index
+        CellIndexType               _x;                     // x-coordinate
+        CellIndexType               _y;                     // y-coordinate
+        FitnessFactors              _environment;           // environmental factors
         Organisms                   _organisms;             // the individual organisms of this biota
         
         Landscape&                  _landscape;             // host landscape
@@ -450,12 +468,15 @@ class Landscape {
 
     public:
     
+        typedef std::pair<Organism, CellIndexType>   MigrationEvent;
+        typedef std::vector<MigrationEvent>          MigrationEvents;
+    
         // --- lifecycle and assignment ---        
         Landscape(const SpeciesPool& species, RandomNumberGenerator& rng);
         ~Landscape();
         
         // --- initialization and set up ---
-        void generate(CellIndexType size_x, CellIndexType size_y, int num_environmental_factors); 
+        void generate(CellIndexType size_x, CellIndexType size_y, unsigned num_environmental_factors); 
  
         // --- landscape access, control and mutation ---                                      
         void set_cell_carrying_capacity(CellIndexType carrying_capacity);
@@ -490,7 +511,35 @@ class Landscape {
         }
         CellIndexType size_y() const {
             return this->_size_y;
-        }        
+        }
+        CellIndexType random_neighbor(CellIndexType i) {
+            static CellIndexType x = 0;
+            static CellIndexType y = 0;
+            x = this->index_to_x(i) + this->_rng.randint(-1, 1); // to reflect: % this->_size_x; 
+            y = this->index_to_y(i) + this->_rng.randint(-1, 1); // to reflect: % this->_size_y; 
+            if (x >= this->_size_x) {
+                x = this->_size_x;
+            }
+            if (y >= this->_size_y) {
+                y = this->_size_y;
+            }
+            return this->xy_to_index(x, y);
+        }
+        
+        // --- migration and movement ---
+        void clear_migrants() {
+            this->_migrants.clear();
+        }
+        void add_migrant(const Organism& organism, CellIndexType dest_cell) {
+            this->_migrants.push_back(std::make_pair(organism, dest_cell));
+        }
+        void process_migrants() {
+            for (MigrationEvents::iterator m = this->_migrants.begin();
+                    m != this->_migrants.end();
+                    ++m) {
+                this->_cells.at(m->second)->insert_organism(m->first);                
+            }                    
+        }
         
         // --- debugging ---
         unsigned long dump() {
@@ -500,7 +549,7 @@ class Landscape {
                 for (CellIndexType x = 0; x < this->_size_x; ++x) {
                     num = this->operator()(x,y).num_organisms();
                     total += num;
-                    std::cout << num << " ";
+                    std::cout << std::setw(4) << num << " ";
                 }
                 std::cout << std::endl;
             }
@@ -512,6 +561,9 @@ class Landscape {
         CellIndexType               _size_y;                // size of the landscape in the y dimension        
         CellIndexType               _size;                  // == x * y, cached here
         std::vector<Cell*>          _cells;                 // cells of the landscape
+        
+        // cache to collect migrating organisms over a round of migration
+        MigrationEvents             _migrants;
         
         const SpeciesPool&          _species;               // species pool
         RandomNumberGenerator&      _rng;                   // random number generator        
@@ -537,15 +589,15 @@ class World {
         Landscape& landscape() {
             return this->_landscape;
         }
-        int get_num_fitness_factors() const {
+        unsigned get_num_fitness_factors() const {
             return this->_num_fitness_factors;
         }
-        void set_num_fitness_factors(int num_fitness_factors) {
+        void set_num_fitness_factors(unsigned num_fitness_factors) {
             this->_num_fitness_factors = num_fitness_factors;
         }        
         
         // --- initialization and set up ---
-        void generate_landscape(CellIndexType size_x, CellIndexType size_y, int num_environmental_factors);
+        void generate_landscape(CellIndexType size_x, CellIndexType size_y, unsigned num_environmental_factors);
         
         // actual implementation will load this from a file, as will
         // cell environment and species travel costs
@@ -556,17 +608,17 @@ class World {
         }
         
         // --- species configuration ---
-        void set_species_movement_costs(int species_index, const std::vector<unsigned>& costs) {
+        void set_species_movement_costs(unsigned species_index, const std::vector<unsigned>& costs) {
             assert(species_index < this->_species_pool.size());
             assert(costs.size() == this->_landscape.size());
             this->_species_pool[species_index]->set_movement_costs(costs);
         }
-        void set_species_selection_strengths(int species_index, const std::vector<float>& strengths) {
+        void set_species_selection_strengths(unsigned species_index, const std::vector<float>& strengths) {
             assert(species_index < this->_species_pool.size());        
             assert(strengths.size() == this->_num_fitness_factors);
             this->_species_pool[species_index]->set_selection_strengths(strengths);
         }
-        void set_species_default_genotype(int species_index, const FitnessFactors& genotype) {
+        void set_species_default_genotype(unsigned species_index, const FitnessFactors& genotype) {
             assert(species_index < this->_species_pool.size());        
             assert(genotype.size() == this->_num_fitness_factors);
             this->_species_pool[species_index]->set_default_genotype(genotype);
@@ -574,18 +626,18 @@ class World {
                                 
         // to kick start
         Species& new_species(const char *label);        
-        void seed_population(CellIndexType x, CellIndexType y, int species_index, CellIndexType size);
-        void seed_population(CellIndexType cell_index, int species_index, CellIndexType size);
+        void seed_population(CellIndexType x, CellIndexType y, unsigned species_index, CellIndexType size);
+        void seed_population(CellIndexType cell_index, unsigned species_index, CellIndexType size);
         
         // --- simulation cycles ---
         void cycle();
-        void run(unsigned int num_generations);
+        void run(unsigned num_generations);
         
     private:
         SpeciesPool                         _species_pool;
         RandomNumberGenerator               _rng;
         Landscape                           _landscape;        
-        int                                 _num_fitness_factors;
+        unsigned                            _num_fitness_factors;
         CellIndexType                       _current_generation;                
         
 }; // World
@@ -599,9 +651,9 @@ class World {
 
 // --- lifecycle and assignment ---
 
-Species::Species(int index,
+Species::Species(unsigned index,
                  const char* label, 
-                 int num_fitness_factors,
+                 unsigned num_fitness_factors,
                  RandomNumberGenerator& rng) 
     : _index(index),
       _label(label),
@@ -624,7 +676,7 @@ Species::Species(int index,
 Cell::Cell(CellIndexType index, 
            CellIndexType x, 
            CellIndexType y, 
-           int num_environmental_factors,
+           unsigned num_environmental_factors,
            Landscape& landscape, 
            const SpeciesPool& species, 
            RandomNumberGenerator& rng)     
@@ -653,7 +705,27 @@ void Cell::reproduction() {
 }
 
 void Cell::migration() {
-
+    for (Organisms::iterator og = this->_organisms.begin(); og != this->_organisms.end(); ++og) {
+        assert(og->species_index() < this->_species.size());
+        assert(og->is_expired() == false);        
+        Species& sp = *this->_species[og->species_index()];
+        unsigned int movement = sp.get_movement_capacity();
+        CellIndexType curr_idx = this->_index;
+        while (movement > 0) {
+            CellIndexType dest_idx = this->_landscape.random_neighbor(curr_idx);
+            movement -= sp.movement_cost(dest_idx);
+            if (movement > 0) {
+                curr_idx = dest_idx;
+            }
+        }
+        if (curr_idx != this->_index) {
+            og->set_expired(true);
+        }
+    }
+    Organisms::iterator end_unexpired = std::remove_if(this->_organisms.begin(), 
+        this->_organisms.end(), 
+        std::mem_fun_ref(&Organism::is_expired));
+    this->_organisms.erase(end_unexpired, this->_organisms.end());
 }
 
 ///////////////////////////////////////////////////////////////////////////////	
@@ -666,7 +738,7 @@ Landscape::Landscape(const SpeciesPool& species, RandomNumberGenerator& rng)
       _rng(rng) {
     this->_size_x = 0;
     this->_size_y = 0;
-    this->_size = 0 * 0;
+    this->_size = 0;
 }
 
 // clean up cells
@@ -680,7 +752,7 @@ Landscape::~Landscape() {
 
 // --- initialization and set up ---
 
-void Landscape::generate(CellIndexType size_x, CellIndexType size_y, int num_environmental_factors) {
+void Landscape::generate(CellIndexType size_x, CellIndexType size_y, unsigned num_environmental_factors) {
     this->_size_x = size_x;
     this->_size_y = size_y;
     this->_size = size_x * size_y;
@@ -726,7 +798,7 @@ World::~World() {
 // --- initialization and set up ---
 
 //! Creates a new landscape.
-void World::generate_landscape(CellIndexType size_x, CellIndexType size_y, int num_environmental_factors) {
+void World::generate_landscape(CellIndexType size_x, CellIndexType size_y, unsigned num_environmental_factors) {
     this->_num_fitness_factors = num_environmental_factors;
     this->_landscape.generate(size_x, size_y, num_environmental_factors);
 }
@@ -742,13 +814,13 @@ Species& World::new_species(const char* label) {
 }
 
 //! Populates the cell at (x,y) with organisms of the given species.
-void World::seed_population(CellIndexType x, CellIndexType y, int species_index, CellIndexType size) {
-    this->_landscape.at(x, y).add_new_organisms(species_index, size);
+void World::seed_population(CellIndexType x, CellIndexType y, unsigned species_index, CellIndexType size) {
+    this->_landscape.at(x, y).generate_new_organisms(species_index, size);
 }
 
 //! Populates the cell cell_index with organisms of the given species.
-void World::seed_population(CellIndexType cell_index, int species_index, CellIndexType size) {
-    this->_landscape.at(cell_index).add_new_organisms(species_index, size);
+void World::seed_population(CellIndexType cell_index, unsigned species_index, CellIndexType size) {
+    this->_landscape.at(cell_index).generate_new_organisms(species_index, size);
 }
 
 // --- species configuration ---
@@ -757,14 +829,18 @@ void World::seed_population(CellIndexType cell_index, int species_index, CellInd
 // --- simulation cycles ---
 void World::cycle() {
     for (CellIndexType i = this->_landscape.size()-1; i > 0; --i) {
-    
+        this->_landscape[i].survival();
+        this->_landscape[i].competition();
+        this->_landscape[i].reproduction();    
         this->_landscape[i].migration();
-        
     }
 }
 
-void World::run(unsigned int num_generations) {
+void World::run(unsigned num_generations) {
     for ( ; num_generations > 0; --num_generations, ++(this->_current_generation)) {
+//##DEBUG##
+DEBUG_BLOCK( std::cout << "\n#### GENERATION " << this->_current_generation << " ####\n\n"; )
+DEBUG_BLOCK( this->_landscape.dump(); )        
         this->cycle();        
     }
 }
@@ -835,9 +911,10 @@ DEBUG_BLOCK( std::cout << "(seeding populations)\n"; )
 DEBUG_BLOCK( std::cout << "(running cycles)\n"; )
     world.run(num_gens);
 
-    
+
+    std::cout << "\n\n(FINAL STATUS)\n"; 
     unsigned long total = world.landscape().dump();
-    std::cout << "\nTotal organisms: " << total << std::endl;
+    std::cout << "\n---\nTotal organisms: " << total << std::endl;
 
 }
 
