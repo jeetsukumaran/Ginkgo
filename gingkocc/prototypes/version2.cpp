@@ -895,7 +895,7 @@ int main(int argc, char* argv[]) {
     int num_gens = atoi(argv[5]);
     int num_env_factors = 4;
     
-    World   world(313914);
+    World   world;
 
 //##DEBUG##
 DEBUG_BLOCK( std::cerr << "(generating landscape)\n"; )
