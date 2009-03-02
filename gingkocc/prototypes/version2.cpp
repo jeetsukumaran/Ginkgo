@@ -1034,19 +1034,35 @@ DEBUG_BLOCK( this->_landscape.dump(std::cout); )
  *****************************************************************************/
 
 int main(int argc, char* argv[]) {
-    if (argc < 6) {
+    long seed = 10;
+	std::vector<int> args_as_ints;
+	for (int i = 1; i < argc; ++i) {
+		std::string a(argv[i]);
+		if (a.length() > 2 && a[0] == '-') {
+			if (a[1] == 's') {
+				seed = atoi(a.c_str() + 2);
+			}
+			else {
+				std::cerr << "Unknown flag: " << a << '\n';
+				exit(2);
+			}
+		}
+		else {
+			args_as_ints.push_back(atoi(a.c_str()));
+		}
+	}
+    if (args_as_ints.size() < 5) {
         std::cerr << "usage: " << argv[0] <<  " <DIM-X> <DIM-Y> <CELL-CARRYING-CAPACITY> <NUM-CELLS-TO-POPULATE> <NUM-GENS>\n";
         exit(1);
     }
 
-    int size_x = atoi(argv[1]);
-    int size_y = atoi(argv[2]);
-    int cc = atoi(argv[3]);
-    int num_cells_init = atoi(argv[4]);
-    int num_gens = atoi(argv[5]);
+    int size_x = args_as_ints[0];
+    int size_y = args_as_ints[1];
+    int cc = args_as_ints[2];
+    int num_cells_init = args_as_ints[3];
+    int num_gens = args_as_ints[4];
     int num_env_factors = 4;
-    long seed = 10;
-    std::cerr << "Hard coded seed of " << seed << '\n';
+    std::cerr << "Using seed of " << seed << '\n';
     World   world(seed);
 
 //##DEBUG##
