@@ -206,8 +206,8 @@ class Organism {
             : _species_index(species_index),
               _genotype(new_genotype),
               _sex(new_sex),
-              _fitness() {
-            this->_expired = false;              
+              _fitness(-1),
+              _expired(false) {
         }
         
         //! Copy constructor.
@@ -224,6 +224,13 @@ class Organism {
             this->_expired = ind._expired;
             return *this;
         }
+        
+        // for sorting
+        bool operator<(const Organism& other) const {
+            assert(this->_fitness >= 0);
+            assert(other._fitness >= 0); 
+            return this->_fitness < other._fitness; 
+        } 
                    
         // genotype       
         const FitnessFactors& genotype() const {
@@ -231,8 +238,11 @@ class Organism {
         }
         
         // fitness & survival
-        float &fitness() {
+        float get_fitness() const {
             return this->_fitness;
+        }
+        void set_fitness(float fitness) {
+            this->_fitness = fitness;
         }
         bool is_expired() const {
             return this->_expired;
@@ -437,10 +447,10 @@ class Cell {
         }
         
         // --- abiotic ---
-        CellIndexType get_carrying_capacity() const {
+        unsigned long get_carrying_capacity() const {
             return this->_carrying_capacity;
         }        
-        void set_carrying_capacity(CellIndexType cc) {
+        void set_carrying_capacity(unsigned long cc) {
             this->_carrying_capacity = cc;
         }        
         unsigned add_environment_factor(FitnessFactorType e) {
@@ -497,7 +507,7 @@ class Cell {
         Cell(const Cell& cell);        
         
     private:        
-        CellIndexType               _carrying_capacity;     // max # ind
+        unsigned long               _carrying_capacity;     // max # ind
         CellIndexType               _index;                 // cell index
         CellIndexType               _x;                     // x-coordinate
         CellIndexType               _y;                     // y-coordinate
@@ -531,7 +541,7 @@ class Landscape {
         void generate(CellIndexType size_x, CellIndexType size_y, unsigned num_environmental_factors); 
  
         // --- landscape access, control and mutation ---                                      
-        void set_cell_carrying_capacity(CellIndexType carrying_capacity);
+        void set_cell_carrying_capacity(unsigned long carrying_capacity);
         
         // --- cell access and spatial mapping ---
         Cell& operator()(CellIndexType x, CellIndexType y) {
@@ -613,6 +623,7 @@ class Landscape {
             for (MigrationEvents::iterator m = this->_migrants.begin();
                     m != this->_migrants.end();
                     ++m) {
+                m->first.set_fitness(-1);   // invalidate cached fitness                    
                 this->_cells.at(m->second)->insert_organism(m->first);                
             }
             this->_migrants.clear();
@@ -679,7 +690,7 @@ class World {
         
         // actual implementation will load this from a file, as will
         // cell environment and species travel costs
-        void set_cell_carrying_capacity(CellIndexType carrying_capacity) {
+        void set_cell_carrying_capacity(unsigned long carrying_capacity) {
             for (CellIndexType i = 0; i < this->_landscape.size(); ++i) {
                 this->_landscape[i].set_carrying_capacity(carrying_capacity);
             }        
@@ -781,7 +792,8 @@ void Cell::survival() {
         assert(og->species_index() < this->_species.size());          
         assert(!og->is_expired());                
         Species& sp = *this->_species[og->species_index()];
-        float fitness = sp.calc_fitness(*og, this->_environment);
+        float fitness = sp.calc_fitness(*og, this->_environment);       
+        og->set_fitness(fitness);
         if (this->_rng.random() > fitness) {
             og->set_expired(true);
         }
@@ -790,6 +802,15 @@ void Cell::survival() {
 }
 
 void Cell::competition() {
+    // NOTE: ASSUMES THAT FITNESS HAS BEEN CALCULATED FOR THE ORGANISM IN THIS CELL!
+    if (this->_organisms.size() > this->_carrying_capacity) {
+        // defaults to using Organism::operator<(), which also checks that 
+        // fitness has been set (i.e., >= 0)
+        std::sort(this->_organisms.begin(), this->_organisms.end());
+        this->_organisms.erase(this->_organisms.begin()+this->_carrying_capacity, 
+            this->_organisms.end());
+        assert(this->_organisms.size() == this->_carrying_capacity);
+    }
 }
 
 void Cell::reproduction() {
