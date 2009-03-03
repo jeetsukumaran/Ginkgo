@@ -20,6 +20,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "world.h"
+#include <iostream>
 
 using namespace gingko;
 
@@ -87,6 +88,9 @@ void World::cycle() {
 //     }
 //     this->landscape_.process_migrants();
     ++this->current_generation_;
+    
+    std::cerr << "\n\n#### GENERATION " << this->current_generation_ << " ####\n" << std::endl;
+
     for (CellIndexType i = this->landscape_.size()-1; i >= 0; --i) {
         this->landscape_[i].reproduction(); 
         this->landscape_[i].migration();
@@ -96,10 +100,13 @@ void World::cycle() {
         this->landscape_[i].survival();
         this->landscape_[i].competition();        
     }    
+    
+    this->landscape_.dump(std::cerr);
+    
 }
 
-void World::run(int num_generations) {
-    for ( ; num_generations >= 0; --num_generations) {       
+void World::run(int num_generations) {    
+    for ( ; num_generations >= 0; --num_generations) {
         this->cycle();        
     }
 }
