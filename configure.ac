@@ -8,7 +8,7 @@ AC_INIT([gingko], [0.01], [jeet@ku.edu])
 # is some file that is in the package's source directory; `configure'
 # checks for this file's existence to make sure that the directory that it
 # is told contains the source code in fact does.
-AC_CONFIG_SRCDIR([gingkocc/prototypes/version2.cpp])
+AC_CONFIG_SRCDIR([gingkocc/gingko.cpp])
 AC_CONFIG_HEADER([config.h])
 
 #	Directory that contains install-sh and other auxiliary files
@@ -226,6 +226,7 @@ AC_SUBST(CPPFLAGS)
 
 AC_CONFIG_FILES([
 	Makefile 			\
+	gingkocc/Makefile   \
 	gingkocc/prototypes/Makefile		\
 	])
 
