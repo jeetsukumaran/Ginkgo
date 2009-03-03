@@ -19,11 +19,11 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "biosys.h"
-#include <iostream>
-
 #if !defined(GINGKO_GEOSYS_H)
 #define GINGKO_GEOSYS_H
+
+#include "biosys.h"
+#include <iostream>
 
 namespace gingko {
 

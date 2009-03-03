@@ -19,6 +19,9 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
+#if !defined(GINGKO_BIOSYS_H)
+#define GINGKO_BIOSYS_H
+
 #include <cassert>
 #include <vector>
 #include <string>
@@ -26,9 +29,6 @@
 
 #include "gingko_defs.h"
 #include "random.h"
-
-#if !defined(GINGKO_BIOSYS_H)
-#define GINGKO_BIOSYS_H
 
 namespace gingko {
 
