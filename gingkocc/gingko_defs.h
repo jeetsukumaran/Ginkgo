@@ -19,6 +19,9 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
+#if !defined(GINGKO_DEFS_H)
+#define GINGKO_DEFS_H
+
 namespace gingko {
 
 //! The maximum number of fitness factors in the system. A "fitness factor"
@@ -40,3 +43,5 @@ typedef FitnessFactorType       FitnessFactors[MAX_FITNESS_FACTORS];
 typedef long                    CellIndexType;
 
 } // gingko namespace
+
+#endif

@@ -23,6 +23,9 @@
 #define WORLD_H
 
 #include "gingko_defs.h"
+#include "random.h"
+#include "cell.h"
+#include "landscape.h"
 
 namespace gingko {
 
@@ -66,19 +69,18 @@ class World {
         
         // --- species configuration ---
         void set_species_movement_costs(unsigned species_index, const std::vector<int>& costs) {
-            assert(species_index < this->species_pool_.size());
+            assert(species_index < this->species_.size());
             assert(costs.size() == static_cast<unsigned long>(this->landscape_.size()));
-            this->species_pool_[species_index]->set_movement_costs(costs);
+            this->species_[species_index]->set_movement_costs(costs);
         }
         void set_species_selection_strengths(unsigned species_index, const std::vector<float>& strengths) {
-            assert(species_index < this->species_pool_.size());        
+            assert(species_index < this->species_.size());        
             assert(strengths.size() == this->num_fitness_factors_);
-            this->species_pool_[species_index]->set_selection_strengths(strengths);
+            this->species_[species_index]->set_selection_strengths(strengths);
         }
         void set_species_default_genotype(unsigned species_index, const FitnessFactors& genotype) {
-            assert(species_index < this->species_pool_.size());        
-            assert(genotype.size() == MAX_FITNESS_FACTORS);
-            this->species_pool_[species_index]->set_default_genotype(genotype);
+            assert(species_index < this->species_.size());        
+            this->species_[species_index]->set_default_genotype(genotype);
         }        
                                 
         // to kick start
@@ -93,7 +95,7 @@ class World {
     private:
     
 
-        SpeciesPointerVector                         species_pool_;
+        SpeciesPointerVector                species_;
         RandomNumberGenerator               rng_;
         Landscape                           landscape_;        
         unsigned                            num_fitness_factors_;

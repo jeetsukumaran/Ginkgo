@@ -25,16 +25,16 @@ using namespace gingko;
 
 //! constructor: calls
 World::World(unsigned long seed) 
-    : species_pool_(),
+    : species_(),
       rng_(seed),
-      landscape_(_species_pool, rng_) {
+      landscape_(species_, rng_) {
     this->current_generation_ = 0;    
 }    
 
 //! clean up species pool
 World::~World() {
-    for (std::vector<Species*>::iterator sp = this->species_pool_.begin();
-            sp != this->species_pool_.end();
+    for (std::vector<Species*>::iterator sp = this->species_.begin();
+            sp != this->species_.end();
             ++sp) {
         delete *sp;            
     }            
@@ -50,11 +50,11 @@ void World::generate_landscape(CellIndexType size_x, CellIndexType size_y, unsig
 
 //! Adds a new species definition to this world.
 Species& World::new_species(const char* label) {
-    Species* sp = new Species(this->species_pool_.size(),
+    Species* sp = new Species(this->species_.size(),
                               label, 
                               this->num_fitness_factors_, 
                               this->rng_);
-    this->species_pool_.push_back(sp);
+    this->species_.push_back(sp);
     return *sp;
 }
 
@@ -86,7 +86,7 @@ void World::cycle() {
 //         this->landscape_[i].competition();
 //     }
 //     this->landscape_.process_migrants();
-
+    ++this->current_generation_;
     for (CellIndexType i = this->landscape_.size()-1; i >= 0; --i) {
         this->landscape_[i].reproduction(); 
         this->landscape_[i].migration();
@@ -99,10 +99,7 @@ void World::cycle() {
 }
 
 void World::run(int num_generations) {
-    for ( ; num_generations >= 0; --num_generations, ++(this->current_generation_)) {
-//##DEBUG##
-DEBUG_BLOCK( std::cerr << "\n#### GENERATION " << this->current_generation_ << " ####\n\n"; )
-DEBUG_BLOCK( this->landscape_.dump(std::cout); )        
+    for ( ; num_generations >= 0; --num_generations) {       
         this->cycle();        
     }
 }

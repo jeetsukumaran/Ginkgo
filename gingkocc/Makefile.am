@@ -10,5 +10,6 @@ gingko_SOURCES = \
     gingko.cpp \
     random.cpp \
     biosys.cpp \
-    geosys.cpp \
+    landscape.cpp \
+    cell.cpp \
     world.cpp
