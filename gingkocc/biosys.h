@@ -37,23 +37,21 @@ class Species;
 
 typedef std::vector<Species *>  SpeciesPointerVector;
 typedef std::vector<Organism>   OrganismVector;
-typedef int                     FitnessFactorType;
-typedef FitnessFactorType       FitnessFactors[MAX_FITNESS_FACTORS];
 
 ///////////////////////////////////////////////////////////////////////////////
 // Tracks an organisms pedigree.
 //
-class PedigreeNode {
+class Pedigree {
 
 	public:
 	    
-		PedigreeNode()
+		Pedigree()
 		: female_(0L),
 		  male_(0L),
 		  reference_count_(1)
 		{}
 		
-		void set_parent_nodes(PedigreeNode * female, PedigreeNode * male) {
+		void inherit(Pedigree * female, Pedigree * male) {
 			this->female_ = female;
 			this->male_ = male;
 			if (female)
@@ -62,7 +60,7 @@ class PedigreeNode {
 				male->increment_count();
 		}
 		
-		~PedigreeNode() {
+		~Pedigree() {
 			if (this->female_)
 				this->female_->decrement_count();
 			if (this->male_)
@@ -81,8 +79,8 @@ class PedigreeNode {
 		}
 		
     private:		
-		PedigreeNode *  female_;
-		PedigreeNode *  male_;
+		Pedigree *      female_;
+		Pedigree *      male_;
 		unsigned        reference_count_;
 		
 }; 
@@ -114,20 +112,20 @@ class Organism {
               num_fitness_factors_(num_fitness_factors),              
               sex_(new_sex),
               fitness_(-1),
-              pedigree_node_(0L),              
+              pedigree_(0L),              
               expired_(false) {
             memcpy(this->genotype_, new_genotype, this->num_fitness_factors_*sizeof(FitnessFactorType));
 		}
         
         //! Copy constructor.
         Organism(const Organism& ind)
-        	: pedigree_node_(0L) {
+        	: pedigree_(0L) {
             *this = ind;
         }
 
         ~Organism() {
-            if (this->pedigree_node_)
-            	this->pedigree_node_->decrement_count();
+            if (this->pedigree_)
+            	this->pedigree_->decrement_count();
         }
         
         //! Assignment.
@@ -141,11 +139,11 @@ class Organism {
             this->sex_ = ind.sex_;
             this->fitness_ = ind.fitness_;
             this->expired_ = ind.expired_;
-            if (this->pedigree_node_)
-            	this->pedigree_node_->decrement_count();
-            this->pedigree_node_ = ind.pedigree_node_;
-            if (this->pedigree_node_)
-            	this->pedigree_node_->increment_count();
+            if (this->pedigree_)
+            	this->pedigree_->decrement_count();
+            this->pedigree_ = ind.pedigree_;
+            if (this->pedigree_)
+            	this->pedigree_->increment_count();
             return *this;
         }
         
@@ -188,10 +186,10 @@ class Organism {
             return this->sex_ == Organism::Female;
         }                
 				
-		void set_parents(const Organism& female, const Organism& male) {		    
-			assert(this->pedigree_node_ == 0L);
-			this->pedigree_node_ = new PedigreeNode();
-			this->pedigree_node_->set_parent_nodes(female.pedigree_node_, male.pedigree_node_);
+		void inherit_pedigrees(const Organism& female, const Organism& male) {		    
+			assert(this->pedigree_ == 0L);
+			this->pedigree_ = new Pedigree();
+			this->pedigree_->inherit(female.pedigree_, male.pedigree_);
 		}
 		
     private:
@@ -200,7 +198,7 @@ class Organism {
         FitnessFactors  genotype_;              // non-neutral genotype: maps to fitness phenotype
         Organism::Sex   sex_;                   // male or female
         float           fitness_;               // cache this organism's fitness
-        PedigreeNode *  pedigree_node_;         // track the pedigree of this organism        
+        Pedigree *      pedigree_;              // track the pedigree of this organism        
         bool            expired_;               // flag an organism to be removed allowing for use of std::remove_if() and std::resize() or v.erase()
         
 };
@@ -310,7 +308,7 @@ class Species {
         	FitnessFactors offspring_genotype;
 			this->compose_offspring_genotype(female.genotype(), male.genotype(), offspring_genotype);
             Organism organism(this->index_, this->num_fitness_factors_, offspring_genotype, this->get_random_sex());
-            organism.set_parents(female, male);
+            organism.inherit_pedigrees(female, male);
             return organism;
         }        
         

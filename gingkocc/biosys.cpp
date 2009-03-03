@@ -21,7 +21,7 @@
 
 #include "biosys.h"
 
-namespace gingko {
+using namespace gingko;
 
 ///////////////////////////////////////////////////////////////////////////////	
 // Species
@@ -46,5 +46,3 @@ Species::Species(unsigned index,
     this->movement_capacity_ = 1;
 }
 
-
-} // gingko namespace
