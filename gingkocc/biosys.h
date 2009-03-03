@@ -43,17 +43,17 @@ typedef FitnessFactorType       FitnessFactors[MAX_FITNESS_FACTORS];
 ///////////////////////////////////////////////////////////////////////////////
 // Tracks an organisms pedigree.
 //
-class Parents {
+class PedigreeNode {
 
 	public:
 	    
-		Parents()
+		PedigreeNode()
 		: female_(0L),
 		  male_(0L),
 		  reference_count_(1)
 		{}
 		
-		void set_parents(Parents * female, Parents * male) {
+		void set_parent_nodes(PedigreeNode * female, PedigreeNode * male) {
 			this->female_ = female;
 			this->male_ = male;
 			if (female)
@@ -62,7 +62,7 @@ class Parents {
 				male->increment_count();
 		}
 		
-		~Parents() {
+		~PedigreeNode() {
 			if (this->female_)
 				this->female_->decrement_count();
 			if (this->male_)
@@ -81,12 +81,12 @@ class Parents {
 		}
 		
     private:		
-		Parents * female_;
-		Parents * male_;
-		unsigned reference_count_;
+		PedigreeNode *  female_;
+		PedigreeNode *  male_;
+		unsigned        reference_count_;
 		
 }; 
-// Parents
+// Pedigree
 ///////////////////////////////////////////////////////////////////////////////
 
 
@@ -190,8 +190,8 @@ class Organism {
 				
 		void set_parents(const Organism& female, const Organism& male) {		    
 			assert(this->pedigree_node_ == 0L);
-			this->pedigree_node_ = new Parents();
-			this->pedigree_node_->set_parents(female.pedigree_node_, male.pedigree_node_);
+			this->pedigree_node_ = new PedigreeNode();
+			this->pedigree_node_->set_parent_nodes(female.pedigree_node_, male.pedigree_node_);
 		}
 		
     private:
@@ -200,7 +200,7 @@ class Organism {
         FitnessFactors  genotype_;              // non-neutral genotype: maps to fitness phenotype
         Organism::Sex   sex_;                   // male or female
         float           fitness_;               // cache this organism's fitness
-        Parents *       pedigree_node_;         // track the pedigree of this organism        
+        PedigreeNode *  pedigree_node_;         // track the pedigree of this organism        
         bool            expired_;               // flag an organism to be removed allowing for use of std::remove_if() and std::resize() or v.erase()
         
 };
