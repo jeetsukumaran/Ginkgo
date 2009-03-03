@@ -83,8 +83,6 @@ int main(int argc, char* argv[]) {
 	for (int i = 0; i < num_env_factors; ++i) {
 	    genotype.push_back(static_cast< gingko::FitnessFactorType >(world.rng().uniform_int(-10, 10)));
 	}
-		
-    std::cerr << "(seeding populations)\n";
     
     unsigned long max_index = (size_x * size_y)-1;
     gingko::CellIndexType cell_index = 0;
@@ -95,10 +93,9 @@ int main(int argc, char* argv[]) {
         if (seeded.size() >= max_index+1) {
             break;
         }
+        std::cerr << "(seeding cell " << cell_index << " with " << cc << " individuals" << ")" << std::endl;
         seeded.insert(cell_index);
-        world.seed_population(cell_index,
-                              sp1.get_index(),
-                              cc);
+        world.seed_population(cell_index, sp1.get_index(), cc);
     }
     
     std::cerr << "(running cycles)\n";

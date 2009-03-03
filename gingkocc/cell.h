@@ -66,19 +66,18 @@ class Cell {
             return this->num_fitness_factors_;
         }            
         
-        // --- biotic ---
+        // --- basic biotics ---
+        
         CellIndexType num_organisms() const {
             return this->organisms_.size();
         }
-        void generate_new_organisms(unsigned species_index, CellIndexType num) {
-            this->organisms_.reserve(this->organisms_.size() + num);
-            for ( ; num > 0; --num) {
-                this->organisms_.push_back(this->species_.at(species_index)->new_organism());
-            }
-        }
+        
+        void generate_new_organisms(unsigned species_index, CellIndexType num);
+        
         void insert_organism(const Organism& organism) {
             this->organisms_.push_back(organism);
         }        
+        
         void purge_expired_organisms() {
             OrganismVector::iterator end_unexpired = std::remove_if(this->organisms_.begin(), 
                 this->organisms_.end(), 
@@ -87,13 +86,16 @@ class Cell {
         }        
     
         // --- primary biogeographical and evolutionary processes ---
+        
         void reproduction();
         void migration();
         void survival();
         void competition();        
         
-        // --- supporting biogeographical and evolutionary processes ---
+        // --- supporting methods ---
+        
         void extract_breeding_groups(unsigned species_index, 
+            const OrganismVector,
             std::vector<const Organism *>& female_ptrs,
             std::vector<const Organism *>& male_ptrs) const;
         

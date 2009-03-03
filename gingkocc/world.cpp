@@ -106,7 +106,7 @@ void World::cycle() {
 }
 
 void World::run(int num_generations) {    
-    for ( ; num_generations >= 0; --num_generations) {
+    for ( ; num_generations > 0; --num_generations) {
         this->cycle();        
     }
 }

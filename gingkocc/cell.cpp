@@ -50,6 +50,15 @@ Cell::Cell(CellIndexType index,
     memset(this->environment_, 0, this->num_fitness_factors_*sizeof(FitnessFactorType));    
 }
 
+// --- basic biotics ---
+
+void Cell::generate_new_organisms(unsigned species_index, CellIndexType num) {
+    this->organisms_.reserve(this->organisms_.size() + num);
+    for ( ; num > 0; --num) {
+        this->organisms_.push_back(this->species_.at(species_index)->new_organism());
+    }
+}
+
 // --- primary biogeographical and evolutionary processes ---
 
 void Cell::reproduction() {
@@ -65,7 +74,10 @@ void Cell::reproduction() {
         // organism level and subject to evolution
         unsigned num_offspring = (*sp)->get_mean_reproductive_rate();
         
-        this->extract_breeding_groups((*sp)->get_index(), Cell::breeding_female_ptrs, Cell::breeding_male_ptrs);
+        this->extract_breeding_groups((*sp)->get_index(),
+            Cell::previous_gen,
+            Cell::breeding_female_ptrs, 
+            Cell::breeding_male_ptrs);
         if ( (Cell::breeding_female_ptrs.size() > 0) and (Cell::breeding_male_ptrs.size() > 0)) {
             for (std::vector<const Organism*>::iterator fptr = Cell::breeding_female_ptrs.begin();
                     fptr != Cell::breeding_female_ptrs.end();
@@ -137,14 +149,16 @@ void Cell::competition() {
 }
 
 
-// --- supporting biogeographical and evolutionary processes ---
+// --- supporting methods ---
 
-//! Extracts pointers to male and female organisms of a particular species
-void Cell::extract_breeding_groups(unsigned species_index, 
-                                        std::vector<const Organism*>& female_ptrs,
-                                        std::vector<const Organism*>& male_ptrs) const {
+//! Extracts pointers to male and female organisms of a particular species from 
+//! a vector of organisms passed to it.
+void Cell::extract_breeding_groups(unsigned species_index,
+        const OrganismVector organisms,
+        std::vector<const Organism*>& female_ptrs,
+        std::vector<const Organism*>& male_ptrs) const {
     assert(species_index < this->species_.size());    
-    for (OrganismVector::const_iterator og = this->organisms_.begin(); og != this->organisms_.end(); ++og) {
+    for (OrganismVector::const_iterator og = organisms.begin(); og != organisms.end(); ++og) {
         if (og->species_index() == species_index) {
             if (og->is_female()) {
                 female_ptrs.push_back(&(*og));
