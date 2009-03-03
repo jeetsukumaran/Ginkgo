@@ -24,9 +24,9 @@
 
 namespace gingko {
 
-/**
- * Encapsulates generation of random variates drawn from various distributions.
- */
+///////////////////////////////////////////////////////////////////////////////
+// Encapsulates generation of random variates drawn from various distributions.
+//
 class RandomNumberGenerator {
 
     public:
@@ -61,6 +61,8 @@ class RandomNumberGenerator {
     private:
         unsigned long seed_;                    //! seed for the underlying rng
 };
+// RandomNumberGenerator
+///////////////////////////////////////////////////////////////////////////////
 
 
 } // gingko namespace

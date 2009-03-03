@@ -26,4 +26,9 @@ namespace gingko {
 //! that together contribute to the fitness of an individual organism.
 const unsigned MAX_FITNESS_FACTORS = 4;
 
+//! The units for referencing cells on the landscape. We allow signed values
+//! even though a negative coordinate is invalide so that negative values can 
+//! be stored and used in calculations.
+typedef long CellIndexType;
+
 } // gingko namespace

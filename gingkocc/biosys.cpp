@@ -23,6 +23,28 @@
 
 namespace gingko {
 
+///////////////////////////////////////////////////////////////////////////////	
+// Species
+
+// --- lifecycle and assignment ---
+
+Species::Species(unsigned index,
+                 const char* label, 
+                 unsigned num_fitness_factors,
+                 RandomNumberGenerator& rng) 
+    : index_(index),
+      label_(label),
+      num_fitness_factors_(num_fitness_factors),
+      rng_(rng) {
+    this->index_ = index;
+    this->mutation_rate_ = 0.1;
+    this->max_mutation_size_ = 1;
+    this->mean_reproductive_rate_ = 6;
+    this->reproductive_rate_mutation_size_ = 1;
+    this->selection_strengths_.assign(this->num_fitness_factors_, 1);
+    memset(this->default_genotype_, 0, this->num_fitness_factors_*sizeof(FitnessFactorType));    
+    this->movement_capacity_ = 1;
+}
 
 
 } // gingko namespace
