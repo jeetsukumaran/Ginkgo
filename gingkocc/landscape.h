@@ -19,110 +19,14 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#if !defined(GINGKO_GEOSYS_H)
-#define GINGKO_GEOSYS_H
+#if !defined(GINGKO_LANDSCAPE_H)
+#define GINGKO_LANDSCAPE_H
 
 #include "biosys.h"
+#include "cell.h"
 #include <iostream>
 
 namespace gingko {
-
-class Cell;
-class Landscape;
-
-///////////////////////////////////////////////////////////////////////////////
-//! The fundamental atomic spatial unit of the world.
-class Cell {
-    public:
-    
-        // --- lifecycle and assignment ---
-        Cell(CellIndexType index,
-             unsigned num_environmental_factors,
-             Landscape& landscape, 
-             const SpeciesPointerVector& species, 
-             RandomNumberGenerator& rng);
-        ~Cell() {};
-        
-        // --- geospatial ---
-        CellIndexType get_index() const {
-            return this->index_;
-        }
-
-        // --- abiotic ---
-        unsigned long get_carrying_capacity() const {
-            return this->carrying_capacity_;
-        }        
-        void set_carrying_capacity(unsigned long cc) {
-            this->carrying_capacity_ = cc;
-        }        
-        void set_environment_factor(unsigned idx, FitnessFactorType e) {
-            assert(idx < this->num_fitness_factors_);
-            this->environment_[idx] = e;
-        }
-        FitnessFactorType get_environment_factor(unsigned idx) const {
-            assert(idx < this->num_fitness_factors_);
-            return this->environment_[idx];
-        }
-        unsigned get_num_environmental_factors() const {
-            return this->num_fitness_factors_;
-        }            
-        
-        // --- biotic ---
-        CellIndexType num_organisms() const {
-            return this->organisms_.size();
-        }
-        void generate_new_organisms(unsigned species_index, CellIndexType num) {
-            this->organisms_.reserve(this->organisms_.size() + num);
-            for ( ; num > 0; --num) {
-                this->organisms_.push_back(this->species_.at(species_index)->new_organism());
-            }
-        }
-        void insert_organism(const Organism& organism) {
-            this->organisms_.push_back(organism);
-        }        
-        void purge_expired_organisms() {
-            OrganismVector::iterator end_unexpired = std::remove_if(this->organisms_.begin(), 
-                this->organisms_.end(), 
-                std::mem_fun_ref(&Organism::is_expired));
-            this->organisms_.erase(end_unexpired, this->organisms_.end());
-        }        
-    
-        // --- primary biogeographical and evolutionary processes ---
-        void reproduction();
-        void migration();
-        void survival();
-        void competition();        
-        
-        // --- supporting biogeographical and evolutionary processes ---
-        void extract_breeding_groups(unsigned species_index, 
-            std::vector<const Organism *>& female_ptrs,
-            std::vector<const Organism *>& male_ptrs) const;
-        
-    private:
-        // disable copying/assignment
-        const Cell& operator=(const Cell& cell);
-        Cell(const Cell& cell);
-        
-    private:        
-        CellIndexType                           index_;                     // cell index
-        unsigned long                           carrying_capacity_;         // max # ind     
-        unsigned                                num_fitness_factors_;       // number of environmental factors
-        FitnessFactors                          environment_;               // environmental factors
-        OrganismVector                          organisms_;                 // the individual organisms of this biota
-        
-        Landscape&                              landscape_;                 // host landscape
-        const SpeciesPointerVector&             species_;                   // species pool
-        RandomNumberGenerator&                  rng_;                       // random number generator
-
-    private:        
-        static std::vector<const Organism *>    breeding_female_ptrs;       // scratch space for breeding
-        static std::vector<const Organism *>    breeding_male_ptrs;         // scratch space for breeding
-        static OrganismVector                   previous_gen;               // scratch space for next gen
-
-}; 
-// Cell
-///////////////////////////////////////////////////////////////////////////////
-
 
 
 ///////////////////////////////////////////////////////////////////////////////	
