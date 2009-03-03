@@ -27,7 +27,7 @@ namespace gingko {
 //! The maximum number of fitness factors in the system. A "fitness factor"
 //! represents an environmental variable and a corresponding genotypic variable
 //! that together contribute to the fitness of an individual organism.
-const unsigned MAX_FITNESS_FACTORS = 4;
+const unsigned MAX_FITNESS_FACTORS = 1;
 
 //! The value type of a fitness factor (both environmental and genotypic.
 typedef int                     FitnessFactorType;

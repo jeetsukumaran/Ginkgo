@@ -93,15 +93,15 @@ void World::cycle() {
 
     for (CellIndexType i = this->landscape_.size()-1; i >= 0; --i) {
         this->landscape_[i].reproduction(); 
-        this->landscape_[i].migration();
+//         this->landscape_[i].migration();
     }
-    this->landscape_.process_migrants();    
-    for (CellIndexType i = this->landscape_.size()-1; i >= 0; --i) {    
-        this->landscape_[i].survival();
-        this->landscape_[i].competition();        
-    }    
-    
-    this->landscape_.dump(std::cerr);
+//     this->landscape_.process_migrants();    
+//     for (CellIndexType i = this->landscape_.size()-1; i >= 0; --i) {    
+//         this->landscape_[i].survival();
+//         this->landscape_[i].competition();        
+//     }    
+//     
+//     this->landscape_.dump(std::cerr);
     
 }
 

@@ -95,7 +95,7 @@ class Cell {
         // --- supporting methods ---
         
         void extract_breeding_groups(unsigned species_index, 
-            const OrganismVector,
+            const OrganismVector& organisms,
             std::vector<const Organism *>& female_ptrs,
             std::vector<const Organism *>& male_ptrs) const;
         

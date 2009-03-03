@@ -27,6 +27,9 @@
 #include <string>
 #include <cmath>
 
+#include <iostream>
+
+
 #include "gingko_defs.h"
 #include "random.h"
 
@@ -49,7 +52,7 @@ class Pedigree {
 		: female_(0L),
 		  male_(0L),
 		  reference_count_(1)
-		{}
+		{ }
 		
 		void inherit(Pedigree * female, Pedigree * male) {
 			this->female_ = female;
@@ -58,6 +61,7 @@ class Pedigree {
 				female->increment_count();
 			if (male)
 				male->increment_count();
+
 		}
 		
 		~Pedigree() {
@@ -114,7 +118,7 @@ class Organism {
               fitness_(-1),
               pedigree_(0L),              
               expired_(false) {
-            memcpy(this->genotype_, new_genotype, this->num_fitness_factors_*sizeof(FitnessFactorType));
+            memcpy(this->genotype_, new_genotype, MAX_FITNESS_FACTORS*sizeof(FitnessFactorType));
 		}
         
         //! Copy constructor.
@@ -135,7 +139,7 @@ class Organism {
             }
             this->species_index_ = ind.species_index_;
             this->num_fitness_factors_ = ind.num_fitness_factors_;
-            memcpy(this->genotype_, ind.genotype_, this->num_fitness_factors_*sizeof(FitnessFactorType));
+            memcpy(this->genotype_, ind.genotype_, MAX_FITNESS_FACTORS*sizeof(FitnessFactorType));
             this->sex_ = ind.sex_;
             this->fitness_ = ind.fitness_;
             this->expired_ = ind.expired_;
@@ -275,7 +279,7 @@ class Species {
             this->selection_strengths_ = strengths;
         }
         void set_default_genotype(const FitnessFactors& genotype) {
-            memcpy(this->default_genotype_, genotype, this->num_fitness_factors_*sizeof(FitnessFactorType));
+            memcpy(this->default_genotype_, genotype, MAX_FITNESS_FACTORS*sizeof(FitnessFactorType));
         }         
         
         // --- fitness ---

@@ -55,7 +55,7 @@ int main(int argc, char* argv[]) {
     int cc = args_as_ints[2];
     int num_cells_init = args_as_ints[3];
     int num_gens = args_as_ints[4];
-    int num_env_factors = 4;
+    int num_env_factors = 1;
     if (seed < 1)
     	seed = time(0);
     std::cerr << "Using seed of " << seed << '\n';

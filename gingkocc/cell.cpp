@@ -47,7 +47,7 @@ Cell::Cell(CellIndexType index,
       species_(species),
       rng_(rng) {
     this->carrying_capacity_ = 0;
-    memset(this->environment_, 0, this->num_fitness_factors_*sizeof(FitnessFactorType));    
+    memset(this->environment_, 0, MAX_FITNESS_FACTORS*sizeof(FitnessFactorType));    
 }
 
 // --- basic biotics ---
@@ -154,7 +154,7 @@ void Cell::competition() {
 //! Extracts pointers to male and female organisms of a particular species from 
 //! a vector of organisms passed to it.
 void Cell::extract_breeding_groups(unsigned species_index,
-        const OrganismVector organisms,
+        const OrganismVector& organisms,
         std::vector<const Organism*>& female_ptrs,
         std::vector<const Organism*>& male_ptrs) const {
     assert(species_index < this->species_.size());    
