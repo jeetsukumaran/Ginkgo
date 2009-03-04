@@ -29,7 +29,7 @@
 
 int main(int argc, char* argv[]) {
     long seed = 0;
-	std::vector<int> args_as_ints;
+	std::vector<unsigned long> args_as_longs;
 	for (int i = 1; i < argc; ++i) {
 		std::string a(argv[i]);
 		if (a.length() > 2 && a[0] == '-') {
@@ -42,19 +42,19 @@ int main(int argc, char* argv[]) {
 			}
 		}
 		else {
-			args_as_ints.push_back(atoi(a.c_str()));
+			args_as_longs.push_back(atoi(a.c_str()));
 		}
 	}
-    if (args_as_ints.size() < 5) {
+    if (args_as_longs.size() < 5) {
         std::cerr << "usage: " << argv[0] <<  " <DIM-X> <DIM-Y> <CELL-CARRYING-CAPACITY> <NUM-CELLS-TO-POPULATE> <NUM-GENS>\n";
         exit(1);
     }
 
-    int size_x = args_as_ints[0];
-    int size_y = args_as_ints[1];
-    int cc = args_as_ints[2];
-    int num_cells_init = args_as_ints[3];
-    int num_gens = args_as_ints[4];
+    int size_x = args_as_longs[0];
+    int size_y = args_as_longs[1];
+    int cc = args_as_longs[2];
+    int num_cells_init = args_as_longs[3];
+    int num_gens = args_as_longs[4];
     int num_env_factors = 1;
     if (seed < 1)
     	seed = time(0);
