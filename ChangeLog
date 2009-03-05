@@ -2,10 +2,12 @@
     * Prototype
     
 2009-03-05 (v0.0.1)
-    * Diploid organism pedigree tracking.
+    * Biparental organism pedigree tracking.
     
 2009-03-05 (v0.0.2)
     * Haploid locus tracking.
     
+2009-03-05 (v0.0.3)
+    * Diploid locus tracking.
     
 
