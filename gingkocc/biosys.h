@@ -43,22 +43,22 @@ typedef std::vector<Organism>   OrganismVector;
 
 ///////////////////////////////////////////////////////////////////////////////
 // Tracks the genealogy of a single haploid locus or allele.
-class HaploidGenealogy {
+class Genealogy {
 
         public:
             
-                HaploidGenealogy()
+                Genealogy()
                 : parent_(0L),
                   reference_count_(1)
                 { }
                 
-                void inherit(HaploidGenealogy * parent) {
+                void inherit(Genealogy * parent) {
                         this->parent_ = parent;
                         if (parent)
                                 parent->increment_count();
                 }
                 
-                ~HaploidGenealogy() {
+                ~Genealogy() {
                         if (this->parent_)
                                 this->parent_->decrement_count();
                         assert(this->reference_count_ == 0 || this->reference_count_ == 1);
@@ -75,26 +75,26 @@ class HaploidGenealogy {
                 }
                 
     private:            
-                HaploidGenealogy *      parent_;
-                unsigned                reference_count_;
+                Genealogy *         parent_;
+                unsigned            reference_count_;
                 
 }; 
-// HaploidGenealogy
+// Genealogy
 ///////////////////////////////////////////////////////////////////////////////
 
 
 ///////////////////////////////////////////////////////////////////////////////
-// Tracks an organisms genealogy.
-class DiploidGenealogy {
+// Manages the genealogies of a diploid locus.
+class DiploidLocus {
 
 	public:
 	    
-		DiploidGenealogy()
+		DiploidLocus()
 		: allele1_(0L),
 		  allele2_(0L)
 		{ }
 		
-		const DiploidGenealogy& operator=(const DiploidGenealogy g) {		        
+		const DiploidLocus& operator=(const DiploidLocus g) {		        
             if (this->allele1_)
             	this->allele1_->decrement_count();
             this->allele1_ = g.allele1_;
@@ -108,8 +108,8 @@ class DiploidGenealogy {
             return *this;            	
 		}
 		
-		void inherit(const DiploidGenealogy& female, 
-		             const DiploidGenealogy& male, 
+		void inherit(const DiploidLocus& female, 
+		             const DiploidLocus& male, 
 		             RandomNumberGenerator& rng) {
 			this->allele1_ = rng.select(female.allele1_, female.allele2_);
 			this->allele2_ = rng.select(male.allele1_, male.allele2_);
@@ -119,7 +119,7 @@ class DiploidGenealogy {
 				this->allele2_->increment_count();
 		}
 		
-		~DiploidGenealogy() {
+		~DiploidLocus() {
 			if (this->allele1_)
 				this->allele1_->decrement_count();
 			if (this->allele2_)
@@ -127,11 +127,11 @@ class DiploidGenealogy {
 		}
 		
     private:		
-		HaploidGenealogy *      allele1_;
-		HaploidGenealogy *      allele2_;
+		Genealogy *      allele1_;
+		Genealogy *      allele2_;
 		
 }; 
-// DiploidGenealogy
+// DiploidLocus
 ///////////////////////////////////////////////////////////////////////////////
 
 
@@ -182,7 +182,7 @@ class Organism {
             this->sex_ = ind.sex_;
             this->fitness_ = ind.fitness_;
             this->expired_ = ind.expired_;
-            this->genealogy_ = ind.genealogy_;
+            this->neutral_marker_locus_ = ind.neutral_marker_locus_;
             return *this;
         }
         
@@ -229,8 +229,8 @@ class Organism {
 		                         const Organism& male,
 		                         RandomNumberGenerator& rng) {		    
 // 			assert(this->genealogy_ == 0L);
-// 			this->genealogy_ = new DiploidGenealogy();
-			this->genealogy_.inherit(female.genealogy_, male.genealogy_, rng);
+// 			this->genealogy_ = new DiploidLocus();
+			this->neutral_marker_locus_.inherit(female.neutral_marker_locus_, male.neutral_marker_locus_, rng);
 		}
 		
     private:
@@ -239,7 +239,7 @@ class Organism {
         FitnessFactors      genotype_;              // non-neutral genotype: maps to fitness phenotype
         Organism::Sex       sex_;                   // male or female
         float               fitness_;               // cache this organism's fitness
-        DiploidGenealogy    genealogy_;             // track the genealogy of this organism        
+        DiploidLocus        neutral_marker_locus_;  // track the genealogy of this organism        
         bool                expired_;               // flag an organism to be removed allowing for use of std::remove_if() and std::resize() or v.erase()
         
 };
