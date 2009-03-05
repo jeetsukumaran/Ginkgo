@@ -42,45 +42,96 @@ typedef std::vector<Species *>  SpeciesPointerVector;
 typedef std::vector<Organism>   OrganismVector;
 
 ///////////////////////////////////////////////////////////////////////////////
-// Tracks an organisms pedigree.
-//
+// Tracks the genealogy of a single haploid locus or allele.
 class HaploidGenealogy {
+
+        public:
+            
+                HaploidGenealogy()
+                : parent_(0L),
+                  reference_count_(1)
+                { }
+                
+                void inherit(HaploidGenealogy * parent) {
+                        this->parent_ = parent;
+                        if (parent)
+                                parent->increment_count();
+                }
+                
+                ~HaploidGenealogy() {
+                        if (this->parent_)
+                                this->parent_->decrement_count();
+                        assert(this->reference_count_ == 0 || this->reference_count_ == 1);
+                }
+                
+                void decrement_count() {
+                        if (this->reference_count_ == 1)
+                                delete this; // never do this!!
+                        this->reference_count_ -= 1;
+                }
+                
+                void increment_count() {
+                        this->reference_count_ += 1;
+                }
+                
+    private:            
+                HaploidGenealogy *      parent_;
+                unsigned                reference_count_;
+                
+}; 
+// HaploidGenealogy
+///////////////////////////////////////////////////////////////////////////////
+
+
+///////////////////////////////////////////////////////////////////////////////
+// Tracks an organisms genealogy.
+class DiploidGenealogy {
 
 	public:
 	    
-		HaploidGenealogy()
-		: parent_(0L),
-		  reference_count_(1)
+		DiploidGenealogy()
+		: allele1_(0L),
+		  allele2_(0L)
 		{ }
 		
-		void inherit(HaploidGenealogy * parent) {
-			this->parent_ = parent;
-			if (parent)
-				parent->increment_count();
+		const DiploidGenealogy& operator=(const DiploidGenealogy g) {		        
+            if (this->allele1_)
+            	this->allele1_->decrement_count();
+            this->allele1_ = g.allele1_;
+            if (this->allele1_)
+            	this->allele1_->increment_count();		        
+            if (this->allele2_)
+            	this->allele2_->decrement_count();
+            this->allele2_ = g.allele2_;
+            if (this->allele2_)
+            	this->allele2_->increment_count();
+            return *this;            	
 		}
 		
-		~HaploidGenealogy() {
-			if (this->parent_)
-				this->parent_->decrement_count();
-			assert(this->reference_count_ == 0 || this->reference_count_ == 1);
+		void inherit(const DiploidGenealogy& female, 
+		             const DiploidGenealogy& male, 
+		             RandomNumberGenerator& rng) {
+			this->allele1_ = rng.select(female.allele1_, female.allele2_);
+			this->allele2_ = rng.select(male.allele1_, male.allele2_);
+			if (this->allele1_)
+				this->allele1_->increment_count();
+			if (this->allele2_)
+				this->allele2_->increment_count();
 		}
 		
-		void decrement_count() {
-			if (this->reference_count_ == 1)
-				delete this; // never do this!!
-			this->reference_count_ -= 1;
-		}
-		
-		void increment_count() {
-			this->reference_count_ += 1;
+		~DiploidGenealogy() {
+			if (this->allele1_)
+				this->allele1_->decrement_count();
+			if (this->allele2_)
+				this->allele2_->decrement_count();
 		}
 		
     private:		
-		HaploidGenealogy *      parent_;
-		unsigned                reference_count_;
+		HaploidGenealogy *      allele1_;
+		HaploidGenealogy *      allele2_;
 		
 }; 
-// HaploidGenealogy
+// DiploidGenealogy
 ///////////////////////////////////////////////////////////////////////////////
 
 
@@ -108,20 +159,16 @@ class Organism {
               num_fitness_factors_(num_fitness_factors),              
               sex_(new_sex),
               fitness_(-1),
-              genealogy_(0L),              
               expired_(false) {
             memcpy(this->genotype_, new_genotype, MAX_FITNESS_FACTORS*sizeof(FitnessFactorType));
 		}
         
         //! Copy constructor.
-        Organism(const Organism& ind)
-        	: genealogy_(0L) {
+        Organism(const Organism& ind) {
             *this = ind;
         }
 
         ~Organism() {
-            if (this->genealogy_)
-            	this->genealogy_->decrement_count();
         }
         
         //! Assignment.
@@ -135,11 +182,7 @@ class Organism {
             this->sex_ = ind.sex_;
             this->fitness_ = ind.fitness_;
             this->expired_ = ind.expired_;
-            if (this->genealogy_)
-            	this->genealogy_->decrement_count();
             this->genealogy_ = ind.genealogy_;
-            if (this->genealogy_)
-            	this->genealogy_->increment_count();
             return *this;
         }
         
@@ -182,20 +225,22 @@ class Organism {
             return this->sex_ == Organism::Female;
         }                
 				
-		void inherit_genealogy(const Organism& organism) {		    
-			assert(this->genealogy_ == 0L);
-			this->genealogy_ = new HaploidGenealogy();
-			this->genealogy_->inherit(organism.genealogy_);
+		void inherit_genealogies(const Organism& female, 
+		                         const Organism& male,
+		                         RandomNumberGenerator& rng) {		    
+// 			assert(this->genealogy_ == 0L);
+// 			this->genealogy_ = new DiploidGenealogy();
+			this->genealogy_.inherit(female.genealogy_, male.genealogy_, rng);
 		}
 		
     private:
-        unsigned        species_index_;         // species
-        unsigned        num_fitness_factors_;   // number of factors effecting fitness        
-        FitnessFactors  genotype_;              // non-neutral genotype: maps to fitness phenotype
-        Organism::Sex   sex_;                   // male or female
-        float           fitness_;               // cache this organism's fitness
-        HaploidGenealogy *      genealogy_;              // track the pedigree of this organism        
-        bool            expired_;               // flag an organism to be removed allowing for use of std::remove_if() and std::resize() or v.erase()
+        unsigned            species_index_;         // species
+        unsigned            num_fitness_factors_;   // number of factors effecting fitness        
+        FitnessFactors      genotype_;              // non-neutral genotype: maps to fitness phenotype
+        Organism::Sex       sex_;                   // male or female
+        float               fitness_;               // cache this organism's fitness
+        DiploidGenealogy    genealogy_;             // track the genealogy of this organism        
+        bool                expired_;               // flag an organism to be removed allowing for use of std::remove_if() and std::resize() or v.erase()
         
 };
 // Organism
@@ -300,11 +345,11 @@ class Species {
             return Organism(this->index_, this->num_fitness_factors_, this->default_genotype_, this->get_random_sex());
         }
         
-        Organism new_organism(const Organism& female, const Organism& male) const {
+        Organism new_organism(const Organism& female, const Organism& male) {
         	FitnessFactors offspring_genotype;
 			this->compose_offspring_genotype(female.genotype(), male.genotype(), offspring_genotype);
             Organism organism(this->index_, this->num_fitness_factors_, offspring_genotype, this->get_random_sex());
-            organism.inherit_genealogy(female);
+            organism.inherit_genealogies(female, male, this->rng_);
             return organism;
         }        
         
