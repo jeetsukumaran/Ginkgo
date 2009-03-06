@@ -47,7 +47,9 @@ Cell::Cell(CellIndexType index,
       species_(species),
       rng_(rng) {
     this->carrying_capacity_ = 0;
-    memset(this->environment_, 0, MAX_FITNESS_FACTORS*sizeof(FitnessFactorType));    
+    // following not neccessary as default constructor for FitnessFactorType will
+    // be called
+//     memset(this->environment_, 0, MAX_FITNESS_FACTORS*sizeof(FitnessFactorType));    
 }
 
 // --- basic biotics ---

@@ -47,41 +47,76 @@ class Genealogy {
 
         public:
             
-                Genealogy()
-                : parent_(0L),
-                  reference_count_(1)
-                { }
-                
-                void inherit(Genealogy * parent) {
-                        this->parent_ = parent;
-                        if (parent)
-                                parent->increment_count();
-                }
-                
-                ~Genealogy() {
-                        if (this->parent_)
-                                this->parent_->decrement_count();
-                        assert(this->reference_count_ == 0 || this->reference_count_ == 1);
-                }
-                
-                void decrement_count() {
-                        if (this->reference_count_ == 1)
-                                delete this; // never do this!!
-                        this->reference_count_ -= 1;
-                }
-                
-                void increment_count() {
-                        this->reference_count_ += 1;
-                }
+            Genealogy()
+            : parent_(0L),
+              reference_count_(1)
+            { }
+            
+            void inherit(Genealogy * parent) {
+                this->parent_ = parent;
+                if (parent)
+                    parent->increment_count();
+            }
+            
+            ~Genealogy() {
+                if (this->parent_)
+                    this->parent_->decrement_count();
+                assert(this->reference_count_ == 0 || this->reference_count_ == 1);
+            }
+            
+            void decrement_count() {
+                if (this->reference_count_ == 1)
+                        delete this; // never do this!!
+                this->reference_count_ -= 1;
+            }
+            
+            void increment_count() {
+                this->reference_count_ += 1;
+            }
                 
     private:            
-                Genealogy *         parent_;
-                unsigned            reference_count_;
+            Genealogy *         parent_;
+            unsigned            reference_count_;
                 
 }; 
 // Genealogy
 ///////////////////////////////////////////////////////////////////////////////
 
+///////////////////////////////////////////////////////////////////////////////
+// Manages the genealogies of a haploid locus.
+class HaploidLocus {
+
+	public:
+	    
+		HaploidLocus()
+		: allele_(0L)
+		{ }
+		
+		const HaploidLocus& operator=(const HaploidLocus g) {		        
+            if (this->allele_)
+            	this->allele_->decrement_count();
+            this->allele_ = g.allele_;
+            if (this->allele_)
+            	this->allele_->increment_count();		        
+            return *this;            	
+		}
+		
+		void inherit(const HaploidLocus& parent) {
+			this->allele_ = parent.allele_;
+			if (this->allele_)
+				this->allele_->increment_count();
+		}
+		
+		~HaploidLocus() {
+			if (this->allele_)
+				this->allele_->decrement_count();;
+		}
+		
+    private:		
+		Genealogy *      allele_;		
+}; 
+// DiploidLocus
+///////////////////////////////////////////////////////////////////////////////
 
 ///////////////////////////////////////////////////////////////////////////////
 // Manages the genealogies of a diploid locus.
@@ -134,7 +169,6 @@ class DiploidLocus {
 // DiploidLocus
 ///////////////////////////////////////////////////////////////////////////////
 
-
 ///////////////////////////////////////////////////////////////////////////////
 //! A single organism of a population of a particular species.
 //! Responsible for tracking (non-neutral) genotype and neutral marker 
@@ -178,11 +212,14 @@ class Organism {
             }
             this->species_index_ = ind.species_index_;
             this->num_fitness_factors_ = ind.num_fitness_factors_;
-            memcpy(this->genotype_, ind.genotype_, MAX_FITNESS_FACTORS*sizeof(FitnessFactorType));
+            memcpy(this->genotype_, ind.genotype_, MAX_FITNESS_FACTORS*sizeof(FitnessFactorType));                    
             this->sex_ = ind.sex_;
             this->fitness_ = ind.fitness_;
             this->expired_ = ind.expired_;
-            this->neutral_marker_locus_ = ind.neutral_marker_locus_;
+            this->neutral_haploid_marker_ = ind.neutral_haploid_marker_;
+            for (unsigned i = 0; i < NUM_NEUTRAL_DIPLOID_LOCII; ++i) {
+                this->neutral_diploid_markers_[i] = ind.neutral_diploid_markers_[i];
+            }             
             return *this;
         }
         
@@ -227,21 +264,22 @@ class Organism {
 				
 		void inherit_genealogies(const Organism& female, 
 		                         const Organism& male,
-		                         RandomNumberGenerator& rng) {		    
-// 			assert(this->genealogy_ == 0L);
-// 			this->genealogy_ = new DiploidLocus();
-			this->neutral_marker_locus_.inherit(female.neutral_marker_locus_, male.neutral_marker_locus_, rng);
+		                         RandomNumberGenerator& rng) {
+            this->neutral_haploid_marker_.inherit(female.neutral_haploid_marker_);                		                         
+            for (unsigned i = 0; i < NUM_NEUTRAL_DIPLOID_LOCII; ++i) {
+                this->neutral_diploid_markers_[i].inherit(female.neutral_diploid_markers_[i], male.neutral_diploid_markers_[i], rng);
+            }                
 		}
 		
     private:
-        unsigned            species_index_;         // species
-        unsigned            num_fitness_factors_;   // number of factors effecting fitness        
-        FitnessFactors      genotype_;              // non-neutral genotype: maps to fitness phenotype
-        Organism::Sex       sex_;                   // male or female
-        float               fitness_;               // cache this organism's fitness
-        DiploidLocus        neutral_marker_locus_;  // track the genealogy of this organism        
-        bool                expired_;               // flag an organism to be removed allowing for use of std::remove_if() and std::resize() or v.erase()
-        
+        unsigned            species_index_;                               // species
+        unsigned            num_fitness_factors_;                         // number of factors effecting fitness        
+        FitnessFactors      genotype_;                                    // non-neutral genotype: maps to fitness phenotype
+        HaploidLocus        neutral_haploid_marker_;
+        DiploidLocus        neutral_diploid_markers_[NUM_NEUTRAL_DIPLOID_LOCII];  // track the genealogy of neutral genes in this organism        
+        Organism::Sex       sex_;                                         // male or female
+        float               fitness_;                                     // cache this organism's fitness
+        bool                expired_;                                     // flag an organism to be removed allowing for use of std::remove_if() and std::resize() or v.erase()    
 };
 // Organism
 ///////////////////////////////////////////////////////////////////////////////

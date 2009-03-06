@@ -29,13 +29,15 @@ namespace gingko {
 //! that together contribute to the fitness of an individual organism.
 const unsigned MAX_FITNESS_FACTORS = 1;
 
+//! The number of neutral diploid locii to track
+const unsigned NUM_NEUTRAL_DIPLOID_LOCII = 10;
+
 //! The value type of a fitness factor (both environmental and genotypic.
 typedef int                     FitnessFactorType;
 
 //! The number of dimensions or "slots" reserved for fitness assessment. The
 //! actual number may be less than this.
 typedef FitnessFactorType       FitnessFactors[MAX_FITNESS_FACTORS];
-
 
 //! The units for referencing cells on the landscape. We allow signed values
 //! even though a negative coordinate is invalide so that negative values can 
