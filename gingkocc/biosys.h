@@ -43,22 +43,22 @@ typedef std::vector<Organism>   OrganismVector;
 
 ///////////////////////////////////////////////////////////////////////////////
 // Tracks the genealogy of a single haploid locus or allele.
-class Genealogy {
+class GenealogyNode {
 
         public:
             
-            Genealogy()
+            GenealogyNode()
             : parent_(0L),
               reference_count_(1)
             { }
             
-            void inherit(Genealogy * parent) {
+            void inherit(GenealogyNode * parent) {
                 this->parent_ = parent;
                 if (parent)
                     parent->increment_count();
             }
             
-            ~Genealogy() {
+            ~GenealogyNode() {
                 if (this->parent_)
                     this->parent_->decrement_count();
                 assert(this->reference_count_ == 0 || this->reference_count_ == 1);
@@ -73,13 +73,39 @@ class Genealogy {
             void increment_count() {
                 this->reference_count_ += 1;
             }
+            
+            GenealogyNode * get_parent() {
+                return this->parent_;
+            }
+            
+            void set_parent(GenealogyNode * parent) {
+                this->parent_ = parent;
+            }
+            
+            GenealogyNode * get_left_child() {
+                return this->left_child_;
+            }
+            
+            void set_left_child(GenealogyNode * left_child) {
+                this->left_child_ = left_child;
+            }
+            
+            GenealogyNode * get_next_sib() {
+                return this->next_sib_;
+            }
+            
+            void set_next_sib(GenealogyNode * next_sib) {
+                this->next_sib_ = next_sib;
+            }                                                        
                 
     private:            
-            Genealogy *         parent_;
+            GenealogyNode *     parent_;
+            GenealogyNode *     left_child_;
+            GenealogyNode *     next_sib_;
             unsigned            reference_count_;
                 
 }; 
-// Genealogy
+// GenealogyNode
 ///////////////////////////////////////////////////////////////////////////////
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -113,7 +139,7 @@ class HaploidLocus {
 		}
 		
     private:		
-		Genealogy *      allele_;		
+		GenealogyNode *      allele_;		
 }; 
 // DiploidLocus
 ///////////////////////////////////////////////////////////////////////////////
@@ -162,8 +188,8 @@ class DiploidLocus {
 		}
 		
     private:		
-		Genealogy *      allele1_;
-		Genealogy *      allele2_;
+		GenealogyNode *      allele1_;
+		GenealogyNode *      allele2_;
 		
 }; 
 // DiploidLocus
@@ -186,16 +212,23 @@ class Organism {
         // lifecycle and assignment
         
         Organism(unsigned species_index, 
-                 unsigned num_fitness_factors, 
                  const FitnessFactors& new_genotype, 
                  Organism::Sex new_sex) 
-            : species_index_(species_index),
-              num_fitness_factors_(num_fitness_factors),              
+            : species_index_(species_index),              
               sex_(new_sex),
               fitness_(-1),
               expired_(false) {
-            memcpy(this->genotype_, new_genotype, MAX_FITNESS_FACTORS*sizeof(FitnessFactorType));
+            memcpy(this->genotypic_fitness_factors_, new_genotype, MAX_FITNESS_FACTORS*sizeof(FitnessFactorType));
 		}
+		
+        Organism(unsigned species_index, 
+                 Organism::Sex new_sex) 
+            : species_index_(species_index),            
+              sex_(new_sex),
+              fitness_(-1),
+              expired_(false) {
+		}		
+        		
         
         //! Copy constructor.
         Organism(const Organism& ind) {
@@ -211,8 +244,7 @@ class Organism {
                 return *this;
             }
             this->species_index_ = ind.species_index_;
-            this->num_fitness_factors_ = ind.num_fitness_factors_;
-            memcpy(this->genotype_, ind.genotype_, MAX_FITNESS_FACTORS*sizeof(FitnessFactorType));                    
+            memcpy(this->genotypic_fitness_factors_, ind.genotypic_fitness_factors_, MAX_FITNESS_FACTORS*sizeof(FitnessFactorType));                    
             this->sex_ = ind.sex_;
             this->fitness_ = ind.fitness_;
             this->expired_ = ind.expired_;
@@ -232,7 +264,7 @@ class Organism {
                    
         // genotype       
         const FitnessFactors& genotype() const {
-            return this->genotype_;
+            return this->genotypic_fitness_factors_;
         }
         
         // fitness & survival
@@ -261,6 +293,23 @@ class Organism {
         bool is_female() const {
             return this->sex_ == Organism::Female;
         }                
+        
+        // inheritance
+        
+        void inherit_genotypic_fitness_factors(const Organism& female, 
+                                               const Organism& male, 
+                                               unsigned num_fitness_factors,
+                                               float mutation_rate,
+                                               int max_mutation_size,
+                                               RandomNumberGenerator& rng) {
+				for (unsigned i = 0; i < num_fitness_factors; ++i) {
+					FitnessFactorType ff_value = rng.select(female.genotypic_fitness_factors_[i], male.genotypic_fitness_factors_[i]);  
+					if (rng.uniform_real() < mutation_rate) {
+						ff_value += rng.uniform_int(-max_mutation_size, max_mutation_size);
+					}
+					this->genotypic_fitness_factors_[i] = ff_value;
+				}
+        }        
 				
 		void inherit_genealogies(const Organism& female, 
 		                         const Organism& male,
@@ -272,14 +321,13 @@ class Organism {
 		}
 		
     private:
-        unsigned            species_index_;                               // species
-        unsigned            num_fitness_factors_;                         // number of factors effecting fitness        
-        FitnessFactors      genotype_;                                    // non-neutral genotype: maps to fitness phenotype
-        HaploidLocus        neutral_haploid_marker_;
+        unsigned            species_index_;                                 // species
+        FitnessFactors      genotypic_fitness_factors_;                     // non-neutral genotype: maps to fitness phenotype
+        HaploidLocus        neutral_haploid_marker_;                        // track the genealogy of neutral genes in this organism    
         DiploidLocus        neutral_diploid_markers_[NUM_NEUTRAL_DIPLOID_LOCII];  // track the genealogy of neutral genes in this organism        
-        Organism::Sex       sex_;                                         // male or female
-        float               fitness_;                                     // cache this organism's fitness
-        bool                expired_;                                     // flag an organism to be removed allowing for use of std::remove_if() and std::resize() or v.erase()    
+        Organism::Sex       sex_;                                           // male or female
+        float               fitness_;                                       // cache this organism's fitness
+        bool                expired_;                                       // flag an organism to be removed allowing for use of std::remove_if() and std::resize() or v.erase()    
 };
 // Organism
 ///////////////////////////////////////////////////////////////////////////////
@@ -354,7 +402,7 @@ class Species {
             this->selection_strengths_ = strengths;
         }
         void set_default_genotype(const FitnessFactors& genotype) {
-            memcpy(this->default_genotype_, genotype, MAX_FITNESS_FACTORS*sizeof(FitnessFactorType));
+            memcpy(this->default_genotypic_fitness_factors_, genotype, MAX_FITNESS_FACTORS*sizeof(FitnessFactorType));
         }         
         
         // --- fitness ---
@@ -380,30 +428,22 @@ class Species {
         }  
         
         Organism new_organism() const {
-            return Organism(this->index_, this->num_fitness_factors_, this->default_genotype_, this->get_random_sex());
+            return Organism(this->index_, this->default_genotypic_fitness_factors_, this->get_random_sex());
         }
         
         Organism new_organism(const Organism& female, const Organism& male) {
         	FitnessFactors offspring_genotype;
-			this->compose_offspring_genotype(female.genotype(), male.genotype(), offspring_genotype);
-            Organism organism(this->index_, this->num_fitness_factors_, offspring_genotype, this->get_random_sex());
+            Organism organism(this->index_, this->get_random_sex());
+            organism.inherit_genotypic_fitness_factors(female, 
+                                                       male, 
+                                                       this->num_fitness_factors_, 
+                                                       this->mutation_rate_, 
+                                                       this->max_mutation_size_, 
+                                                       this->rng_);
             organism.inherit_genealogies(female, male, this->rng_);
             return organism;
         }        
         
-        void compose_offspring_genotype(const FitnessFactors& female_genotype, 
-                const FitnessFactors& male_genotype, 
-                FitnessFactors & offspring_genotype) const {
-				for (unsigned i = 0; i < this->num_fitness_factors_; ++i) {
-					FitnessFactorType genotype_value = this->rng_.select(male_genotype[i], female_genotype[i]);  
-					if (this->rng_.uniform_real() < this->mutation_rate_) {
-						genotype_value += this->rng_.uniform_int(-this->max_mutation_size_,
-															 this->max_mutation_size_);
-					}
-					offspring_genotype[i] = genotype_value;
-				}
-        }
-
     private:
         // declared as private (and undefined) to prevent copying/assignment
         Species(const Species& species);    
@@ -420,7 +460,7 @@ class Species {
         unsigned                    reproductive_rate_mutation_size_;  // if reprod. rate evolves, size of step
         std::vector<int>            movement_costs_;            // the movement surface: the "cost" to enter into every cell on the landscape
         int                         movement_capacity_;         // number of cells per round an individual can move
-        FitnessFactors              default_genotype_;          // genotype of individuals generated de novo        
+        FitnessFactors              default_genotypic_fitness_factors_;          // genotype of individuals generated de novo        
         RandomNumberGenerator&      rng_;                       // rng to use
 
 };
