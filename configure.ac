@@ -228,6 +228,7 @@ AC_CONFIG_FILES([
 	Makefile 			\
 	gingkocc/Makefile   \
 	gingkocc/prototypes/Makefile		\
+	gingkocc/tests/Makefile		\
 	])
 
 AC_OUTPUT

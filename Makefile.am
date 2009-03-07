@@ -5,6 +5,6 @@ EXTRA_DIST = \
     gingkopy \
 	README
 
-SUBDIRS = gingkocc gingkocc/prototypes
-
-
+SUBDIRS = gingkocc \
+          gingkocc/prototypes \
+          gingkocc/tests
