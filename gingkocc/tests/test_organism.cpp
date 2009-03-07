@@ -21,6 +21,7 @@
 
 #include <ctime>
 #include <iostream>
+#include <vector>
 #include "../biosys.h"
 #include "../random.h"
 
@@ -28,26 +29,51 @@ using namespace gingko;
 
 int main(int argc, char* argv[]) {
     long seed = 0;
-    if (argc == 0) {
-        seed = atol(argv[0]);
+    if (argc > 1) {
+        seed = atol(argv[1]);
     } else {
         seed = time(0);
     }
     
-    std::cout << "Seed = " << seed << "\n";
+    std::cout << "\nSeed = " << seed << "\n";
     RandomNumberGenerator rng(seed);
     Species sp(0, "gecko", 4, rng);
     
-    std::cout << "Generating parents p1 and p2 ...\n";
-    Organism p1 = sp.new_organism();
-    Organism p2 = sp.new_organism();
-    p1.dump(std::cout);
-    std::cout << std::endl;
-    p2.dump(std::cout);
-    std::cout << std::endl;    
+    std::cout << "\nGenerating gen1 ...\n";
+    std::vector<Organism> gen1;
+    for (int i = 0; i < 4; ++i) {
+        gen1.push_back(sp.new_organism());
+    }
+    for (int i = 0; i < 4; ++i) {
+        gen1[i].dump(std::cout);
+        std::cout << std::endl;
+    }   
     
-    std::cout << "Creating offspring o1 ...\n";
-    Organism o1 = sp.new_organism(p1, p2);
-    o1.dump(std::cout);
+    std::cout << "\nGenerating gen2 ...\n";
+    std::vector<Organism> gen2;
+    gen2.push_back(sp.new_organism(gen1[0], gen1[1]));
+    gen2.push_back(sp.new_organism(gen1[1], gen1[2]));
+    gen2.push_back(sp.new_organism(gen1[2], gen1[3]));
+    
+    std::cout << "\nDestroying gen1 ...\n";    
+    gen1.erase(gen1.begin(), gen1.end());
+
+    for (int i = 0; i < 3; ++i) {
+        gen2[i].dump(std::cout);
+        std::cout << std::endl;
+    }    
+    
+    std::cout << "\nGenerating gen3 ...\n";
+    std::vector<Organism> gen3;
+    gen3.push_back(sp.new_organism(gen2[1], gen2[2]));
+    
+    std::cout << "\nDestroying gen2 ...\n";       
+    gen2.erase(gen2.begin(), gen2.end());
+
+    for (int i = 0; i < 1; ++i) {
+        gen3[i].dump(std::cout);
+        std::cout << std::endl;
+    }    
+    
     
 }
