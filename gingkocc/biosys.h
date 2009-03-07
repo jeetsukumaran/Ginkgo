@@ -45,64 +45,104 @@ typedef std::vector<Organism>   OrganismVector;
 // Tracks the genealogy of a single haploid locus or allele.
 class GenealogyNode {
 
-        public:
-            
-            GenealogyNode()
-            : parent_(0L),
-              reference_count_(1)
-            { }
-            
-            void inherit(GenealogyNode * parent) {
-                this->parent_ = parent;
-                if (parent)
-                    parent->increment_count();
+    public:
+        
+        GenealogyNode()
+        : parent_(NULL),
+          left_child_(NULL),
+          next_sib_(NULL),
+          reference_count_(1)
+        { }
+        
+        const GenealogyNode& operator=(const GenealogyNode n) {
+            if (this->parent_ != NULL) {
+                GenealogyNode * g = this->parent_->left_child_;
+                if (g == this) {
+                    if ( g->next_sib_ == NULL ) {
+                        this->parent_->left_child_ = NULL;
+                    } else {
+                        this->parent_->left_child_ = g->next_sib_;                        
+                    }
+                } else {
+                    while (g->next_sib_ != this) {
+                        g = g->next_sib_;
+                    }
+                    g->next_sib_ = this->next_sib_;
+                }                                        
+                this->parent_->decrement_count();                
             }
-            
-            ~GenealogyNode() {
-                if (this->parent_)
-                    this->parent_->decrement_count();
-                assert(this->reference_count_ == 0 || this->reference_count_ == 1);
+            this->parent_ = n.parent_;
+            if (this->parent_ != NULL) {
+                this->parent_->increment_count();
             }
-            
-            void decrement_count() {
-                if (this->reference_count_ == 1)
-                        delete this; // never do this!!
-                this->reference_count_ -= 1;
-            }
-            
-            void increment_count() {
-                this->reference_count_ += 1;
-            }
-            
-            GenealogyNode * get_parent() {
-                return this->parent_;
-            }
-            
-            void set_parent(GenealogyNode * parent) {
-                this->parent_ = parent;
-            }
-            
-            GenealogyNode * get_left_child() {
-                return this->left_child_;
-            }
-            
-            void set_left_child(GenealogyNode * left_child) {
-                this->left_child_ = left_child;
-            }
-            
-            GenealogyNode * get_next_sib() {
-                return this->next_sib_;
-            }
-            
-            void set_next_sib(GenealogyNode * next_sib) {
-                this->next_sib_ = next_sib;
-            }                                                        
+            this->left_child_ = n.left_child_;
+            this->next_sib_ = n.next_sib_;
+            return *this;               
+        }
+                
+        
+        void inherit(GenealogyNode * parent) {
+            this->parent_ = parent;
+            if (this->parent_ != NULL) {
+                this->parent_->increment_count();
+                if (this->parent_->left_child_ == NULL) {
+                    this->parent_->left_child_ = this;
+                } else {
+                    GenealogyNode * g = this->parent_->left_child_;
+                    while (g->next_sib_ != NULL) {
+                        g = g->next_sib_;       
+                    }
+                    g->next_sib_ = this;
+                }
+            }                    
+        }
+        
+        ~GenealogyNode() {
+            if (this->parent_)
+                this->parent_->decrement_count();
+            assert(this->left_child_ == NULL);                
+            assert(this->reference_count_ == 0 || this->reference_count_ == 1);
+        }
+        
+        void decrement_count() {
+            if (this->reference_count_ == 1)
+                    delete this; // never do this!!
+            this->reference_count_ -= 1;
+        }
+        
+        void increment_count() {
+            this->reference_count_ += 1;
+        }
+        
+        GenealogyNode * get_parent() {
+            return this->parent_;
+        }
+        
+        void set_parent(GenealogyNode * parent) {
+            this->parent_ = parent;
+        }
+        
+        GenealogyNode * get_left_child() {
+            return this->left_child_;
+        }
+        
+        void set_left_child(GenealogyNode * left_child) {
+            this->left_child_ = left_child;
+        }
+        
+        GenealogyNode * get_next_sib() {
+            return this->next_sib_;
+        }
+        
+        void set_next_sib(GenealogyNode * next_sib) {
+            this->next_sib_ = next_sib;
+        }                                                        
                 
     private:            
-            GenealogyNode *     parent_;
-            GenealogyNode *     left_child_;
-            GenealogyNode *     next_sib_;
-            unsigned            reference_count_;
+        GenealogyNode *     parent_;
+        GenealogyNode *     left_child_;
+        GenealogyNode *     next_sib_;
+        unsigned            reference_count_;
                 
 }; 
 // GenealogyNode
@@ -112,34 +152,30 @@ class GenealogyNode {
 // Manages the genealogies of a haploid locus.
 class HaploidLocus {
 
-	public:
-	    
-		HaploidLocus()
-		: allele_(0L)
-		{ }
-		
-		const HaploidLocus& operator=(const HaploidLocus g) {		        
-            if (this->allele_)
-            	this->allele_->decrement_count();
-            this->allele_ = g.allele_;
-            if (this->allele_)
-            	this->allele_->increment_count();		        
-            return *this;            	
-		}
-		
-		void inherit(const HaploidLocus& parent) {
-			this->allele_ = parent.allele_;
-			if (this->allele_)
-				this->allele_->increment_count();
-		}
-		
-		~HaploidLocus() {
-			if (this->allele_)
-				this->allele_->decrement_count();;
-		}
-		
-    private:		
-		GenealogyNode *      allele_;		
+    public:
+        
+        HaploidLocus()
+            : allele_(NULL) 
+        { }
+        
+        const HaploidLocus& operator=(const HaploidLocus g) {               
+            this->allele_ = g.allele_;              
+            return *this;               
+        }
+        
+        void inherit(const HaploidLocus& parent) {
+            assert(this->allele_ == NULL);
+            this->allele_ = new GenealogyNode();
+            this->allele_->inherit(parent.allele_);
+        }
+        
+        ~HaploidLocus() {
+//          if (this->allele_)
+//              this->allele_->decrement_count();;
+        }
+        
+    private:        
+        GenealogyNode *      allele_;       
 }; 
 // DiploidLocus
 ///////////////////////////////////////////////////////////////////////////////
@@ -148,49 +184,37 @@ class HaploidLocus {
 // Manages the genealogies of a diploid locus.
 class DiploidLocus {
 
-	public:
-	    
-		DiploidLocus()
-		: allele1_(0L),
-		  allele2_(0L)
-		{ }
-		
-		const DiploidLocus& operator=(const DiploidLocus g) {		        
-            if (this->allele1_)
-            	this->allele1_->decrement_count();
+    public:
+        
+        DiploidLocus()
+            : allele1_(NULL),
+              allele2_(NULL)
+        { }
+        
+        const DiploidLocus& operator=(const DiploidLocus g) {               
             this->allele1_ = g.allele1_;
-            if (this->allele1_)
-            	this->allele1_->increment_count();		        
-            if (this->allele2_)
-            	this->allele2_->decrement_count();
             this->allele2_ = g.allele2_;
-            if (this->allele2_)
-            	this->allele2_->increment_count();
-            return *this;            	
-		}
-		
-		void inherit(const DiploidLocus& female, 
-		             const DiploidLocus& male, 
-		             RandomNumberGenerator& rng) {
-			this->allele1_ = rng.select(female.allele1_, female.allele2_);
-			this->allele2_ = rng.select(male.allele1_, male.allele2_);
-			if (this->allele1_)
-				this->allele1_->increment_count();
-			if (this->allele2_)
-				this->allele2_->increment_count();
-		}
-		
-		~DiploidLocus() {
-			if (this->allele1_)
-				this->allele1_->decrement_count();
-			if (this->allele2_)
-				this->allele2_->decrement_count();
-		}
-		
-    private:		
-		GenealogyNode *      allele1_;
-		GenealogyNode *      allele2_;
-		
+            return *this;               
+        }
+        
+        void inherit(const DiploidLocus& female, 
+                     const DiploidLocus& male, 
+                     RandomNumberGenerator& rng) {
+            assert(this->allele1_ == NULL);
+            this->allele1_ = new GenealogyNode();
+            this->allele1_->inherit(rng.select(female.allele1_, female.allele2_));
+            assert(this->allele2_ == NULL);
+            this->allele2_ = new GenealogyNode();            
+            this->allele2_->inherit(rng.select(male.allele1_, male.allele2_));
+        }
+        
+        ~DiploidLocus() {
+        }
+        
+    private:        
+        GenealogyNode *      allele1_;
+        GenealogyNode *      allele2_;
+        
 }; 
 // DiploidLocus
 ///////////////////////////////////////////////////////////////////////////////
@@ -219,16 +243,16 @@ class Organism {
               fitness_(-1),
               expired_(false) {
             memcpy(this->genotypic_fitness_factors_, new_genotype, MAX_FITNESS_FACTORS*sizeof(FitnessFactorType));
-		}
-		
+        }
+        
         Organism(unsigned species_index, 
                  Organism::Sex new_sex) 
             : species_index_(species_index),            
               sex_(new_sex),
               fitness_(-1),
               expired_(false) {
-		}		
-        		
+        }       
+                
         
         //! Copy constructor.
         Organism(const Organism& ind) {
@@ -302,24 +326,24 @@ class Organism {
                                                float mutation_rate,
                                                int max_mutation_size,
                                                RandomNumberGenerator& rng) {
-				for (unsigned i = 0; i < num_fitness_factors; ++i) {
-					FitnessFactorType ff_value = rng.select(female.genotypic_fitness_factors_[i], male.genotypic_fitness_factors_[i]);  
-					if (rng.uniform_real() < mutation_rate) {
-						ff_value += rng.uniform_int(-max_mutation_size, max_mutation_size);
-					}
-					this->genotypic_fitness_factors_[i] = ff_value;
-				}
+            for (unsigned i = 0; i < num_fitness_factors; ++i) {
+                FitnessFactorType ff_value = rng.select(female.genotypic_fitness_factors_[i], male.genotypic_fitness_factors_[i]);  
+                if (rng.uniform_real() < mutation_rate) {
+                    ff_value += rng.uniform_int(-max_mutation_size, max_mutation_size);
+                }
+                this->genotypic_fitness_factors_[i] = ff_value;
+            }
         }        
-				
-		void inherit_genealogies(const Organism& female, 
-		                         const Organism& male,
-		                         RandomNumberGenerator& rng) {
-            this->neutral_haploid_marker_.inherit(female.neutral_haploid_marker_);                		                         
+                
+        void inherit_genealogies(const Organism& female, 
+                                 const Organism& male,
+                                 RandomNumberGenerator& rng) {
+            this->neutral_haploid_marker_.inherit(female.neutral_haploid_marker_);                                               
             for (unsigned i = 0; i < NUM_NEUTRAL_DIPLOID_LOCII; ++i) {
                 this->neutral_diploid_markers_[i].inherit(female.neutral_diploid_markers_[i], male.neutral_diploid_markers_[i], rng);
             }                
-		}
-		
+        }
+        
     private:
         unsigned            species_index_;                                 // species
         FitnessFactors      genotypic_fitness_factors_;                     // non-neutral genotype: maps to fitness phenotype
@@ -432,7 +456,7 @@ class Species {
         }
         
         Organism new_organism(const Organism& female, const Organism& male) {
-        	FitnessFactors offspring_genotype;
+            FitnessFactors offspring_genotype;
             Organism organism(this->index_, this->get_random_sex());
             organism.inherit_genotypic_fitness_factors(female, 
                                                        male, 
