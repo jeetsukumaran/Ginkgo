@@ -47,66 +47,99 @@ class GenealogyNode {
 
     public:
         
+        //! Constructs a genealogy node de novo.
         GenealogyNode()
         : parent_(NULL),
-          left_child_(NULL),
+          first_child_(NULL),
           next_sib_(NULL),
-          reference_count_(1)
-        { }
+          reference_count_(1) { 
+          // std::cout << "+++ CONSTRUCTING " << this << " #" << this->reference_count_ << std::endl; 
+        }
         
+        
+        GenealogyNode(const GenealogyNode& ) {
+            assert(0);
+        }
+        
+        //! Assignment. Must "unlink" self from parent node, if parent
+        //! node exists, before copying source node's fields.
         const GenealogyNode& operator=(const GenealogyNode n) {
-            if (this->parent_ != NULL) {
-                GenealogyNode * g = this->parent_->left_child_;
-                if (g == this) {
-                    if ( g->next_sib_ == NULL ) {
-                        this->parent_->left_child_ = NULL;
-                    } else {
-                        this->parent_->left_child_ = g->next_sib_;                        
-                    }
-                } else {
-                    while (g->next_sib_ != this) {
-                        g = g->next_sib_;
-                    }
-                    g->next_sib_ = this->next_sib_;
-                }                                        
-                this->parent_->decrement_count();                
-            }
+            assert(0); // temporarily DISABLE
+            // remove reference to previous
+            this->unlink();
+            // copy fields
             this->parent_ = n.parent_;
             if (this->parent_ != NULL) {
+                // adjust count
                 this->parent_->increment_count();
             }
-            this->left_child_ = n.left_child_;
+            this->first_child_ = n.first_child_;
             this->next_sib_ = n.next_sib_;
             return *this;               
         }
-                
         
+        //! Unlink = remove allele from parent
+        void unlink() {
+            if (this->parent_ != NULL) { // if parent exists
+                GenealogyNode * g = this->parent_->first_child_;
+                if (g == this) { // if parent's first child is self ...
+                    if ( g->next_sib_ == NULL ) { // ... and self has no sibs (self is only child of parent)
+                        this->parent_->first_child_ = NULL; // set parent to have no more children
+                    } else { // self has sibs (parent has more than one child)
+                        this->parent_->first_child_ = g->next_sib_; // set parent's first child to sib
+                    }
+                } else { // parent's first child is not self ...
+                    // search for self amongst parent's children
+                    while (g->next_sib_ != this) {
+                        g = g->next_sib_;
+                    }
+                    // set previous sib to point to self's next sib
+                    g->next_sib_ = this->next_sib_;
+                }
+                // adjust reference count
+                this->parent_->decrement_count();                
+            }        
+        }
+          
+        //! Inheriting a genealogy by assigning self as a child.
         void inherit(GenealogyNode * parent) {
             this->parent_ = parent;
             if (this->parent_ != NULL) {
+                assert(parent != this);
                 this->parent_->increment_count();
-                if (this->parent_->left_child_ == NULL) {
-                    this->parent_->left_child_ = this;
+                if (this->parent_->first_child_ == NULL) {
+                    // parent has no children: self is first child.
+                    this->parent_->first_child_ = this;
                 } else {
-                    GenealogyNode * g = this->parent_->left_child_;
+                    // parent has children
+                    GenealogyNode * g = this->parent_->first_child_;
+                    // search for the first child with no sibling
                     while (g->next_sib_ != NULL) {
                         g = g->next_sib_;       
                     }
+                    // insert self as sibling                    
                     g->next_sib_ = this;
                 }
-            }                    
+            }        
         }
         
         ~GenealogyNode() {
-            if (this->parent_)
-                this->parent_->decrement_count();
-            assert(this->left_child_ == NULL);                
+            assert(this->parent_ != this);
+            // std::cout << "~~~ DESTRUCTING " << this << " #" << this->reference_count_ << std::endl;
+            if (this->parent_) {
+                // std::cout << "decrementing parent " << this->parent_;
+                this->parent_->decrement_count();                          
+            }                
+            assert(this->first_child_ == NULL);                
             assert(this->reference_count_ == 0 || this->reference_count_ == 1);
         }
         
         void decrement_count() {
-            if (this->reference_count_ == 1)
-                    delete this; // never do this!!
+//             std::cout << "--- DECREMENTING ALLELE " << this << " #" << this->reference_count_ << std::endl;
+            if (this->reference_count_ == 1) {
+//                 std::cout << "--- DELETING ALLELE " << this << " #" << this->reference_count_ << std::endl;
+                delete this;
+            }                
             this->reference_count_ -= 1;
         }
         
@@ -122,12 +155,12 @@ class GenealogyNode {
             this->parent_ = parent;
         }
         
-        GenealogyNode * get_left_child() {
-            return this->left_child_;
+        GenealogyNode * get_first_child() {
+            return this->first_child_;
         }
         
-        void set_left_child(GenealogyNode * left_child) {
-            this->left_child_ = left_child;
+        void set_first_child(GenealogyNode * first_child) {
+            this->first_child_ = first_child;
         }
         
         GenealogyNode * get_next_sib() {
@@ -140,7 +173,7 @@ class GenealogyNode {
                 
     private:            
         GenealogyNode *     parent_;
-        GenealogyNode *     left_child_;
+        GenealogyNode *     first_child_;
         GenealogyNode *     next_sib_;
         unsigned            reference_count_;
                 
@@ -154,24 +187,34 @@ class HaploidLocus {
 
     public:
         
-        HaploidLocus()
-            : allele_(NULL) 
-        { }
+        HaploidLocus() : allele_(NULL) { 
+        }
         
-        const HaploidLocus& operator=(const HaploidLocus g) {               
-            this->allele_ = g.allele_;              
+        const HaploidLocus& operator=(const HaploidLocus g) {
+            if (this->allele_ != NULL) {
+                this->allele_->decrement_count();
+            }            
+            this->allele_ = g.allele_;  
+            if (this->allele_ != NULL) {
+                this->allele_->increment_count();
+            }              
             return *this;               
         }
         
-        void inherit(const HaploidLocus& parent) {
+        void inherit(const HaploidLocus& parent) {            
             assert(this->allele_ == NULL);
+            assert(this != &parent);
+            // std::cout << "(BEFORE) This: " << this << ": " << this->allele_ << " / PARENT: " << &parent << ": " << parent.allele_ << std::endl;                        
             this->allele_ = new GenealogyNode();
+            // std::cout << "(AFTER)  This: " << this << ": " << this->allele_ << " / PARENT: " << &parent << ": " << parent.allele_ << std::endl << std::endl;            
             this->allele_->inherit(parent.allele_);
         }
         
         ~HaploidLocus() {
-//          if (this->allele_)
-//              this->allele_->decrement_count();;
+//             std::cout << "\n--- DESTRUCTING HAPLOID LOCUS " << this << " (" << this->allele_ << ")" << std::endl;
+//             if (this->allele_) {
+//                 this->allele_->decrement_count();
+//             }
         }
         
     private:        
@@ -191,9 +234,21 @@ class DiploidLocus {
               allele2_(NULL)
         { }
         
-        const DiploidLocus& operator=(const DiploidLocus g) {               
+        const DiploidLocus& operator=(const DiploidLocus g) {          
+            if (this->allele1_ != NULL) {
+                this->allele1_->decrement_count();
+            }            
             this->allele1_ = g.allele1_;
+            if (this->allele1_ != NULL) {
+                this->allele1_->increment_count();
+            }              
+            if (this->allele2_ != NULL) {
+                this->allele2_->decrement_count();
+            }                
             this->allele2_ = g.allele2_;
+            if (this->allele2_ != NULL) {
+                this->allele2_->increment_count();
+            }                    
             return *this;               
         }
         
@@ -208,7 +263,7 @@ class DiploidLocus {
             this->allele2_->inherit(rng.select(male.allele1_, male.allele2_));
         }
         
-        ~DiploidLocus() {
+        ~DiploidLocus() {          
         }
         
     private:        
@@ -338,6 +393,7 @@ class Organism {
         void inherit_genealogies(const Organism& female, 
                                  const Organism& male,
                                  RandomNumberGenerator& rng) {
+            // std::cout << "INHERITING: " << this << " = " << &female << " + " << &male << std::endl;
             this->neutral_haploid_marker_.inherit(female.neutral_haploid_marker_);                                               
             for (unsigned i = 0; i < NUM_NEUTRAL_DIPLOID_LOCII; ++i) {
                 this->neutral_diploid_markers_[i].inherit(female.neutral_diploid_markers_[i], male.neutral_diploid_markers_[i], rng);
@@ -456,8 +512,8 @@ class Species {
         }
         
         Organism new_organism(const Organism& female, const Organism& male) {
-            FitnessFactors offspring_genotype;
             Organism organism(this->index_, this->get_random_sex());
+            // std::cout << "\n\nCreating new organism: " << &organism << std::endl;
             organism.inherit_genotypic_fitness_factors(female, 
                                                        male, 
                                                        this->num_fitness_factors_, 
