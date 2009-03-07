@@ -34,7 +34,7 @@ int main(int argc, char* argv[]) {
 		std::string a(argv[i]);
 		if (a.length() > 2 && a[0] == '-') {
 			if (a[1] == 's') {
-				seed = atoi(a.c_str() + 2);
+				seed = atol(a.c_str() + 2);
 			}
 			else {
 				std::cerr << "Unknown flag: " << a << '\n';
@@ -42,7 +42,7 @@ int main(int argc, char* argv[]) {
 			}
 		}
 		else {
-			args_as_longs.push_back(atoi(a.c_str()));
+			args_as_longs.push_back(atol(a.c_str()));
 		}
 	}
     if (args_as_longs.size() < 5) {
@@ -50,11 +50,11 @@ int main(int argc, char* argv[]) {
         exit(1);
     }
 
-    int size_x = args_as_longs[0];
-    int size_y = args_as_longs[1];
-    int cc = args_as_longs[2];
-    int num_cells_init = args_as_longs[3];
-    int num_gens = args_as_longs[4];
+    long size_x = args_as_longs[0];
+    long size_y = args_as_longs[1];
+    long cc = args_as_longs[2];
+    long num_cells_init = args_as_longs[3];
+    long num_gens = args_as_longs[4];
     int num_env_factors = 1;
     if (seed < 1)
     	seed = time(0);
