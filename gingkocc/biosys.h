@@ -53,7 +53,7 @@ class GenealogyNode {
           first_child_(NULL),
           next_sib_(NULL),
           reference_count_(1) { 
-            std::cout << "+++ CONSTRUCTING " << this << " #" << this->reference_count_ << std::endl; 
+            // std::cout << "+++ CONSTRUCTING " << this << " #" << this->reference_count_ << std::endl; 
         }
         
         
@@ -97,7 +97,7 @@ class GenealogyNode {
                     g->next_sib_ = this->next_sib_;
                 }
                 // adjust reference count
-                std::cout << "decrementing parent " << this->parent_;                
+                // std::cout << "decrementing parent " << this->parent_;                
                 this->parent_->decrement_count();                
             }        
         }
@@ -126,7 +126,7 @@ class GenealogyNode {
         
         ~GenealogyNode() {
             assert(this->parent_ != this);
-            std::cout << "~~~ DESTRUCTING " << this << " #" << this->reference_count_ << std::endl;
+            // std::cout << "~~~ DESTRUCTING " << this << " #" << this->reference_count_ << std::endl;
             if (this->parent_) {                
                 this->unlink();                         
             }                
@@ -135,9 +135,9 @@ class GenealogyNode {
         }
         
         void decrement_count() {
-            std::cout << "--- DECREMENTING ALLELE " << this << " #" << this->reference_count_ << std::endl;
+            // std::cout << "--- DECREMENTING ALLELE " << this << " #" << this->reference_count_ << std::endl;
             if (this->reference_count_ == 1) {
-                std::cout << "--- DELETING ALLELE " << this << " #" << this->reference_count_ << std::endl;
+                // std::cout << "--- DELETING ALLELE " << this << " #" << this->reference_count_ << std::endl;
                 delete this;
             }                
             this->reference_count_ -= 1;
@@ -204,13 +204,13 @@ class HaploidLocus {
     public:
         
         HaploidLocus() : allele_(NULL) { 
-            std::cout << "\n--- CONSTRUCTING HAPLOID LOCUS " << this << std::endl;
+            // std::cout << "\n--- CONSTRUCTING HAPLOID LOCUS " << this << std::endl;
         }
         
         
     private:        
         HaploidLocus(const HaploidLocus& h) {
-            std::cout << "\n--- COPY CONSTRUCTING HAPLOID LOCUS " << this << " (" << &h << ")" << std::endl;
+            // std::cout << "\n--- COPY CONSTRUCTING HAPLOID LOCUS " << this << " (" << &h << ")" << std::endl;
             *this = h;
         }
         
@@ -230,14 +230,14 @@ class HaploidLocus {
         void inherit(const HaploidLocus& parent) {
             assert(this->allele_ == NULL);
             assert(this != &parent);
-            // std::cout << "(BEFORE) This: " << this << ": " << this->allele_ << " / PARENT: " << &parent << ": " << parent.allele_ << std::endl;                        
+            // // std::cout << "(BEFORE) This: " << this << ": " << this->allele_ << " / PARENT: " << &parent << ": " << parent.allele_ << std::endl;                        
             this->allele_ = new GenealogyNode();
-            // std::cout << "(AFTER)  This: " << this << ": " << this->allele_ << " / PARENT: " << &parent << ": " << parent.allele_ << std::endl << std::endl;            
+            // // std::cout << "(AFTER)  This: " << this << ": " << this->allele_ << " / PARENT: " << &parent << ": " << parent.allele_ << std::endl << std::endl;            
             this->allele_->inherit(parent.allele_);
         }
         
         ~HaploidLocus() {
-            std::cout << "\n--- DESTRUCTING HAPLOID LOCUS " << this << " (" << this->allele_ << ")" << std::endl;
+            // std::cout << "\n--- DESTRUCTING HAPLOID LOCUS " << this << " (" << this->allele_ << ")" << std::endl;
             if (this->allele_) {
                 this->allele_->decrement_count();
             }
@@ -364,9 +364,9 @@ class Organism {
             this->fitness_ = ind.fitness_;
             this->expired_ = ind.expired_;
             this->neutral_haploid_marker_ = ind.neutral_haploid_marker_;
-//             for (unsigned i = 0; i < NUM_NEUTRAL_DIPLOID_LOCII; ++i) {
-//                 this->neutral_diploid_markers_[i] = ind.neutral_diploid_markers_[i];
-//             }             
+            for (unsigned i = 0; i < NUM_NEUTRAL_DIPLOID_LOCII; ++i) {
+                this->neutral_diploid_markers_[i] = ind.neutral_diploid_markers_[i];
+            }             
             return *this;
         }
         
@@ -435,18 +435,18 @@ class Organism {
         void inherit_genealogies(const Organism& female, 
                                  const Organism& male,
                                  RandomNumberGenerator& rng) {
-            // std::cout << "INHERITING: " << this << " = " << &female << " + " << &male << std::endl;
+            // // std::cout << "INHERITING: " << this << " = " << &female << " + " << &male << std::endl;
             this->neutral_haploid_marker_.inherit(female.neutral_haploid_marker_);                                               
-//             for (unsigned i = 0; i < NUM_NEUTRAL_DIPLOID_LOCII; ++i) {
-//                 this->neutral_diploid_markers_[i].inherit(female.neutral_diploid_markers_[i], male.neutral_diploid_markers_[i], rng);
-//             }                
+            for (unsigned i = 0; i < NUM_NEUTRAL_DIPLOID_LOCII; ++i) {
+                this->neutral_diploid_markers_[i].inherit(female.neutral_diploid_markers_[i], male.neutral_diploid_markers_[i], rng);
+            }                
         }
         
     private:
         unsigned            species_index_;                                 // species
         FitnessFactors      genotypic_fitness_factors_;                     // non-neutral genotype: maps to fitness phenotype
         HaploidLocus        neutral_haploid_marker_;                        // track the genealogy of neutral genes in this organism    
-//         DiploidLocus        neutral_diploid_markers_[NUM_NEUTRAL_DIPLOID_LOCII];  // track the genealogy of neutral genes in this organism        
+        DiploidLocus        neutral_diploid_markers_[NUM_NEUTRAL_DIPLOID_LOCII];  // track the genealogy of neutral genes in this organism        
         Organism::Sex       sex_;                                           // male or female
         float               fitness_;                                       // cache this organism's fitness
         bool                expired_;                                       // flag an organism to be removed allowing for use of std::remove_if() and std::resize() or v.erase()    
@@ -555,7 +555,7 @@ class Species {
         
         Organism new_organism(const Organism& female, const Organism& male) {
             Organism organism(this->index_, this->get_random_sex());
-            // std::cout << "\n\nCreating new organism: " << &organism << std::endl;
+            // // std::cout << "\n\nCreating new organism: " << &organism << std::endl;
             organism.inherit_genotypic_fitness_factors(female, 
                                                        male, 
                                                        this->num_fitness_factors_, 
