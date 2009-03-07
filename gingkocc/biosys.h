@@ -217,6 +217,10 @@ class HaploidLocus {
 //             }
         }
         
+        void dump(std::ostream& out) {
+            out << "haploid marker " << this << ": " << this->allele_ << "\n";
+        }
+        
     private:        
         GenealogyNode *      allele_;       
 }; 
@@ -371,7 +375,12 @@ class Organism {
         
         bool is_female() const {
             return this->sex_ == Organism::Female;
-        }                
+        }
+        
+        void dump(std::ostream& out) {
+            out << "-- ORGANISM " << this << " ---\n";
+            this->neutral_haploid_marker_.dump(out);
+        }
         
         // inheritance
         

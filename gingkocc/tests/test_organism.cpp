@@ -20,9 +20,11 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include <ctime>
+#include <iostream>
 #include "../biosys.h"
-#include "../world.h"
+#include "../random.h"
 
+using namespace gingko;
 
 int main(int argc, char* argv[]) {
     long seed = 0;
@@ -30,6 +32,22 @@ int main(int argc, char* argv[]) {
         seed = atol(argv[0]);
     } else {
         seed = time(0);
-    }   
-    gingko::World world(seed);
+    }
+    
+    std::cout << "Seed = " << seed << "\n";
+    RandomNumberGenerator rng(seed);
+    Species sp(0, "gecko", 4, rng);
+    
+    std::cout << "Generating parents p1 and p2 ...\n";
+    Organism p1 = sp.new_organism();
+    Organism p2 = sp.new_organism();
+    p1.dump(std::cout);
+    std::cout << std::endl;
+    p2.dump(std::cout);
+    std::cout << std::endl;    
+    
+    std::cout << "Creating offspring o1 ...\n";
+    Organism o1 = sp.new_organism(p1, p2);
+    o1.dump(std::cout);
+    
 }
