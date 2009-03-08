@@ -40,25 +40,27 @@ int main(int argc, char* argv[]) {
     RandomNumberGenerator rng(seed);
     Species sp(0, "gecko", 4, rng);
     
-//     Organism g0_1 = sp.new_organism();
-//     Organism g1_1 = sp.new_organism(g0_1, g0_1);
-//     Organism g1_2 = sp.new_organism(g0_1, g0_1);
-//     Organism g2_1 = sp.new_organism(g1_1, g1_1);
-//     Organism g2_2 = sp.new_organism(g1_2, g1_2);
-//     Organism g2_3 = sp.new_organism(g1_2, g1_2);
-    
-    Organism g0_0 = sp.new_organism();
-    Organism g0_1 = sp.new_organism(g0_0, g0_0);
+    Organism g0_1 = sp.new_organism();
+
     Organism g1_1 = sp.new_organism(g0_1, g0_1);
     Organism g1_2 = sp.new_organism(g0_1, g0_1);
+
     Organism g2_1 = sp.new_organism(g1_1, g1_1);
     Organism g2_2 = sp.new_organism(g1_2, g1_2);
-    Organism g2_3 = sp.new_organism(g1_2, g1_2);    
+    Organism g2_3 = sp.new_organism(g1_2, g1_2);
+    
+    Organism g3_1 = sp.new_organism(g2_1, g2_1);
+    Organism g3_2 = sp.new_organism(g2_2, g2_2);
+    Organism g3_3 = sp.new_organism(g2_2, g2_2);
+    Organism g3_4 = sp.new_organism(g2_3, g2_3);
+    Organism g3_5 = sp.new_organism(g2_3, g2_3);      
     
     Tree tree;
-    tree.process_node(g2_1.haploid_marker().node());
-    tree.process_node(g2_2.haploid_marker().node());
-    tree.process_node(g2_3.haploid_marker().node());
+    tree.process_node(g3_1.haploid_marker().node());
+    tree.process_node(g3_2.haploid_marker().node());
+    tree.process_node(g3_3.haploid_marker().node());
+    tree.process_node(g3_4.haploid_marker().node());
+    tree.process_node(g3_5.haploid_marker().node());    
     
     tree.dump(std::cerr);
     std::cerr << "\n---\n";

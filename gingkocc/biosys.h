@@ -62,6 +62,8 @@ class GenealogyNode {
         }
 
         void suppress_outdegree1() {
+            if (this->parent_) 
+                this->parent_->suppress_outdegree1();
 			if (this->is_outdegree1()) {
 				this->first_child_->edge_len_ += this->edge_len_;
 				this->first_child_->inherit(this->parent_);
@@ -143,7 +145,7 @@ class GenealogyNode {
                     old_gparent->first_child_ = NULL;
                     old_gparent->decrement_count();                    
                 }
-            }  			
+            }
         }
         
         ~GenealogyNode() {
