@@ -41,9 +41,12 @@ class Tree {
     typedef std::vector<long>                       IndexVector;
 
     public:
-        Tree() { }
+        Tree() 
+            : coalesce_multiple_roots_(true) {
+        }
     
-        Tree(std::vector<Organism>& organisms) {
+        Tree(std::vector<Organism>& organisms) 
+                : coalesce_multiple_roots_(true) {
             std::vector<Organism*> organism_ptrs;
             organism_ptrs.reserve(organisms.size());
             for (std::vector<Organism>::iterator optr = organisms.begin();
@@ -54,7 +57,8 @@ class Tree {
             this->init(organism_ptrs);
         }
 
-        Tree(std::vector<Organism*>& organism_ptrs) { 
+        Tree(std::vector<Organism*>& organism_ptrs) 
+                : coalesce_multiple_roots_(true) { 
             this->init(organism_ptrs);
         }
 
@@ -106,15 +110,28 @@ class Tree {
         }                
         
         void write_newick_tree(std::ostream& out) {
-            int num_roots = std::count(this->tree_nodes_.begin(), this->tree_nodes_.end(), -1);
-            // if we "assert(num_roots == 1)" we lose info on the problem
+            int num_roots = std::count(this->tree_nodes_.begin(), this->tree_nodes_.end(), -1);         
             assert(num_roots > 0);
-            assert(num_roots < 2); 
-            IndexVector::iterator root = std::find(this->tree_nodes_.begin(),
-                    this->tree_nodes_.end(), -1);
-            assert(root != this->tree_nodes_.end());                    
-            this->write_newick_node(root-this->tree_nodes_.begin(), out);
-            out << ";";
+            if (this->coalesce_multiple_roots_ and num_roots > 1) {
+                IndexVector::iterator root = std::find(this->tree_nodes_.begin(), this->tree_nodes_.end(), -1);
+                out << "(";
+                this->write_newick_node(root-this->tree_nodes_.begin(), out);                
+                while (root != this->tree_nodes_.end()) {
+                    root = std::find(root+1, this->tree_nodes_.end(), -1);
+                    if (root != this->tree_nodes_.end()) {
+                        out << ",";
+                        this->write_newick_node(root-this->tree_nodes_.begin(), out);
+                    }                        
+                }
+                out << ");"; // add infinite branch length?                
+            } else {
+                assert(num_roots < 2); 
+                IndexVector::iterator root = std::find(this->tree_nodes_.begin(),
+                        this->tree_nodes_.end(), -1);
+                assert(root != this->tree_nodes_.end());                    
+                this->write_newick_node(root-this->tree_nodes_.begin(), out);
+                out << ";";
+            }                
         }
         
         void write_newick_node(long node_idx, std::ostream& out) {
@@ -141,6 +158,14 @@ class Tree {
             }
             out << ":" << edge_length;
         }
+        
+        bool get_coalesce_multiple_roots() const {
+            return this->coalesce_multiple_roots_;
+        }
+        
+        void set_coalesce_multiple_roots(bool val) {
+            this->coalesce_multiple_roots_ = val;
+        }
                 
         void dump(std::ostream& out) {
             out << std::setw(10) << "idx" << "   ";
@@ -161,6 +186,7 @@ class Tree {
         IndexVector                         tree_nodes_;
         std::vector<unsigned long>          edge_lens_;
         std::vector<std::string>            labels_;
+        bool                                coalesce_multiple_roots_;
 };
 
 

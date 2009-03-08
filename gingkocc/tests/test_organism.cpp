@@ -24,6 +24,7 @@
 #include <vector>
 #include "../biosys.h"
 #include "../random.h"
+#include "../tree.h"
 
 using namespace gingko;
 
@@ -39,41 +40,29 @@ int main(int argc, char* argv[]) {
     RandomNumberGenerator rng(seed);
     Species sp(0, "gecko", 4, rng);
     
-    std::cout << "\nGenerating gen1 ...\n";
-    std::vector<Organism> gen1;
-    for (int i = 0; i < 4; ++i) {
-        gen1.push_back(sp.new_organism());
-    }
-    for (int i = 0; i < 4; ++i) {
-        gen1[i].dump(std::cout);
-        std::cout << std::endl;
-    }   
+//     Organism g0_1 = sp.new_organism();
+//     Organism g1_1 = sp.new_organism(g0_1, g0_1);
+//     Organism g1_2 = sp.new_organism(g0_1, g0_1);
+//     Organism g2_1 = sp.new_organism(g1_1, g1_1);
+//     Organism g2_2 = sp.new_organism(g1_2, g1_2);
+//     Organism g2_3 = sp.new_organism(g1_2, g1_2);
     
-    std::cout << "\nGenerating gen2 ...\n";
-    std::vector<Organism> gen2;
-    gen2.push_back(sp.new_organism(gen1[0], gen1[1]));
-    gen2.push_back(sp.new_organism(gen1[1], gen1[2]));
-    gen2.push_back(sp.new_organism(gen1[2], gen1[3]));
+    Organism g0_0 = sp.new_organism();
+    Organism g0_1 = sp.new_organism(g0_0, g0_0);
+    Organism g1_1 = sp.new_organism(g0_1, g0_1);
+    Organism g1_2 = sp.new_organism(g0_1, g0_1);
+    Organism g2_1 = sp.new_organism(g1_1, g1_1);
+    Organism g2_2 = sp.new_organism(g1_2, g1_2);
+    Organism g2_3 = sp.new_organism(g1_2, g1_2);    
     
-    std::cout << "\nDestroying gen1 ...\n";    
-    gen1.erase(gen1.begin(), gen1.end());
-
-    for (int i = 0; i < 3; ++i) {
-        gen2[i].dump(std::cout);
-        std::cout << std::endl;
-    }    
+    Tree tree;
+    tree.process_node(g2_1.haploid_marker().node());
+    tree.process_node(g2_2.haploid_marker().node());
+    tree.process_node(g2_3.haploid_marker().node());
     
-    std::cout << "\nGenerating gen3 ...\n";
-    std::vector<Organism> gen3;
-    gen3.push_back(sp.new_organism(gen2[1], gen2[2]));
-    
-    std::cout << "\nDestroying gen2 ...\n";       
-    gen2.erase(gen2.begin(), gen2.end());
-
-    for (int i = 0; i < 1; ++i) {
-        gen3[i].dump(std::cout);
-        std::cout << std::endl;
-    }    
-    
-    
+    tree.dump(std::cerr);
+    std::cerr << "\n---\n";
+    tree.write_newick_tree(std::cout);
+    std::cerr << std::endl;    
+     
 }
