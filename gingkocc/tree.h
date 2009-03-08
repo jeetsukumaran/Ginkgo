@@ -116,6 +116,9 @@ class Tree {
         
         void write_newick_node(long node_idx, std::ostream& out) {
             std::vector<long> children = this->get_children(node_idx);
+            while (children.size() == 1) {
+                children = this->get_children(children[0]);
+            }
             if (children.size() > 0) {
                 out << "(";
                 for (std::vector<long>::iterator child_iter = children.begin();
