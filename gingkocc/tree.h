@@ -23,12 +23,14 @@
 #define GINGKO_TREE_H
 
 #include "biosys.h"
+#include <functional>
 #include <iterator>
 #include <vector>
 #include <map>
 #include <sstream>
 #include <iomanip>
 #include <iostream>
+#include <algorithm>
 
 namespace gingko {
 
@@ -86,8 +88,48 @@ class Tree {
             return idx;
         }
         
-        void write_newick(std::ostream& out) {
+        std::vector<long> get_children(long parent) {
+            std::vector<long> children;
+//             std::remove_copy_if(this->tree_nodes_.begin(), 
+//                                 this->tree_nodes_.end(), 
+//                                 std::back_inserter(children), 
+//                                 std::bind2nd(std::not_equal_to<long>(), parent));
+            for (unsigned long i = 0; i < this->tree_nodes_.size(); ++i) {
+                if (this->tree_nodes_[i] == parent) {
+                    children.push_back(i);
+                }
+            }
+            return children;
+        }                
         
+        void write_newick_tree(std::ostream& out) {
+            int num_roots = std::count(this->tree_nodes_.begin(), this->tree_nodes_.end(), -1);
+            // if we "assert(num_roots == 1)" we lose info on the problem
+            assert(num_roots > 0);
+            assert(num_roots < 2); 
+            IndexVector::iterator root = std::find(this->tree_nodes_.begin(),
+                    this->tree_nodes_.end(), -1);
+            assert(root != this->tree_nodes_.end());                    
+            this->write_newick_node(root-this->tree_nodes_.begin(), out);
+            out << ";";
+        }
+        
+        void write_newick_node(long node_idx, std::ostream& out) {
+            std::vector<long> children = this->get_children(node_idx);
+            if (children.size() > 0) {
+                out << "(";
+                for (std::vector<long>::iterator child_iter = children.begin();
+                     child_iter != children.end();
+                     ++child_iter) {
+                     if (child_iter != children.begin()) {
+                        out << ", ";
+                     }
+                    this->write_newick_node(*child_iter, out);    
+                }
+                out << ")";
+            } else {
+                out << this->labels_.at(node_idx);
+            }                
         }
                 
         void dump(std::ostream& out) {

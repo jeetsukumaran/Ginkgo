@@ -109,6 +109,9 @@ int main(int argc, char* argv[]) {
     std::cerr << "\n\n#### TREE(S) ####\n";
     gingko::OrganismVector organisms = world.landscape()[0].organisms();
     gingko::Tree tree(organisms);
-    tree.dump(std::cout);
+    tree.dump(std::cerr);
+    std::cerr << "\n---\n\n";
+    tree.write_newick_tree(std::cout);
+    std::cerr << std::endl;
     
 }
