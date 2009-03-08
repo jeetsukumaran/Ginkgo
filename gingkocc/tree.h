@@ -81,7 +81,7 @@ class Tree {
             if (node == NULL) {
                 return -1;
             }
-            node->suppress_outdegree1();
+//             node->suppress_outdegree1();
             NodeIndexMap::iterator nidx = this->node_indexes_.find(node);
             if (nidx != this->node_indexes_.end()) {
                 return nidx->second;

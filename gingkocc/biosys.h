@@ -62,8 +62,8 @@ class GenealogyNode {
         }
 
         void suppress_outdegree1() {
-            if (this->parent_) 
-                this->parent_->suppress_outdegree1();
+//             if (this->parent_) 
+//                 this->parent_->suppress_outdegree1();
 			if (this->is_outdegree1()) {
 				this->first_child_->edge_len_ += this->edge_len_;
 				this->first_child_->inherit(this->parent_);
@@ -120,7 +120,24 @@ class GenealogyNode {
 				g->next_sib_ = this;
 			}
 			// seed =1236498769
+			
 			// clean up lineage of outdegree1 nodes
+            /*
+             Deals with the following situation
+             
+                                 0
+                                / \
+                               1   2
+                              /   / \
+                             3   4   5
+                            /   / \ / \
+                           6   7   89 10
+                             
+            When node 6 is being added, it knows that node 1 will not be
+            getting any more children, and hence is safe to suppress. It is not
+            clear that node 3 might not be getting more children, so it is left
+            alone.
+            */			
             if (this->parent_->parent_ != NULL) {
                 if (this->parent_->next_sib_ == NULL && this->parent_->parent_->first_child_ == this->parent_) {
                     GenealogyNode * old_gparent = this->parent_->parent_;                    
@@ -146,6 +163,20 @@ class GenealogyNode {
                     old_gparent->decrement_count();                    
                 }
             }
+            
+            /*
+             This situation still not accounted for:
+             
+                                 0
+                                / \
+                               1   2
+                              /   / \
+                             3   4   5
+                             
+            Node 1 should be suppressed, but it is not clear when. It cannot be
+            done when adding node "3", as at that point there is no way of
+            knowing whether node 3 is the last node to be added or not.
+            */
         }
         
         ~GenealogyNode() {
