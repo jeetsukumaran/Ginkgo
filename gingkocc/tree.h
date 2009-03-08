@@ -115,8 +115,10 @@ class Tree {
         }
         
         void write_newick_node(long node_idx, std::ostream& out) {
+            unsigned edge_length = 1;
             std::vector<long> children = this->get_children(node_idx);
             while (children.size() == 1) {
+                ++edge_length;
                 children = this->get_children(children[0]);
             }
             if (children.size() > 0) {
@@ -132,7 +134,8 @@ class Tree {
                 out << ")";
             } else {
                 out << this->labels_.at(node_idx);
-            }                
+            }
+            out << ":" << edge_length;
         }
                 
         void dump(std::ostream& out) {
