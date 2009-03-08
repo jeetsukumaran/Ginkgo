@@ -81,7 +81,7 @@ class Tree {
             if (nidx != this->node_indexes_.end()) {
                 return nidx->second;
             }            
-            this->tree_nodes_.push_back(this->process_node(node->get_parent()));            
+            this->tree_nodes_.push_back(this->process_node(node->get_parent())); 
             unsigned long idx = this->tree_nodes_.size() - 1;
             this->node_indexes_.insert(std::make_pair(node, idx));
             std::ostringstream label;
@@ -121,7 +121,8 @@ class Tree {
             unsigned edge_length = this->edge_lens_.at(node_idx);
             std::vector<long> children = this->get_children(node_idx);
             while (children.size() == 1) {
-//                 ++edge_length; // disabled to track down places where outdegree1 nodes not suppressed
+                // this deals with nodes of outdegree 1 still in the structure
+//                 ++edge_length; // disabled to show where outdegree1 nodes not suppressed by GenealogyNode
                 children = this->get_children(children[0]);
             }
             if (children.size() > 0) {
@@ -142,9 +143,14 @@ class Tree {
         }
                 
         void dump(std::ostream& out) {
+            out << std::setw(10) << "idx" << "   ";
+            out << std::setw(10) << "parent" << "   ";
+            out << std::setw(10) << "edge len" << "   ";
+            out << std::setw(10) << "label" << "\n";        
             for (unsigned i = 0; i < this->tree_nodes_.size(); ++i) {
                 out << std::setw(10) << i << "   ";
                 out << std::setw(10) << this->tree_nodes_[i] << "   ";
+                out << std::setw(10) << this->edge_lens_[i] << "   ";
                 out << std::setw(10) << this->labels_[i] << "\n";
             }
         }

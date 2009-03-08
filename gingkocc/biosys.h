@@ -119,32 +119,31 @@ class GenealogyNode {
 			}
 			// seed =1236498769
 			// clean up lineage of outdegree1 nodes
-            if (this->parent_->parent_ != NULL) {
-                if (this->parent_->next_sib_ == NULL && this->parent_->parent_->first_child_ == this->parent_) {
-                    GenealogyNode * old_gparent = this->parent_->parent_;                    
-                    GenealogyNode * new_gparent = this->parent_->parent_->parent_;
-                    assert(old_gparent->first_child_ == this->parent_);
-                    assert(this->parent_->next_sib_ == NULL);
-                    this->parent_->edge_len_ += old_gparent->edge_len_;
-
-                    this->parent_->parent_ = new_gparent;
-                    if (new_gparent != NULL) {
-                        new_gparent->increment_count();
-                        GenealogyNode * ngp_child = new_gparent->first_child_;
-                        if (ngp_child == NULL) {
-                            new_gparent->first_child_ = this->parent_;
-                        } else {
-                            while (ngp_child->next_sib_ != NULL) {
-                                ngp_child = ngp_child->next_sib_;
-                            }
-                            ngp_child->next_sib_ = this->parent_;
-                        }
-                    }
-                    
-                    old_gparent->first_child_ = NULL;
-                    old_gparent->decrement_count();                    
-                }
-            }  			
+//             if (this->parent_->parent_ != NULL) {
+//                 if (this->parent_->next_sib_ == NULL && this->parent_->parent_->first_child_ == this->parent_) {
+//                     GenealogyNode * old_gparent = this->parent_->parent_;                    
+//                     GenealogyNode * new_gparent = this->parent_->parent_->parent_;
+//                     assert(old_gparent->first_child_ == this->parent_);
+//                     assert(this->parent_->next_sib_ == NULL);
+//                     this->parent_->edge_len_ += old_gparent->edge_len_;
+//                     this->parent_->parent_ = new_gparent;
+//                     if (new_gparent != NULL) {
+//                         new_gparent->increment_count();
+//                         GenealogyNode * ngp_child = new_gparent->first_child_;
+//                         if (ngp_child == NULL) {
+//                             new_gparent->first_child_ = this->parent_;
+//                         } else {
+//                             while (ngp_child->next_sib_ != NULL) {
+//                                 ngp_child = ngp_child->next_sib_;
+//                             }
+//                             ngp_child->next_sib_ = this->parent_;
+//                         }
+//                     }
+//                     
+//                     old_gparent->first_child_ = NULL;
+//                     old_gparent->decrement_count();                    
+//                 }
+//             }  			
         }
         
         ~GenealogyNode() {
@@ -195,11 +194,11 @@ class GenealogyNode {
             this->next_sib_ = next_sib;
         }
         
-        unsigned long get_edge_len() const {
+        unsigned get_edge_len() const {
             return this->edge_len_;
         }
         
-        void set_edge_len(unsigned long len) {
+        void set_edge_len(unsigned len) {
             this->edge_len_ = len;    
         }
         
