@@ -52,76 +52,64 @@ class GenealogyNode {
         : parent_(NULL),
           first_child_(NULL),
           next_sib_(NULL),
-          reference_count_(1) { 
+          reference_count_(1),
+          edge_len(1) { 
             // std::cout << "+++ CONSTRUCTING " << this << " #" << this->reference_count_ << std::endl; 
         }
-        
-        
-        GenealogyNode(const GenealogyNode& ) {
-            assert(0);
-        }
-        
-        //! Assignment. Must "unlink" self from parent node, if parent
-        //! node exists, before copying source node's fields.
-        const GenealogyNode& operator=(const GenealogyNode& n) {
-            assert(0); // temporarily DISABLE
-            // remove reference to previous
-            this->unlink();
-            // copy fields
-            this->parent_ = n.parent_;
-            if (this->parent_ != NULL) {
-                // adjust count
-                this->parent_->increment_count();
-            }
-            this->first_child_ = n.first_child_;
-            this->next_sib_ = n.next_sib_;
-            return *this;               
-        }
-        
+
+
+		void remove_child(GenealogyNode * c) {
+			assert(this);
+			GenealogyNode * g = this->first_child_;
+			if (g == c) {
+				this->first_child_ = g->next_sib_;
+			} else { // parent's first child is not self ...
+				// search for self amongst parent's children
+				while (g->next_sib_ != c) {
+					g = g->next_sib_;
+					assert(g);
+				}
+				assert(g->next_sib_ == c);
+				// set previous sib to point to self's next sib
+				g->next_sib_ = c->next_sib_;
+			}
+			if (this->first_child_ && !this->first_child_->next_sib_) {
+				this->first_child_->edge_len += this->edge_len;
+				this->first_child_->inherit(this->parent_);
+			}
+			this->decrement_count();
+		}
+		
         //! Unlink = remove allele from parent
         void unlink() {
-            if (this->parent_ != NULL) { // if parent exists
-                GenealogyNode * g = this->parent_->first_child_;
-                if (g == this) { // if parent's first child is self ...
-                    if ( g->next_sib_ == NULL ) { // ... and self has no sibs (self is only child of parent)
-                        this->parent_->first_child_ = NULL; // set parent to have no more children
-                    } else { // self has sibs (parent has more than one child)
-                        this->parent_->first_child_ = g->next_sib_; // set parent's first child to sib
-                    }
-                } else { // parent's first child is not self ...
-                    // search for self amongst parent's children
-                    while (g->next_sib_ != this) {
-                        g = g->next_sib_;
-                    }
-                    // set previous sib to point to self's next sib
-                    g->next_sib_ = this->next_sib_;
-                }
-                // adjust reference count
-                // std::cout << "decrementing parent " << this->parent_;                
-                this->parent_->decrement_count();                
-            }        
+            if (this->parent_ == NULL)
+            	return;
+            this->parent_->remove_child(this);
+			this->parent_ = NULL;
+			this->next_sib_ = NULL;
         }
           
         //! Inheriting a genealogy by assigning self as a child.
         void inherit(GenealogyNode * parent) {
+        	this->unlink();
             this->parent_ = parent;
-            if (this->parent_ != NULL) {
-                assert(parent != this);
-                this->parent_->increment_count();
-                if (this->parent_->first_child_ == NULL) {
-                    // parent has no children: self is first child.
-                    this->parent_->first_child_ = this;
-                } else {
-                    // parent has children
-                    GenealogyNode * g = this->parent_->first_child_;
-                    // search for the first child with no sibling
-                    while (g->next_sib_ != NULL) {
-                        g = g->next_sib_;       
-                    }
-                    // insert self as sibling                    
-                    g->next_sib_ = this;
-                }
-            }        
+            if (this->parent_ == NULL)
+            	return;
+			assert(parent != this);
+			this->parent_->increment_count();
+			if (this->parent_->first_child_ == NULL) {
+				// parent has no children: self is first child.
+				this->parent_->first_child_ = this;
+			} else {
+				// parent has children
+				GenealogyNode * g = this->parent_->first_child_;
+				// search for the first child with no sibling
+				while (g->next_sib_ != NULL) {
+					g = g->next_sib_;       
+				}
+				// insert self as sibling                    
+				g->next_sib_ = this;
+			}
         }
         
         ~GenealogyNode() {
@@ -137,6 +125,7 @@ class GenealogyNode {
         void decrement_count() {
             // std::cout << "--- DECREMENTING ALLELE " << this << " #" << this->reference_count_ << std::endl;
             if (this->reference_count_ == 1) {
+            	assert(this->first_child_ == 0L);
                 // std::cout << "--- DELETING ALLELE " << this << " #" << this->reference_count_ << std::endl;
                 delete this;
             }                
@@ -192,7 +181,29 @@ class GenealogyNode {
         GenealogyNode *     first_child_;
         GenealogyNode *     next_sib_;
         unsigned            reference_count_;
-                
+		unsigned			edge_len;
+		
+        GenealogyNode(const GenealogyNode& ); // don't define
+
+         //! Assignment. Must "unlink" self from parent node, if parent
+        //! node exists, before copying source node's fields.
+        const GenealogyNode& operator=(const GenealogyNode& n); // don't define
+        /* {
+            assert(0); // temporarily DISABLE
+            // remove reference to previous
+            this->unlink();
+            // copy fields
+            this->parent_ = n.parent_;
+            if (this->parent_ != NULL) {
+                // adjust count
+                this->parent_->increment_count();
+            }
+            this->first_child_ = n.first_child_;
+            this->next_sib_ = n.next_sib_;
+            return *this;               
+        } */
+        
+               
 }; 
 // GenealogyNode
 ///////////////////////////////////////////////////////////////////////////////
@@ -303,6 +314,12 @@ class DiploidLocus {
         }
         
         ~DiploidLocus() {          
+			if (this->allele1_ != NULL) {
+                this->allele1_->decrement_count();
+            }            
+            if (this->allele2_ != NULL) {
+                this->allele2_->decrement_count();
+            }
         }
         
     private:        
