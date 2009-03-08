@@ -68,6 +68,10 @@ class Cell {
         
         // --- basic biotics ---
         
+        OrganismVector& organisms() {
+            return this->organisms_;
+        }
+        
         CellIndexType num_organisms() const {
             return this->organisms_.size();
         }

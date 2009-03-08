@@ -243,6 +243,9 @@ class HaploidLocus {
             }
         }
         
+        GenealogyNode* node() const {
+            return this->allele_;
+        }
         
         // --- DEBUGGING ---
         
@@ -381,6 +384,11 @@ class Organism {
         const FitnessFactors& genotype() const {
             return this->genotypic_fitness_factors_;
         }
+        
+        // markers       
+        const HaploidLocus& haploid_marker() const {
+            return this->neutral_haploid_marker_;
+        }        
         
         // fitness & survival
         float get_fitness() const {

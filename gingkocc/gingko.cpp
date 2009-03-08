@@ -22,6 +22,7 @@
 #include "gingko_defs.h"
 #include "biosys.h"
 #include "world.h"
+#include "tree.h"
 #include <iostream>
 #include <cstdlib>
 #include <vector>
@@ -102,6 +103,12 @@ int main(int argc, char* argv[]) {
     world.run(num_gens);
 
 
-    std::cerr << "\n#### FINAL STATUS ####\n\n"; 
+    std::cerr << "\n#### FINAL STATUS ####\n"; 
     world.landscape().dump(std::cerr);
+    
+    std::cerr << "\n\n#### TREE(S) ####\n";
+    gingko::OrganismVector organisms = world.landscape()[0].organisms();
+    gingko::Tree tree(organisms);
+    tree.dump(std::cout);
+    
 }
