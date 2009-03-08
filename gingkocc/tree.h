@@ -41,6 +41,8 @@ class Tree {
     typedef std::vector<long>                       IndexVector;
 
     public:
+        Tree() { }
+    
         Tree(std::vector<Organism>& organisms) {
             std::vector<Organism*> organism_ptrs;
             organism_ptrs.reserve(organisms.size());

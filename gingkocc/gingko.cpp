@@ -107,8 +107,17 @@ int main(int argc, char* argv[]) {
     world.landscape().dump(std::cerr);
     
     std::cerr << "\n\n#### TREE(S) ####\n";
-    gingko::OrganismVector organisms = world.landscape()[0].organisms();
-    gingko::Tree tree(organisms);
+    gingko::Tree tree;
+    for (unsigned long i = (size_x * size_y); i != 0; --i) {
+        gingko::OrganismVector& ov = world.landscape()[i-1].organisms();
+        for (gingko::OrganismVector::iterator oiter = ov.begin();
+                oiter != ov.end();
+                ++oiter) {
+            tree.process_node(oiter->haploid_marker().node());
+        }                
+    }    
+    
+
     tree.dump(std::cerr);
     std::cerr << "\n---\n\n";
     tree.write_newick_tree(std::cout);
