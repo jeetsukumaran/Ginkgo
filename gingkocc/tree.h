@@ -87,6 +87,7 @@ class Tree {
             std::ostringstream label;
             label << "K" << std::setw(6) << std::setfill('0') << idx;
             this->labels_.push_back(label.str());
+            this->edge_lens_.push_back(node->get_edge_len());
             return idx;
         }
         
@@ -117,7 +118,7 @@ class Tree {
         }
         
         void write_newick_node(long node_idx, std::ostream& out) {
-            unsigned edge_length = 1;
+            unsigned edge_length = this->edge_lens_[node_idx];
             std::vector<long> children = this->get_children(node_idx);
             while (children.size() == 1) {
                 ++edge_length;
@@ -152,6 +153,7 @@ class Tree {
         NodeIndexMap                        node_indexes_;
         NodeVector                          nodes_to_coalesce_;
         IndexVector                         tree_nodes_;
+        std::vector<unsigned long>          edge_lens_;
         std::vector<std::string>            labels_;
 };
 

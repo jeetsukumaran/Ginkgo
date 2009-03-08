@@ -53,7 +53,7 @@ class GenealogyNode {
           first_child_(NULL),
           next_sib_(NULL),
           reference_count_(1),
-          edge_len(1) { 
+          edge_len_(1) { 
             // std::cout << "+++ CONSTRUCTING " << this << " #" << this->reference_count_ << std::endl; 
         }
 
@@ -74,7 +74,7 @@ class GenealogyNode {
 				g->next_sib_ = c->next_sib_;
 			}
 			if (this->first_child_ && !this->first_child_->next_sib_) {
-				this->first_child_->edge_len += this->edge_len;
+				this->first_child_->edge_len_ += this->edge_len_;
 				this->first_child_->inherit(this->parent_);
 			}
 			this->decrement_count();
@@ -160,6 +160,14 @@ class GenealogyNode {
             this->next_sib_ = next_sib;
         }
         
+        unsigned long get_edge_len() const {
+            return this->edge_len_;
+        }
+        
+        void set_edge_len(unsigned long len) {
+            this->edge_len_ = len;    
+        }
+        
         // --- DEBUGGING ---
         
         void trace(std::ostream& out) {
@@ -181,7 +189,7 @@ class GenealogyNode {
         GenealogyNode *     first_child_;
         GenealogyNode *     next_sib_;
         unsigned            reference_count_;
-		unsigned			edge_len;
+		unsigned			edge_len_;
 		
         GenealogyNode(const GenealogyNode& ); // don't define
 
