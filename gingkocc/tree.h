@@ -85,6 +85,10 @@ class Tree {
             this->labels_.push_back(label.str());
             return idx;
         }
+        
+        void write_newick(std::ostream& out) {
+        
+        }
                 
         void dump(std::ostream& out) {
             for (unsigned i = 0; i < this->tree_nodes_.size(); ++i) {
