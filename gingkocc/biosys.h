@@ -26,7 +26,7 @@
 #include <vector>
 #include <string>
 #include <cmath>
-
+#include <iomanip>
 #include <iostream>
 
 
@@ -56,7 +56,17 @@ class GenealogyNode {
           edge_len_(1) { 
             // std::cout << "+++ CONSTRUCTING " << this << " #" << this->reference_count_ << std::endl; 
         }
+        
+        bool is_outdegree1() {
+            return this->first_child_ && !this->first_child_->next_sib_;
+        }
 
+        void suppress_outdegree1() {
+			if (this->is_outdegree1()) {
+				this->first_child_->edge_len_ += this->edge_len_;
+				this->first_child_->inherit(this->parent_);
+			}        
+        }
 
 		void remove_child(GenealogyNode * c) {
 			assert(this);
@@ -73,10 +83,7 @@ class GenealogyNode {
 				// set previous sib to point to self's next sib
 				g->next_sib_ = c->next_sib_;
 			}
-			if (this->first_child_ && !this->first_child_->next_sib_) {
-				this->first_child_->edge_len_ += this->edge_len_;
-				this->first_child_->inherit(this->parent_);
-			}
+            this->suppress_outdegree1();
 			this->decrement_count();
 		}
 		
@@ -94,7 +101,7 @@ class GenealogyNode {
         	this->unlink();
             this->parent_ = parent;
             if (this->parent_ == NULL)
-            	return;
+            	return;              
 			assert(parent != this);
 			this->parent_->increment_count();
 			if (this->parent_->first_child_ == NULL) {
@@ -110,6 +117,34 @@ class GenealogyNode {
 				// insert self as sibling                    
 				g->next_sib_ = this;
 			}
+			// seed =1236498769
+			// clean up lineage of outdegree1 nodes
+            if (this->parent_->parent_ != NULL) {
+                if (this->parent_->next_sib_ == NULL && this->parent_->parent_->first_child_ == this->parent_) {
+                    GenealogyNode * old_gparent = this->parent_->parent_;                    
+                    GenealogyNode * new_gparent = this->parent_->parent_->parent_;
+                    assert(old_gparent->first_child_ == this->parent_);
+                    assert(this->parent_->next_sib_ == NULL);
+                    this->parent_->edge_len_ += old_gparent->edge_len_;
+
+                    this->parent_->parent_ = new_gparent;
+                    if (new_gparent != NULL) {
+                        new_gparent->increment_count();
+                        GenealogyNode * ngp_child = new_gparent->first_child_;
+                        if (ngp_child == NULL) {
+                            new_gparent->first_child_ = this->parent_;
+                        } else {
+                            while (ngp_child->next_sib_ != NULL) {
+                                ngp_child = ngp_child->next_sib_;
+                            }
+                            ngp_child->next_sib_ = this->parent_;
+                        }
+                    }
+                    
+                    old_gparent->first_child_ = NULL;
+                    old_gparent->decrement_count();                    
+                }
+            }  			
         }
         
         ~GenealogyNode() {
@@ -128,7 +163,7 @@ class GenealogyNode {
             	assert(this->first_child_ == 0L);
                 // std::cout << "--- DELETING ALLELE " << this << " #" << this->reference_count_ << std::endl;
                 delete this;
-            }                
+            }
             this->reference_count_ -= 1;
         }
         

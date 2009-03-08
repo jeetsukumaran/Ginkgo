@@ -118,10 +118,10 @@ class Tree {
         }
         
         void write_newick_node(long node_idx, std::ostream& out) {
-            unsigned edge_length = this->edge_lens_[node_idx];
+            unsigned edge_length = this->edge_lens_.at(node_idx);
             std::vector<long> children = this->get_children(node_idx);
             while (children.size() == 1) {
-                ++edge_length;
+//                 ++edge_length; // disabled to track down places where outdegree1 nodes not suppressed
                 children = this->get_children(children[0]);
             }
             if (children.size() > 0) {
