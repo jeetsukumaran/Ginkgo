@@ -1,15 +1,29 @@
-2009-03-02 (v0.0.0)
-    * Prototype
+2009-03-06  Jeet Sukumaran (jeetsukumaran@gmail.com)
     
-2009-03-05 (v0.0.1)
-    * Biparental organism pedigree tracking.
-    
-2009-03-05 (v0.0.2)
-    * Haploid locus tracking.
-    
-2009-03-05 (v0.0.3)
-    * Diploid locus tracking.
-    
-2009-03-06 (v0.0.4)
+    * Version 0.0.4.
+
     * Multiple diploid locus (+ single haploid locus) tracking.
 
+2009-03-05  Jeet Sukumaran (jeetsukumaran@gmail.com)
+
+    * Version 0.0.3.
+
+    * Diploid locus tracking.
+
+2009-03-06  Jeet Sukumaran (jeetsukumaran@gmail.com)
+
+    * Version 0.0.2.
+
+    * Haploid locus tracking.
+
+2009-03-06  Jeet Sukumaran (jeetsukumaran@gmail.com)
+
+    * Version 0.0.1.
+
+    * Biparental organism pedigree tracking.
+
+2009-03-06  Jeet Sukumaran (jeetsukumaran@gmail.com)
+
+    * Version 0.0.0.
+
+    * Prototype.
