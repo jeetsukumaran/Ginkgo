@@ -8,7 +8,7 @@ noinst_HEADERS = \
 
 gingko_SOURCES = \
     gingko.cpp \
-    random.cpp \
+    randgen.cpp \
     biosys.cpp \
     landscape.cpp \
     cell.cpp \
