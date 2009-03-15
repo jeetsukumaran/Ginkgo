@@ -12,4 +12,5 @@ gingko_SOURCES = \
     biosys.cpp \
     landscape.cpp \
     cell.cpp \
-    world.cpp
+    world.cpp \
+    cmdopts.cpp
