@@ -237,13 +237,11 @@ class OptionParser {
         //! (e.g., "-f").
         //! Long flags start with two dashes and are followed by one or more
         //! characters (e.g., "--filename").
-        OptionArg& add_option(const char * short_flag=NULL,
-                              const char * long_flag=NULL,
-                              OptionArg::option_arg_type val_type=OptionArg::STRING,
-                              const void * default_value=NULL,
-                              const char * help=NULL,
-                              const char * meta_var=NULL,
-                              bool is_switch=false);        
+        OptionArg * add_option(const char * short_flag=NULL,
+                               const char * long_flag=NULL,
+                               OptionArg::option_arg_type val_type=OptionArg::STRING,
+                               const char * help=NULL,
+                               const char * meta_var=NULL);        
                
         //! Client must call this, passing in arguments from main().               
         void parse(int argc, char * argv[]);                
@@ -261,6 +259,7 @@ class OptionParser {
         OptionArg& get_option(const char * flag);     
 
     private:
+        BooleanOptionArg *                          help_option_;
         std::vector<OptionArg *>                    option_args_;
         std::vector< std::string >                  pos_args_;
         std::map< std::string, OptionArg * >        key_opt_map_;

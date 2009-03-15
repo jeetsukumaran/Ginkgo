@@ -23,7 +23,7 @@
 #define WORLD_H
 
 #include "gingko_defs.h"
-#include "random.h"
+#include "randgen.h"
 #include "cell.h"
 #include "landscape.h"
 

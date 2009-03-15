@@ -94,8 +94,10 @@ std::ostream& OptionArg::write_help(std::ostream& out) const {
 ///////////////////////////////////////////////////////////////////////////////
 // OptionParser
 
-OptionParser::OptionParser() 
-    {}
+OptionParser::OptionParser() {
+    this->help_option_ = dynamic_cast<BooleanOptionArg *>(this->add_option("-h", "--help", OptionArg::BOOLEAN,
+                                           "show this message and exit"));
+}
     
 OptionParser::~OptionParser() {
     for (std::vector<OptionArg *>::iterator oap = this->option_args_.begin();
@@ -105,13 +107,11 @@ OptionParser::~OptionParser() {
     }                    
 }
 
-OptionArg& OptionParser::add_option(const char * short_flag,
+OptionArg * OptionParser::add_option(const char * short_flag,
                                     const char * long_flag,
                                     OptionArg::option_arg_type val_type,
-                                    const void * default_value,
                                     const char * help,
-                                    const char * meta_var,
-                                    bool is_switch) {
+                                    const char * meta_var) {
     OptionArg * oa;                              
     if (val_type == OptionArg::STRING) {            
         oa = new StringOptionArg();
@@ -142,19 +142,19 @@ OptionArg& OptionParser::add_option(const char * short_flag,
         oa->set_meta_var(short_flag);
     }
     
-    if (val_type == OptionArg::STRING) {            
-        StringOptionArg * str_opt = dynamic_cast<StringOptionArg *>(oa);
-        str_opt->set_value(*static_cast<const std::string *>(default_value));
-    } else if (val_type == OptionArg::INTEGER) {            
-        IntegerOptionArg * int_opt = dynamic_cast<IntegerOptionArg *>(oa);
-        int_opt->set_value(*static_cast<const int *>(default_value));
-    } else if (val_type == OptionArg::REAL) {            
-        RealOptionArg * double_opt = dynamic_cast<RealOptionArg *>(oa);
-        double_opt->set_value(*static_cast<const double *>(default_value));
-    } else if (val_type == OptionArg::BOOLEAN) {
-        BooleanOptionArg * bool_opt = dynamic_cast<BooleanOptionArg *>(oa);
-        bool_opt->set_value(*static_cast<const bool *>(default_value));
-    }
+//     if (val_type == OptionArg::STRING) {            
+//         StringOptionArg * str_opt = dynamic_cast<StringOptionArg *>(oa);
+//         str_opt->set_value(*static_cast<const std::string *>(default_value));
+//     } else if (val_type == OptionArg::INTEGER) {            
+//         IntegerOptionArg * int_opt = dynamic_cast<IntegerOptionArg *>(oa);
+//         int_opt->set_value(*static_cast<const int *>(default_value));
+//     } else if (val_type == OptionArg::REAL) {            
+//         RealOptionArg * double_opt = dynamic_cast<RealOptionArg *>(oa);
+//         double_opt->set_value(*static_cast<const double *>(default_value));
+//     } else if (val_type == OptionArg::BOOLEAN) {
+//         BooleanOptionArg * bool_opt = dynamic_cast<BooleanOptionArg *>(oa);
+//         bool_opt->set_value(*static_cast<const bool *>(default_value));
+//     }
     
     this->option_args_.push_back(oa);
     if (short_flag) {
@@ -167,7 +167,7 @@ OptionArg& OptionParser::add_option(const char * short_flag,
         assert(this->key_opt_map_.find(long_flag) == this->key_opt_map_.end());
         this->key_opt_map_.insert(std::make_pair(long_flag, oa));
     }        
-    return *oa;
+    return oa;
 }
 
 std::ostream& OptionParser::write_help(std::ostream& out) const {
@@ -182,11 +182,7 @@ std::ostream& OptionParser::write_help(std::ostream& out) const {
 
 void OptionParser::parse(int argc, char * argv[]) {
 
-    // TODO:
-    // -- search for "-h", "-?", "--help" amongst arguments, 
-    //    respond and exit if found
-
-    for (int i = 0; i < argc; ++i) {                
+    for (int i = 0; i < argc; ++i) { 
         if (argv[i][0] == '-') {
             std::string arg_name;
             std::string arg_value;
@@ -217,14 +213,21 @@ void OptionParser::parse(int argc, char * argv[]) {
                     arg_value = arg.substr(2, arg.size());
                 }
             }
+            
             std::map< std::string, OptionArg * >::iterator oai = this->key_opt_map_.find(arg_name);
             if ( oai == this->key_opt_map_.end() ) {
                 std::cerr << "unrecognized command \"" << arg_name << "\"" << std::endl;
                 exit(1);
             }
+            
+            if (oai->second == this->help_option_) {
+                this->write_help(std::cerr);
+                exit(1);
+            }
+            
             OptionArg& oa = *(oai->second);
             
-            if (not oa.is_switch()) {
+            if (not oa.get_val_type() == OptionArg::BOOLEAN) {
                 if (arg_value.size() == 0) {
                     if (i == argc-1) {
                         std::cerr << "expecting value for option \"" << arg_name << "\"" << std::endl;

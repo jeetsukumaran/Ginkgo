@@ -31,7 +31,7 @@
 
 
 #include "gingko_defs.h"
-#include "random.h"
+#include "randgen.h"
 
 namespace gingko {
 

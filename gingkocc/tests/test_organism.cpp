@@ -23,7 +23,7 @@
 #include <iostream>
 #include <vector>
 #include "../biosys.h"
-#include "../random.h"
+#include "../randgen.h"
 #include "../tree.h"
 
 using namespace gingko;
