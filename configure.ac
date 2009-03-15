@@ -227,7 +227,6 @@ AC_SUBST(CPPFLAGS)
 AC_CONFIG_FILES([
 	Makefile 			\
 	gingkocc/Makefile   \
-	gingkocc/prototypes/Makefile		\
 	gingkocc/tests/Makefile		\
 	])
 

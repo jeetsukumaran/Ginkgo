@@ -6,5 +6,4 @@ EXTRA_DIST = \
 	README
 
 SUBDIRS = gingkocc \
-          gingkocc/prototypes \
           gingkocc/tests
