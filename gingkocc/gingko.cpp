@@ -31,18 +31,12 @@
 
 int main(int argc, char* argv[]) {
     gingko::OptionParser parser = gingko::OptionParser();
-    parser.add_option("-x", "--dim-x", gingko::OptionArg::INTEGER,  
-                      "size of landscape in the x-dimension", "X");
-    parser.add_option("-y", "--dim-y", gingko::OptionArg::INTEGER, 
-                      "size of landscape in the y-dimension", "Y");
-    parser.add_option("-c", "--carrying-capacity", gingko::OptionArg::INTEGER, 
-                      "maximum carrying capacity of each cell", "K");
-    parser.add_option("-n", "--num-gens", gingko::OptionArg::INTEGER,
-                      "number of generations to run", "GENERATIONS");  
-    parser.add_option("-f", "--num-fitness", gingko::OptionArg::INTEGER, 
-                      "number of fitness factors", "FACTORS");
-    parser.add_option("-z", "--random-seed", gingko::OptionArg::INTEGER, 
-                      "random number seed", "SEED");                      
+    parser.add_option<std::string>("-x", "--dim-x", "size of landscape in the x-dimension", "X");
+    parser.add_option<std::string>("-y", "--dim-y", "size of landscape in the y-dimension", "Y");
+    parser.add_option<std::string>("-c", "--carrying-capacity", "maximum carrying capacity of each cell", "K");
+    parser.add_option<std::string>("-n", "--num-gens","number of generations to run", "#GENERATIONS");  
+    parser.add_option<std::string>("-f", "--num-fitness", "number of fitness factors", "#FACTORS");
+    parser.add_option<std::string>("-z", "--random-seed", "random number seed", "SEED");                      
 
 
     parser.parse(argc, argv);

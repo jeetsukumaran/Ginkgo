@@ -26,10 +26,16 @@ using namespace gingko;
 ///////////////////////////////////////////////////////////////////////////////
 // OptionArg
 
-OptionArg::OptionArg()
+OptionArg::OptionArg(const char * help, const char * meta_var)
     : is_switch_(false),
-      is_set_(false) 
-  {}
+      is_set_(false) {
+    if (help != NULL) {
+        this->help_ = help;
+    }
+    if (meta_var != NULL) {
+        this->meta_var_ = meta_var;
+    }
+}
   
 OptionArg::~OptionArg() {}
   
@@ -111,12 +117,12 @@ std::ostream& OptionArg::write_help(std::ostream& out) const {
     return out;
 }
 
+
 ///////////////////////////////////////////////////////////////////////////////
 // OptionParser
 
 OptionParser::OptionParser() {
-    this->help_option_ = dynamic_cast<BooleanOptionArg *>(this->add_option("-h", "--help", OptionArg::BOOLEAN,
-                                           "show this message and exit"));
+//     this->help_option_ = this->add_option<bool>("-h", "--help", "show this message and exit");
 }
     
 OptionParser::~OptionParser() {
@@ -127,40 +133,32 @@ OptionParser::~OptionParser() {
     }                    
 }
 
-OptionArg * OptionParser::add_option(const char * short_flag,
-                                    const char * long_flag,
-                                    OptionArg::option_arg_type val_type,
-                                    const char * help,
-                                    const char * meta_var) {
-    OptionArg * oa;                              
-    if (val_type == OptionArg::STRING) {            
-        oa = new StringOptionArg();
-    } else if (val_type == OptionArg::INTEGER) {      
-        oa = new IntegerOptionArg();
-    } else if (val_type == OptionArg::REAL) { 
-        oa = new RealOptionArg();            
-    } else if (val_type == OptionArg::BOOLEAN) { 
-        oa = new BooleanOptionArg();            
-    }
-    assert ( oa );
-    assert( short_flag != NULL or long_flag != NULL);
-    if (short_flag != NULL) {
-        oa->set_short_flag(short_flag);
-    }
-    if (long_flag != NULL) {
-        oa->set_long_flag(long_flag);
-    }   
+// OptionArg * OptionParser::add_option(const char * short_flag,
+//                                     const char * long_flag,
+//                                     typename T,
+//                                     const char * help,
+//                                     const char * meta_var) {
+//     OptionArg * oa;                              
+//     oa = new TypedOptionArg<T>(help, meta_var);
+//     assert ( oa );
+//     assert( short_flag != NULL or long_flag != NULL);
+//     if (short_flag != NULL) {
+//         oa->set_short_flag(short_flag);
+//     }
+//     if (long_flag != NULL) {
+//         oa->set_long_flag(long_flag);
+//     }   
     
-    if (help != NULL) {
-        oa->set_help(help);
-    }   
-    if (meta_var != NULL) {
-        oa->set_meta_var(meta_var);
-    } else if (long_flag != NULL) {
-        oa->set_meta_var(long_flag);
-    } else if (short_flag != NULL) {
-        oa->set_meta_var(short_flag);
-    }
+//     if (help != NULL) {
+//         oa->set_help(help);
+//     }   
+//     if (meta_var != NULL) {
+//         oa->set_meta_var(meta_var);
+//     } else if (long_flag != NULL) {
+//         oa->set_meta_var(long_flag);
+//     } else if (short_flag != NULL) {
+//         oa->set_meta_var(short_flag);
+//     }
     
 //     if (val_type == OptionArg::STRING) {            
 //         StringOptionArg * str_opt = dynamic_cast<StringOptionArg *>(oa);
@@ -176,19 +174,19 @@ OptionArg * OptionParser::add_option(const char * short_flag,
 //         bool_opt->set_value(*static_cast<const bool *>(default_value));
 //     }
     
-    this->option_args_.push_back(oa);
-    if (short_flag) {
-        assert(short_flag[0] == '-' and short_flag[1] != 0 and short_flag[1] != '-');
-        assert(this->key_opt_map_.find(short_flag) == this->key_opt_map_.end());
-        this->key_opt_map_.insert(std::make_pair(short_flag, oa));
-    }        
-    if (long_flag) {
-        assert(long_flag[0] == '-' and long_flag[1] =='-' and long_flag[2] != '-');
-        assert(this->key_opt_map_.find(long_flag) == this->key_opt_map_.end());
-        this->key_opt_map_.insert(std::make_pair(long_flag, oa));
-    }        
-    return oa;
-}
+//     this->option_args_.push_back(oa);
+//     if (short_flag) {
+//         assert(short_flag[0] == '-' and short_flag[1] != 0 and short_flag[1] != '-');
+//         assert(this->key_opt_map_.find(short_flag) == this->key_opt_map_.end());
+//         this->key_opt_map_.insert(std::make_pair(short_flag, oa));
+//     }        
+//     if (long_flag) {
+//         assert(long_flag[0] == '-' and long_flag[1] =='-' and long_flag[2] != '-');
+//         assert(this->key_opt_map_.find(long_flag) == this->key_opt_map_.end());
+//         this->key_opt_map_.insert(std::make_pair(long_flag, oa));
+//     }        
+//     return oa;
+// }
 
 std::ostream& OptionParser::write_help(std::ostream& out) const {
     for (std::vector<OptionArg *>::const_iterator oa = this->option_args_.begin();
@@ -201,114 +199,114 @@ std::ostream& OptionParser::write_help(std::ostream& out) const {
 }
 
 void OptionParser::parse(int argc, char * argv[]) {
-
-    for (int i = 0; i < argc; ++i) { 
-        if (argv[i][0] == '-') {
-            std::string arg_name;
-            std::string arg_value;
-
-            if (strncmp(argv[i], "--", 2) == 0) {
-                bool parsing_name = true;
-                for (char *a = argv[i]; *a; ++a) {
-                    if (parsing_name) {
-                        if (*a == '=') {
-                            parsing_name = false;
-                        } else {
-                            arg_name += *a;
-                        }
-                    } else {
-                        arg_value += *a;
-                    }
-                }                        
-            } else if (argv[i][0] == '-') {
-                std::string arg(argv[i]);
-                if (arg.size() < 2) {
-                    std::cerr << "unrecognized or incomplete option \"" << arg << "\"" << std::endl;
-                    exit(1);
-                }
-                if (arg.size() == 2) {
-                    arg_name = arg;
-                } else {
-                    arg_name = arg.substr(0, 2);
-                    arg_value = arg.substr(2, arg.size());
-                }
-            }
-            
-            std::map< std::string, OptionArg * >::iterator oai = this->key_opt_map_.find(arg_name);
-            if ( oai == this->key_opt_map_.end() ) {
-                std::cerr << "unrecognized command \"" << arg_name << "\"" << std::endl;
-                exit(1);
-            }
-            
-            if (oai->second == this->help_option_) {
-                this->write_help(std::cerr);
-                exit(1);
-            }
-            
-            OptionArg& oa = *(oai->second);
-            
-            if (not oa.get_val_type() == OptionArg::BOOLEAN) {
-                if (arg_value.size() == 0) {
-                    if (i == argc-1) {
-                        std::cerr << "expecting value for option \"" << arg_name << "\"" << std::endl;
-                        exit(1);
-                    } else {
-                        arg_value = argv[i+1];
-                        i += 1;
-                    }                            
-                }
-                if (oa.get_val_type() == OptionArg::STRING) {            
-                    StringOptionArg * str_opt = dynamic_cast<StringOptionArg *>(&oa);
-                    str_opt->set_value(arg_value);
-                } else if (oa.get_val_type() == OptionArg::INTEGER) {            
-                    IntegerOptionArg * int_opt = dynamic_cast<IntegerOptionArg *>(&oa);
-                    int_opt->set_value(atol(arg_value.c_str()));
-                } else if (oa.get_val_type() == OptionArg::REAL) {            
-                    RealOptionArg * double_opt = dynamic_cast<RealOptionArg *>(&oa);
-                    double_opt->set_value(atof(arg_value.c_str()));
-                }                        
-            } else {
-                BooleanOptionArg * bool_opt = static_cast<BooleanOptionArg *>(&oa);
-                bool_opt->set_value(true);            
-            }
-            
-        } else {
-            this->pos_args_.push_back(argv[i]);
-        }
-    }
+// 
+//     for (int i = 0; i < argc; ++i) { 
+//         if (argv[i][0] == '-') {
+//             std::string arg_name;
+//             std::string arg_value;
+// 
+//             if (strncmp(argv[i], "--", 2) == 0) {
+//                 bool parsing_name = true;
+//                 for (char *a = argv[i]; *a; ++a) {
+//                     if (parsing_name) {
+//                         if (*a == '=') {
+//                             parsing_name = false;
+//                         } else {
+//                             arg_name += *a;
+//                         }
+//                     } else {
+//                         arg_value += *a;
+//                     }
+//                 }                        
+//             } else if (argv[i][0] == '-') {
+//                 std::string arg(argv[i]);
+//                 if (arg.size() < 2) {
+//                     std::cerr << "unrecognized or incomplete option \"" << arg << "\"" << std::endl;
+//                     exit(1);
+//                 }
+//                 if (arg.size() == 2) {
+//                     arg_name = arg;
+//                 } else {
+//                     arg_name = arg.substr(0, 2);
+//                     arg_value = arg.substr(2, arg.size());
+//                 }
+//             }
+//             
+//             std::map< std::string, OptionArg * >::iterator oai = this->key_opt_map_.find(arg_name);
+//             if ( oai == this->key_opt_map_.end() ) {
+//                 std::cerr << "unrecognized command \"" << arg_name << "\"" << std::endl;
+//                 exit(1);
+//             }
+//             
+//             if (oai->second == this->help_option_) {
+//                 this->write_help(std::cerr);
+//                 exit(1);
+//             }
+//             
+//             OptionArg& oa = *(oai->second);
+//             
+//             if (not oa.get_val_type() == OptionArg::BOOLEAN) {
+//                 if (arg_value.size() == 0) {
+//                     if (i == argc-1) {
+//                         std::cerr << "expecting value for option \"" << arg_name << "\"" << std::endl;
+//                         exit(1);
+//                     } else {
+//                         arg_value = argv[i+1];
+//                         i += 1;
+//                     }                            
+//                 }
+//                 if (oa.get_val_type() == OptionArg::STRING) {            
+//                     StringOptionArg * str_opt = dynamic_cast<StringOptionArg *>(&oa);
+//                     str_opt->set_value(arg_value);
+//                 } else if (oa.get_val_type() == OptionArg::INTEGER) {            
+//                     IntegerOptionArg * int_opt = dynamic_cast<IntegerOptionArg *>(&oa);
+//                     int_opt->set_value(atol(arg_value.c_str()));
+//                 } else if (oa.get_val_type() == OptionArg::REAL) {            
+//                     RealOptionArg * double_opt = dynamic_cast<RealOptionArg *>(&oa);
+//                     double_opt->set_value(atof(arg_value.c_str()));
+//                 }                        
+//             } else {
+//                 BooleanOptionArg * bool_opt = static_cast<BooleanOptionArg *>(&oa);
+//                 bool_opt->set_value(true);            
+//             }
+//             
+//         } else {
+//             this->pos_args_.push_back(argv[i]);
+//         }
+//     }
 }
-
-OptionArg* OptionParser::get_option_ptr(const char * flag) {
-    std::map< std::string, OptionArg * >::iterator oai = this->key_opt_map_.find(flag);
-    assert (oai != this->key_opt_map_.end() );
-    return oai->second;
-}
-
-OptionArg& OptionParser::get_option(const char * flag) {
-    return *(get_option_ptr(flag));
-}
-
-
-bool OptionParser::is_set(const char * flag) {
-    OptionArg& oa = this->get_option(flag);
-    return oa.is_set();
-}
-
-void OptionParser::store_value(const char * flag, void * data) {
-    OptionArg * oa = this->get_option_ptr(flag);
-    if (oa->get_val_type() == OptionArg::STRING) {            
-        StringOptionArg * str_opt = dynamic_cast<StringOptionArg *>(this->get_option_ptr(flag));
-        *(static_cast<std::string *>(data)) = str_opt->get_value();
-    } else if (oa->get_val_type() == OptionArg::INTEGER) {            
-        IntegerOptionArg * int_opt = dynamic_cast<IntegerOptionArg *>(this->get_option_ptr(flag));
-        *(static_cast<int *>(data)) = int_opt->get_value();
-    } else if (oa->get_val_type() == OptionArg::REAL) {            
-        RealOptionArg * double_opt = dynamic_cast<RealOptionArg *>(this->get_option_ptr(flag));
-        *(static_cast<double *>(data)) = double_opt->get_value();
-    } else if (oa->get_val_type() == OptionArg::BOOLEAN) {            
-        BooleanOptionArg * bool_opt = dynamic_cast<BooleanOptionArg *>(this->get_option_ptr(flag));
-        *(static_cast<bool *>(data)) = bool_opt->get_value();
-    } else {
-        assert(0);
-    }
-}
+// 
+// OptionArg* OptionParser::get_option_ptr(const char * flag) {
+//     std::map< std::string, OptionArg * >::iterator oai = this->key_opt_map_.find(flag);
+//     assert (oai != this->key_opt_map_.end() );
+//     return oai->second;
+// }
+// 
+// OptionArg& OptionParser::get_option(const char * flag) {
+//     return *(get_option_ptr(flag));
+// }
+// 
+// 
+// bool OptionParser::is_set(const char * flag) {
+//     OptionArg& oa = this->get_option(flag);
+//     return oa.is_set();
+// }
+// 
+// void OptionParser::store_value(const char * flag, void * data) {
+//     OptionArg * oa = this->get_option_ptr(flag);
+//     if (oa->get_val_type() == OptionArg::STRING) {            
+//         StringOptionArg * str_opt = dynamic_cast<StringOptionArg *>(this->get_option_ptr(flag));
+//         *(static_cast<std::string *>(data)) = str_opt->get_value();
+//     } else if (oa->get_val_type() == OptionArg::INTEGER) {            
+//         IntegerOptionArg * int_opt = dynamic_cast<IntegerOptionArg *>(this->get_option_ptr(flag));
+//         *(static_cast<int *>(data)) = int_opt->get_value();
+//     } else if (oa->get_val_type() == OptionArg::REAL) {            
+//         RealOptionArg * double_opt = dynamic_cast<RealOptionArg *>(this->get_option_ptr(flag));
+//         *(static_cast<double *>(data)) = double_opt->get_value();
+//     } else if (oa->get_val_type() == OptionArg::BOOLEAN) {            
+//         BooleanOptionArg * bool_opt = dynamic_cast<BooleanOptionArg *>(this->get_option_ptr(flag));
+//         *(static_cast<bool *>(data)) = bool_opt->get_value();
+//     } else {
+//         assert(0);
+//     }
+// }

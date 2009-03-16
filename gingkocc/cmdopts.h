@@ -46,7 +46,7 @@ class OptionArg {
         };    
         
         //! Default constructor.
-        OptionArg();      
+        OptionArg(const char * help=NULL, const char * meta_var=NULL);      
         
         //! Default destructor.
         virtual ~OptionArg();
@@ -103,15 +103,7 @@ class OptionArg {
         bool& is_set() {
             return this->is_set_;
         }
-        
-        option_arg_type get_val_type() const {
-            return this->val_type_;
-        }
-        
-        void set_val_type(option_arg_type val) {
-            this->val_type_ = val;
-        }
-                
+  
     private:
         std::string     short_flag_;
         std::string     long_flag_;
@@ -119,129 +111,33 @@ class OptionArg {
         std::string     meta_var_;
         bool            is_switch_;        
         bool            is_set_;
-        option_arg_type val_type_;
 
 };
 
-class StringOptionArg : public OptionArg {
+template <typename T>
+class TypedOptionArg : public OptionArg {
 
     public:
-        StringOptionArg() {
-            this->set_val_type(OptionArg::STRING);
-            this->set_is_switch(false);
-        }        
-        virtual ~StringOptionArg() {}    
+        TypedOptionArg(const char * help=NULL,
+                       const char * meta_var=NULL)     
+            : OptionArg(help, meta_var) {
+    
+        }   
         
-        std::string get_default_value() const {
-            return this->default_value_;
-        }
-       
-        void set_default_value(const std::string& value) {
-            this->default_value_ = value;
-        }
+        virtual ~TypedOptionArg() {}
         
-        std::string get_value() const {
-            return this->value_;
+        T * get_store() {
+            return this->store_;
         }
-       
-        void set_value(const std::string& value) {
-            this->value_ = value;
-        }         
+                
+        void set_store(T * store) {
+            this->store_ = store;
+        }       
                
     private:
-        std::string     default_value_;
-        std::string     value_;
+        T *     store;
 };
 
-//! Specialization for integer option.
-class IntegerOptionArg : public OptionArg {
-    public:
-        IntegerOptionArg() {
-            this->set_val_type(OptionArg::INTEGER);
-            this->set_is_switch(false);
-        }           
-        virtual ~IntegerOptionArg() {}    
-        
-        long get_default_value() const {
-            return this->default_value_;
-        }
-       
-        void set_default_value(const long& value) {
-            this->default_value_ = value;
-        }
-        
-        long get_value() const {
-            return this->value_;
-        }
-       
-        void set_value(const long& value) {
-            this->value_ = value;
-        }         
-               
-    private:
-        long     default_value_;
-        long     value_;
-};
-
-//! Specialization for floating point option.
-class RealOptionArg : public OptionArg {
-    public:
-        RealOptionArg() {
-            this->set_val_type(OptionArg::REAL);
-            this->set_is_switch(false);
-        }           
-        virtual ~RealOptionArg() {}    
-        
-        double get_default_value() const {
-            return this->default_value_;
-        }
-       
-        void set_default_value(const double& value) {
-            this->default_value_ = value;
-        }
-        
-        double get_value() const {
-            return this->value_;
-        }
-       
-        void set_value(const double& value) {
-            this->value_ = value;
-        }         
-               
-    private:
-        double     default_value_;
-        double     value_;
-};
-
-//! Specialization for boolean option.
-class BooleanOptionArg : public OptionArg {
-    public:
-        BooleanOptionArg() {
-            this->set_val_type(OptionArg::BOOLEAN);
-            this->set_is_switch(true);
-        }           
-        virtual ~BooleanOptionArg() {}    
-        
-        bool get_default_value() const {
-            return this->default_value_;
-        }
-       
-        void set_default_value(const bool& value) {
-            this->default_value_ = value;
-        }
-        
-        bool get_value() const {
-            return this->value_;
-        }
-       
-        void set_value(const bool& value) {
-            this->value_ = value;
-        }         
-               
-    private:
-        bool     default_value_;
-        bool     value_;
-};
 
 //! General option parser.
 class OptionParser {
@@ -257,21 +153,70 @@ class OptionParser {
         //! (e.g., "-f").
         //! Long flags start with two dashes and are followed by one or more
         //! characters (e.g., "--filename").
+        template <typename T>
         OptionArg * add_option(const char * short_flag=NULL,
                                const char * long_flag=NULL,
-                               OptionArg::option_arg_type val_type=OptionArg::STRING,
                                const char * help=NULL,
-                               const char * meta_var=NULL);        
+                               const char * meta_var=NULL) {                               
+            OptionArg * oa;                              
+            oa = new TypedOptionArg<T>(help, meta_var);
+            assert ( oa );
+            assert( short_flag != NULL or long_flag != NULL);
+            if (short_flag != NULL) {
+                oa->set_short_flag(short_flag);
+            }
+            if (long_flag != NULL) {
+                oa->set_long_flag(long_flag);
+            }   
+            
+            if (help != NULL) {
+                oa->set_help(help);
+            }   
+            if (meta_var != NULL) {
+                oa->set_meta_var(meta_var);
+            } else if (long_flag != NULL) {
+                oa->set_meta_var(long_flag);
+            } else if (short_flag != NULL) {
+                oa->set_meta_var(short_flag);
+            }
+            
+//             if (val_type == OptionArg::STRING) {            
+//                 StringOptionArg * str_opt = dynamic_cast<StringOptionArg *>(oa);
+//                 str_opt->set_value(*static_cast<const std::string *>(default_value));
+//             } else if (val_type == OptionArg::INTEGER) {            
+//                 IntegerOptionArg * int_opt = dynamic_cast<IntegerOptionArg *>(oa);
+//                 int_opt->set_value(*static_cast<const int *>(default_value));
+//             } else if (val_type == OptionArg::REAL) {            
+//                 RealOptionArg * double_opt = dynamic_cast<RealOptionArg *>(oa);
+//                 double_opt->set_value(*static_cast<const double *>(default_value));
+//             } else if (val_type == OptionArg::BOOLEAN) {
+//                 BooleanOptionArg * bool_opt = dynamic_cast<BooleanOptionArg *>(oa);
+//                 bool_opt->set_value(*static_cast<const bool *>(default_value));
+//             }
+            
+            this->option_args_.push_back(oa);
+            if (short_flag) {
+                assert(short_flag[0] == '-' and short_flag[1] != 0 and short_flag[1] != '-');
+                assert(this->key_opt_map_.find(short_flag) == this->key_opt_map_.end());
+                this->key_opt_map_.insert(std::make_pair(short_flag, oa));
+            }        
+            if (long_flag) {
+                assert(long_flag[0] == '-' and long_flag[1] =='-' and long_flag[2] != '-');
+                assert(this->key_opt_map_.find(long_flag) == this->key_opt_map_.end());
+                this->key_opt_map_.insert(std::make_pair(long_flag, oa));
+            }        
+            return oa;
+        }
                
         //! Client must call this, passing in arguments from main().               
         void parse(int argc, char * argv[]);                
         
         //! Checks to see if a particular flag is set (i.e., specified by the 
         //! user.
-        bool is_set(const char * flag);                
+//         bool is_set(const char * flag);                
         
         //! Copies value into given data field.
-        void store_value(const char * flag, void * data);
+//         void store_value(const char * flag, void * data);
 
     private:
         std::ostream& write_help(std::ostream& out) const;               
@@ -279,7 +224,6 @@ class OptionParser {
         OptionArg& get_option(const char * flag);     
 
     private:
-        BooleanOptionArg *                          help_option_;
         std::vector<OptionArg *>                    option_args_;
         std::vector< std::string >                  pos_args_;
         std::map< std::string, OptionArg * >        key_opt_map_;
