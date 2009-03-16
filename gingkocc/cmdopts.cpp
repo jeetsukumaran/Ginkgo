@@ -211,38 +211,19 @@ void OptionParser::parse(int argc, char * argv[]) {
         }
     }
 }
-// 
-// OptionArg* OptionParser::get_option_ptr(const char * flag) {
-//     std::map< std::string, OptionArg * >::iterator oai = this->key_opt_map_.find(flag);
-//     assert (oai != this->key_opt_map_.end() );
-//     return oai->second;
-// }
-// 
-// OptionArg& OptionParser::get_option(const char * flag) {
-//     return *(get_option_ptr(flag));
-// }
-// 
-// 
-// bool OptionParser::is_set(const char * flag) {
-//     OptionArg& oa = this->get_option(flag);
-//     return oa.is_set();
-// }
-// 
-// void OptionParser::store_value(const char * flag, void * data) {
-//     OptionArg * oa = this->get_option_ptr(flag);
-//     if (oa->get_val_type() == OptionArg::STRING) {            
-//         StringOptionArg * str_opt = dynamic_cast<StringOptionArg *>(this->get_option_ptr(flag));
-//         *(static_cast<std::string *>(data)) = str_opt->get_value();
-//     } else if (oa->get_val_type() == OptionArg::INTEGER) {            
-//         IntegerOptionArg * int_opt = dynamic_cast<IntegerOptionArg *>(this->get_option_ptr(flag));
-//         *(static_cast<int *>(data)) = int_opt->get_value();
-//     } else if (oa->get_val_type() == OptionArg::REAL) {            
-//         RealOptionArg * double_opt = dynamic_cast<RealOptionArg *>(this->get_option_ptr(flag));
-//         *(static_cast<double *>(data)) = double_opt->get_value();
-//     } else if (oa->get_val_type() == OptionArg::BOOLEAN) {            
-//         BooleanOptionArg * bool_opt = dynamic_cast<BooleanOptionArg *>(this->get_option_ptr(flag));
-//         *(static_cast<bool *>(data)) = bool_opt->get_value();
-//     } else {
-//         assert(0);
-//     }
-// }
+
+OptionArg* OptionParser::get_option_ptr(const char * flag) {
+    std::map< std::string, OptionArg * >::iterator oai = this->key_opt_map_.find(flag);
+    assert (oai != this->key_opt_map_.end() );
+    return oai->second;
+}
+
+OptionArg& OptionParser::get_option(const char * flag) {
+    return *(get_option_ptr(flag));
+}
+
+bool OptionParser::is_set(const char * flag) {
+    OptionArg& oa = this->get_option(flag);
+    return oa.is_set();
+}
+

@@ -124,7 +124,8 @@ class TypedOptionArg : public OptionArg {
                        const char * help=NULL,
                        const char * meta_var=NULL,
                        void * default_value=NULL)
-            : OptionArg(help, meta_var) {
+            : OptionArg(help, meta_var),
+              default_value_() {
             if (store != NULL) {
                 this->set_store(store);
             }
@@ -152,8 +153,12 @@ class TypedOptionArg : public OptionArg {
         }      
         
         virtual void process_value_string(const std::string& val_str) {
-            std::istringstream istr(val_str);
-            istr >> *this->store_;
+            if (this->is_set()) {
+                std::istringstream istr(val_str);
+                istr >> *this->store_;
+            } else {
+                *this->store_ = this->default_value_;
+            }
         }
 
         void set_default_value(void * val) {
@@ -241,10 +246,10 @@ class OptionParser {
         
         //! Checks to see if a particular flag is set (i.e., specified by the 
         //! user.
-//         bool is_set(const char * flag);                
+        bool is_set(const char * flag);                
         
         //! Copies value into given data field.
-//         void store_value(const char * flag, void * data);
+        void store_value(const char * flag, void * data);
 
     private:
         std::ostream& write_help(std::ostream& out) const;               
