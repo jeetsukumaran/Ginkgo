@@ -118,10 +118,17 @@ template <typename T>
 class TypedOptionArg : public OptionArg {
 
     public:
-        TypedOptionArg(const char * help=NULL,
-                       const char * meta_var=NULL)     
+        TypedOptionArg(void * store,
+                       const char * help=NULL,
+                       const char * meta_var=NULL,
+                       void * default_value=NULL)
             : OptionArg(help, meta_var) {
-    
+            if (store != NULL) {
+                this->set_store(store);
+            }
+            if (default_value != NULL) {
+                this->set_default_value(default_value);
+            }
         }   
         
         virtual ~TypedOptionArg() {}
@@ -133,9 +140,20 @@ class TypedOptionArg : public OptionArg {
         void set_store(T * store) {
             this->store_ = store;
         }       
-               
+
+        void set_store(void * store) {
+            this->store_ = static_cast<T *>(store);
+        }       
+
+        void set_default_value(void * val) {
+            if (val != NULL) {
+                this->default_value_ = *(static_cast<T *>(val));
+            }                
+        }
+
     private:
-        T *     store;
+        T *     store_;
+        T       default_value_;
 };
 
 
@@ -154,12 +172,14 @@ class OptionParser {
         //! Long flags start with two dashes and are followed by one or more
         //! characters (e.g., "--filename").
         template <typename T>
-        OptionArg * add_option(const char * short_flag=NULL,
+        OptionArg * add_option(void * store,
+                               const char * short_flag=NULL,
                                const char * long_flag=NULL,
                                const char * help=NULL,
-                               const char * meta_var=NULL) {                               
+                               const char * meta_var=NULL,
+                               void * default_value=NULL) {                               
             OptionArg * oa;                              
-            oa = new TypedOptionArg<T>(help, meta_var);
+            oa = new TypedOptionArg<T>(store, help, meta_var, default_value);
             assert ( oa );
             assert( short_flag != NULL or long_flag != NULL);
             if (short_flag != NULL) {
@@ -179,21 +199,7 @@ class OptionParser {
             } else if (short_flag != NULL) {
                 oa->set_meta_var(short_flag);
             }
-            
-//             if (val_type == OptionArg::STRING) {            
-//                 StringOptionArg * str_opt = dynamic_cast<StringOptionArg *>(oa);
-//                 str_opt->set_value(*static_cast<const std::string *>(default_value));
-//             } else if (val_type == OptionArg::INTEGER) {            
-//                 IntegerOptionArg * int_opt = dynamic_cast<IntegerOptionArg *>(oa);
-//                 int_opt->set_value(*static_cast<const int *>(default_value));
-//             } else if (val_type == OptionArg::REAL) {            
-//                 RealOptionArg * double_opt = dynamic_cast<RealOptionArg *>(oa);
-//                 double_opt->set_value(*static_cast<const double *>(default_value));
-//             } else if (val_type == OptionArg::BOOLEAN) {
-//                 BooleanOptionArg * bool_opt = dynamic_cast<BooleanOptionArg *>(oa);
-//                 bool_opt->set_value(*static_cast<const bool *>(default_value));
-//             }
-            
+
             this->option_args_.push_back(oa);
             if (short_flag) {
                 assert(short_flag[0] == '-' and short_flag[1] != 0 and short_flag[1] != '-');
@@ -207,6 +213,17 @@ class OptionParser {
             }        
             return oa;
         }
+        
+        OptionArg * add_switch(void * store,
+                               const char * short_flag=NULL,
+                               const char * long_flag=NULL,
+                               const char * help=NULL,
+                               const char * meta_var=NULL,
+                               void * default_value=NULL) {
+            OptionArg * switch_arg = this->add_option<bool>(store, short_flag, long_flag, help, meta_var, default_value);
+            switch_arg->set_is_switch(false);
+            return switch_arg;
+        }                        
                
         //! Client must call this, passing in arguments from main().               
         void parse(int argc, char * argv[]);                
@@ -224,6 +241,7 @@ class OptionParser {
         OptionArg& get_option(const char * flag);     
 
     private:
+        OptionArg *                                 help_option_;
         std::vector<OptionArg *>                    option_args_;
         std::vector< std::string >                  pos_args_;
         std::map< std::string, OptionArg * >        key_opt_map_;

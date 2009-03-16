@@ -30,13 +30,19 @@
 #include <set>
 
 int main(int argc, char* argv[]) {
+    unsigned long size_x = 1000;
+    unsigned long size_y = 1000;
+    unsigned long cc = 100;
+    unsigned long num_gens = 100000;
+    unsigned int num_fitness = 10;
+    unsigned long rand_seed = 0;
     gingko::OptionParser parser = gingko::OptionParser();
-    parser.add_option<std::string>("-x", "--dim-x", "size of landscape in the x-dimension", "X");
-    parser.add_option<std::string>("-y", "--dim-y", "size of landscape in the y-dimension", "Y");
-    parser.add_option<std::string>("-c", "--carrying-capacity", "maximum carrying capacity of each cell", "K");
-    parser.add_option<std::string>("-n", "--num-gens","number of generations to run", "#GENERATIONS");  
-    parser.add_option<std::string>("-f", "--num-fitness", "number of fitness factors", "#FACTORS");
-    parser.add_option<std::string>("-z", "--random-seed", "random number seed", "SEED");                      
+    parser.add_option<unsigned long>(&size_x, "-x", "--dim-x", "size of landscape in the x-dimension", "X");
+    parser.add_option<unsigned long>(&size_y, "-y", "--dim-y", "size of landscape in the y-dimension", "Y");
+    parser.add_option<unsigned long>(&cc, "-c", "--carrying-capacity", "maximum carrying capacity of each cell", "K");
+    parser.add_option<unsigned long>(&num_gens, "-n", "--num-gens","number of generations to run", "#GENERATIONS");  
+    parser.add_option<unsigned int>(&num_fitness, "-f", "--num-fitness", "number of fitness factors", "#FACTORS");
+    parser.add_option<unsigned long>(&rand_seed, "-z", "--random-seed", "random number seed", "SEED");                      
 
 
     parser.parse(argc, argv);
