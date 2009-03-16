@@ -26,11 +26,18 @@
 #include <cstdlib>
 #include <map>
 #include <utility>
+#include <stdexcept>
 
 namespace gingko {
 
 const unsigned CMDOPTS_LINE_WIDTH = 78;
 const unsigned CMDOPTS_OPTION_COL_WIDTH = 24;
+
+
+class OptionValueTypeError : public std::runtime_error {
+    public:
+        OptionValueTypeError(const char * msg) : std::runtime_error(msg) {}
+};
 
 //! Wraps up a single option, including tracking flags and writing help.
 class OptionArg {
@@ -155,8 +162,16 @@ class TypedOptionArg : public OptionArg {
         
         virtual void process_value_string(const std::string& val_str) {
             std::istringstream istr(val_str);
-            istr >> *this->store_;
-            this->is_set() = true;
+            T temp;
+            istr >> temp;
+            if (!istr.fail() and istr.eof()) {
+                *this->store_ = temp;
+                this->is_set() = true;
+            } else {
+                std::string msg;
+                msg = "failed to convert \"" + val_str + "\"";
+                throw OptionValueTypeError(msg.c_str());
+            }
         }
 
         void set_default_value(void * val) {

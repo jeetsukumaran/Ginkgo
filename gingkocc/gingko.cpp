@@ -28,6 +28,7 @@
 #include <cstdlib>
 #include <vector>
 #include <set>
+#include <ctime>
 
 int main(int argc, char* argv[]) {
     unsigned long size_x = 1000;
@@ -35,15 +36,21 @@ int main(int argc, char* argv[]) {
     unsigned long cc = 100;
     unsigned long num_gens = 100000;
     unsigned int num_fitness = 10;
-    unsigned long rand_seed = 0;
+    unsigned long rand_seed = time(0);
+    double d = 0.0;
     gingko::OptionParser parser = gingko::OptionParser();
-    parser.add_option<unsigned long>(&size_x, "-x", "--dim-x", "size of landscape in the x-dimension", "X");
-    parser.add_option<unsigned long>(&size_y, "-y", "--dim-y", "size of landscape in the y-dimension", "Y");
-    parser.add_option<unsigned long>(&cc, "-c", "--carrying-capacity", "maximum carrying capacity of each cell", "K");
-    parser.add_option<unsigned long>(&num_gens, "-n", "--num-gens","number of generations to run", "#GENERATIONS");  
-    parser.add_option<unsigned int>(&num_fitness, "-f", "--num-fitness", "number of fitness factors", "#FACTORS");
-    parser.add_option<unsigned long>(&rand_seed, "-z", "--random-seed", "random number seed", "SEED");                      
-
+    parser.add_option<unsigned long>(&size_x, "-x", "--dim-x", 
+                                     "size of landscape in the x-dimension", "X");
+    parser.add_option<unsigned long>(&size_y, "-y", "--dim-y", 
+                                     "size of landscape in the y-dimension", "Y");
+    parser.add_option<unsigned long>(&cc, "-c", "--carrying-capacity", 
+                                     "maximum carrying capacity of each cell", "K");
+    parser.add_option<unsigned long>(&num_gens, "-g", "--num-gens",
+                                     "number of generations to run", "#GENERATIONS");  
+    parser.add_option<unsigned int>(&num_fitness, "-f", "--num-fitness", 
+                                    "number of fitness factors", "#FACTORS");
+    parser.add_option<unsigned long>(&rand_seed, "-z", "--random-seed", 
+                                     "random number seed", "SEED");
 
     parser.parse(argc, argv);
        
@@ -77,10 +84,12 @@ int main(int argc, char* argv[]) {
 //     long num_gens = args_as_longs[4];
 //     int num_env_factors = 1;
 //     
-//     
-//     if (seed < 1)
-//     	seed = time(0);
-//     std::cerr << "Using seed of " << seed << '\n';
+    
+    std::cerr << "           Landscape size: (" << size_x << ", " << size_y << ")\n";
+    std::cerr << "   Cell carrying capacity: " << cc << '\n';
+    std::cerr << "    Number of generations: " << num_gens << '\n';
+    std::cerr << "Number of fitness factors: " << num_fitness << '\n';
+    std::cerr << "       Random number seed: " << rand_seed << std::endl;
 //     gingko::World world(seed);
 // 
 //     std::cerr << "(generating landscape)\n";

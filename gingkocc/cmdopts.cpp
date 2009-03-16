@@ -200,7 +200,14 @@ void OptionParser::parse(int argc, char * argv[]) {
                         i += 1;
                     }                            
                 }
-                oa.process_value_string(arg_value);                    
+                try {
+                    oa.process_value_string(arg_value);                    
+                } catch(OptionValueTypeError& e) {
+                    std::cerr << "Invalid value passed to option " << arg_name << ": ";
+                    std::cerr << "\"" << arg_value << "\"" << std::endl;
+                    
+                    exit(1);
+                }
             } else {
                 TypedOptionArg<bool>* bool_opt = static_cast< TypedOptionArg<bool> *>(&oa);
                 bool_opt->process_value(true);            
