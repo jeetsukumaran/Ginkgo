@@ -250,7 +250,7 @@ class OptionParser {
                                const char * meta_var=NULL,
                                void * default_value=NULL) {
             OptionArg * switch_arg = this->add_option<bool>(store, short_flag, long_flag, help, meta_var, default_value);
-            switch_arg->set_is_switch(false);
+            switch_arg->set_is_switch(true);
             return switch_arg;
         }                        
                
@@ -270,6 +270,7 @@ class OptionParser {
         OptionArg& get_option(const char * flag);     
 
     private:
+        bool                                        show_help_;
         OptionArg *                                 help_option_;
         std::vector<OptionArg *>                    option_args_;
         std::vector< std::string >                  pos_args_;

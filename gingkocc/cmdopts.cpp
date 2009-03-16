@@ -72,7 +72,7 @@ std::string OptionArg::textwrap(const std::string& source,
 } 
 
 std::ostream& OptionArg::write_help(std::ostream& out) const {            
-    std::string help_str;        
+    std::string help_str;      
     if (this->short_flag_.size() > 0) {               
         help_str += this->short_flag_;
         if (not this->is_switch_) {
@@ -122,7 +122,7 @@ std::ostream& OptionArg::write_help(std::ostream& out) const {
 // OptionParser
 
 OptionParser::OptionParser() {
-    this->help_option_ = this->add_option<bool>(NULL, "-h", "--help", "show this message and exit");
+    this->help_option_ = this->add_switch(&this->show_help_, "-h", "--help",  "show this message and exit");
 }
     
 OptionParser::~OptionParser() {

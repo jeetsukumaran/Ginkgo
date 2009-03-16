@@ -37,7 +37,7 @@ int main(int argc, char* argv[]) {
     unsigned long num_gens = 100000;
     unsigned int num_fitness = 10;
     unsigned long rand_seed = time(0);
-    double d = 0.0;
+
     gingko::OptionParser parser = gingko::OptionParser();
     parser.add_option<unsigned long>(&size_x, "-x", "--dim-x", 
                                      "size of landscape in the x-dimension", "X");
@@ -52,38 +52,7 @@ int main(int argc, char* argv[]) {
     parser.add_option<unsigned long>(&rand_seed, "-z", "--random-seed", 
                                      "random number seed", "SEED");
 
-    parser.parse(argc, argv);
-       
-
-//     long seed = 0;
-// 	std::vector<unsigned long> args_as_longs;
-// 	for (int i = 1; i < argc; ++i) {
-// 		std::string a(argv[i]);
-// 		if (a.length() > 2 && a[0] == '-') {
-// 			if (a[1] == 's') {
-// 				seed = atol(a.c_str() + 2);
-// 			}
-// 			else {
-// 				std::cerr << "Unknown flag: " << a << '\n';
-// 				exit(2);
-// 			}
-// 		}
-// 		else {
-// 			args_as_longs.push_back(atol(a.c_str()));
-// 		}
-// 	}
-//     if (args_as_longs.size() < 5) {
-//         std::cerr << "usage: " << argv[0] <<  " <DIM-X> <DIM-Y> <CELL-CARRYING-CAPACITY> <NUM-CELLS-TO-POPULATE> <NUM-GENS>\n";
-//         exit(1);
-//     }
-
-//     long size_x = args_as_longs[0];
-//     long size_y = args_as_longs[1];
-//     long cc = args_as_longs[2];
-//     long num_cells_init = args_as_longs[3];
-//     long num_gens = args_as_longs[4];
-//     int num_env_factors = 1;
-//     
+    parser.parse(argc, argv);       
     
     std::cerr << "           Landscape size: (" << size_x << ", " << size_y << ")\n";
     std::cerr << "   Cell carrying capacity: " << cc << '\n';
