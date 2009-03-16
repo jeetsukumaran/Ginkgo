@@ -131,6 +131,7 @@ class TypedOptionArg : public OptionArg {
             }
             if (default_value != NULL) {
                 this->set_default_value(default_value);
+                *this->store_ = this->default_value_;
             }
         }   
         
@@ -153,12 +154,9 @@ class TypedOptionArg : public OptionArg {
         }      
         
         virtual void process_value_string(const std::string& val_str) {
-            if (this->is_set()) {
-                std::istringstream istr(val_str);
-                istr >> *this->store_;
-            } else {
-                *this->store_ = this->default_value_;
-            }
+            std::istringstream istr(val_str);
+            istr >> *this->store_;
+            this->is_set() = true;
         }
 
         void set_default_value(void * val) {
