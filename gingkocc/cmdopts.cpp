@@ -188,19 +188,19 @@ void OptionParser::parse(int argc, char * argv[]) {
                 exit(1);
             }
             
-//             OptionArg& oa = *(oai->second);
-//             
-//             if (not oa.get_val_type() == OptionArg::BOOLEAN) {
-//                 if (arg_value.size() == 0) {
-//                     if (i == argc-1) {
-//                         std::cerr << "expecting value for option \"" << arg_name << "\"" << std::endl;
-//                         exit(1);
-//                     } else {
-//                         arg_value = argv[i+1];
-//                         i += 1;
-//                     }                            
-//                 }
-//                 if (oa.get_val_type() == OptionArg::STRING) {            
+            OptionArg& oa = *(oai->second);
+            
+            if (not oa.is_switch()) {
+                if (arg_value.size() == 0) {
+                    if (i == argc-1) {
+                        std::cerr << "expecting value for option \"" << arg_name << "\"" << std::endl;
+                        exit(1);
+                    } else {
+                        arg_value = argv[i+1];
+                        i += 1;
+                    }                            
+                }
+                // if (oa.get_val_type() == OptionArg::STRING) {            
 //                     StringOptionArg * str_opt = dynamic_cast<StringOptionArg *>(&oa);
 //                     str_opt->set_value(arg_value);
 //                 } else if (oa.get_val_type() == OptionArg::INTEGER) {            
@@ -210,11 +210,11 @@ void OptionParser::parse(int argc, char * argv[]) {
 //                     RealOptionArg * double_opt = dynamic_cast<RealOptionArg *>(&oa);
 //                     double_opt->set_value(atof(arg_value.c_str()));
 //                 }                        
-//             } else {
-//                 BooleanOptionArg * bool_opt = static_cast<BooleanOptionArg *>(&oa);
-//                 bool_opt->set_value(true);            
-//             }
-//             
+            } else {
+                TypedOptionArg<bool>* bool_opt = static_cast< TypedOptionArg<bool> *>(&oa);
+                bool_opt->process_value(true);            
+            }
+            
         } else {
             this->pos_args_.push_back(argv[i]);
         }

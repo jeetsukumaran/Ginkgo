@@ -144,6 +144,22 @@ class TypedOptionArg : public OptionArg {
         void set_store(void * store) {
             this->store_ = static_cast<T *>(store);
         }       
+        
+        void process_value(const T& val) {
+            *this->store_ = val;
+        }      
+        
+        void process_value(const char * value) {
+//             UH-OH: how do we know what type T is to convert it?
+//             could use template specialization, but then would have
+//             to repeat large amounts of code, plus write wrappers for
+//             every possible type T ...
+//             *this->store_ = val;
+        }                        
+        
+        void process_value(void * val) {
+            *this->store_ = *(static_cast<T *>(val));
+        }
 
         void set_default_value(void * val) {
             if (val != NULL) {
