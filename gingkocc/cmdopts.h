@@ -103,6 +103,8 @@ class OptionArg {
         bool& is_set() {
             return this->is_set_;
         }
+        
+        virtual void process_value_string(const std::string& val_str) = 0;
   
     private:
         std::string     short_flag_;
@@ -149,16 +151,9 @@ class TypedOptionArg : public OptionArg {
             *this->store_ = val;
         }      
         
-        void process_value(const char * value) {
-//             UH-OH: how do we know what type T is to convert it?
-//             could use template specialization, but then would have
-//             to repeat large amounts of code, plus write wrappers for
-//             every possible type T ...
-//             *this->store_ = val;
-        }                        
-        
-        void process_value(void * val) {
-            *this->store_ = *(static_cast<T *>(val));
+        virtual void process_value_string(const std::string& val_str) {
+            std::istringstream istr(val_str);
+            istr >> *this->store_;
         }
 
         void set_default_value(void * val) {
@@ -172,7 +167,7 @@ class TypedOptionArg : public OptionArg {
         T       default_value_;
 };
 
-
+///////////////////////////////////////////////////////////////////////////////
 //! General option parser.
 class OptionParser {
 

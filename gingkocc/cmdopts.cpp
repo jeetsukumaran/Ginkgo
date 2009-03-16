@@ -200,16 +200,7 @@ void OptionParser::parse(int argc, char * argv[]) {
                         i += 1;
                     }                            
                 }
-                // if (oa.get_val_type() == OptionArg::STRING) {            
-//                     StringOptionArg * str_opt = dynamic_cast<StringOptionArg *>(&oa);
-//                     str_opt->set_value(arg_value);
-//                 } else if (oa.get_val_type() == OptionArg::INTEGER) {            
-//                     IntegerOptionArg * int_opt = dynamic_cast<IntegerOptionArg *>(&oa);
-//                     int_opt->set_value(atol(arg_value.c_str()));
-//                 } else if (oa.get_val_type() == OptionArg::REAL) {            
-//                     RealOptionArg * double_opt = dynamic_cast<RealOptionArg *>(&oa);
-//                     double_opt->set_value(atof(arg_value.c_str()));
-//                 }                        
+                oa.process_value_string(arg_value);                    
             } else {
                 TypedOptionArg<bool>* bool_opt = static_cast< TypedOptionArg<bool> *>(&oa);
                 bool_opt->process_value(true);            
