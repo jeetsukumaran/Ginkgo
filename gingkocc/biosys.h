@@ -104,7 +104,7 @@ class GenealogyNode {
          * @param child     pointer to the child node to be added
          */
 		void add_child(GenealogyNode * child) {
-			assert(this);
+			assert(this != child);
 			child->parent_ = this;
 			this->increment_count();
 			if (this->first_child_ == NULL) {
@@ -152,12 +152,14 @@ class GenealogyNode {
         	if (parent == NULL) {
         	    return;
         	}
-			this->parent_->add_child(this);
+			parent->add_child(this);
         }
         
+        /**
+         * Destructor.
+         */        
         ~GenealogyNode() {
             assert(this->parent_ != this);
-            // std::cout << "~~~ DESTRUCTING " << this << " #" << this->reference_count_ << std::endl;
             if (this->parent_) {                
                 this->unlink();                         
             }                
@@ -165,6 +167,14 @@ class GenealogyNode {
             assert(this->reference_count_ == 0 || this->reference_count_ == 1);
         }
         
+        /**
+         * Registers one less reference to this node.
+         * 
+         * Decrements the count of references to this node (number of objects
+         * that point to this node). If this goes to 1 (which means that the
+         * only object that references this node object is this node object 
+         * itself), then this deletes itself.
+         */        
         void decrement_count() {
             // std::cout << "--- DECREMENTING ALLELE " << this << " #" << this->reference_count_ << std::endl;
             if (this->reference_count_ == 1) {
@@ -174,11 +184,22 @@ class GenealogyNode {
             }
             this->reference_count_ -= 1;
         }
-        
+
+        /**
+         * Registers one more reference to this node.
+         * 
+         * Notes that one more object points to or otherwise references this
+         * node object.
+         */            
         void increment_count() {
             this->reference_count_ += 1;
         }
         
+        /**
+         * Returns pointer to parent node.
+         * 
+         * @return      pointer to parent node
+         */        
         GenealogyNode * get_parent() {
             return this->parent_;
         }
