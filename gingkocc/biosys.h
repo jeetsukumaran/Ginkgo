@@ -367,13 +367,21 @@ class HaploidLocus {
 // Manages the genealogies of a diploid locus.
 class DiploidLocus {
 
-    public:
-        
+    public:        
         DiploidLocus()
             : allele1_(NULL),
               allele2_(NULL)
         { }
         
+    private:        
+        DiploidLocus(const DiploidLocus& d)
+            : allele1_(NULL),
+              allele2_(NULL) { 
+            *this = d;
+        }
+                
+        
+    public:        
         void set_label(const std::string& label) {
             if (this->allele1_ != NULL) {
                 this->allele1_->set_label(label);
@@ -450,22 +458,21 @@ class Organism {
                  const FitnessFactors& new_genotype, 
                  Organism::Sex new_sex) 
                 : species_index_(species_index),
+                  label_(label),
                   sex_(new_sex),
                   fitness_(-1),
                   expired_(false) {
             memcpy(this->genotypic_fitness_factors_, new_genotype, MAX_FITNESS_FACTORS*sizeof(FitnessFactorType));
-            this->set_label(label);
         }
         
         Organism(unsigned species_index, 
                  const std::string& label,        
                  Organism::Sex new_sex) 
-                : species_index_(species_index),               
+                : species_index_(species_index), 
+                  label_(label),                
                   sex_(new_sex),
                   fitness_(-1),
-                  expired_(false) {
-            this->set_label(label);              
-        }       
+                  expired_(false) { }       
                 
         
         //! Copy constructor.
@@ -473,8 +480,7 @@ class Organism {
             *this = ind;
         }
 
-        ~Organism() {
-        }
+        ~Organism() { }
         
         //! Assignment.
         const Organism& operator=(const Organism& ind) {
@@ -492,14 +498,6 @@ class Organism {
                 this->neutral_diploid_markers_[i] = ind.neutral_diploid_markers_[i];
             }             
             return *this;
-        }
-        
-        void set_label(const std::string& label) {
-            this->label_ = label;
-            this->neutral_haploid_marker_.set_label(label);
-            for (unsigned i = 0; i < NUM_NEUTRAL_DIPLOID_LOCII; ++i) {
-                this->neutral_diploid_markers_[i].set_label(label);
-            }        
         }
         
         // for sorting
@@ -592,6 +590,7 @@ class Organism {
         bool                expired_;                                       // flag an organism to be removed allowing for use of std::remove_if() and std::resize() or v.erase()
 };
 // Organism
+
 ///////////////////////////////////////////////////////////////////////////////
 
 ///////////////////////////////////////////////////////////////////////////////
