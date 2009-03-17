@@ -67,7 +67,7 @@ class GenealogyNode {
           reference_count_(1) { }
                   
         /** 
-         * Ensures all links, pointers and references are nulled out before 
+         * Ensures all pointers from and to this object are nulled out before 
          * winking out of existence. 
          */        
         ~GenealogyNode() {
@@ -90,7 +90,8 @@ class GenealogyNode {
     public:        
           
         /**          
-         * Removes all references to a node from this node and its children.
+         * Nullifies all pointers to the specified node in this node and 
+         * its children.
          *
          * Ensures that nothing points to <code>c</code>, either this node 
          * itself (through <code>first_child_</code>, or any of this node's 
@@ -152,7 +153,7 @@ class GenealogyNode {
         /**          
          * Removes this node from a genealogy tree.
          *
-         * Disconnects this node from the reference network of a genealogy 
+         * Disconnects this node from the pointer graph of a genealogy 
          * tree by asking this node's parent to remove self, and then nulling 
          * out this node's parent pointers.
          */
@@ -493,9 +494,11 @@ class DiploidMarker {
         /** 
          * Connects the alleles (the GenealogyNode objects) at this locus into 
          * existing genealogies represented by <code>female</code> and <code>
-         * male</code>.
-         * @param female a DiploidMarker from which one allele will be selected
-         * @param male a DiploidMarker from which one allele will be selected         
+         * male</code> markers.
+         * @param female a DiploidMarker from which one allele at this locus 
+         *               will be selected
+         * @param male   a DiploidMarker from which another allele at this 
+         *               locus will be selected         
          */         
         void inherit(const DiploidMarker& female, 
                      const DiploidMarker& male, 
@@ -527,21 +530,38 @@ class DiploidMarker {
 ///////////////////////////////////////////////////////////////////////////////
 
 ///////////////////////////////////////////////////////////////////////////////
-//! A single organism of a population of a particular species.
-//! Responsible for tracking (non-neutral) genotype and neutral marker 
-//! histories. Very lightweight, with most functionality delegated to other
-//! classes.
+// Organism
+/**
+ * A single organism of a population of a particular species.
+ * Responsible for tracking (non-neutral) genotype and neutral marker 
+ * histories. Very lightweight, with most functionality delegated to other
+ * classes.
+ */
 class Organism {
     public:
     
-        // gender
+        /** Flags indicating gender for sexual reproduction */
         enum Sex {
             Male,
             Female
         };
 
-        // lifecycle and assignment
+        // --- lifecycle and assignment ---
         
+        /** 
+         * Constructor instantiates a new organism with species, identity,
+         * (fitness) genotype, and sex.
+         *
+         * @param species_index     index of Species object in species pool
+         *                          of the World object to which this organism 
+         *                          belongs
+         * @param label             string label that will identify alleles
+         *                          belonging to this organism in genealogies
+         * @param genotype          array of fitness factor values representing
+         *                          the inheritable portion of fitness of this
+         *                          individual organism
+         * @param sex               gender of this organism
+         */ 
         Organism(unsigned species_index,
                  const std::string& label,
                  const FitnessFactors& new_genotype, 
@@ -554,6 +574,16 @@ class Organism {
             memcpy(this->genotypic_fitness_factors_, new_genotype, MAX_FITNESS_FACTORS*sizeof(FitnessFactorType));
         }
         
+        /** 
+         * Constructor instantiates a new organism with species, identity,
+         * and sex.
+         * @param species_index     index of Species object in species pool
+         *                          of the World object to which this organism 
+         *                          belongs
+         * @param label             string label that will identify alleles
+         *                          belonging to this organism in genealogies
+         * @param sex               gender of this organism
+         */        
         Organism(unsigned species_index, 
                  const std::string& label,        
                  Organism::Sex new_sex) 
@@ -561,17 +591,23 @@ class Organism {
                   label_(label),                
                   sex_(new_sex),
                   fitness_(-1),
-                  expired_(false) { }       
-                
+                  expired_(false) { }
         
-        //! Copy constructor.
+        /**
+         * Copy constructor, delegate work to assignment operator.
+         */
         Organism(const Organism& ind) {
             *this = ind;
         }
 
+        /** Destructor. */
         ~Organism() { }
         
-        //! Assignment.
+        /**
+         * Assignment.
+         * @param   ind     the organism being copied
+         * @return          const reference to this object
+         */
         const Organism& operator=(const Organism& ind) {
             if (this == &ind) {
                 return *this;
@@ -589,57 +625,126 @@ class Organism {
             return *this;
         }
         
-        // for sorting
+        /**
+         * Less-than operator to rank organisms according to fitness (which 
+         * must have been precalculated for both this and the other organism).
+         * @param   other   the organism to which this one is being compared
+         * @return          <code>true</code> if this organism has a lower 
+         *                  fitness than the other, <code>false</code> 
+         *                  otherwise
+         */
         bool operator<(const Organism& other) const {
             assert(this->fitness_ >= 0);
             assert(other.fitness_ >= 0); 
             return this->fitness_ < other.fitness_; 
         } 
                    
-        // genotype       
+        /** Returns reference to the array of inheritable fitness factors. */
         const FitnessFactors& genotype() const {
             return this->genotypic_fitness_factors_;
         }
         
-        // markers       
+        /** Returns a reference to the haploid marker of this organism. */
         const HaploidMarker& haploid_marker() const {
             return this->neutral_haploid_marker_;
-        }        
+        }
         
-        // fitness & survival
+        /** Returns a reference to the diploid marker of this organism. */
+        const DiploidMarker& diploid_marker(unsigned idx) const {
+            assert(idx < NUM_NEUTRAL_DIPLOID_LOCII);
+            return this->neutral_diploid_markers_[idx];
+        }                
+        
+        // --- fitness & survival ---
+        
+        /** 
+         * Returns the fitness score of this organism. 
+         * @return  a floating-point value [0, 1] representing the 
+         *          pre-calculated fitness of this organism given the its 
+         *          genotype and environment
+         */  
         float get_fitness() const {
             return this->fitness_;
         }
+        
+        /** 
+         * Sets the fitness score of this organism. 
+         * @param fitness a floating-point value [0, 1] representing the 
+         *                pre-calculated fitness of this organism given the its 
+         *                genotype and environment
+         */        
         void set_fitness(float fitness) {
             this->fitness_ = fitness;
         }
+        
+        /** 
+         * Returns <code>true</code> if the organism needs to be removed from
+         * the simulation by a higher-power. 
+         * @return  <code>true</code> if organism should be removed, </code>
+         *          false</code> otherwise
+         */          
         bool is_expired() const {
             return this->expired_;
         }
+        
+        /** 
+         * Specifies whether or not the organism needs to be removed from
+         * the simulation by a higher-power. 
+         * @param val  <code>true</code> if organism should be removed, </code>
+         *             false</code> otherwise
+         */           
         void set_expired(bool val) {
             this->expired_ = val;
         }          
         
-        // meta-info
+        /** 
+         * Returns the index of the pointer to the Species object representing
+         * the species of this object in the species pool of the World.
+         *
+         * @return  index of pointer to Species object in species pool
+         */   
         unsigned species_index() const {
             return this->species_index_;
         }
         
+        /** 
+         * Returns <code>true</code> if this organism is male.         
+         *
+         * @return  <code>true</code> if this organism is male
+         */   
         bool is_male() const {
             return this->sex_ == Organism::Male;
         }
         
+        /** 
+         * Returns <code>true</code> if this organism is female.         
+         *
+         * @return  <code>true</code> if this organism is female
+         */   
         bool is_female() const {
             return this->sex_ == Organism::Female;
         }
+                        
+        // --- inheritance ---
         
-        void dump(std::ostream& out) {
-            out << "-- ORGANISM " << this << " ---\n";
-//             this->neutral_haploid_marker_.dump(out);
-        }
-        
-        // inheritance
-        
+        /**
+         * Composes the genotypic fitness component of this organism.
+         *
+         * Composes the genotypic (inheritable) fitness factors of this 
+         * organism by copying elements with uniform random probability from
+         * either the male or female parent, with random mutation.
+         *
+         * @param female                the female parent
+         * @param male                  the other parent
+         * @param num_fitness_factors   the number of fitness factors (which 
+         *                              should be less than or equal to 
+         *                              MAX_FITNESS_FACTORS)
+         * @param mutation_rate         the probability of mutation per 
+         *                              factor inheritance
+         * @param max_mutation_size     the window (+/-) that a mutation event
+         *                              can perturb a value
+         * @param rng                   source of random numbers
+         */
         void inherit_genotypic_fitness_factors(const Organism& female, 
                                                const Organism& male, 
                                                unsigned num_fitness_factors,
@@ -655,7 +760,7 @@ class Organism {
                 this->genotypic_fitness_factors_[i] = ff_value;
             }
         }        
-                
+
         void inherit_genealogies(const Organism& female, 
                                  const Organism& male,
                                  RandomNumberGenerator& rng) {
