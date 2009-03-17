@@ -34,8 +34,22 @@ class SumTreesTest(unittest.TestCase):
         self.prog_path = get_gingko_program_path("test_cmdopts")
         
     def testDefaultArgs(self):
-        _LOG.info("testing default command argument settings")
-        
+        cmd = self.prog_path    
+        _LOG.info('Testing default arguments using command: "%s"' % cmd)
+        p1 = subprocess.Popen([cmd],
+                               shell=True,
+                               stdout=subprocess.PIPE,
+                               stderr=subprocess.PIPE)
+        stdout, stderr = p1.communicate()
+        stdout = stdout.split("\n")
+        assert p1.returncode == 0, "Program exited with error code %d" % p1.returncode
+        expected_strings = ["1000", "1000", "1000", "1000", "0.1", "default 1", "0"]
+        for idx, expected in enumerate(expected_strings):
+            _LOG.info('Line %d: %s (correct: "%s")' % (idx+1, stdout[idx], expected))        
+            assert stdout[idx] == expected, \
+                'Expecting "%s", but found "%s" in line %d of stdout' \
+                % (expected, stdout[idx], idx+1)            
+            
 
 if __name__ == "__main__":
     unittest.main()

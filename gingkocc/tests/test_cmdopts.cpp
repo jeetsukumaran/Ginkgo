@@ -30,7 +30,7 @@ int main(int argc, char* argv[]) {
     unsigned long b = 1000;
     int           c = 1000;
     unsigned int  d = 1000;
-    double        e = 0.0;
+    double        e = 0.10;
     std::string   f = "default 1";
     bool          g = false;
     
