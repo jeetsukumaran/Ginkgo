@@ -29,9 +29,14 @@ import os
 import sys
 
 from run_tests import get_logger
+from run_tests import get_gingko_program_path
+
 _LOG = get_logger("test_cmdopts")
 
 class SumTreesTest(unittest.TestCase):
+    def setUp(self):
+        self.prog_path = get_gingko_program_path("test_cmdopts")
+        
     def testTest(self):
         _LOG.warning("Hello, world.")
 
