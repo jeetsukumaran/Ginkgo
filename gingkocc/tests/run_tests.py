@@ -65,7 +65,7 @@ def get_logger(name="gingko"):
         rich_formatter = logging.Formatter("[%(asctime)s] %(filename)s (%(lineno)d): %(levelname) 8s: %(message)s")
         simple_formatter = logging.Formatter("%(levelname) 8s: %(message)s")
         raw_formatter = logging.Formatter("%(message)s")
-        default_formatter = simple_formatter
+        default_formatter = rich_formatter
         logging_formatter = default_formatter
         if _LOGGING_FORMAT_ENVAR in os.environ:
             if os.environ[_LOGGING_FORMAT_ENVAR].upper() == "RICH":

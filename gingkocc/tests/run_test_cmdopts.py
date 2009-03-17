@@ -23,10 +23,6 @@
 
 import unittest
 import subprocess
-import tempfile
-import re
-import os
-import sys
 
 from run_tests import get_logger
 from run_tests import get_gingko_program_path
@@ -37,8 +33,9 @@ class SumTreesTest(unittest.TestCase):
     def setUp(self):
         self.prog_path = get_gingko_program_path("test_cmdopts")
         
-    def testTest(self):
-        _LOG.warning("Hello, world.")
+    def testDefaultArgs(self):
+        _LOG.info("testing default command argument settings")
+        
 
 if __name__ == "__main__":
     unittest.main()
