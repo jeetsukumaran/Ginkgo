@@ -54,7 +54,10 @@ class SumTreesTest(unittest.TestCase):
     def testShortFlagsArgs(self):
         cmd = self.prog_path + ' -a -10 -b 10 -c -100 -d 100 -e 2.718 -f "the quick brown fox" -g'
         self.check_opts_parsing(cmd, ["-10", "10", "-100", "100", "2.718", "the quick brown fox", "1"])        
-                        
+        
+    def testLongFlagsArgs(self):
+        cmd = self.prog_path + ' --seta -10 --setb 10 --setc -100 --setd 100 --sete 2.718 --setf "the quick brown fox" --setg'
+        self.check_opts_parsing(cmd, ["-10", "10", "-100", "100", "2.718", "the quick brown fox", "1"]) 
 
 if __name__ == "__main__":
     unittest.main()
