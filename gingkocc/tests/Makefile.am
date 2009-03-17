@@ -1,9 +1,9 @@
 AM_CPPFLAGS = @CPPFLAGS@
 AM_LDFLAGS  = @LDFLAGS@
 
-bin_PROGRAMS = test_organism
+bin_PROGRAMS = test_cmdopts
 
-test_organism_SOURCES = \
-    test_organism.cpp \
-    ../biosys.cpp \
-    ../randgen.cpp
+test_cmdopts_SOURCES = \
+    test_cmdopts.cpp \
+    ../cmdopts.cpp
+    
