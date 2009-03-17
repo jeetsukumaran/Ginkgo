@@ -28,7 +28,7 @@
 #include <cmath>
 #include <iomanip>
 #include <iostream>
-
+#include <sstream>
 
 #include "gingko_defs.h"
 #include "randgen.h"
@@ -235,6 +235,14 @@ class GenealogyNode {
             this->edge_len_ = len;    
         }
         
+        void set_label(const std::string& label) {
+            this->label_ = label;                       
+        }
+        
+        std::string get_label() const {
+            return this->label_;
+        }
+        
         // --- DEBUGGING ---
         
         void trace(std::ostream& out) {
@@ -257,6 +265,7 @@ class GenealogyNode {
         GenealogyNode *     next_sib_;
         unsigned            reference_count_;
 		unsigned			edge_len_;
+		std::string         label_;
 		
         GenealogyNode(const GenealogyNode& ); // don't define
 
@@ -333,6 +342,13 @@ class HaploidLocus {
             return this->allele_;
         }
         
+        
+        void set_label(const std::string& label) {
+            if (this->allele_ != NULL) {
+                this->allele_->set_label(label);
+            }        
+        }
+        
         // --- DEBUGGING ---
         
         void dump(std::ostream& out) {
@@ -358,6 +374,15 @@ class DiploidLocus {
             : allele1_(NULL),
               allele2_(NULL)
         { }
+        
+        void set_label(const std::string& label) {
+            if (this->allele1_ != NULL) {
+                this->allele1_->set_label(label);
+            }              
+            if (this->allele2_ != NULL) {
+                this->allele2_->set_label(label);
+            }             
+        }
         
         const DiploidLocus& operator=(const DiploidLocus& g) {          
             if (this->allele1_ != NULL) {
@@ -400,7 +425,7 @@ class DiploidLocus {
     private:        
         GenealogyNode *      allele1_;
         GenealogyNode *      allele2_;
-        
+
 }; 
 // DiploidLocus
 ///////////////////////////////////////////////////////////////////////////////
@@ -421,22 +446,26 @@ class Organism {
 
         // lifecycle and assignment
         
-        Organism(unsigned species_index, 
+        Organism(unsigned species_index,
+                 const std::string& label,
                  const FitnessFactors& new_genotype, 
                  Organism::Sex new_sex) 
-            : species_index_(species_index),              
-              sex_(new_sex),
-              fitness_(-1),
-              expired_(false) {
+                : species_index_(species_index),
+                  sex_(new_sex),
+                  fitness_(-1),
+                  expired_(false) {
             memcpy(this->genotypic_fitness_factors_, new_genotype, MAX_FITNESS_FACTORS*sizeof(FitnessFactorType));
+            this->set_label(label);
         }
         
         Organism(unsigned species_index, 
+                 const std::string& label,        
                  Organism::Sex new_sex) 
-            : species_index_(species_index),            
-              sex_(new_sex),
-              fitness_(-1),
-              expired_(false) {
+                : species_index_(species_index),               
+                  sex_(new_sex),
+                  fitness_(-1),
+                  expired_(false) {
+            this->set_label(label);              
         }       
                 
         
@@ -458,11 +487,19 @@ class Organism {
             this->sex_ = ind.sex_;
             this->fitness_ = ind.fitness_;
             this->expired_ = ind.expired_;
+            this->label_ = ind.label_;
             this->neutral_haploid_marker_ = ind.neutral_haploid_marker_;
             for (unsigned i = 0; i < NUM_NEUTRAL_DIPLOID_LOCII; ++i) {
                 this->neutral_diploid_markers_[i] = ind.neutral_diploid_markers_[i];
             }             
             return *this;
+        }
+        
+        void set_label(const std::string& label) {
+            this->neutral_haploid_marker_.set_label(label);
+            for (unsigned i = 0; i < NUM_NEUTRAL_DIPLOID_LOCII; ++i) {
+                this->neutral_diploid_markers_[i].set_label(label);
+            }        
         }
         
         // for sorting
@@ -522,7 +559,7 @@ class Organism {
                                                float mutation_rate,
                                                int max_mutation_size,
                                                RandomNumberGenerator& rng) {
-            assert(num_fitness_factors < MAX_FITNESS_FACTORS);                                               
+            assert(num_fitness_factors <= MAX_FITNESS_FACTORS);                                               
             for (unsigned i = 0; i < num_fitness_factors; ++i) {
                 FitnessFactorType ff_value = rng.select(female.genotypic_fitness_factors_[i], male.genotypic_fitness_factors_[i]);  
                 if (rng.uniform_real() < mutation_rate) {
@@ -543,13 +580,14 @@ class Organism {
         }
         
     private:
-        unsigned            species_index_;                                 // species
+        unsigned            species_index_;                                 // species 
+        std::string         label_;                                         // label        
         FitnessFactors      genotypic_fitness_factors_;                     // non-neutral genotype: maps to fitness phenotype
         HaploidLocus        neutral_haploid_marker_;                        // track the genealogy of neutral genes in this organism    
         DiploidLocus        neutral_diploid_markers_[NUM_NEUTRAL_DIPLOID_LOCII];  // track the genealogy of neutral genes in this organism        
         Organism::Sex       sex_;                                           // male or female
         float               fitness_;                                       // cache this organism's fitness
-        bool                expired_;                                       // flag an organism to be removed allowing for use of std::remove_if() and std::resize() or v.erase()    
+        bool                expired_;                                       // flag an organism to be removed allowing for use of std::remove_if() and std::resize() or v.erase()
 };
 // Organism
 ///////////////////////////////////////////////////////////////////////////////
@@ -641,6 +679,15 @@ class Species {
         }                    
         
         // --- organism generation and reproduction ---
+        void new_generation();
+        
+        std::string new_organism_label() {
+            std::string label;
+            std::ostringstream label_ostr(label);
+            label_ostr << this->label_ << "_" << this->organism_counter_++;
+            return label;
+        }
+        
         Organism::Sex get_random_sex(float female_threshold=0.5) const {
             if (this->rng_.uniform_real() < female_threshold) {
                 return Organism::Male;
@@ -649,12 +696,15 @@ class Species {
             }
         }  
         
-        Organism new_organism() const {
-            return Organism(this->index_, this->default_genotypic_fitness_factors_, this->get_random_sex());
+        Organism new_organism() {
+            return Organism(this->index_, 
+                            this->new_organism_label(), 
+                            this->default_genotypic_fitness_factors_, 
+                            this->get_random_sex());
         }
         
         Organism new_organism(const Organism& female, const Organism& male) {
-            Organism organism(this->index_, this->get_random_sex());
+            Organism organism(this->index_, this->new_organism_label(), this->get_random_sex());
             // // std::cout << "\n\nCreating new organism: " << &organism << std::endl;
             organism.inherit_genotypic_fitness_factors(female, 
                                                        male, 
@@ -684,6 +734,7 @@ class Species {
         int                         movement_capacity_;         // number of cells per round an individual can move
         FitnessFactors              default_genotypic_fitness_factors_;          // genotype of individuals generated de novo        
         RandomNumberGenerator&      rng_;                       // rng to use
+        unsigned long               organism_counter_;
 
 };
 // Species

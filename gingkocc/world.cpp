@@ -88,6 +88,9 @@ void World::cycle() {
 //     }
 //     this->landscape_.process_migrants();
     ++this->current_generation_;
+    for (SpeciesPointerVector::iterator sp = this->species_.begin(); sp != this->species_.end(); ++sp) {
+        (*sp)->new_generation();
+    }
     
     std::cerr << "\n\n#### GENERATION " << this->current_generation_ << " ####\n" << std::endl;
 

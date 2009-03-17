@@ -35,7 +35,8 @@ Species::Species(unsigned index,
     : index_(index),
       label_(label),
       num_fitness_factors_(num_fitness_factors),
-      rng_(rng) {
+      rng_(rng),
+      organism_counter_(0) {
     this->index_ = index;
     this->mutation_rate_ = 0.1;
     this->max_mutation_size_ = 1;
@@ -47,3 +48,6 @@ Species::Species(unsigned index,
     this->movement_capacity_ = 1;
 }
 
+void Species::new_generation() {
+    this->organism_counter_ = 0;
+}
