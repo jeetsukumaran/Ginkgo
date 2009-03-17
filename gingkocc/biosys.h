@@ -22,6 +22,8 @@
 #if !defined(GINGKO_BIOSYS_H)
 #define GINGKO_BIOSYS_H
 
+/** @file biosys.h */
+
 #include <cassert>
 #include <vector>
 #include <string>
@@ -38,18 +40,18 @@ namespace gingko {
 class Organism;
 class Species;
 
-/** collection of pointers to {@link Species} objects */
+/** collection of pointers to Species objects */
 typedef std::vector<Species *>  SpeciesPointerVector;
 
-/** collection of {@link Organism} objects */
+/** collection of Organism objects */
 typedef std::vector<Organism>   OrganismVector;
 
 ///////////////////////////////////////////////////////////////////////////////
 // GenealogyNode
 /**
- * Tracks the geneaology of a single haplod locus or allele.
+ * A single node of a genealogical tree.
  *
- * Represents a single node on a genealogy of a neutral marker, with pointers 
+ * Represents a single node of a genealogy of a neutral marker, with pointers 
  * to its parent node. Uses reference counting to tracking references to self,
  * and deletes self when no other node points to self as parent.
  */
@@ -57,14 +59,35 @@ class GenealogyNode {
 
     public:
         
-        /**
-         * Constructs a node with no antecedents.
-         */
+        /** Constructs a node with no antecedents. */
         GenealogyNode()
         : parent_(NULL),
           first_child_(NULL),
           next_sib_(NULL),
           reference_count_(1) { }
+                  
+        /** 
+         * Ensures all links, pointers and references are nulled out before 
+         * winking out of existence. 
+         */        
+        ~GenealogyNode() {
+            assert(this->parent_ != this);
+            if (this->parent_) {                
+                this->unlink();                         
+            }                
+            assert(this->first_child_ == NULL);                
+            assert(this->reference_count_ == 0 || this->reference_count_ == 1);
+        }
+          
+    private:		
+		
+        /** Copy constructor (disabled by private scoping). */   		
+        GenealogyNode(const GenealogyNode& );
+
+        /** Assignment constructor (disabled by private scoping). */ 
+        const GenealogyNode& operator=(const GenealogyNode&);          
+        
+    public:        
           
         /**          
          * Removes all references to a node from this node and its children.
@@ -158,19 +181,7 @@ class GenealogyNode {
         	}
 			parent->add_child(this);
         }
-        
-        /**
-         * Destructor.
-         */        
-        ~GenealogyNode() {
-            assert(this->parent_ != this);
-            if (this->parent_) {                
-                this->unlink();                         
-            }                
-            assert(this->first_child_ == NULL);                
-            assert(this->reference_count_ == 0 || this->reference_count_ == 1);
-        }
-        
+
         /**
          * Registers one less reference to this node.
          * 
@@ -308,44 +319,51 @@ class GenealogyNode {
          * a tree.
          */            
 		std::string         label_;
-		
-
-    private:		
-		
-        /** 
-         * Private null copy constructor.
-         */   		
-        GenealogyNode(const GenealogyNode& );
-
-        /** 
-         * Private null assignment constructor.
-         */ 
-        const GenealogyNode& operator=(const GenealogyNode&);
                
 }; 
 // GenealogyNode
 ///////////////////////////////////////////////////////////////////////////////
 
 ///////////////////////////////////////////////////////////////////////////////
-// HaploidLocus
-class HaploidLocus {
+// HaploidMarker
+/**
+ * The allele of a haploid marker in a particualr organism.
+ *
+ * Wraps a single GenealogyNode pointer, representing the terminal node
+ * of a genealogy of a haploid locus.
+ */
+class HaploidMarker {
 
     public:
         
-        HaploidLocus() : allele_(NULL) { 
-            // std::cout << "\n--- CONSTRUCTING HAPLOID LOCUS " << this << std::endl;
-        }
+        /** Default constructor. */
+        HaploidMarker() : allele_(NULL) {}
         
+        /** 
+         * Destructor ensures that dropped reference to allele (a 
+         * GenealogyNode) object is registered. 
+         */
+        ~HaploidMarker() {
+            if (this->allele_) {
+                this->allele_->decrement_count();
+            }
+        }        
         
     private:        
-        HaploidLocus(const HaploidLocus& h) {
-            // std::cout << "\n--- COPY CONSTRUCTING HAPLOID LOCUS " << this << " (" << &h << ")" << std::endl;
+        /** Copy constructor (disabled by private scoping). */
+        HaploidMarker(const HaploidMarker& h) {
             *this = h;
         }
         
     public:
         
-        const HaploidLocus& operator=(const HaploidLocus& g) {
+        /** 
+         * Assignment operator.
+         * Calls on assignment operators of member objects. 
+         * @param g     the HaploidMarker being copied
+         * @return      constant reference to self
+         */
+        const HaploidMarker& operator=(const HaploidMarker& g) {
             if (this->allele_ != NULL) {
                 this->allele_->decrement_count();
             }            
@@ -356,56 +374,61 @@ class HaploidLocus {
             return *this;               
         }
         
-        void inherit(const HaploidLocus& parent) {
+        /** 
+         * Connects the allele (a GenealogyNode) at this locus into a genealogy
+         * by setting it as the child of the allele wrapped by 
+         * <code>parent</code>. 
+         * @param   parent  the HaploidMarker with the allele being inherited
+         */        
+        void inherit(const HaploidMarker& parent) {
             assert(this->allele_ == NULL);
             assert(this != &parent);
-            // // std::cout << "(BEFORE) This: " << this << ": " << this->allele_ << " / PARENT: " << &parent << ": " << parent.allele_ << std::endl;                        
             this->allele_ = new GenealogyNode();
-            // // std::cout << "(AFTER)  This: " << this << ": " << this->allele_ << " / PARENT: " << &parent << ": " << parent.allele_ << std::endl << std::endl;            
             this->allele_->link(parent.allele_);
         }
         
-        ~HaploidLocus() {
-            // std::cout << "\n--- DESTRUCTING HAPLOID LOCUS " << this << " (" << this->allele_ << ")" << std::endl;
-            if (this->allele_) {
-                this->allele_->decrement_count();
-            }
-        }
-        
+        /**
+         * Returns pointer to GenealogyNode representing allele at this locus.
+         * @return GenealogyNode representing allele at this locus
+         */
         GenealogyNode* node() const {
             return this->allele_;
         }
-                
+
+        /**
+         * Sets the string representation or identification of the allele at 
+         * this locus.
+         * @param label     string representation of allele as an OTU on a tree
+         */
         void set_label(const std::string& label) {       
             if (this->allele_) {
                 this->allele_->set_label(label);
             }        
         }
         
-        // --- DEBUGGING ---
-        
-        void dump(std::ostream& out) {
-            out << "haploid marker " << this << ": " << this->allele_ << "\n";              
-        }
-        
-    private:        
+    private:   
+    
+        /** 
+         * The single node representing the allele at this locus in a 
+         * particular organism in a genealogy of this locus.
+         */
         GenealogyNode *      allele_;       
 }; 
-// DiploidLocus
+// HaplodMarker
 ///////////////////////////////////////////////////////////////////////////////
 
 ///////////////////////////////////////////////////////////////////////////////
 // Manages the genealogies of a diploid locus.
-class DiploidLocus {
+class DiploidMarker {
 
     public:        
-        DiploidLocus()
+        DiploidMarker()
             : allele1_(NULL),
               allele2_(NULL)
         { }
         
     private:        
-        DiploidLocus(const DiploidLocus& d)
+        DiploidMarker(const DiploidMarker& d)
             : allele1_(NULL),
               allele2_(NULL) { 
             *this = d;
@@ -422,7 +445,7 @@ class DiploidLocus {
             }             
         }
         
-        const DiploidLocus& operator=(const DiploidLocus& g) {          
+        const DiploidMarker& operator=(const DiploidMarker& g) {          
             if (this->allele1_ != NULL) {
                 this->allele1_->decrement_count();
             }            
@@ -440,8 +463,8 @@ class DiploidLocus {
             return *this;               
         }
         
-        void inherit(const DiploidLocus& female, 
-                     const DiploidLocus& male, 
+        void inherit(const DiploidMarker& female, 
+                     const DiploidMarker& male, 
                      RandomNumberGenerator& rng) {
             assert(this->allele1_ == NULL);
             this->allele1_ = new GenealogyNode();
@@ -451,7 +474,7 @@ class DiploidLocus {
             this->allele2_->link(rng.select(male.allele1_, male.allele2_));
         }
         
-        ~DiploidLocus() {          
+        ~DiploidMarker() {          
 			if (this->allele1_ != NULL) {
                 this->allele1_->decrement_count();
             }            
@@ -465,7 +488,7 @@ class DiploidLocus {
         GenealogyNode *      allele2_;
 
 }; 
-// DiploidLocus
+// DiploidMarker
 ///////////////////////////////////////////////////////////////////////////////
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -544,7 +567,7 @@ class Organism {
         }
         
         // markers       
-        const HaploidLocus& haploid_marker() const {
+        const HaploidMarker& haploid_marker() const {
             return this->neutral_haploid_marker_;
         }        
         
@@ -577,7 +600,7 @@ class Organism {
         
         void dump(std::ostream& out) {
             out << "-- ORGANISM " << this << " ---\n";
-            this->neutral_haploid_marker_.dump(out);
+//             this->neutral_haploid_marker_.dump(out);
         }
         
         // inheritance
@@ -614,8 +637,8 @@ class Organism {
         unsigned            species_index_;                                 // species 
         std::string         label_;                                         // label        
         FitnessFactors      genotypic_fitness_factors_;                     // non-neutral genotype: maps to fitness phenotype
-        HaploidLocus        neutral_haploid_marker_;                        // track the genealogy of neutral genes in this organism    
-        DiploidLocus        neutral_diploid_markers_[NUM_NEUTRAL_DIPLOID_LOCII];  // track the genealogy of neutral genes in this organism        
+        HaploidMarker        neutral_haploid_marker_;                        // track the genealogy of neutral genes in this organism    
+        DiploidMarker        neutral_diploid_markers_[NUM_NEUTRAL_DIPLOID_LOCII];  // track the genealogy of neutral genes in this organism        
         Organism::Sex       sex_;                                           // male or female
         float               fitness_;                                       // cache this organism's fitness
         bool                expired_;                                       // flag an organism to be removed allowing for use of std::remove_if() and std::resize() or v.erase()
