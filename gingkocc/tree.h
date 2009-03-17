@@ -89,13 +89,12 @@ class Tree {
             this->tree_nodes_.push_back(this->process_node(node->get_parent())); 
             unsigned long idx = this->tree_nodes_.size() - 1;
             this->node_indexes_.insert(std::make_pair(node, idx));
-            std::string label = node->get_label();
-            if (label.size() == 0) {
+            if (not node->has_label()) {
                 std::ostringstream label_os;
                 label_os << "K" << std::setw(6) << std::setfill('0') << idx;
                 this->labels_.push_back(label_os.str());
             } else {                
-                this->labels_.push_back(label);
+                this->labels_.push_back(node->get_label());
             }                
 //             this->edge_lens_.push_back(node->get_edge_len());
             return idx;

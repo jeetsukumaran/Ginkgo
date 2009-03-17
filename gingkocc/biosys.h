@@ -64,7 +64,8 @@ class GenealogyNode {
         : parent_(NULL),
           first_child_(NULL),
           next_sib_(NULL),
-          reference_count_(1) { }
+          reference_count_(1),
+          label_(NULL) { }
                   
         /** 
          * Ensures all pointers from and to this object are nulled out before 
@@ -272,6 +273,7 @@ class GenealogyNode {
          * @return      copy of the label of the OTU represented by this node
          */          
         std::string get_label() const {
+            assert(this->label_ != NULL);
             return *this->label_;
         }
                         
@@ -298,6 +300,15 @@ class GenealogyNode {
         void unset_label() {
             this->label_ = NULL;                       
         }
+        
+        /**
+         * Returns <code>true</code> if the label is set.
+         *
+         * @return <code>true</code> if label pointer is not <code>NULL</code>.
+         */          
+        bool has_label() {
+            return not (this->label_ == NULL);
+        }        
         
     private:
     
