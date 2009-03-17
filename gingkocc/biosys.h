@@ -191,10 +191,8 @@ class GenealogyNode {
          * itself), then this deletes itself.
          */        
         void decrement_count() {
-            // std::cout << "--- DECREMENTING ALLELE " << this << " #" << this->reference_count_ << std::endl;
             if (this->reference_count_ == 1) {
             	assert(this->first_child_ == 0L);
-                // std::cout << "--- DELETING ALLELE " << this << " #" << this->reference_count_ << std::endl;
                 delete this;
             }
             this->reference_count_ -= 1;
@@ -327,7 +325,7 @@ class GenealogyNode {
 ///////////////////////////////////////////////////////////////////////////////
 // HaploidMarker
 /**
- * The allele of a haploid marker in a particualr organism.
+ * The allele of a haploid marker in a particular organism.
  *
  * Wraps a single GenealogyNode pointer, representing the terminal node
  * of a genealogy of a haploid locus.
@@ -341,7 +339,7 @@ class HaploidMarker {
         
         /** 
          * Destructor ensures that dropped reference to allele (a 
-         * GenealogyNode) object is registered. 
+         * GenealogyNode object) is registered. 
          */
         ~HaploidMarker() {
             if (this->allele_) {
@@ -409,42 +407,71 @@ class HaploidMarker {
     private:   
     
         /** 
-         * The single node representing the allele at this locus in a 
-         * particular organism in a genealogy of this locus.
+         * A node in the genealogy of this locus representing the 
+         * alleles at this locus in a particular organism.
          */
         GenealogyNode *      allele_;       
 }; 
-// HaplodMarker
+// HaploidMarker
 ///////////////////////////////////////////////////////////////////////////////
 
 ///////////////////////////////////////////////////////////////////////////////
 // Manages the genealogies of a diploid locus.
+/**
+ * The alleles of a diploid marker in a particualr organism.
+ *
+ * Wraps two GenealogyNode pointers, representing the terminal nodes
+ * of the genealogies of a diploid locus.
+ */
 class DiploidMarker {
 
-    public:        
+    public:
+    
+        /** Default constructor. Initializes genealogy nodes/alleles. */
         DiploidMarker()
             : allele1_(NULL),
-              allele2_(NULL)
-        { }
+              allele2_(NULL) { }
+              
+        /** 
+         * Destructor ensures that dropped reference to alleles
+         * (GenealogyNode objects) are registered. 
+         */        
+        ~DiploidMarker() {          
+			if (this->allele1_ != NULL) {
+                this->allele1_->decrement_count();
+            }            
+            if (this->allele2_ != NULL) {
+                this->allele2_->decrement_count();
+            }
+        }               
         
-    private:        
-        DiploidMarker(const DiploidMarker& d)
-            : allele1_(NULL),
-              allele2_(NULL) { 
-            *this = d;
-        }
-                
+    private:
+        /** Copy constructor (disabled by private scoping) */
+        DiploidMarker(const DiploidMarker&);                
         
-    public:        
+    public:          
+    
+        /**
+         * Sets the OTU label prefix for the nodes of the genealogies of this
+         * locus.
+         * @param label     the string for the OTU label prefix (generally, the
+         *                  label of the organism to which this locus belongs)
+         */
         void set_label(const std::string& label) {
             if (this->allele1_ != NULL) {
-                this->allele1_->set_label(label);
+                this->allele1_->set_label(label + "_a");
             }              
             if (this->allele2_ != NULL) {
-                this->allele2_->set_label(label);
+                this->allele2_->set_label(label + "_b");
             }             
         }
         
+        /** 
+         * Assignment operator.
+         * Calls on assignment operators of member objects. 
+         * @param g     the HaploidMarker being copied
+         * @return      constant reference to self
+         */        
         const DiploidMarker& operator=(const DiploidMarker& g) {          
             if (this->allele1_ != NULL) {
                 this->allele1_->decrement_count();
@@ -463,6 +490,13 @@ class DiploidMarker {
             return *this;               
         }
         
+        /** 
+         * Connects the alleles (the GenealogyNode objects) at this locus into 
+         * existing genealogies represented by <code>female</code> and <code>
+         * male</code>.
+         * @param female a DiploidMarker from which one allele will be selected
+         * @param male a DiploidMarker from which one allele will be selected         
+         */         
         void inherit(const DiploidMarker& female, 
                      const DiploidMarker& male, 
                      RandomNumberGenerator& rng) {
@@ -474,17 +508,18 @@ class DiploidMarker {
             this->allele2_->link(rng.select(male.allele1_, male.allele2_));
         }
         
-        ~DiploidMarker() {          
-			if (this->allele1_ != NULL) {
-                this->allele1_->decrement_count();
-            }            
-            if (this->allele2_ != NULL) {
-                this->allele2_->decrement_count();
-            }
-        }
-        
-    private:        
+    private:
+    
+        /** 
+         * A node in the genealogy of this locus representing one of the 
+         * alleles at this locus in a particular organism.
+         */
         GenealogyNode *      allele1_;
+        
+        /** 
+         * A node in the genealogy of this locus representing the other 
+         * allele at this locus in a particular organism.
+         */        
         GenealogyNode *      allele2_;
 
 }; 
