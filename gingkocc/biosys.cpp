@@ -48,6 +48,8 @@ Species::Species(unsigned index,
     this->movement_capacity_ = 1;
 }
 
+// --- organism production and management ---
+
 void Species::new_generation() {
     this->organism_counter_ = 0;
 }

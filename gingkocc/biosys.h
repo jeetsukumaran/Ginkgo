@@ -41,55 +41,94 @@ class Species;
 typedef std::vector<Species *>  SpeciesPointerVector;
 typedef std::vector<Organism>   OrganismVector;
 
-///////////////////////////////////////////////////////////////////////////////
-// Tracks the genealogy of a single haploid locus or allele.
+/**
+ * Tracks the geneaology of a single haplod locus or allele.
+ *
+ * Represents a single node on a genealogy of a neutral marker, with pointers 
+ * to its parent node. Uses reference counting to tracking references to self,
+ * and deletes self when no other node points to self as parent.
+ */
 class GenealogyNode {
 
     public:
         
-        //! Constructs a genealogy node de novo.
+        /**
+         * Constructs a node with no antecedents.
+         */
         GenealogyNode()
         : parent_(NULL),
           first_child_(NULL),
           next_sib_(NULL),
           reference_count_(1),
-          edge_len_(1) { 
-            // std::cout << "+++ CONSTRUCTING " << this << " #" << this->reference_count_ << std::endl; 
-        }
-        
-        bool is_outdegree1() {
-            return this->first_child_ && !this->first_child_->next_sib_;
-        }
-
-        void suppress_outdegree1() {
-//             if (this->parent_) 
-//                 this->parent_->suppress_outdegree1();
-			if (this->is_outdegree1()) {
-				this->first_child_->edge_len_ += this->edge_len_;
-				this->first_child_->inherit(this->parent_);
-			}        
-        }
-
-		void remove_child(GenealogyNode * c) {
+          edge_len_(1) { }
+          
+        /**          
+         * Removes all references to a node from this node and its children.
+         *
+         * Ensures that nothing points to <code>c</code>, either this node 
+         * itself (through <code>first_child_</code>, or any of this node's 
+         * children (through this node's children's <code>next_sib_</code>).
+         * Also sets the child node's parent to NULL, and then decrements the 
+         * count of references to self.
+         *
+         * @param child     pointer to the child node to be removed
+         */
+		void remove_child(GenealogyNode * child) {
 			assert(this);
 			GenealogyNode * g = this->first_child_;
-			if (g == c) {
+			if (g == child) {
 				this->first_child_ = g->next_sib_;
 			} else { // parent's first child is not self ...
 				// search for self amongst parent's children
-				while (g->next_sib_ != c) {
+				while (g->next_sib_ != child) {
 					g = g->next_sib_;
 					assert(g);
 				}
-				assert(g->next_sib_ == c);
+				assert(g->next_sib_ == child);
 				// set previous sib to point to self's next sib
-				g->next_sib_ = c->next_sib_;
+				g->next_sib_ = child->next_sib_;
 			}
-            this->suppress_outdegree1();
+			child->parent_ = NULL;
 			this->decrement_count();
 		}
 		
-        //! Unlink = remove allele from parent
+        /**          
+         * Adds a node as a child of this node.
+         *
+         * If this node has no children, then this node's 
+         * <code>first_child_</code> pointer is set to point to the new child
+         * node, otherwise the first null <code>next_sib_</code> is set to 
+         * point to child. Also sets the child node's parent to this node, and 
+         * increments count of references to self.
+         *
+         * @param child     pointer to the child node to be added
+         */
+		void add_child(GenealogyNode * child) {
+			assert(this);
+			child->parent_ = this;
+			this->increment_count();
+			if (this->first_child_ == NULL) {
+				// parent has no children: self is first child.
+				this->first_child_ = child;
+			} else {
+				// parent has children
+				GenealogyNode * g = this->first_child_;
+				// search for the first child with no sibling
+				while (g->next_sib_ != NULL) {
+					g = g->next_sib_;       
+				}
+				// insert self as sibling                    
+				g->next_sib_ = child;
+			}
+		}		
+		
+        /**          
+         * Removes this node from a genealogy tree.
+         *
+         * Disconnects this node from the reference network of a genealogy 
+         * tree by asking this node's parent to remove self, and then nulling 
+         * out this node's parent pointers.
+         */
         void unlink() {
             if (this->parent_ == NULL)
             	return;
@@ -98,85 +137,22 @@ class GenealogyNode {
 			this->next_sib_ = NULL;
         }
           
-        //! Inheriting a genealogy by assigning self as a child.
-        void inherit(GenealogyNode * parent) {
+        /**
+         * Inserts this node into a genealogy tree as child of given parent.
+         * 
+         * Unlinks this node from its current position in the genealogy, and
+         * then requests that the parent add this node as a child (which takes
+         * care of all the new linking).
+         *
+         * @param parent    the immediate ancestor of this node in the tree
+         */
+        void link(GenealogyNode * parent) {
+            assert(parent != this);
         	this->unlink();
-            this->parent_ = parent;
-            if (this->parent_ == NULL)
-            	return;              
-			assert(parent != this);
-			this->parent_->increment_count();
-			if (this->parent_->first_child_ == NULL) {
-				// parent has no children: self is first child.
-				this->parent_->first_child_ = this;
-			} else {
-				// parent has children
-				GenealogyNode * g = this->parent_->first_child_;
-				// search for the first child with no sibling
-				while (g->next_sib_ != NULL) {
-					g = g->next_sib_;       
-				}
-				// insert self as sibling                    
-				g->next_sib_ = this;
-			}
-			// seed =1236498769
-			
-			// clean up lineage of outdegree1 nodes
-            /*
-             Deals with the following situation
-             
-                                 0
-                                / \
-                               1   2
-                              /   / \
-                             3   4   5
-                            /   / \ / \
-                           6   7   89 10
-                             
-            When node 6 is being added, it knows that node 1 will not be
-            getting any more children, and hence is safe to suppress. It is not
-            clear that node 3 might not be getting more children, so it is left
-            alone.
-            */			
-            if (this->parent_->parent_ != NULL) {
-                if (this->parent_->next_sib_ == NULL && this->parent_->parent_->first_child_ == this->parent_) {
-                    GenealogyNode * old_gparent = this->parent_->parent_;                    
-                    GenealogyNode * new_gparent = this->parent_->parent_->parent_;
-                    assert(old_gparent->first_child_ == this->parent_);
-                    assert(this->parent_->next_sib_ == NULL);
-                    this->parent_->edge_len_ += old_gparent->edge_len_;
-                    this->parent_->parent_ = new_gparent;
-                    if (new_gparent != NULL) {
-                        new_gparent->increment_count();
-                        GenealogyNode * ngp_child = new_gparent->first_child_;
-                        if (ngp_child == NULL) {
-                            new_gparent->first_child_ = this->parent_;
-                        } else {
-                            while (ngp_child->next_sib_ != NULL) {
-                                ngp_child = ngp_child->next_sib_;
-                            }
-                            ngp_child->next_sib_ = this->parent_;
-                        }
-                    }
-                    
-                    old_gparent->first_child_ = NULL;
-                    old_gparent->decrement_count();                    
-                }
-            }
-            
-            /*
-             This situation still not accounted for:
-             
-                                 0
-                                / \
-                               1   2
-                              /   / \
-                             3   4   5
-                             
-            Node 1 should be suppressed, but it is not clear when. It cannot be
-            done when adding node "3", as at that point there is no way of
-            knowing whether node 3 is the last node to be added or not.
-            */
+        	if (parent == NULL) {
+        	    return;
+        	}
+			this->parent_->add_child(this);
         }
         
         ~GenealogyNode() {
@@ -328,7 +304,7 @@ class HaploidLocus {
             // // std::cout << "(BEFORE) This: " << this << ": " << this->allele_ << " / PARENT: " << &parent << ": " << parent.allele_ << std::endl;                        
             this->allele_ = new GenealogyNode();
             // // std::cout << "(AFTER)  This: " << this << ": " << this->allele_ << " / PARENT: " << &parent << ": " << parent.allele_ << std::endl << std::endl;            
-            this->allele_->inherit(parent.allele_);
+            this->allele_->link(parent.allele_);
         }
         
         ~HaploidLocus() {
@@ -414,10 +390,10 @@ class DiploidLocus {
                      RandomNumberGenerator& rng) {
             assert(this->allele1_ == NULL);
             this->allele1_ = new GenealogyNode();
-            this->allele1_->inherit(rng.select(female.allele1_, female.allele2_));
+            this->allele1_->link(rng.select(female.allele1_, female.allele2_));
             assert(this->allele2_ == NULL);
             this->allele2_ = new GenealogyNode();            
-            this->allele2_->inherit(rng.select(male.allele1_, male.allele2_));
+            this->allele2_->link(rng.select(male.allele1_, male.allele2_));
         }
         
         ~DiploidLocus() {          
