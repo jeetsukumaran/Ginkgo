@@ -189,6 +189,8 @@ class TypedOptionArg : public OptionArg {
 class OptionParser {
 
     public:
+    
+        typedef std::vector< std::string >  PosArgs;
         
         OptionParser();            
         ~OptionParser();
@@ -254,6 +256,10 @@ class OptionParser {
         
         //! Copies value into given data field.
         void store_value(const char * flag, void * data);
+        
+        std::vector< std::string > get_args() {
+            return this->pos_args_;
+        }
 
     private:
         std::ostream& write_help(std::ostream& out) const;               
@@ -264,7 +270,7 @@ class OptionParser {
         bool                                        show_help_;
         OptionArg *                                 help_option_;
         std::vector<OptionArg *>                    option_args_;
-        std::vector< std::string >                  pos_args_;
+        PosArgs                                     pos_args_;
         std::map< std::string, OptionArg * >        key_opt_map_;
 };
 

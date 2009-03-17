@@ -153,7 +153,7 @@ std::ostream& OptionParser::write_help(std::ostream& out) const {
 
 void OptionParser::parse(int argc, char * argv[]) {
 
-    for (int i = 0; i < argc; ++i) { 
+    for (int i = 1; i < argc; ++i) { 
         if (argv[i][0] == '-') {
             std::string arg_name;
             std::string arg_value;

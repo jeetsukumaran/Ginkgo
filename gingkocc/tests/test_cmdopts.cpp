@@ -52,6 +52,7 @@ int main(int argc, char* argv[]) {
                                      "set value of e", "#");
     parser.parse(argc, argv);
     
+    std::cerr << "--Flagged options:" << std::endl;
     std::cout << a << std::endl;
     std::cout << b << std::endl;
     std::cout << c << std::endl;
@@ -59,5 +60,11 @@ int main(int argc, char* argv[]) {
     std::cout << e << std::endl;
     std::cout << f << std::endl;    
     std::cout << g << std::endl;
-
+    std::cerr << "--Position arguments:" << std::endl;
+    OptionParser::PosArgs args = parser.get_args();
+    for (OptionParser::PosArgs::iterator a = args.begin(); a != args.end(); ++a) {
+        std::cout << *a << std::endl;
+    }
+    std::cerr << "(done)" << std::endl;
+    
 }    
