@@ -146,7 +146,9 @@ def get_test_suite():
     every file with a name of 'test*.py' has test(s) to be run.
     """
     # get list of test file names'
-    path = os.path.dirname(__file__)  
+    path = os.path.dirname(__file__)
+    if not path:
+        path = '.'       
     files = os.listdir(path)                               
     test_file_pattern = re.compile("test.*\.py$", re.IGNORECASE)   
     test_files = []
