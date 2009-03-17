@@ -25,6 +25,7 @@ import os
 import logging
 import unittest
 import re
+import subprocess
 import sys
 
 ###############################################################################
@@ -132,7 +133,17 @@ def get_gingko_program_path(prog_name):
         if prog_path is None:
             sys.stderr.write('Could not find "%s" on system path, and environmental variable "%s" specifying directory not set.\n' % (prog_name, GINGKO_BIN_PATH_ENVAR))
             sys.exit(1)
-    return prog_path                
+    return prog_path
+    
+def run_program(cmd, log=None):
+    if log is not None:
+        log.info('Invoking command: "%s"' % cmd)
+    p1 = subprocess.Popen([cmd],
+                           shell=True,
+                           stdout=subprocess.PIPE,
+                           stderr=subprocess.PIPE)
+    stdout, stderr = p1.communicate()
+    return stdout, stderr, p1.returncode
 
 ###############################################################################
 ## TESTS RUN    

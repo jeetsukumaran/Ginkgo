@@ -26,27 +26,30 @@ import subprocess
 
 from run_tests import get_logger
 from run_tests import get_gingko_program_path
+from run_tests import run_program
 
 _LOG = get_logger("test_cmdopts")
 
-class SumTreesTest(unittest.TestCase):
+class CmdOptsTest(unittest.TestCase):
     def setUp(self):
         self.prog_path = get_gingko_program_path("test_cmdopts")
         
     def check_opts_parsing(self, cmd, expected_strings):  
-        _LOG.info('Testing arguments parsing of command: "%s"' % cmd)
-        p1 = subprocess.Popen([cmd],
-                               shell=True,
-                               stdout=subprocess.PIPE,
-                               stderr=subprocess.PIPE)
-        stdout, stderr = p1.communicate()
-        stdout = stdout.split("\n")
-        assert p1.returncode == 0, "Program exited with error code %d:\n%s" % (p1.returncode, stderr)
+        _LOG.info('Testing arguments parsing: "%s"' % cmd)
+        stdout, stderr, returncode = run_program(cmd)
+        assert returncode == 0, "Program exited with error code %d:\n%s" % (p1.returncode, stderr)
+        stdout = stdout.split("\n")        
         for idx, expected in enumerate(expected_strings):
             _LOG.info('Line %d: %s (correct = "%s")' % (idx+1, stdout[idx], expected))        
             assert stdout[idx] == expected, \
                 'Expecting "%s", but found "%s" in line %d of stdout' \
-                % (expected, stdout[idx], idx+1)          
+                % (expected, stdout[idx], idx+1)
+                
+    def check_wrong_opts_parsing(self, wrong_flag):  
+        cmd = self.prog_path + " " + wrong_flag
+        _LOG.info('Testing for correct rejection of wrong or invalid options: %s' % cmd)
+        stdout, stderr, returncode = run_program(cmd)
+        assert returncode != 0, "Program did not exit with error on wrong flag:\n%s\n%s" % (stdout, stderr)
         
     def testDefaultArgs(self):
         self.check_opts_parsing(self.prog_path, ["1000", "1000", "1000", "1000", "0.1", "default 1", "0"])
@@ -58,6 +61,29 @@ class SumTreesTest(unittest.TestCase):
     def testLongFlagsArgs(self):
         cmd = self.prog_path + ' --seta -10 --setb 10 --setc -100 --setd 100 --sete 2.718 --setf "the quick brown fox" --setg'
         self.check_opts_parsing(cmd, ["-10", "10", "-100", "100", "2.718", "the quick brown fox", "1"]) 
+        
+    def testWrongFlag(self):
+        self.check_wrong_opts_parsing("-x")
+        self.check_wrong_opts_parsing("--hello")
+       
+    def testInvalidValue(self):
+        _LOG.info('Testing for correct rejection of invalid values')
+        stdout, stderr, returncode = run_program(self.prog_path + " -a xx", _LOG)
+        assert returncode != 0
+        stdout, stderr, returncode = run_program(self.prog_path + " -a 1x", _LOG)
+        assert returncode != 0
+        stdout, stderr, returncode = run_program(self.prog_path + " -a x1", _LOG)
+        assert returncode != 0
+        stdout, stderr, returncode = run_program(self.prog_path + " -a 1.1", _LOG)
+        assert returncode != 0
+        stdout, stderr, returncode = run_program(self.prog_path + " --seta xx", _LOG)
+        assert returncode != 0
+        stdout, stderr, returncode = run_program(self.prog_path + " --seta 1x", _LOG)
+        assert returncode != 0
+        stdout, stderr, returncode = run_program(self.prog_path + " --seta x1", _LOG)
+        assert returncode != 0
+        stdout, stderr, returncode = run_program(self.prog_path + " --seta 1.1", _LOG)
+        assert returncode != 0          
 
 if __name__ == "__main__":
     unittest.main()
