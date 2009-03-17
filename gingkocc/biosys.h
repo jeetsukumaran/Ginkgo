@@ -38,9 +38,14 @@ namespace gingko {
 class Organism;
 class Species;
 
+/** collection of pointers to {@link Species} objects */
 typedef std::vector<Species *>  SpeciesPointerVector;
+
+/** collection of {@link Organism} objects */
 typedef std::vector<Organism>   OrganismVector;
 
+///////////////////////////////////////////////////////////////////////////////
+// GenealogyNode
 /**
  * Tracks the geneaology of a single haplod locus or allele.
  *
@@ -59,8 +64,7 @@ class GenealogyNode {
         : parent_(NULL),
           first_child_(NULL),
           next_sib_(NULL),
-          reference_count_(1),
-          edge_len_(1) { }
+          reference_count_(1) { }
           
         /**          
          * Removes all references to a node from this node and its children.
@@ -204,93 +208,126 @@ class GenealogyNode {
             return this->parent_;
         }
         
+        /**
+         * Sets pointer to parent node.
+         * 
+         * @param parent    pointer to parent node
+         */          
         void set_parent(GenealogyNode * parent) {
             this->parent_ = parent;
         }
         
+        /**
+         * Returns pointer to first child.
+         * 
+         * @return      pointer to first child
+         */          
         GenealogyNode * get_first_child() {
             return this->first_child_;
         }
         
+        /**
+         * Sets pointer to first child.
+         * 
+         * @param first_child    pointer to first child
+         */         
         void set_first_child(GenealogyNode * first_child) {
             this->first_child_ = first_child;
         }
         
+        /**
+         * Returns pointer to this node's (right) sibling.
+         * 
+         * @return      pointer to this node's right sibling
+         */          
         GenealogyNode * get_next_sib() {
             return this->next_sib_;
         }
         
+        /**
+         * Sets pointer to this node's (right) sibling.
+         * 
+         * @param      pointer to this node's right sibling
+         */         
         void set_next_sib(GenealogyNode * next_sib) {
             this->next_sib_ = next_sib;
         }
         
-        unsigned get_edge_len() const {
-            return this->edge_len_;
-        }
-        
-        void set_edge_len(unsigned len) {
-            this->edge_len_ = len;    
-        }
-        
-        void set_label(const std::string& label) {
-            this->label_ = label;                       
-        }
-        
+        /**
+         * Returns the label of this node.
+         *
+         * The label serves to identify this node as an OTU on a tree 
+         * representing the genealogy of this node.
+         * 
+         * @return      the label of the OTU represented by this node
+         */          
         std::string get_label() const {
             return this->label_;
         }
-        
-        // --- DEBUGGING ---
-        
-        void trace(std::ostream& out) {
-            out << this;
-            if (this != NULL) {
-                if (this->parent_ != NULL) {
-                    out << " > ";
-                    this->parent_->trace(out);
-                } else {
-                    out << " [EOL] " << std::endl;
-                }                    
-            } else {
-                out << " [NULL] " << std::endl;
-            }            
-        }        
+                        
+        /**
+         * Sets the label of this node.
+         *
+         * The label serves to identify this node as an OTU on a tree 
+         * representing the genealogy of this node.
+         * 
+         * @label      the label of the OTU represented by this node
+         */          
+        void set_label(const std::string& label) {
+            this->label_ = label;                       
+        }      
                 
-    private:            
+    private:
+    
+        /** 
+         * Pointer to the parent of this node (<code>NULL</code> if no 
+         * children).
+         */
         GenealogyNode *     parent_;
+        
+        /** 
+         * Pointer to the first child of this node (<code>NULL</code> if no 
+         * children).
+         */
         GenealogyNode *     first_child_;
+        
+        /** 
+         * Pointer to next sibling of this node (<code>NULL</code> if this node
+         * is the last child).
+         */        
         GenealogyNode *     next_sib_;
+        
+        /** 
+         * Number of objects that point to or reference this object (including
+         * this object itself).
+         */        
         unsigned            reference_count_;
-		unsigned			edge_len_;
+        
+        /** 
+         * Identifier or label that will represent this node as an OTU on 
+         * a tree.
+         */            
 		std::string         label_;
 		
-        GenealogyNode(const GenealogyNode& ); // don't define
 
-         //! Assignment. Must "unlink" self from parent node, if parent
-        //! node exists, before copying source node's fields.
-        const GenealogyNode& operator=(const GenealogyNode& n); // don't define
-        /* {
-            assert(0); // temporarily DISABLE
-            // remove reference to previous
-            this->unlink();
-            // copy fields
-            this->parent_ = n.parent_;
-            if (this->parent_ != NULL) {
-                // adjust count
-                this->parent_->increment_count();
-            }
-            this->first_child_ = n.first_child_;
-            this->next_sib_ = n.next_sib_;
-            return *this;               
-        } */
-        
+    private:		
+		
+        /** 
+         * Private null copy constructor.
+         */   		
+        GenealogyNode(const GenealogyNode& );
+
+        /** 
+         * Private null assignment constructor.
+         */ 
+        const GenealogyNode& operator=(const GenealogyNode&);
                
 }; 
 // GenealogyNode
 ///////////////////////////////////////////////////////////////////////////////
 
 ///////////////////////////////////////////////////////////////////////////////
-// Manages the genealogies of a haploid locus.
+// HaploidLocus
 class HaploidLocus {
 
     public:
@@ -348,10 +385,7 @@ class HaploidLocus {
         // --- DEBUGGING ---
         
         void dump(std::ostream& out) {
-            out << "haploid marker " << this << ": " << this->allele_ << "\n";
-            if (this->allele_ != NULL) {
-                this->allele_->trace(out);
-            }                
+            out << "haploid marker " << this << ": " << this->allele_ << "\n";              
         }
         
     private:        

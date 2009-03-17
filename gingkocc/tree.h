@@ -97,7 +97,7 @@ class Tree {
             } else {                
                 this->labels_.push_back(label);
             }                
-            this->edge_lens_.push_back(node->get_edge_len());
+//             this->edge_lens_.push_back(node->get_edge_len());
             return idx;
         }
         
@@ -141,11 +141,11 @@ class Tree {
         }
         
         void write_newick_node(long node_idx, std::ostream& out) {
-            unsigned edge_length = this->edge_lens_.at(node_idx);
+            unsigned edge_length = 0; 
             std::vector<long> children = this->get_children(node_idx);
             while (children.size() == 1) {
                 // this deals with nodes of outdegree 1 still in the structure
-//                 ++edge_length; // disabled to show where outdegree1 nodes not suppressed by GenealogyNode
+                ++edge_length; 
                 children = this->get_children(children[0]);
             }
             if (children.size() > 0) {
@@ -176,12 +176,10 @@ class Tree {
         void dump(std::ostream& out) {
             out << std::setw(10) << "idx" << "   ";
             out << std::setw(10) << "parent" << "   ";
-            out << std::setw(10) << "edge len" << "   ";
             out << std::setw(10) << "label" << "\n";        
             for (unsigned i = 0; i < this->tree_nodes_.size(); ++i) {
                 out << std::setw(10) << i << "   ";
                 out << std::setw(10) << this->tree_nodes_[i] << "   ";
-                out << std::setw(10) << this->edge_lens_[i] << "   ";
                 out << std::setw(10) << this->labels_[i] << "\n";
             }
         }
@@ -190,7 +188,6 @@ class Tree {
         NodeIndexMap                        node_indexes_;
         NodeVector                          nodes_to_coalesce_;
         IndexVector                         tree_nodes_;
-        std::vector<unsigned long>          edge_lens_;
         std::vector<std::string>            labels_;
         bool                                coalesce_multiple_roots_;
 };
