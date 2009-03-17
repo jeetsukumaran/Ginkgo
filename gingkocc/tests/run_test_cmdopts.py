@@ -33,23 +33,28 @@ class SumTreesTest(unittest.TestCase):
     def setUp(self):
         self.prog_path = get_gingko_program_path("test_cmdopts")
         
-    def testDefaultArgs(self):
-        cmd = self.prog_path    
-        _LOG.info('Testing default arguments using command: "%s"' % cmd)
+    def check_opts_parsing(self, cmd, expected_strings):  
+        _LOG.info('Testing arguments parsing of command: "%s"' % cmd)
         p1 = subprocess.Popen([cmd],
                                shell=True,
                                stdout=subprocess.PIPE,
                                stderr=subprocess.PIPE)
         stdout, stderr = p1.communicate()
         stdout = stdout.split("\n")
-        assert p1.returncode == 0, "Program exited with error code %d" % p1.returncode
-        expected_strings = ["1000", "1000", "1000", "1000", "0.1", "default 1", "0"]
+        assert p1.returncode == 0, "Program exited with error code %d:\n%s" % (p1.returncode, stderr)
         for idx, expected in enumerate(expected_strings):
-            _LOG.info('Line %d: %s (correct: "%s")' % (idx+1, stdout[idx], expected))        
+            _LOG.info('Line %d: %s (correct = "%s")' % (idx+1, stdout[idx], expected))        
             assert stdout[idx] == expected, \
                 'Expecting "%s", but found "%s" in line %d of stdout' \
-                % (expected, stdout[idx], idx+1)            
-            
+                % (expected, stdout[idx], idx+1)          
+        
+    def testDefaultArgs(self):
+        self.check_opts_parsing(self.prog_path, ["1000", "1000", "1000", "1000", "0.1", "default 1", "0"])
+        
+    def testShortFlagsArgs(self):
+        cmd = self.prog_path + ' -a -10 -b 10 -c -100 -d 100 -e 2.718 -f "the quick brown fox" -g'
+        self.check_opts_parsing(cmd, ["-10", "10", "-100", "100", "2.718", "the quick brown fox", "1"])        
+                        
 
 if __name__ == "__main__":
     unittest.main()

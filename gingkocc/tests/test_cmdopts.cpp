@@ -48,8 +48,7 @@ int main(int argc, char* argv[]) {
                                      "set value of e", "#");
     parser.add_option<std::string>(&f, "-f", "--setf", 
                                      "set value of a", "#");
-    parser.add_option<bool>(&g, "-g", "--setg", 
-                                     "set value of e", "#");
+    parser.add_switch(&g, "-g", "--setg", "set value of e", "#");
     parser.parse(argc, argv);
     
     std::cerr << "--Flagged options:" << std::endl;
