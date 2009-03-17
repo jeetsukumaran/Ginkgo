@@ -269,10 +269,10 @@ class GenealogyNode {
          * The label serves to identify this node as an OTU on a tree 
          * representing the genealogy of this node.
          * 
-         * @return      the label of the OTU represented by this node
+         * @return      copy of the label of the OTU represented by this node
          */          
         std::string get_label() const {
-            return this->label_;
+            return *this->label_;
         }
                         
         /**
@@ -281,12 +281,24 @@ class GenealogyNode {
          * The label serves to identify this node as an OTU on a tree 
          * representing the genealogy of this node.
          * 
-         * @label      the label of the OTU represented by this node
+         * @label      pointer to the label of the OTU represented by this node
          */          
-        void set_label(const std::string& label) {
+        void set_label(const std::string * label) {
             this->label_ = label;                       
-        }      
-                
+        }
+        
+        /**
+         * Unsets the label of this node.
+         *
+         * Labels are only required on terminal nodes, so once the 
+         * HaploidMarker or DiploidMarker object wrapping this node gets 
+         * destroyed, the label is removed (as this node can then only exist
+         * as an internal node).
+         */          
+        void unset_label() {
+            this->label_ = NULL;                       
+        }
+        
     private:
     
         /** 
@@ -314,10 +326,10 @@ class GenealogyNode {
         unsigned            reference_count_;
         
         /** 
-         * Identifier or label that will represent this node as an OTU on 
-         * a tree.
+         * Pointer to a identifier or label that will represent this node as an
+         * OTU on a tree.
          */            
-		std::string         label_;
+		const std::string * label_;
                
 }; 
 // GenealogyNode
@@ -344,6 +356,7 @@ class HaploidMarker {
          */
         ~HaploidMarker() {
             if (this->allele_) {
+                this->allele_->unset_label();
                 this->allele_->decrement_count();
             }
         }        
@@ -399,9 +412,10 @@ class HaploidMarker {
          * this locus.
          * @param label     string representation of allele as an OTU on a tree
          */
-        void set_label(const std::string& label) {       
+        void set_label(const std::string& label) {
+            this->label_ = label;
             if (this->allele_) {
-                this->allele_->set_label(label);
+                this->allele_->set_label(&this->label_);
             }        
         }
         
@@ -411,7 +425,14 @@ class HaploidMarker {
          * A node in the genealogy of this locus representing the 
          * alleles at this locus in a particular organism.
          */
-        GenealogyNode *      allele_;       
+        GenealogyNode *      allele_;
+        
+        /** 
+         * Label for the above allele. Maintained here so that when this object
+         * goes out of scope or is destroyed, so will the label (labels are 
+         * required only for terminals/OTUS).
+         */
+         std::string        label_;        
 }; 
 // HaploidMarker
 ///////////////////////////////////////////////////////////////////////////////
@@ -439,9 +460,11 @@ class DiploidMarker {
          */        
         ~DiploidMarker() {          
 			if (this->allele1_ != NULL) {
+			    this->allele1_->unset_label();
                 this->allele1_->decrement_count();
             }            
             if (this->allele2_ != NULL) {
+			    this->allele2_->unset_label();            
                 this->allele2_->decrement_count();
             }
         }               
@@ -459,11 +482,13 @@ class DiploidMarker {
          *                  label of the organism to which this locus belongs)
          */
         void set_label(const std::string& label) {
+            this->label1_ = label + "_a";
+            this->label2_ = label + "_b";
             if (this->allele1_ != NULL) {
-                this->allele1_->set_label(label + "_a");
+                this->allele1_->set_label(&this->label1_);
             }              
             if (this->allele2_ != NULL) {
-                this->allele2_->set_label(label + "_b");
+                this->allele2_->set_label(&this->label2_);
             }             
         }
         
@@ -520,10 +545,24 @@ class DiploidMarker {
         GenealogyNode *      allele1_;
         
         /** 
+         * Label for the above allele. Maintained here so that when this object
+         * goes out of scope or is destroyed, so will the label (labels are 
+         * required only for terminals/OTUS).
+         */
+         std::string        label1_;
+        
+        /** 
          * A node in the genealogy of this locus representing the other 
          * allele at this locus in a particular organism.
          */        
         GenealogyNode *      allele2_;
+        
+        /** 
+         * Label for the above allele. Maintained here so that when this object
+         * goes out of scope or is destroyed, so will the label (labels are 
+         * required only for terminals/OTUS).
+         */
+         std::string        label2_;        
 
 }; 
 // DiploidMarker
