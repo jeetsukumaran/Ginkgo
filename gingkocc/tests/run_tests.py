@@ -154,22 +154,22 @@ def get_test_suite():
     `dendropy.tests`. Right now, assumes (a) no subdirectories (though
     this can easily be accomodated) and (b) every test to be run is
     sitting in a module with a file name of 'test*.py', and, conversely,
-    every file with a name of 'test*.py' has test(s) to be run.
+    every file with a name of 'run_test_*.py' has test(s) to be run.
     """
     # get list of test file names'
     path = os.path.dirname(__file__)
     if not path:
         path = '.'       
     files = os.listdir(path)                               
-    test_file_pattern = re.compile("test.*\.py$", re.IGNORECASE)   
+    test_file_pattern = re.compile("run_test_.*\.py$", re.IGNORECASE)   
     test_files = []
     for f in files:
         if test_file_pattern.search(f):
             test_files.append(os.path.splitext(f)[0])
-            
+
     # extract the tests            
     tests = unittest.defaultTestLoader.loadTestsFromNames(test_files)
-    
+
     # return the suite
     return unittest.TestSuite(tests) 
 
