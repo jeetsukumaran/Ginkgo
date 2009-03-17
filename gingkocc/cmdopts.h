@@ -27,6 +27,7 @@
 #include <map>
 #include <utility>
 #include <stdexcept>
+#include <iomanip>
 
 namespace gingko {
 
@@ -128,18 +129,21 @@ class TypedOptionArg : public OptionArg {
 
     public:
         TypedOptionArg(void * store,
+                       const char * short_flag,
+                       const char * long_flag,
                        const char * help=NULL,
-                       const char * meta_var=NULL,
-                       void * default_value=NULL)
-            : OptionArg(help, meta_var),
-              default_value_() {
+                       const char * meta_var=NULL)
+                : OptionArg(help, meta_var) {
             if (store != NULL) {
                 this->set_store(store);
             }
-            if (default_value != NULL) {
-                this->set_default_value(default_value);
-                *this->store_ = this->default_value_;
+            assert( short_flag != NULL or long_flag != NULL);
+            if (short_flag != NULL) {
+                this->set_short_flag(short_flag);
             }
+            if (long_flag != NULL) {
+                this->set_long_flag(long_flag);
+            }             
         }   
         
         virtual ~TypedOptionArg() {}
@@ -163,6 +167,7 @@ class TypedOptionArg : public OptionArg {
         virtual void process_value_string(const std::string& val_str) {
             std::istringstream istr(val_str);
             T temp;
+            istr >> std::noskipws; 
             istr >> temp;
             if (!istr.fail() and istr.eof()) {
                 *this->store_ = temp;
@@ -174,16 +179,10 @@ class TypedOptionArg : public OptionArg {
             }
         }
 
-        void set_default_value(void * val) {
-            if (val != NULL) {
-                this->default_value_ = *(static_cast<T *>(val));
-            }                
-        }
-
     private:
         T *     store_;
-        T       default_value_;
 };
+
 
 ///////////////////////////////////////////////////////////////////////////////
 //! General option parser.
@@ -205,18 +204,11 @@ class OptionParser {
                                const char * short_flag=NULL,
                                const char * long_flag=NULL,
                                const char * help=NULL,
-                               const char * meta_var=NULL,
-                               void * default_value=NULL) {                               
+                               const char * meta_var=NULL) {                               
             OptionArg * oa;                              
-            oa = new TypedOptionArg<T>(store, help, meta_var, default_value);
+            oa = new TypedOptionArg<T>(store, short_flag, long_flag, help, meta_var);
             assert ( oa );
-            assert( short_flag != NULL or long_flag != NULL);
-            if (short_flag != NULL) {
-                oa->set_short_flag(short_flag);
-            }
-            if (long_flag != NULL) {
-                oa->set_long_flag(long_flag);
-            }   
+  
             
             if (help != NULL) {
                 oa->set_help(help);
@@ -247,9 +239,8 @@ class OptionParser {
                                const char * short_flag=NULL,
                                const char * long_flag=NULL,
                                const char * help=NULL,
-                               const char * meta_var=NULL,
-                               void * default_value=NULL) {
-            OptionArg * switch_arg = this->add_option<bool>(store, short_flag, long_flag, help, meta_var, default_value);
+                               const char * meta_var=NULL) {
+            OptionArg * switch_arg = this->add_option<bool>(store, short_flag, long_flag, help, meta_var);
             switch_arg->set_is_switch(true);
             return switch_arg;
         }                        

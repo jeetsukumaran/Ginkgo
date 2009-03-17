@@ -117,6 +117,14 @@ std::ostream& OptionArg::write_help(std::ostream& out) const {
     return out;
 }
 
+///////////////////////////////////////////////////////////////////////////////
+// Specializations of TypedOptionArg
+
+template <>
+void TypedOptionArg<std::string>::process_value_string(const std::string& val_str) {
+    *this->store_ = val_str;
+    this->is_set() = true;
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 // OptionParser
@@ -204,8 +212,7 @@ void OptionParser::parse(int argc, char * argv[]) {
                     oa.process_value_string(arg_value);                    
                 } catch(OptionValueTypeError& e) {
                     std::cerr << "Invalid value passed to option " << arg_name << ": ";
-                    std::cerr << "\"" << arg_value << "\"" << std::endl;
-                    
+                    std::cerr << "\"" << arg_value << "\"" << std::endl;                    
                     exit(1);
                 }
             } else {
