@@ -341,10 +341,9 @@ class HaploidLocus {
         GenealogyNode* node() const {
             return this->allele_;
         }
-        
-        
-        void set_label(const std::string& label) {
-            if (this->allele_ != NULL) {
+                
+        void set_label(const std::string& label) {       
+            if (this->allele_) {
                 this->allele_->set_label(label);
             }        
         }
@@ -496,6 +495,7 @@ class Organism {
         }
         
         void set_label(const std::string& label) {
+            this->label_ = label;
             this->neutral_haploid_marker_.set_label(label);
             for (unsigned i = 0; i < NUM_NEUTRAL_DIPLOID_LOCII; ++i) {
                 this->neutral_diploid_markers_[i].set_label(label);
@@ -573,9 +573,11 @@ class Organism {
                                  const Organism& male,
                                  RandomNumberGenerator& rng) {
             // // std::cout << "INHERITING: " << this << " = " << &female << " + " << &male << std::endl;
-            this->neutral_haploid_marker_.inherit(female.neutral_haploid_marker_);                                               
+            this->neutral_haploid_marker_.inherit(female.neutral_haploid_marker_);
+            this->neutral_haploid_marker_.set_label(this->label_);        
             for (unsigned i = 0; i < NUM_NEUTRAL_DIPLOID_LOCII; ++i) {
                 this->neutral_diploid_markers_[i].inherit(female.neutral_diploid_markers_[i], male.neutral_diploid_markers_[i], rng);
+                this->neutral_diploid_markers_[i].set_label(this->label_);
             }                
         }
         
@@ -682,10 +684,9 @@ class Species {
         void new_generation();
         
         std::string new_organism_label() {
-            std::string label;
-            std::ostringstream label_ostr(label);
+            std::ostringstream label_ostr;
             label_ostr << this->label_ << "_" << this->organism_counter_++;
-            return label;
+            return label_ostr.str();
         }
         
         Organism::Sex get_random_sex(float female_threshold=0.5) const {
