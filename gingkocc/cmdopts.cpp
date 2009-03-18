@@ -121,7 +121,7 @@ std::ostream& OptionArg::write_help(std::ostream& out) const {
 // Specializations of TypedOptionArg
 
 template <>
-void TypedOptionArg<std::string>::process_value_string(const std::string& val_str) {
+void gingko::TypedOptionArg<std::string>::process_value_string(const std::string& val_str) {
     *this->store_ = val_str;
     this->is_set() = true;
 }
