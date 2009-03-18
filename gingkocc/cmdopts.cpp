@@ -21,7 +21,7 @@
 
 #include "cmdopts.h"
 
-using namespace gingko;
+namespace gingko {
 
 ///////////////////////////////////////////////////////////////////////////////
 // OptionArg
@@ -121,7 +121,7 @@ std::ostream& OptionArg::write_help(std::ostream& out) const {
 // Specializations of TypedOptionArg
 
 template <>
-void gingko::TypedOptionArg<std::string>::process_value_string(const std::string& val_str) {
+void TypedOptionArg<std::string>::process_value_string(const std::string& val_str) {
     *this->store_ = val_str;
     this->is_set() = true;
 }
@@ -241,3 +241,4 @@ bool OptionParser::is_set(const char * flag) {
     return oa.is_set();
 }
 
+} // namespace gingko
