@@ -816,10 +816,17 @@ class Organism {
             }
         }        
 
+        /**
+         * Inserts the alleles/genealogical nodes of this organism's neutral
+         * markers into the genealogy of its parents.
+         *
+         * @param female                the female parent
+         * @param male                  the other parent
+         * @param rng                   source of random numbers
+         */
         void inherit_genealogies(const Organism& female, 
                                  const Organism& male,
                                  RandomNumberGenerator& rng) {
-            // // std::cout << "INHERITING: " << this << " = " << &female << " + " << &male << std::endl;
             this->neutral_haploid_marker_.inherit(female.neutral_haploid_marker_);
             this->neutral_haploid_marker_.set_label(this->label_);        
             for (unsigned i = 0; i < NUM_NEUTRAL_DIPLOID_LOCII; ++i) {
@@ -829,17 +836,35 @@ class Organism {
         }
         
     private:
-        unsigned            species_index_;                                 // species 
-        std::string         label_;                                         // label        
-        FitnessFactors      genotypic_fitness_factors_;                     // non-neutral genotype: maps to fitness phenotype
-        HaploidMarker        neutral_haploid_marker_;                        // track the genealogy of neutral genes in this organism    
-        DiploidMarker        neutral_diploid_markers_[NUM_NEUTRAL_DIPLOID_LOCII];  // track the genealogy of neutral genes in this organism        
-        Organism::Sex       sex_;                                           // male or female
-        float               fitness_;                                       // cache this organism's fitness
-        bool                expired_;                                       // flag an organism to be removed allowing for use of std::remove_if() and std::resize() or v.erase()
+    
+        /** 
+         * index of pointer to Species object in the World species pool of the
+         * species of this organism
+         */
+        unsigned                species_index_;
+        
+        /** unique (within a species and a generation) label of this organism */
+        std::string             label_;
+        
+        /** values of inheritable component of fitness */
+        FitnessFactors          genotypic_fitness_factors_;
+        
+        /** genealogy inherited through female alone */
+        HaploidMarker           neutral_haploid_marker_;
+        
+        /** diploid genealogies */
+        DiploidMarker           neutral_diploid_markers_[NUM_NEUTRAL_DIPLOID_LOCII];
+        
+        /** for reproduction */
+        Organism::Sex           sex_;
+        
+        /** to cache pre-calculated fitness values */       
+        float                   fitness_;
+        
+        /** flag organism to be removed */        
+        bool                    expired_;
 };
 // Organism
-
 ///////////////////////////////////////////////////////////////////////////////
 
 ///////////////////////////////////////////////////////////////////////////////
