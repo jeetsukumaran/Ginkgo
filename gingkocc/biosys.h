@@ -746,79 +746,230 @@ class Organism {
 ///////////////////////////////////////////////////////////////////////////////
 
 ///////////////////////////////////////////////////////////////////////////////
-//! A collection of processes and properties that determine the ecologies of
-//! organisms.
+// Species
+/**
+ * Processes and properties that determine the ecologies, reproduction 
+ * characteristics, fitness, etc. of organisms.
+ */
 class Species {
 
     public:
-    
-        // --- lifecycle and assignment ---        
+
+        // --- lifecycle and assignment ---
+        
+        /**
+         * Constructor.
+         *
+         * @param index                 index of pointer to this species object
+         *                              in World species pool
+         * @param label                 identifier string for this species
+         * @param num_fitness_factors   number of factors in fitness function
+         * @param rng                   random number generator
+         */
         Species(unsigned index,
                 const char* label, 
                 unsigned num_fitness_factors,
                 RandomNumberGenerator& rng);              
+                
+        /**
+         * Destructor.
+         */
         ~Species() {}        
                 
         // --- access and mutation ---
+        
+        /**
+         * Returns index of pointer to this species in World species pool.
+         *
+         * @return index of pointer to this species in World species pool
+         */
         unsigned get_index() const {
             return this->index_;
         }
-        void set_num_fitness_factors(unsigned i) {
-            this->num_fitness_factors_ = i;
-        }
+        
+        /**
+         * Returns number of fitness factors.
+         *
+         * Returns the number of elements of the statically allocated 
+         * genotypic fitness factor array of each organism that will actually
+         * be used.
+         *
+         * @return number of "active" fitness factors
+         */        
         unsigned get_num_fitness_factors() const {
             return this->num_fitness_factors_;
         }
-        void set_index(unsigned i) {
-            this->index_ = i;
-        }            
+        
+        /**
+         * Sets the number of fitness factors.
+         *
+         * Sets the number of elements of the statically allocated 
+         * genotypic fitness factor array of each organism that will actually
+         * be used.
+         *
+         * @param i number of "active" fitness factors
+         */             
+        void set_num_fitness_factors(unsigned num_fitness_factors) {
+            this->num_fitness_factors_ = num_fitness_factors;
+        }       
+           
+        /**
+         * Returns the probability of mutation when inheriting an organism 
+         * inherits a genotypic fitness factor from its parent.
+         *
+         * @return rate of mutation per factor inheritance 
+         */           
         float get_mutation_rate() const {
             return this->mutation_rate_;
         }
-        void set_mutation_rate(float i) {
-            this->mutation_rate_ = i;
+        
+        /**
+         * Sets the probability of mutation when inheriting an organism 
+         * inherits a genotypic fitness factor from its parent.
+         *
+         * @param rate of mutation per factor inheritance 
+         */           
+        void set_mutation_rate(float mutation_rate) {
+            this->mutation_rate_ = mutation_rate;
         }
+        
+        /**
+         * Returns the window size that a genotypic fitness factor can be 
+         * changed when inheriting a genotypic fitness factor from its parent.
+         *
+         * @return size of mutation (+/-)
+         */           
         FitnessFactorType get_max_mutation_size() const {
             return this->max_mutation_size_;
         }
-        void set_max_mutation_size(FitnessFactorType i) {
-            this->max_mutation_size_ = i;
+        
+        /**
+         * Sets the window size that a genotypic fitness factor can be 
+         * changed when inheriting a genotypic fitness factor from its parent.
+         *
+         * @param i size of mutation (+/-)
+         */          
+        void set_max_mutation_size(FitnessFactorType mutation_size) {
+            this->max_mutation_size_ = mutation_size;
         }
+        
+        /**
+         * Returns the mean number of offspring per female.
+         *
+         * @return mean number of offspring per female
+         */         
         unsigned get_mean_reproductive_rate() const {
             return this->mean_reproductive_rate_;
         }
-        void set_mean_reproductive_rate(unsigned i) {
-            this->mean_reproductive_rate_ = i;
+        
+        /**
+         * Sets the mean number of offspring per female.
+         *
+         * @param mean number of offspring per female
+         */           
+        void set_mean_reproductive_rate(unsigned rate) {
+            this->mean_reproductive_rate_ = rate;
         }     
-        unsigned get_reproductive_rate_mutation_size() const {
-            return this->reproductive_rate_mutation_size_;
-        }
-        void set_reproductive_rate_mutation_size(unsigned i) {
-            this->reproductive_rate_mutation_size_ = i;
-        }
+        
+        /**
+         * Returns the movement currency or potential for an organism.
+         *
+         * @return the movement potential of an organism
+         */          
         int get_movement_capacity() const {
             return this->movement_capacity_;
         }
-        void set_movement_capacity(int i) {
-            this->movement_capacity_ = i;
+        
+        /**
+         * Sets the movement currency or potential for an organism.
+         *
+         * @param moves the movement potential of an organism
+         */          
+        void set_movement_capacity(int moves) {
+            this->movement_capacity_ = moves;
         }   
         
+        /**
+         * Defines the costs for entering cells in the landscape.
+         *
+         * Each element in the vector <code>costs</code> corresponds to a cell
+         * of the same index on the landscape. The value of each element is
+         * the 'cost' that will be 'paid' out of an organism's movement 
+         * capacity to enter the cell.
+         *
+         * @param costs vector of movement costs
+         */
         void set_movement_costs(const std::vector<int>& costs) {
             this->movement_costs_ = costs;
         }
+        
+        /**
+         * Returns the cost to be paid by an organism to enter a particular 
+         * cell.
+         * @param  i    index of the cell to be entered
+         * @return      value to be deducted from organism's movement capacity
+         */
         int movement_cost(CellIndexType i) {
             assert( (i >= 0 ) and (static_cast<unsigned>(i) < this->movement_costs_.size()) );
             return this->movement_costs_[i];
         }
         
+        /**
+         * Sets the strengths of individual fitness factors on the fitness as 
+         * calculated for this species.
+         *
+         * Each element in the vector is a coefficient for the fitness function 
+         * calculated using the corresponding elements of the environmental and
+         * genotypic fitness factor vectors.
+         *
+         * @param  strengths    vector of coefficients to the multivariate 
+         *                      fitness function
+         */        
         void set_selection_strengths(const std::vector<float>& strengths) {
             this->selection_strengths_ = strengths;
         }
+        
+        /**
+         * Sets the strengths of individual fitness factors on the fitness as 
+         * calculated for this species.
+         *
+         * Each element in the vector is a coefficient for the fitness function 
+         * calculated using the corresponding elements of the environmental and
+         * genotypic fitness factor vectors.
+         *
+         * @param  strengths    vector of coefficients to the multivariate 
+         *                      fitness function
+         */        
         void set_default_genotype(const FitnessFactors& genotype) {
             memcpy(this->default_genotypic_fitness_factors_, genotype, MAX_FITNESS_FACTORS*sizeof(FitnessFactorType));
         }         
         
-        // --- fitness ---
+        /**
+         * Returns the fitness for a particular organism in a particular 
+         * environment.
+         *
+         * The fitness score is calculated based on Fisher's geometric fitness
+         * function: multivariate gaussian distance between elements of the 
+         * organism's genotypic fitness factors and the environment's fitness
+         * factors, with each distance weighted by the species-specific 
+         * selection strength for that element. 
+         *
+         * \f[
+         *      F_{j,k} = \sum_{i=1}^{i=Q}{S_i * (E_i - G_i)^2}
+         * \f]
+         *
+         * Where \f$F_{j,k}\f$, is the fitness for organism \f$j\f$ in cell 
+         * \f$k\f$, \f$Q\f$ is the number of fitness factors, \f$S_i\f$ is the
+         * selection strength for this species for factor \f$i\f$, \f$E_i\f$ is
+         * the \f$i^{th}\f$ environmental factor in cell \f$k\f$ and \f$G_i\f$ 
+         * is then \f$i^{th}\f$ genotypic factor for organism \f$j\f$.
+         *
+         * @param  organism     the organism
+         * @param  environment  the vector of fitness factors of the 
+         *                      environment of the organism
+         * @return              the fitness score for the organism in the given
+         *                      environment
+         */
         float calc_fitness(const Organism& organism, const FitnessFactors environment) const {
             const FitnessFactors& genotype = organism.genotype();        
             const FitnessFactorType * g = genotype;
@@ -832,14 +983,31 @@ class Species {
         }                    
         
         // --- organism generation and reproduction ---
-        void new_generation();
         
+        /**
+         * Resets the count of the number of labels produced.
+         */                 
+        void reset_label_index() {
+            this->label_index_ = 0;
+        }
+        
+        /**
+         * Returns a new unique (from the the last resetting of the label
+         * index) organism label.
+         *
+         * @return      OTU label
+         */
         std::string new_organism_label() {
             std::ostringstream label_ostr;
-            label_ostr << this->label_ << "_" << this->organism_counter_++;
+            label_ostr << this->label_ << "_" << this->label_index_++;
             return label_ostr.str();
         }
         
+        /**
+         * Returns male/female with uniform probability.
+         *
+         * @return      Organism::Male or Organism::Female
+         */
         Organism::Sex get_random_sex(float female_threshold=0.5) const {
             if (this->rng_.uniform_real() < female_threshold) {
                 return Organism::Male;
@@ -848,15 +1016,35 @@ class Species {
             }
         }  
         
+        /**
+         * Returns new organism, created de novo.
+         *
+         * @return  a default Organism object.
+         */
         Organism new_organism() {
             return Organism(this->index_, 
                             this->default_genotypic_fitness_factors_, 
                             this->get_random_sex());
         }
         
+        /**
+         * Returns an offspring produced by two organisms.
+         *
+         * Genotypic fitness factors of the offspring are random mosaic 
+         * composed of factors selected with uniform random probability from
+         * either male or female genotype of corresponding elements, with 
+         * random mutation of values. Genealogies are linked in with parental
+         * nodes as ancestors: haploid node of offspring takes female's haploid
+         * node as ancestor, whereas in diploid locii, each of the two nodes at
+         * each locii selects one node at random from the male, and one from 
+         * the female parent. Sex is assigned randomly.
+         *
+         * @param female    female parent
+         * @param male      male parent
+         * @return          offspring 
+         */
         Organism new_organism(const Organism& female, const Organism& male) {
             Organism organism(this->index_, this->get_random_sex());
-            // // std::cout << "\n\nCreating new organism: " << &organism << std::endl;
             organism.inherit_genotypic_fitness_factors(female, 
                                                        male, 
                                                        this->num_fitness_factors_, 
@@ -868,25 +1056,39 @@ class Species {
         }        
         
     private:
-        // declared as private (and undefined) to prevent copying/assignment
-        Species(const Species& species);    
-        const Species& operator=(const Species& species);
+        /** Copy constructor, private declaration with no definition to disabled */
+        Species(const Species&);    
+        /** Assignment, private declaration with no definition to disabled */        
+        const Species& operator=(const Species&);
         
-    private:        
-        unsigned                    index_;                     // "slot" in cell's pop vector    
-        std::string                 label_;                     // arbitrary identifier
-        unsigned                    num_fitness_factors_;       // so genotypes of appropriate length can be composed                
-        std::vector<float>          selection_strengths_;       // weighted_distance = distance / (sel. strength)
-        float                       mutation_rate_;             // rate of mutations
-        FitnessFactorType           max_mutation_size_;         // window "size" of mutations
-        unsigned                    mean_reproductive_rate_;    // "base" reproductive rate
-        unsigned                    reproductive_rate_mutation_size_;  // if reprod. rate evolves, size of step
-        std::vector<int>            movement_costs_;            // the movement surface: the "cost" to enter into every cell on the landscape
-        int                         movement_capacity_;         // number of cells per round an individual can move
-        FitnessFactors              default_genotypic_fitness_factors_;          // genotype of individuals generated de novo        
-        RandomNumberGenerator&      rng_;                       // rng to use
-        unsigned long               organism_counter_;
-        unsigned long               generation_;
+    private:
+    
+        /** index of this species in World species pool */        
+        unsigned                    index_;
+        /** unique identifier for this species */
+        std::string                 label_;
+        /** number of active fitness factors */
+        unsigned                    num_fitness_factors_;
+        /** coefficients for the fitness functions */
+        std::vector<float>          selection_strengths_;
+        /** rate of mutation for the genotypic fitness factors */
+        float                       mutation_rate_;
+        /** window for perturbations of fitness factor values */
+        FitnessFactorType           max_mutation_size_;        
+        /** mean number of offspring per female */
+        unsigned                    mean_reproductive_rate_;
+        /** allowing for evolution in fecundity */
+        unsigned                    reproductive_rate_mutation_size_;
+        /** landscape migration potential for this species */
+        std::vector<int>            movement_costs_;
+        /** movement potential of each organism at the start of each round */
+        int                         movement_capacity_;
+        /** genotype for organisms created de novo */
+        FitnessFactors              default_genotypic_fitness_factors_;
+        /** source of random numbers of various distributions */
+        RandomNumberGenerator&      rng_;
+        /** tracks the number of labels assigned to organisms of this species */
+        unsigned long               label_index_;
 
 };
 // Species
