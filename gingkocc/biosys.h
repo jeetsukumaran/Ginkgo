@@ -297,8 +297,9 @@ class GenealogyNode {
          * destroyed, the label is removed (as this node can then only exist
          * as an internal node).
          */          
-        void unset_label() {
-            this->label_ = NULL;                       
+        void unset_label(const std::string * label) {
+            if (this->label_ == label)
+                this->label_ = NULL;                       
         }
         
         /**
@@ -360,14 +361,14 @@ class HaploidMarker {
         
         /** Default constructor. */
         HaploidMarker() : allele_(NULL) {}
-        
+
         /** 
          * Destructor ensures that dropped reference to allele (a 
          * GenealogyNode object) is registered. 
          */
         ~HaploidMarker() {
             if (this->allele_) {
-                this->allele_->unset_label();
+                this->allele_->unset_label(&this->label_);
                 this->allele_->decrement_count();
             }
         }        
@@ -388,12 +389,15 @@ class HaploidMarker {
          */
         const HaploidMarker& operator=(const HaploidMarker& g) {
             if (this->allele_ != NULL) {
+                this->allele_->unset_label(&this->label_);
                 this->allele_->decrement_count();
             }            
-            this->allele_ = g.allele_;  
+            this->allele_ = g.allele_;
+            this->label_ = g.label_;            
             if (this->allele_ != NULL) {
+                this->allele_->set_label(&this->label_);
                 this->allele_->increment_count();
-            }              
+            }
             return *this;               
         }
         
@@ -417,6 +421,8 @@ class HaploidMarker {
         GenealogyNode* node() const {
             return this->allele_;
         }
+
+        const std::string& xlabel() const { return this->label_; }        
 
         /**
          * Sets the string representation or identification of the allele at 
@@ -471,11 +477,11 @@ class DiploidMarker {
          */        
         ~DiploidMarker() {          
 			if (this->allele1_ != NULL) {
-			    this->allele1_->unset_label();
+			    this->allele1_->unset_label(&this->label1_);
                 this->allele1_->decrement_count();
             }            
             if (this->allele2_ != NULL) {
-			    this->allele2_->unset_label();            
+			    this->allele2_->unset_label(&this->label2_);            
                 this->allele2_->decrement_count();
             }
         }               
@@ -502,7 +508,7 @@ class DiploidMarker {
                 this->allele2_->set_label(&this->label2_);
             }             
         }
-        
+
         /** 
          * Assignment operator.
          * Calls on assignment operators of member objects. 
@@ -523,7 +529,9 @@ class DiploidMarker {
             this->allele2_ = g.allele2_;
             if (this->allele2_ != NULL) {
                 this->allele2_->increment_count();
-            }                    
+            }
+            this->label1_ = g.label1_;
+            this->label2_ = g.label2_;
             return *this;               
         }
         
@@ -928,7 +936,7 @@ class Species {
         
         std::string new_organism_label() {
             std::ostringstream label_ostr;
-            label_ostr << this->label_ << "_" << this->organism_counter_++;
+            label_ostr << this->label_ << "_" << this->generation_ << "_" << this->organism_counter_++;
             return label_ostr.str();
         }
         
@@ -979,6 +987,7 @@ class Species {
         FitnessFactors              default_genotypic_fitness_factors_;          // genotype of individuals generated de novo        
         RandomNumberGenerator&      rng_;                       // rng to use
         unsigned long               organism_counter_;
+        unsigned long               generation_;
 
 };
 // Species

@@ -111,6 +111,7 @@ int main(int argc, char* argv[]) {
         for (gingko::OrganismVector::iterator oiter = ov.begin();
                 oiter != ov.end();
                 ++oiter) {
+            std::cerr << "/// " << oiter->haploid_marker().node()->has_label() << " **" << &oiter->haploid_marker() << ": " << oiter->haploid_marker().xlabel() << " ///\n";
             tree.process_node(oiter->haploid_marker().node());
         }                
     }    

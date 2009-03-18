@@ -89,7 +89,7 @@ class Tree {
             this->tree_nodes_.push_back(this->process_node(node->get_parent())); 
             unsigned long idx = this->tree_nodes_.size() - 1;
             this->node_indexes_.insert(std::make_pair(node, idx));
-            if (not node->has_label()) {
+            if (node->has_label() == false) {
                 std::ostringstream label_os;
                 label_os << "K" << std::setw(6) << std::setfill('0') << idx;
                 this->labels_.push_back(label_os.str());
@@ -140,7 +140,7 @@ class Tree {
         }
         
         void write_newick_node(long node_idx, std::ostream& out) {
-            unsigned edge_length = 0; 
+            unsigned edge_length = 1; 
             std::vector<long> children = this->get_children(node_idx);
             while (children.size() == 1) {
                 // this deals with nodes of outdegree 1 still in the structure
