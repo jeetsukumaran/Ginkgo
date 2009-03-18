@@ -70,7 +70,7 @@ int main(int argc, char* argv[]) {
     std::cerr << "(setting carrying capacity)\n";
 	world.set_cell_carrying_capacity(cc);
     std::cerr << "(adding species)\n";	
-	gingko::Species& sp1 = world.new_species("gecko");
+	gingko::Species& sp1 = world.new_species("Sp1");
 	
 	std::vector<int> costs;
 	costs.assign(size_x * size_y, 1);
@@ -111,8 +111,9 @@ int main(int argc, char* argv[]) {
         for (gingko::OrganismVector::iterator oiter = ov.begin();
                 oiter != ov.end();
                 ++oiter) {
-//             std::cerr << "/// " << oiter->haploid_marker().node()->has_label() << " **" << &oiter->haploid_marker() << ": " << oiter->haploid_marker().xlabel() << " ///\n";
-            tree.process_node(oiter->haploid_marker().node());
+            std::string label = sp1.new_organism_label();
+            oiter->set_label(label);
+            tree.process_node(oiter->haploid_marker().node(), &label);
         }                
     }    
     

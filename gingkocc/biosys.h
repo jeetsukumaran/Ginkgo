@@ -64,8 +64,8 @@ class GenealogyNode {
         : parent_(NULL),
           first_child_(NULL),
           next_sib_(NULL),
-          reference_count_(1),
-          label_(NULL) { }
+          reference_count_(1)
+          { }
                   
         /** 
          * Ensures all pointers from and to this object are nulled out before 
@@ -262,54 +262,7 @@ class GenealogyNode {
          */         
         void set_next_sib(GenealogyNode * next_sib) {
             this->next_sib_ = next_sib;
-        }
-        
-        /**
-         * Returns the label of this node.
-         *
-         * The label serves to identify this node as an OTU on a tree 
-         * representing the genealogy of this node.
-         * 
-         * @return      copy of the label of the OTU represented by this node
-         */          
-        std::string get_label() const {
-            assert(this->label_ != NULL);
-            return *this->label_;
-        }
-                        
-        /**
-         * Sets the label of this node.
-         *
-         * The label serves to identify this node as an OTU on a tree 
-         * representing the genealogy of this node.
-         * 
-         * @label       the label of the OTU represented by this node
-         */          
-        void set_label(const std::string& label) {
-            this->label_ = &label;               
-        }
-        
-        /**
-         * Unsets the label of this node.
-         *
-         * Labels are only required on terminal nodes, so once the 
-         * HaploidMarker or DiploidMarker object wrapping this node gets 
-         * destroyed, the label is removed (as this node can then only exist
-         * as an internal node).
-         */          
-        void unset_label(const std::string& label) {
-            if (this->label_ == &label)
-                this->label_ = NULL;                       
-        }
-        
-        /**
-         * Returns <code>true</code> if the label is set.
-         *
-         * @return <code>true</code> if label pointer is not <code>NULL</code>.
-         */          
-        bool has_label() {
-            return not (this->label_ == NULL);
-        }        
+        }      
         
     private:
     
@@ -336,12 +289,6 @@ class GenealogyNode {
          * this object itself).
          */        
         unsigned            reference_count_;
-        
-        /** 
-         * Pointer to a identifier or label that will represent this node as an
-         * OTU on a tree.
-         */            
-		const std::string *  label_;
                
 }; 
 // GenealogyNode
@@ -368,7 +315,6 @@ class HaploidMarker {
          */
         ~HaploidMarker() {
             if (this->allele_) {
-                this->allele_->unset_label(this->label_);
                 this->allele_->decrement_count();
             }
         }        
@@ -389,13 +335,10 @@ class HaploidMarker {
          */
         const HaploidMarker& operator=(const HaploidMarker& g) {
             if (this->allele_ != NULL) {
-                this->allele_->unset_label(this->label_);
                 this->allele_->decrement_count();
             }            
-            this->allele_ = g.allele_;
-            this->label_ = g.label_;            
+            this->allele_ = g.allele_;          
             if (this->allele_ != NULL) {
-                this->allele_->set_label(this->label_);
                 this->allele_->increment_count();
             }
             return *this;               
@@ -421,18 +364,6 @@ class HaploidMarker {
         GenealogyNode* node() const {
             return this->allele_;
         }    
-
-        /**
-         * Sets the string representation or identification of the allele at 
-         * this locus.
-         * @param label     string representation of allele as an OTU on a tree
-         */
-        void set_label(const std::string& label) {
-            this->label_ = label;
-            if (this->allele_) {
-                this->allele_->set_label(this->label_);
-            }        
-        }
         
     private:   
     
@@ -441,13 +372,6 @@ class HaploidMarker {
          * alleles at this locus in a particular organism.
          */
         GenealogyNode *      allele_;
-        
-        /** 
-         * Label for the above allele. Maintained here so that when this object
-         * goes out of scope or is destroyed, so will the label (labels are 
-         * required only for terminals/OTUS).
-         */
-         std::string        label_;        
 }; 
 // HaploidMarker
 ///////////////////////////////////////////////////////////////////////////////
@@ -475,11 +399,9 @@ class DiploidMarker {
          */        
         ~DiploidMarker() {          
 			if (this->allele1_ != NULL) {
-			    this->allele1_->unset_label(this->label1_);
                 this->allele1_->decrement_count();
             }            
             if (this->allele2_ != NULL) {
-			    this->allele2_->unset_label(this->label2_);
                 this->allele2_->decrement_count();
             }
         }               
@@ -490,23 +412,6 @@ class DiploidMarker {
         
     public:          
     
-        /**
-         * Sets the OTU label prefix for the nodes of the genealogies of this
-         * locus.
-         * @param label     the string for the OTU label prefix (generally, the
-         *                  label of the organism to which this locus belongs)
-         */
-        void set_label(const std::string& label) {
-            this->label1_ = label + "_a";
-            this->label2_ = label + "_b";
-            if (this->allele1_ != NULL) {
-                this->allele1_->set_label(this->label1_);
-            }              
-            if (this->allele2_ != NULL) {
-                this->allele2_->set_label(this->label2_);
-            }             
-        }
-
         /** 
          * Assignment operator.
          * Calls on assignment operators of member objects. 
@@ -518,18 +423,14 @@ class DiploidMarker {
                 this->allele1_->decrement_count();
             }            
             this->allele1_ = g.allele1_;
-            this->label1_ = g.label1_;
             if (this->allele1_ != NULL) {
-                this->allele1_->set_label(this->label1_);
                 this->allele1_->increment_count();
             }              
             if (this->allele2_ != NULL) {
                 this->allele2_->decrement_count();
             }                
             this->allele2_ = g.allele2_;
-            this->label2_ = g.label2_;
             if (this->allele2_ != NULL) {
-                this->allele2_->set_label(this->label2_);
                 this->allele2_->increment_count();
             }                        
             return *this;               
@@ -564,24 +465,10 @@ class DiploidMarker {
         GenealogyNode *      allele1_;
         
         /** 
-         * Label for the above allele. Maintained here so that when this object
-         * goes out of scope or is destroyed, so will the label (labels are 
-         * required only for terminals/OTUS).
-         */
-         std::string        label1_;
-        
-        /** 
          * A node in the genealogy of this locus representing the other 
          * allele at this locus in a particular organism.
          */        
-        GenealogyNode *      allele2_;
-        
-        /** 
-         * Label for the above allele. Maintained here so that when this object
-         * goes out of scope or is destroyed, so will the label (labels are 
-         * required only for terminals/OTUS).
-         */
-         std::string        label2_;        
+        GenealogyNode *      allele2_;      
 
 }; 
 // DiploidMarker
@@ -613,19 +500,15 @@ class Organism {
          * @param species_index     index of Species object in species pool
          *                          of the World object to which this organism 
          *                          belongs
-         * @param label             string label that will identify alleles
-         *                          belonging to this organism in genealogies
          * @param genotype          array of fitness factor values representing
          *                          the inheritable portion of fitness of this
          *                          individual organism
          * @param sex               gender of this organism
          */ 
         Organism(unsigned species_index,
-                 const std::string& label,
                  const FitnessFactors& new_genotype, 
                  Organism::Sex new_sex) 
                 : species_index_(species_index),
-                  label_(label),
                   sex_(new_sex),
                   fitness_(-1),
                   expired_(false) {
@@ -638,15 +521,11 @@ class Organism {
          * @param species_index     index of Species object in species pool
          *                          of the World object to which this organism 
          *                          belongs
-         * @param label             string label that will identify alleles
-         *                          belonging to this organism in genealogies
          * @param sex               gender of this organism
          */        
-        Organism(unsigned species_index, 
-                 const std::string& label,        
+        Organism(unsigned species_index,      
                  Organism::Sex new_sex) 
-                : species_index_(species_index), 
-                  label_(label),                
+                : species_index_(species_index),              
                   sex_(new_sex),
                   fitness_(-1),
                   expired_(false) { }
@@ -755,6 +634,8 @@ class Organism {
             this->expired_ = val;
         }          
         
+        // --- meta info ---
+        
         /** 
          * Returns the index of the pointer to the Species object representing
          * the species of this object in the species pool of the World.
@@ -764,6 +645,22 @@ class Organism {
         unsigned species_index() const {
             return this->species_index_;
         }
+        
+        /** 
+         * Returns the label of this organism. 
+         * @return  a string that will represent this organism on a tree
+         */  
+        std::string get_label() const {
+            return this->label_;
+        }
+        
+        /** 
+         * Sets the label of this organism. 
+         * @param label a string that will represent this organism on a tree
+         */        
+        void set_label(const std::string& label) {
+            this->label_ = label;
+        }         
         
         /** 
          * Returns <code>true</code> if this organism is male.         
@@ -830,11 +727,9 @@ class Organism {
         void inherit_genealogies(const Organism& female, 
                                  const Organism& male,
                                  RandomNumberGenerator& rng) {
-            this->neutral_haploid_marker_.inherit(female.neutral_haploid_marker_);
-            this->neutral_haploid_marker_.set_label(this->label_);        
+            this->neutral_haploid_marker_.inherit(female.neutral_haploid_marker_);  
             for (unsigned i = 0; i < NUM_NEUTRAL_DIPLOID_LOCII; ++i) {
                 this->neutral_diploid_markers_[i].inherit(female.neutral_diploid_markers_[i], male.neutral_diploid_markers_[i], rng);
-                this->neutral_diploid_markers_[i].set_label(this->label_);
             }                
         }
         
@@ -975,13 +870,12 @@ class Species {
         
         Organism new_organism() {
             return Organism(this->index_, 
-                            this->new_organism_label(), 
                             this->default_genotypic_fitness_factors_, 
                             this->get_random_sex());
         }
         
         Organism new_organism(const Organism& female, const Organism& male) {
-            Organism organism(this->index_, this->new_organism_label(), this->get_random_sex());
+            Organism organism(this->index_, this->get_random_sex());
             // // std::cout << "\n\nCreating new organism: " << &organism << std::endl;
             organism.inherit_genotypic_fitness_factors(female, 
                                                        male, 

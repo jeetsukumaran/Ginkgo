@@ -78,7 +78,7 @@ class Tree {
         
         // adds node if it is note already in the ancestor array
         // returns index in array
-        unsigned long process_node(GenealogyNode* node) {
+        unsigned long process_node(GenealogyNode* node, const std::string * label=NULL) {
             if (node == NULL) {
                 return -1;
             }
@@ -90,8 +90,11 @@ class Tree {
             this->tree_nodes_.push_back(this->process_node(node->get_parent())); 
             unsigned long idx = this->tree_nodes_.size() - 1;
             this->node_indexes_.insert(std::make_pair(node, idx));
-            if (node->get_first_child() == NULL) {
-                this->labels_.insert(std::make_pair(idx, node->get_label()));
+            if (label != NULL) {
+                this->labels_.insert(std::make_pair(idx, *label));
+            } else {
+                // all terminals must have labels
+                assert(node->get_first_child() != NULL);
             }
 //             if (node->has_label()) {              
 //                 this->labels_.insert(std::make_pair(idx, node->get_label()));
@@ -152,9 +155,8 @@ class Tree {
                 long only_child = children[0];
                 children = this->get_children(only_child);
                 if (children.size() == 0) {
-//                     std::cerr << "%%% from one to none: " << node_idx << " %%%\n";
                     // node has chain of outdegree 1 descendents all the way
-                    // to single terminal
+                    // to single terminal: collapse to child
                     node_idx = only_child;
                 }
             }
