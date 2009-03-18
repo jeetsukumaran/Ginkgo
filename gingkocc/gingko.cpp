@@ -112,7 +112,6 @@ int main(int argc, char* argv[]) {
                 oiter != ov.end();
                 ++oiter) {
             std::string label = sp1.new_organism_label();
-            oiter->set_label(label);
             tree.process_node(oiter->haploid_marker().node(), &label);
         }                
     }    

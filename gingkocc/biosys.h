@@ -554,7 +554,6 @@ class Organism {
             this->sex_ = ind.sex_;
             this->fitness_ = ind.fitness_;
             this->expired_ = ind.expired_;
-            this->label_ = ind.label_;
             this->neutral_haploid_marker_ = ind.neutral_haploid_marker_;
             for (unsigned i = 0; i < NUM_NEUTRAL_DIPLOID_LOCII; ++i) {
                 this->neutral_diploid_markers_[i] = ind.neutral_diploid_markers_[i];
@@ -644,23 +643,7 @@ class Organism {
          */   
         unsigned species_index() const {
             return this->species_index_;
-        }
-        
-        /** 
-         * Returns the label of this organism. 
-         * @return  a string that will represent this organism on a tree
-         */  
-        std::string get_label() const {
-            return this->label_;
-        }
-        
-        /** 
-         * Sets the label of this organism. 
-         * @param label a string that will represent this organism on a tree
-         */        
-        void set_label(const std::string& label) {
-            this->label_ = label;
-        }         
+        }       
         
         /** 
          * Returns <code>true</code> if this organism is male.         
@@ -740,9 +723,6 @@ class Organism {
          * species of this organism
          */
         unsigned                species_index_;
-        
-        /** unique (within a species and a generation) label of this organism */
-        std::string             label_;
         
         /** values of inheritable component of fitness */
         FitnessFactors          genotypic_fitness_factors_;
