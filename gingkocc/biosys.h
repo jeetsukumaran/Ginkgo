@@ -64,8 +64,7 @@ class GenealogyNode {
         : parent_(NULL),
           first_child_(NULL),
           next_sib_(NULL),
-          reference_count_(1),
-          label_(NULL) { }
+          reference_count_(1) { }
                   
         /** 
          * Ensures all pointers from and to this object are nulled out before 
@@ -273,8 +272,8 @@ class GenealogyNode {
          * @return      copy of the label of the OTU represented by this node
          */          
         std::string get_label() const {
-            assert(this->label_ != NULL);
-            return *this->label_;
+//             assert(this->label_ != NULL);
+            return this->label_;
         }
                         
         /**
@@ -283,10 +282,10 @@ class GenealogyNode {
          * The label serves to identify this node as an OTU on a tree 
          * representing the genealogy of this node.
          * 
-         * @label      pointer to the label of the OTU represented by this node
+         * @label       the label of the OTU represented by this node
          */          
-        void set_label(const std::string * label) {
-            this->label_ = label;                       
+        void set_label(const std::string& label) {
+            this->label_ = label;               
         }
         
         /**
@@ -297,19 +296,19 @@ class GenealogyNode {
          * destroyed, the label is removed (as this node can then only exist
          * as an internal node).
          */          
-        void unset_label(const std::string * label) {
-            if (this->label_ == label)
-                this->label_ = NULL;                       
-        }
+//         void unset_label(const std::string * label) {
+//             if (this->label_ == label)
+//                 this->label_ = NULL;                       
+//         }
         
         /**
          * Returns <code>true</code> if the label is set.
          *
          * @return <code>true</code> if label pointer is not <code>NULL</code>.
          */          
-        bool has_label() {
-            return not (this->label_ == NULL);
-        }        
+//         bool has_label() {
+//             return not (this->label_ == NULL);
+//         }        
         
     private:
     
@@ -341,7 +340,7 @@ class GenealogyNode {
          * Pointer to a identifier or label that will represent this node as an
          * OTU on a tree.
          */            
-		const std::string * label_;
+		std::string   label_;
                
 }; 
 // GenealogyNode
@@ -368,7 +367,7 @@ class HaploidMarker {
          */
         ~HaploidMarker() {
             if (this->allele_) {
-                this->allele_->unset_label(&this->label_);
+//                 this->allele_->unset_label(&this->label_);
                 this->allele_->decrement_count();
             }
         }        
@@ -389,13 +388,13 @@ class HaploidMarker {
          */
         const HaploidMarker& operator=(const HaploidMarker& g) {
             if (this->allele_ != NULL) {
-                this->allele_->unset_label(&this->label_);
+//                 this->allele_->unset_label(&this->label_);
                 this->allele_->decrement_count();
             }            
             this->allele_ = g.allele_;
             this->label_ = g.label_;            
             if (this->allele_ != NULL) {
-                this->allele_->set_label(&this->label_);
+                this->allele_->set_label(this->label_);
                 this->allele_->increment_count();
             }
             return *this;               
@@ -420,9 +419,7 @@ class HaploidMarker {
          */
         GenealogyNode* node() const {
             return this->allele_;
-        }
-
-        const std::string& xlabel() const { return this->label_; }        
+        }    
 
         /**
          * Sets the string representation or identification of the allele at 
@@ -432,7 +429,7 @@ class HaploidMarker {
         void set_label(const std::string& label) {
             this->label_ = label;
             if (this->allele_) {
-                this->allele_->set_label(&this->label_);
+                this->allele_->set_label(this->label_);
             }        
         }
         
@@ -477,11 +474,11 @@ class DiploidMarker {
          */        
         ~DiploidMarker() {          
 			if (this->allele1_ != NULL) {
-			    this->allele1_->unset_label(&this->label1_);
+// 			    this->allele1_->unset_label(&this->label1_);
                 this->allele1_->decrement_count();
             }            
             if (this->allele2_ != NULL) {
-			    this->allele2_->unset_label(&this->label2_);            
+// 			    this->allele2_->unset_label(&this->label2_);            
                 this->allele2_->decrement_count();
             }
         }               
@@ -502,10 +499,10 @@ class DiploidMarker {
             this->label1_ = label + "_a";
             this->label2_ = label + "_b";
             if (this->allele1_ != NULL) {
-                this->allele1_->set_label(&this->label1_);
+                this->allele1_->set_label(this->label1_);
             }              
             if (this->allele2_ != NULL) {
-                this->allele2_->set_label(&this->label2_);
+                this->allele2_->set_label(this->label2_);
             }             
         }
 
@@ -936,7 +933,7 @@ class Species {
         
         std::string new_organism_label() {
             std::ostringstream label_ostr;
-            label_ostr << this->label_ << "_" << this->generation_ << "_" << this->organism_counter_++;
+            label_ostr << this->label_ << "_" << this->organism_counter_++;
             return label_ostr.str();
         }
         
