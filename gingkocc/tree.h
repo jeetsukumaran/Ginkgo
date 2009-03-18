@@ -93,6 +93,8 @@ class Tree {
             if (node->has_label()) {              
                 this->labels_.insert(std::make_pair(idx, node->get_label()));
             } else {
+                // all nodes without labels must be internal nodes,
+                // which means they must have children
                 assert(node->get_first_child() != NULL);
             }
 //             this->edge_lens_.push_back(node->get_edge_len());

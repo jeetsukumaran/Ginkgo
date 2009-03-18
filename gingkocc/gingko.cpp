@@ -111,7 +111,7 @@ int main(int argc, char* argv[]) {
         for (gingko::OrganismVector::iterator oiter = ov.begin();
                 oiter != ov.end();
                 ++oiter) {
-            std::cerr << "/// " << oiter->haploid_marker().node()->has_label() << " **" << &oiter->haploid_marker() << ": " << oiter->haploid_marker().xlabel() << " ///\n";
+//             std::cerr << "/// " << oiter->haploid_marker().node()->has_label() << " **" << &oiter->haploid_marker() << ": " << oiter->haploid_marker().xlabel() << " ///\n";
             tree.process_node(oiter->haploid_marker().node());
         }                
     }    
@@ -120,6 +120,6 @@ int main(int argc, char* argv[]) {
 //     tree.dump(std::cerr);
     std::cerr << "\n---\n\n";
     tree.write_newick_tree(std::cout);
-    std::cerr << std::endl;
+    std::cout << std::endl;
     
 }
