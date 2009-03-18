@@ -64,7 +64,8 @@ class GenealogyNode {
         : parent_(NULL),
           first_child_(NULL),
           next_sib_(NULL),
-          reference_count_(1) { }
+          reference_count_(1),
+          label_(NULL) { }
                   
         /** 
          * Ensures all pointers from and to this object are nulled out before 
@@ -272,8 +273,8 @@ class GenealogyNode {
          * @return      copy of the label of the OTU represented by this node
          */          
         std::string get_label() const {
-//             assert(this->label_ != NULL);
-            return this->label_;
+            assert(this->label_ != NULL);
+            return *this->label_;
         }
                         
         /**
@@ -285,7 +286,7 @@ class GenealogyNode {
          * @label       the label of the OTU represented by this node
          */          
         void set_label(const std::string& label) {
-            this->label_ = label;               
+            this->label_ = &label;               
         }
         
         /**
@@ -296,19 +297,19 @@ class GenealogyNode {
          * destroyed, the label is removed (as this node can then only exist
          * as an internal node).
          */          
-//         void unset_label(const std::string * label) {
-//             if (this->label_ == label)
-//                 this->label_ = NULL;                       
-//         }
+        void unset_label(const std::string& label) {
+            if (this->label_ == &label)
+                this->label_ = NULL;                       
+        }
         
         /**
          * Returns <code>true</code> if the label is set.
          *
          * @return <code>true</code> if label pointer is not <code>NULL</code>.
          */          
-//         bool has_label() {
-//             return not (this->label_ == NULL);
-//         }        
+        bool has_label() {
+            return not (this->label_ == NULL);
+        }        
         
     private:
     
@@ -340,7 +341,7 @@ class GenealogyNode {
          * Pointer to a identifier or label that will represent this node as an
          * OTU on a tree.
          */            
-		std::string   label_;
+		const std::string *  label_;
                
 }; 
 // GenealogyNode
@@ -367,7 +368,7 @@ class HaploidMarker {
          */
         ~HaploidMarker() {
             if (this->allele_) {
-//                 this->allele_->unset_label(&this->label_);
+                this->allele_->unset_label(this->label_);
                 this->allele_->decrement_count();
             }
         }        
@@ -388,7 +389,7 @@ class HaploidMarker {
          */
         const HaploidMarker& operator=(const HaploidMarker& g) {
             if (this->allele_ != NULL) {
-//                 this->allele_->unset_label(&this->label_);
+                this->allele_->unset_label(this->label_);
                 this->allele_->decrement_count();
             }            
             this->allele_ = g.allele_;
@@ -474,11 +475,11 @@ class DiploidMarker {
          */        
         ~DiploidMarker() {          
 			if (this->allele1_ != NULL) {
-// 			    this->allele1_->unset_label(&this->label1_);
+			    this->allele1_->unset_label(this->label1_);
                 this->allele1_->decrement_count();
             }            
             if (this->allele2_ != NULL) {
-// 			    this->allele2_->unset_label(&this->label2_);            
+			    this->allele2_->unset_label(this->label2_);
                 this->allele2_->decrement_count();
             }
         }               
@@ -517,18 +518,20 @@ class DiploidMarker {
                 this->allele1_->decrement_count();
             }            
             this->allele1_ = g.allele1_;
+            this->label1_ = g.label1_;
             if (this->allele1_ != NULL) {
+                this->allele1_->set_label(this->label1_);
                 this->allele1_->increment_count();
             }              
             if (this->allele2_ != NULL) {
                 this->allele2_->decrement_count();
             }                
             this->allele2_ = g.allele2_;
-            if (this->allele2_ != NULL) {
-                this->allele2_->increment_count();
-            }
-            this->label1_ = g.label1_;
             this->label2_ = g.label2_;
+            if (this->allele2_ != NULL) {
+                this->allele2_->set_label(this->label2_);
+                this->allele2_->increment_count();
+            }                        
             return *this;               
         }
         
