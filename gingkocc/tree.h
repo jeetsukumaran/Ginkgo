@@ -36,6 +36,7 @@ namespace gingko {
 
 class Tree {
 
+    typedef std::map< long, std::string >           NodeLabelMap;
     typedef std::map< GenealogyNode*, long >        NodeIndexMap;
     typedef std::vector<GenealogyNode*>             NodeVector;
     typedef std::vector<long>                       IndexVector;
@@ -89,13 +90,11 @@ class Tree {
             this->tree_nodes_.push_back(this->process_node(node->get_parent())); 
             unsigned long idx = this->tree_nodes_.size() - 1;
             this->node_indexes_.insert(std::make_pair(node, idx));
-            if (node->has_label() == false) {
-                std::ostringstream label_os;
-                label_os << "K" << std::setw(6) << std::setfill('0') << idx;
-                this->labels_.push_back(label_os.str());
-            } else {                
-                this->labels_.push_back(node->get_label());
-            }                
+            if (node->has_label()) {              
+                this->labels_.insert(std::make_pair(idx, node->get_label()));
+            } else {
+                assert(node->get_first_child() != NULL);
+            }
 //             this->edge_lens_.push_back(node->get_edge_len());
             return idx;
         }
@@ -144,8 +143,15 @@ class Tree {
             std::vector<long> children = this->get_children(node_idx);
             while (children.size() == 1) {
                 // this deals with nodes of outdegree 1 still in the structure
-                ++edge_length; 
-                children = this->get_children(children[0]);
+                ++edge_length;
+                long only_child = children[0];
+                children = this->get_children(only_child);
+                if (children.size() == 0) {
+//                     std::cerr << "%%% from one to none: " << node_idx << " %%%\n";
+                    // node has chain of outdegree 1 descendents all the way
+                    // to single terminal
+                    node_idx = only_child;
+                }
             }
             if (children.size() > 0) {
                 out << "(";
@@ -159,7 +165,12 @@ class Tree {
                 }
                 out << ")";
             } else {
-                out << this->labels_.at(node_idx);
+                NodeLabelMap::iterator node_label = this->labels_.find(node_idx);
+                if (node_label == this->labels_.end()) {
+                    std::cerr << "### NOT FOUND: " << node_idx << " ###\n";
+                } else {
+                    out << node_label->second;
+                }                    
             }
             out << ":" << edge_length;
         }
@@ -187,7 +198,7 @@ class Tree {
         NodeIndexMap                        node_indexes_;
         NodeVector                          nodes_to_coalesce_;
         IndexVector                         tree_nodes_;
-        std::vector<std::string>            labels_;
+        NodeLabelMap                        labels_;
         bool                                coalesce_multiple_roots_;
 };
 

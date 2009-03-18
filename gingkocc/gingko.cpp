@@ -117,7 +117,7 @@ int main(int argc, char* argv[]) {
     }    
     
 
-    tree.dump(std::cerr);
+//     tree.dump(std::cerr);
     std::cerr << "\n---\n\n";
     tree.write_newick_tree(std::cout);
     std::cerr << std::endl;
