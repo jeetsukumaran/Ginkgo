@@ -44,10 +44,11 @@ std::string textwrap(const std::string& source,
             line_count += 1;
             continue;
         }
-        ;
+
         if (col_count > line_width) {
+            std::string::size_type last_break = wrapped.find_last_of("\n");
             std::string::size_type wrap_pos = wrapped.find_last_of(" ");
-            if (wrap_pos == std::string::npos) {
+            if (wrap_pos == std::string::npos or ((last_break != std::string::npos) and (last_break > wrap_pos))) {
                 wrapped += "\n";
                 col_count = 1;
             } else {                
