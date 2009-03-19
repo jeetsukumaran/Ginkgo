@@ -24,31 +24,80 @@
 
 namespace gingko {
 
-///////////////////////////////////////////////////////////////////////////////
-// Encapsulates generation of random variates drawn from various distributions.
-//
+/**
+ * Encapsulates generation of random number from various distribution and 
+ * various ranges.
+ */
 class RandomNumberGenerator {
 
     public:
+    
+        /** Constructs a RNG seeded with current time. */
         RandomNumberGenerator();
+        
+        /** Constructs a RNG seeded with current time. */
+        
+        /** Constructs a RNG seeded with given seed. */
         RandomNumberGenerator(unsigned long seed);
+        
+        /** Explicitly sets the RNG seed. */
         void set_seed(unsigned long seed);
  
-        float uniform_real();                   //! Uniform random real variate in [0, 1).
-        long  uniform_int(int a, int b);        //! Uniform random integer variate in [a, b].
-        float standard_normal();                //! Gaussian random variate with mean of 0 and std. dev. of 1.
-        float normal(float mean, float sd);     //! Gaussian random variate with given mean and std. dev.        
-        unsigned int poisson(float rate);       //! Poisson random variate with given hazard parameter.
+        /**
+         * Returns a uniform random real variate in [0,1).
+         * @return   uniform random real variate in [0,1)
+         */
+        float uniform_real();
         
-        //! Returns an element selected with uniform probability from a
-        //! collection.
+        /**
+         * Returns a uniform random integer in [a, b].
+         * @param   lower-bound of range
+         * @param   upper-bound of range
+         * @return  uniform random integer in [a, b]
+         */        
+        long  uniform_int(int a, int b);
+        
+        /**
+         * Returns Gaussian random variate with mean of 0 and standard
+         * deviation of 1.
+         * @return   random variate with mean of 0 and standard deviation of 1
+         */          
+        float standard_normal(); 
+        
+        /**
+         * Returns Gaussian random variate with mean of <code>mean</code> and 
+         * standard deviation of <code>sd</code>.
+         * @return   random variate with mean of <code>mean</code> and standard 
+         *           deviation of <code>sd</code>
+         */        
+        float normal(float mean, float sd);
+        
+        /**
+         * Returns a Poisson-distributed random variate with given rate.
+         * @param   rate    rate for the Poisson process
+         * @return          random variate from a Poisson distribution with given
+         *                  rate
+         */
+        unsigned int poisson(float rate);
+        
+        /**
+         * Returns an element selected with uniform random probability from
+         * given universe of elements.
+         * @param   collection  universe of elements from which to sample
+         * @return              random element from collection
+         */
         template <typename T>
         inline typename T::value_type& select(T& collection) {
             return collection[this->uniform_int(0, collection.size()-1)];
         }
         
-        //! Returns one of two values passed as arguments with uniform
-        //! random probability.
+        /**
+         * Returns one of two arguments passed to it.
+         * @param   a   the first candidate to be returned
+         * @param   b   the second candidate to be returned
+         * @return      either <code>a</code> or <code>b</code>, selected at
+         *              random
+         */
         template <typename T>        
         inline T& select(T& a, T& b) {
             if (this->uniform_real() < 0.5) {
@@ -59,11 +108,9 @@ class RandomNumberGenerator {
         }        
         
     private:
+        /** random number generator seed */
         unsigned long seed_;                    //! seed for the underlying rng
 };
-// RandomNumberGenerator
-///////////////////////////////////////////////////////////////////////////////
-
 
 } // gingko namespace
 
