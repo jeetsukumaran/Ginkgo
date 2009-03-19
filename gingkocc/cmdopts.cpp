@@ -43,32 +43,70 @@ std::string OptionArg::textwrap(const std::string& source,
         unsigned line_width,
         unsigned first_line_indent, 
         unsigned subsequent_line_indent) const {
-    std::ostringstream wrapped;
+//     std::ostringstream wrapped;
+    std::string wrapped;
     unsigned col_count = 1;
     unsigned line_count = 1;
+    std::string subsequent_line_indent_str(subsequent_line_indent, ' ');
     for (std::string::const_iterator s = source.begin();
             s != source.end();
             ++s, ++col_count) {
-        if (*s == '\n' or col_count > line_width) {
-            wrapped << '\n';
+
+        if (*s == '\n') {
+            wrapped += "\n";
             col_count = 0;
             line_count += 1;
             continue;
-        }        
+        }
+        
+        if (col_count > line_width) {
+            std::string::size_type wrap_pos = wrapped.find_last_of(" ");
+            if (wrap_pos == std::string::npos) {
+                wrapped += "\n";
+                col_count = 0;
+            } else {                
+                wrapped.replace(wrap_pos, 1, "\n" + subsequent_line_indent_str);             
+                col_count = wrapped.size() - wrap_pos;                    
+            }
+            line_count += 1;                                    
+            wrapped += *s;
+            col_count += 1;
+            continue;
+        }
+            
         if (col_count == 1 and line_count == 1 and first_line_indent > 0) {
             for (unsigned i = 0; i < first_line_indent; ++i) {
-                wrapped << ' ';
+                wrapped += ' ';
             }
             col_count += first_line_indent;
         } else if (col_count == 1 and line_count > 1) {
-            for (unsigned i = 0; i < subsequent_line_indent; ++i) {
-                wrapped << ' ';
-            }
+            wrapped += subsequent_line_indent_str;
             col_count += subsequent_line_indent;                    
         }
-        wrapped << *s;
+        wrapped += *s;
+                                   
+//         if (*s == '\n' or col_count > line_width) {
+//             wrapped << '\n';
+//             col_count = 0;
+//             line_count += 1;
+//             continue;
+//         }        
+//         if (col_count == 1 and line_count == 1 and first_line_indent > 0) {
+//             for (unsigned i = 0; i < first_line_indent; ++i) {
+//                 wrapped << ' ';
+//             }
+//             col_count += first_line_indent;
+//         } else if (col_count == 1 and line_count > 1) {
+//             for (unsigned i = 0; i < subsequent_line_indent; ++i) {
+//                 wrapped << ' ';
+//             }
+//             col_count += subsequent_line_indent;                    
+//         }
+//         wrapped << *s;
     }
-    return wrapped.str();                         
+//     return wrapped.str();
+
+    return wrapped;
 } 
 
 std::ostream& OptionArg::write_help(std::ostream& out) const {            
@@ -110,7 +148,7 @@ std::ostream& OptionArg::write_help(std::ostream& out) const {
         std::string::size_type defval = help_msg.find("%default");
         std::string replace_val = this->current_value_as_string();
         while (defval != std::string::npos) {
-            help_msg.replace(defval, 9, replace_val.c_str());
+            help_msg.replace(defval, 8, replace_val.c_str());
             defval = help_msg.find("%default");
         }
         help_str += help_msg;

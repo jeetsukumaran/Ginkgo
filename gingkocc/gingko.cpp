@@ -54,7 +54,6 @@ int main(int argc, char* argv[]) {
                                     "number of fitness factors (default = %default)", "#FACTORS");
     parser.add_option<unsigned long>(&rand_seed, "-z", "--random-seed", 
                                      "random number seed (default = %default)", "SEED");
-
     parser.parse(argc, argv);       
     
     std::cerr << "           Landscape size: (" << size_x << ", " << size_y << ")\n";
