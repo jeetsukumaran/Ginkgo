@@ -193,8 +193,9 @@ void OptionParser::parse(int argc, char * argv[]) {
                 exit(1);
             }
             
+            // help option specified
             if (oai->second == this->help_option_) {
-                this->write_help(std::cerr, argv[0]);
+                this->write_help(std::cerr, extract_filename_from_path(argv[0]).c_str());
                 exit(1);
             }
             
