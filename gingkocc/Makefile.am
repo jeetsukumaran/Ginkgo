@@ -14,4 +14,5 @@ gingko_SOURCES = \
     cell.cpp \
     world.cpp \
     cmdopts.cpp \
-    textutils.cpp
+    textutils.cpp \
+    tree.cpp
