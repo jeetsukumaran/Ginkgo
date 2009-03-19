@@ -42,7 +42,8 @@ OptionArg::~OptionArg() {}
   
 
 std::ostream& OptionArg::write_help(std::ostream& out) const {            
-    std::string help_str;      
+    std::string help_str;
+    help_str += "  ";
     if (this->short_flag_.size() > 0) {               
         help_str += this->short_flag_;
         if (not this->is_switch_) {
@@ -117,7 +118,8 @@ OptionParser::OptionParser(const char * description,
     if (version != NULL) {
         this->version_.assign(version);
     }       
-    this->help_option_ = this->add_switch(&this->show_help_, "-h", "--help",  "show this message and exit");
+    this->version_option_ = this->add_switch(&this->show_version_, NULL, "--version", "show program's version number and exit");    
+    this->help_option_ = this->add_switch(&this->show_help_, "-h", "--help",  "show this help message and exit");
 }
     
 OptionParser::~OptionParser() {
@@ -144,6 +146,7 @@ std::ostream& OptionParser::write_help(std::ostream& out, const char * progname)
     if (this->description_.size() != 0) {
         out << textwrap(this->description_, CMDOPTS_LINE_WIDTH) << std::endl << std::endl;
     }
+    out << "Options:" << std::endl;
     for (std::vector<OptionArg *>::const_iterator oa = this->option_args_.begin();
             oa != this->option_args_.end();
             ++oa) {
@@ -189,15 +192,9 @@ void OptionParser::parse(int argc, char * argv[]) {
             
             std::map< std::string, OptionArg * >::iterator oai = this->key_opt_map_.find(arg_name);
             if ( oai == this->key_opt_map_.end() ) {
-                std::cerr << "unrecognized command \"" << arg_name << "\"" << std::endl;
+                std::cerr << "unrecognized option \"" << arg_name << "\"" << std::endl;
                 exit(1);
-            }
-            
-            // help option specified
-            if (oai->second == this->help_option_) {
-                this->write_help(std::cerr, extract_filename_from_path(argv[0]).c_str());
-                exit(1);
-            }
+            }          
             
             OptionArg& oa = *(oai->second);
             
@@ -226,6 +223,19 @@ void OptionParser::parse(int argc, char * argv[]) {
         } else {
             this->pos_args_.push_back(argv[i]);
         }
+        
+            
+        // help option specified
+        if (this->show_help_) {
+            this->write_help(std::cout, extract_filename_from_path(argv[0]).c_str());
+            exit(0);
+        }
+        
+        // show version
+        if (this->show_version_) {
+            std::cout << this->version_ << std::endl;
+            exit(0);
+        }          
     }
 }
 

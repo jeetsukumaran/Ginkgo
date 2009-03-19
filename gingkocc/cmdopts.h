@@ -459,6 +459,10 @@ class OptionParser {
         bool                                        show_help_;
         /** stores pointer to help option arg */
         OptionArg *                                 help_option_;
+        /** stores value of help option arg switch */
+        bool                                        show_version_;
+        /** stores pointer to help option arg */
+        OptionArg *                                 version_option_;        
         /** usage string */
         std::string                                 usage_;
         /** program description */
