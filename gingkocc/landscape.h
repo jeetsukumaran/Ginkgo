@@ -30,59 +30,168 @@ namespace gingko {
 
 
 ///////////////////////////////////////////////////////////////////////////////	
-//! The landscape.
+// Landscape
+/**
+ * The geospatial framework.
+ */
 class Landscape {
 
     public:
     
+        /** To store information on a single migration event: organism, dest */
         typedef std::pair<Organism, CellIndexType>   MigrationEvent;
+        /** To store collection of single migration events */
         typedef std::vector<MigrationEvent>          MigrationEvents;
     
-        // --- lifecycle and assignment ---        
+        // --- lifecycle and assignment ---
 
+        /**
+         * Constructs a landscape object, binding a species pool and a random
+         * number generator.
+         *
+         * @param species   reference vector of pointer to Species objects
+         * @param rng       reference to a RandomNumberGenerator
+         */
         Landscape(const SpeciesPointerVector& species, RandomNumberGenerator& rng);
+        
+        /** Destructor */
         ~Landscape();
         
         // --- initialization and set up ---
 
+        /**
+         * Create landscape data structure with specified dimensions.
+         *
+         * @param size_x                    x-dimension
+         * @param size_y                    y-dimension
+         * @param num_environmental_factors number of active fitness factors
+         */
         void generate(CellIndexType size_x, CellIndexType size_y, unsigned num_environmental_factors); 
  
         // --- landscape access, control and mutation ---                                      
 
+        /**
+         * Globally fixes the maximum number of organisms that can occupy a 
+         * cell.
+         * Iterates through all cells, setting their carrying capacity.
+         * @param carrying_capacity        maximum occupancy of each cell
+         */
         void set_cell_carrying_capacity(unsigned long carrying_capacity);
         
         // --- cell access and spatial mapping ---
         
+        /**
+         * Returns cell at geospatial coordinates (x,y).
+         *
+         * @param   x   geospatial x-coordinate of the Cell
+         * @param   y   geospatial y-coordinate of the Cell
+         * @return      Cell object at (x,y)
+         */
         Cell& operator()(CellIndexType x, CellIndexType y) {
             return *this->cells_[this->xy_to_index(x, y)];
         }
-        Cell& operator[](CellIndexType index) {
-            return *this->cells_[index];
-        }            
+        
+        /**
+         * Returns cell at geospatial coordinates (x,y) with bounds checking.
+         *
+         * @param   x   geospatial x-coordinate of the Cell
+         * @param   y   geospatial y-coordinate of the Cell
+         * @return      Cell object at (x,y)
+         */        
         Cell& at(CellIndexType x, CellIndexType y) {
             return *this->cells_.at(this->xy_to_index(x, y));
-        }
+        }        
+        
+        /**
+         * Returns cell at given vector index.
+         *
+         * @param   index   vector index of the Cell
+         * @return          Cell object at given vector index
+         */        
+        Cell& operator[](CellIndexType index) {
+            return *this->cells_[index];
+        }         
+
+        /**
+         * Returns cell at given vector index with bounds checking.
+         *
+         * @param   index   vector index of the Cell
+         * @return          Cell object at given vector index
+         */                  
         Cell& at(CellIndexType index) {
             return *this->cells_.at(index);
         }
+        
+        /**
+         * Returns geospatial x-coordinate for a given vector index.
+         *
+         * @param   index   index of element in vector
+         * @return          geospatial x-coordinate corresponding to vector
+         *                  index
+         */
         CellIndexType index_to_x(CellIndexType index) const {
             return index % this->size_x_;          
         }
+        
+        /**
+         * Returns geospatial y-coordinate for a given vector index.
+         *
+         * @param   index   index of element in vector
+         * @return          geospatial y-coordinate corresponding to vector
+         *                  index
+         */        
         CellIndexType index_to_y(CellIndexType index) const {
             return static_cast<CellIndexType>(index / this->size_x_);            
         }
+        
+        /**
+         * Returns geospatial (x, y) coordinates for a given vector index.
+         *
+         * @param    x  geospatial x-coordinate of the Cell
+         * @param    y  geospatial y-coordinate of the Cell
+         * @return      index of element in vector         
+         */        
         CellIndexType xy_to_index(CellIndexType x, CellIndexType y) const {
             return (y * this->size_x_) + x;
         }
+        
+        /**
+         * Returns length of vector of Cell objects.
+         *
+         * @return  number of Cell objects in this Landscape        
+         */         
         CellIndexType size() const {
             return this->size_;
         }
+        
+        /**
+         * Returns length of x-dimension of the geospatial framework 
+         * superimposed on the vector of Cell objects.
+         *
+         * @return  length of x-dimension       
+         */         
         CellIndexType size_x() const {
             return this->size_x_;
         }
+        
+        /**
+         * Returns length of y-dimension of the geospatial framework 
+         * superimposed on the vector of Cell objects.
+         *
+         * @return  length of y-dimension       
+         */          
         CellIndexType size_y() const {
             return this->size_y_;
         }
+        
+        /**
+         * Returns a Cell object that is adjacent to the cell of the given 
+         * vector index when considered within the geospatial framework.         
+         *
+         * @param   i   index of the origin cell in the vector
+         * @return      a random cell that is "next to" the origin cell in
+         *              the geospatial framework
+         */             
         CellIndexType random_neighbor(CellIndexType i) {
             static CellIndexType x = 0;
             static CellIndexType y = 0;
@@ -103,31 +212,52 @@ class Landscape {
         }
         
         // --- migration and movement ---
-
+        
+        /**
+         * Adds a migration event to be processed.        
+         *
+         * When simulating migration, we build up a collection of migrants
+         * to be actually inserted into the destination cells at the end of the 
+         * round.
+         *
+         * @param   organism    reference to organism that will be moved
+         * @param   dest_cell   vector index of destination cell
+         */ 
         void add_migrant(const Organism& organism, CellIndexType dest_cell) {
             this->migrants_.push_back(std::make_pair(organism, dest_cell));
         }
+        
+        /** Clear the collection of migration events. */
         void clear_migrants();               
+        
+        /** Actually process the migration events (move the organisms). */
         void process_migrants();
         
         // --- debugging ---
         
+        /** Write a representation of the landscape to the given outputs stream */
         unsigned long dump(std::ostream& output = std::cout);       
     
     private:
-        CellIndexType                   size_x_;                // size of the landscape in the x dimension
-        CellIndexType                   size_y_;                // size of the landscape in the y dimension        
-        CellIndexType                   size_;                  // == x * y, cached here
-        std::vector<Cell*>              cells_;                 // cells of the landscape
-        
-        // cache to collect migrating organisms over a round of migration
+    
+        /** Size of the Landscape in the x-dimension in the geospatial framework */
+        CellIndexType                   size_x_;
+        /** Size of the Landscape in the y-dimension in the geospatial framework */
+        CellIndexType                   size_y_;
+        /** Total number of cells in this Landscape. */
+        CellIndexType                   size_;
+        /** Collection of cells in this Landscape. */
+        std::vector<Cell*>              cells_;
+        /** Collection migration events. */
         MigrationEvents                 migrants_;
-        
-        const SpeciesPointerVector&     species_;               // species pool
-        RandomNumberGenerator&          rng_;                   // random number generator        
+        /** Reference to collection of pointers to Species objects in the World. */
+        const SpeciesPointerVector&     species_;
+        /** Reference to RandomNumberGenerator of the World. */
+        RandomNumberGenerator&          rng_;
 };
 // Landscape
 //////////////////////////////////////////////////////////////////////////////
+
 
 } // gingko namespace
 
