@@ -41,19 +41,19 @@ int main(int argc, char* argv[]) {
 
     gingko::OptionParser parser = gingko::OptionParser();
     parser.add_option<unsigned long>(&size_x, "-x", "--dim-x", 
-                                     "size of landscape in the x-dimension", "DIM-X");
+                                     "size of landscape in the x-dimension (default = %default)", "DIM-X");
     parser.add_option<unsigned long>(&size_y, "-y", "--dim-y", 
-                                     "size of landscape in the y-dimension", "DIM-Y");
+                                     "size of landscape in the y-dimension (default = %default)", "DIM-Y");
     parser.add_option<unsigned long>(&cc, "-c", "--carrying-capacity", 
-                                     "maximum carrying capacity of each cell", "K");
+                                     "maximum carrying capacity of each cell (default = %default)", "K");
     parser.add_option<unsigned long>(&num_cells_init, "-i", "--init-cells", 
-                                     "number of cells to seed with initial population", "#");
+                                     "number of cells to seed with initial population (default = %default)", "#");
     parser.add_option<unsigned long>(&num_gens, "-g", "--num-gens",                                     
-                                     "number of generations to run", "#GENERATIONS");  
+                                     "number of generations to run (default = %default)", "#GENERATIONS");  
     parser.add_option<unsigned int>(&num_fitness, "-f", "--num-fitness", 
-                                    "number of fitness factors", "#FACTORS");
+                                    "number of fitness factors (default = %default)", "#FACTORS");
     parser.add_option<unsigned long>(&rand_seed, "-z", "--random-seed", 
-                                     "random number seed", "SEED");
+                                     "random number seed (default = %default)", "SEED");
 
     parser.parse(argc, argv);       
     

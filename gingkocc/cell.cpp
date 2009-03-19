@@ -42,15 +42,11 @@ Cell::Cell(CellIndexType index,
            const SpeciesPointerVector& species, 
            RandomNumberGenerator& rng)     
     : index_(index),
+      carrying_capacity_(0),
       num_fitness_factors_(num_fitness_factors),
       landscape_(landscape),
       species_(species),
-      rng_(rng) {
-    this->carrying_capacity_ = 0;
-    // following not neccessary as default constructor for FitnessFactorType will
-    // be called
-//     memset(this->environment_, 0, MAX_FITNESS_FACTORS*sizeof(FitnessFactorType));    
-}
+      rng_(rng) {   }
 
 // --- basic biotics ---
 

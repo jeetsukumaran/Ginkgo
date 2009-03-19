@@ -106,7 +106,14 @@ std::ostream& OptionArg::write_help(std::ostream& out) const {
                 help_str += " ";
             }                
         }
-        help_str += this->help_;
+        std::string help_msg = this->help_;
+        std::string::size_type defval = help_msg.find("%default");
+        std::string replace_val = this->current_value_as_string();
+        while (defval != std::string::npos) {
+            help_msg.replace(defval, 9, replace_val.c_str());
+            defval = help_msg.find("%default");
+        }
+        help_str += help_msg;
         std::string help_desc = this->textwrap(help_str, 
                                                CMDOPTS_LINE_WIDTH, 
                                                0, 
@@ -123,7 +130,7 @@ std::ostream& OptionArg::write_help(std::ostream& out) const {
 template <>
 void TypedOptionArg<std::string>::process_value_string(const std::string& val_str) {
     *this->store_ = val_str;
-    this->is_set() = true;
+    this->set_is_set(true);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
