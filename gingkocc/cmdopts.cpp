@@ -20,6 +20,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "cmdopts.h"
+#include "textutils.h"
 
 namespace gingko {
 
@@ -39,75 +40,6 @@ OptionArg::OptionArg(const char * help, const char * meta_var)
   
 OptionArg::~OptionArg() {}
   
-std::string OptionArg::textwrap(const std::string& source, 
-        unsigned line_width,
-        unsigned first_line_indent, 
-        unsigned subsequent_line_indent) const {
-//     std::ostringstream wrapped;
-    std::string wrapped;
-    unsigned col_count = 1;
-    unsigned line_count = 1;
-    std::string subsequent_line_indent_str(subsequent_line_indent, ' ');
-    for (std::string::const_iterator s = source.begin();
-            s != source.end();
-            ++s, ++col_count) {
-
-        if (*s == '\n') {
-            wrapped += "\n";
-            col_count = 0;
-            line_count += 1;
-            continue;
-        }
-        
-        if (col_count > line_width) {
-            std::string::size_type wrap_pos = wrapped.find_last_of(" ");
-            if (wrap_pos == std::string::npos) {
-                wrapped += "\n";
-                col_count = 0;
-            } else {                
-                wrapped.replace(wrap_pos, 1, "\n" + subsequent_line_indent_str);             
-                col_count = wrapped.size() - wrap_pos;                    
-            }
-            line_count += 1;                                    
-            wrapped += *s;
-            col_count += 1;
-            continue;
-        }
-            
-        if (col_count == 1 and line_count == 1 and first_line_indent > 0) {
-            for (unsigned i = 0; i < first_line_indent; ++i) {
-                wrapped += ' ';
-            }
-            col_count += first_line_indent;
-        } else if (col_count == 1 and line_count > 1) {
-            wrapped += subsequent_line_indent_str;
-            col_count += subsequent_line_indent;                    
-        }
-        wrapped += *s;
-                                   
-//         if (*s == '\n' or col_count > line_width) {
-//             wrapped << '\n';
-//             col_count = 0;
-//             line_count += 1;
-//             continue;
-//         }        
-//         if (col_count == 1 and line_count == 1 and first_line_indent > 0) {
-//             for (unsigned i = 0; i < first_line_indent; ++i) {
-//                 wrapped << ' ';
-//             }
-//             col_count += first_line_indent;
-//         } else if (col_count == 1 and line_count > 1) {
-//             for (unsigned i = 0; i < subsequent_line_indent; ++i) {
-//                 wrapped << ' ';
-//             }
-//             col_count += subsequent_line_indent;                    
-//         }
-//         wrapped << *s;
-    }
-//     return wrapped.str();
-
-    return wrapped;
-} 
 
 std::ostream& OptionArg::write_help(std::ostream& out) const {            
     std::string help_str;      
@@ -137,7 +69,7 @@ std::ostream& OptionArg::write_help(std::ostream& out) const {
         }
     }            
     if (this->help_.size() > 0) {
-        if (help_str.size() > CMDOPTS_OPTION_COL_WIDTH) {
+        if (help_str.size() > CMDOPTS_OPTION_COL_WIDTH-2) {
             help_str += "\n";
         } else {
             while (help_str.size() < CMDOPTS_OPTION_COL_WIDTH) {
@@ -152,10 +84,7 @@ std::ostream& OptionArg::write_help(std::ostream& out) const {
             defval = help_msg.find("%default");
         }
         help_str += help_msg;
-        std::string help_desc = this->textwrap(help_str, 
-                                               CMDOPTS_LINE_WIDTH, 
-                                               0, 
-                                               CMDOPTS_OPTION_COL_WIDTH);
+        std::string help_desc = textwrap(help_str);
         help_str = help_desc;
     }                            
     out << help_str; 
@@ -174,7 +103,20 @@ void TypedOptionArg<std::string>::process_value_string(const std::string& val_st
 ///////////////////////////////////////////////////////////////////////////////
 // OptionParser
 
-OptionParser::OptionParser() {
+OptionParser::OptionParser(const char * version,
+        const char * description, 
+        const char * usage) {
+    if (usage != NULL) {
+        this->usage_.assign(usage);
+    } else {
+        this->usage_ = "%prog [options] [args]";
+    }
+    if (description != NULL) {
+        this->description_.assign(description);
+    }
+    if (version != NULL) {
+        this->version_.assign(version);
+    }       
     this->help_option_ = this->add_switch(&this->show_help_, "-h", "--help",  "show this message and exit");
 }
     
@@ -186,7 +128,22 @@ OptionParser::~OptionParser() {
     }                    
 }
 
-std::ostream& OptionParser::write_help(std::ostream& out) const {
+std::ostream& OptionParser::write_help(std::ostream& out, const char * progname) const {
+    if (this->usage_.size() != 0) {
+        if (progname == NULL) {
+            progname = "PROGRAM";
+        }
+        std::string usage = "Usage: " + this->usage_;
+        std::string::size_type pos = usage.find("%prog");
+        while (pos != std::string::npos) {
+            usage.replace(pos, 5, progname); 
+            pos = usage.find("%prog");
+        }
+        out << usage << std::endl << std::endl;
+    }
+    if (this->description_.size() != 0) {
+    
+    }
     for (std::vector<OptionArg *>::const_iterator oa = this->option_args_.begin();
             oa != this->option_args_.end();
             ++oa) {
@@ -237,7 +194,7 @@ void OptionParser::parse(int argc, char * argv[]) {
             }
             
             if (oai->second == this->help_option_) {
-                this->write_help(std::cerr);
+                this->write_help(std::cerr, argv[0]);
                 exit(1);
             }
             

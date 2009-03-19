@@ -30,10 +30,11 @@
 #include <stdexcept>
 #include <iomanip>
 
-namespace gingko {
 
-const unsigned CMDOPTS_LINE_WIDTH = 78;
-const unsigned CMDOPTS_OPTION_COL_WIDTH = 24;
+#if !defined(GINGKO_CMDOPTS_H)
+#define GINGKO_CMDOPTS_H
+
+namespace gingko {
 
 /**
  * Thrown when types cannot be converted.
@@ -60,20 +61,6 @@ class OptionArg {
         
         /** Destructor. */
         virtual ~OptionArg();
-        
-        /**
-         * Wraps a line of text.
-         *
-         * @param  source                   text to be wrapped
-         * @param  line_width               width of wrapping
-         * @param  first_line_indent        amount to indent first line
-         * @param  subsequent_line_indent   amount to indent remaining lines
-         * @return                          wrapped text (line breaks="\n")
-         */
-        std::string textwrap(const std::string& source, 
-                         unsigned line_width=CMDOPTS_LINE_WIDTH,
-                         unsigned first_line_indent=0, 
-                         unsigned subsequent_line_indent=0) const;                         
         
         /**
          * Writes help message for this option out to given stream.
@@ -288,7 +275,7 @@ class OptionParser {
         typedef std::vector< std::string >  PosArgs;
         
         /** Constructor. */
-        OptionParser();    
+        OptionParser(const char * description=NULL, const char * version=NULL, const char * usage=NULL);    
         
         /** Destructor: frees memory associated with OptionArg objects. */
         ~OptionParser();
@@ -361,7 +348,55 @@ class OptionParser {
             OptionArg * switch_arg = this->add_option<bool>(store, short_flag, long_flag, help, meta_var);
             switch_arg->set_is_switch(true);
             return switch_arg;
-        }                        
+        }
+        
+        /**
+         * Returns copy of the current program usage string.
+         * @return  copy of the current program usage string
+         */
+         std::string get_usage() const {
+            return this->usage_;
+         }
+         
+        /**
+         * Sets the current program usage string.
+         * @param usage  program usage string
+         */
+         void set_usage(const char * usage) {
+            this->usage_ = usage;
+         }     
+         
+        /**
+         * Returns copy of the current program description string.
+         * @return  copy of the current program description string
+         */
+         std::string get_description() const {
+            return this->description_;
+         }
+         
+        /**
+         * Sets the current program description string.
+         * @param description  program description string
+         */
+         void set_description(const char * description) {
+            this->description_ = description;
+         }
+         
+        /**
+         * Returns copy of the current program version string.
+         * @return  copy of the current program version string
+         */
+         std::string get_version() const {
+            return this->version_;
+         }
+         
+        /**
+         * Sets the current program version string.
+         * @param version  program version string
+         */
+         void set_version(const char * version) {
+            this->version_ = version;
+         }          
                
         /**
          * Client must call this, passing in arguments from main().
@@ -400,7 +435,7 @@ class OptionParser {
          * @param out   output stream to which to write help message
          * @return      same output stream
          */
-        std::ostream& write_help(std::ostream& out) const;         
+        std::ostream& write_help(std::ostream& out, const char * progname=NULL) const;         
 
     private:
         /**
@@ -421,6 +456,12 @@ class OptionParser {
         bool                                        show_help_;
         /** stores pointer to help option arg */
         OptionArg *                                 help_option_;
+        /** usage string */
+        std::string                                 usage_;
+        /** program description */
+        std::string                                 description_;        
+        /** program version */
+        std::string                                 version_;        
         /** collection of OptionArg objects */
         std::vector<OptionArg *>                    option_args_;
         /** positional arguments on the command line */
@@ -430,3 +471,5 @@ class OptionParser {
 };
 
 } // namespace gingko
+
+#endif
