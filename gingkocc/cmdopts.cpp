@@ -84,7 +84,7 @@ std::ostream& OptionArg::write_help(std::ostream& out) const {
             defval = help_msg.find("%default");
         }
         help_str += help_msg;
-        std::string help_desc = textwrap(help_str);
+        std::string help_desc = textwrap(help_str, CMDOPTS_LINE_WIDTH, 0, CMDOPTS_OPTION_COL_WIDTH);
         help_str = help_desc;
     }                            
     out << help_str; 

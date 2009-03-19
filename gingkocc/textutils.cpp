@@ -19,6 +19,7 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
+#include <iostream>
 #include "textutils.h"
 
 namespace gingko {
@@ -48,15 +49,11 @@ std::string textwrap(const std::string& source,
             std::string::size_type wrap_pos = wrapped.find_last_of(" ");
             if (wrap_pos == std::string::npos) {
                 wrapped += "\n";
-                col_count = 0;
+                col_count = 1;
             } else {                
                 wrapped.replace(wrap_pos, 1, "\n" + subsequent_line_indent_str);             
                 col_count = wrapped.size() - wrap_pos;                    
             }
-            line_count += 1;                                    
-            wrapped += *s;
-            col_count += 1;
-            continue;
         }
             
         if (col_count == 1 and line_count == 1 and first_line_indent > 0) {
@@ -64,7 +61,7 @@ std::string textwrap(const std::string& source,
                 wrapped += ' ';
             }
             col_count += first_line_indent;
-        } else if (col_count == 1 and line_count > 1) {
+        } else if (col_count == 1 and line_count > 1) {   
             wrapped += subsequent_line_indent_str;
             col_count += subsequent_line_indent;                    
         }

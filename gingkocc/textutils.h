@@ -28,9 +28,6 @@
 
 namespace gingko {
 
-const unsigned CMDOPTS_LINE_WIDTH = 78;
-const unsigned CMDOPTS_OPTION_COL_WIDTH = 24;
-
 /**
  * Wraps a line of text to specified width.
  *
@@ -41,7 +38,7 @@ const unsigned CMDOPTS_OPTION_COL_WIDTH = 24;
  * @return                          wrapped text (line breaks="\n")
  */
 std::string textwrap(const std::string& source, 
-        unsigned line_width=CMDOPTS_LINE_WIDTH,
+        unsigned line_width=78,
         unsigned first_line_indent=0, 
         unsigned subsequent_line_indent=0);                         
      

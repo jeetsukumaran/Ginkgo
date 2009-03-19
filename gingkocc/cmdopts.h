@@ -36,6 +36,9 @@
 
 namespace gingko {
 
+const unsigned CMDOPTS_LINE_WIDTH = 78;
+const unsigned CMDOPTS_OPTION_COL_WIDTH = 24;
+
 /**
  * Thrown when types cannot be converted.
  */
