@@ -106,7 +106,9 @@ void TypedOptionArg<std::string>::process_value_string(const std::string& val_st
 
 OptionParser::OptionParser(const char * description, 
         const char * version,
-        const char * usage) {
+        const char * usage)
+    : show_help_(false),
+      show_version_(false) {
     if (usage != NULL) {
         this->usage_.assign(usage);
     } else {
