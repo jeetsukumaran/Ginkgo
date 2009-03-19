@@ -103,8 +103,8 @@ void TypedOptionArg<std::string>::process_value_string(const std::string& val_st
 ///////////////////////////////////////////////////////////////////////////////
 // OptionParser
 
-OptionParser::OptionParser(const char * version,
-        const char * description, 
+OptionParser::OptionParser(const char * description, 
+        const char * version,
         const char * usage) {
     if (usage != NULL) {
         this->usage_.assign(usage);
@@ -142,7 +142,7 @@ std::ostream& OptionParser::write_help(std::ostream& out, const char * progname)
         out << usage << std::endl << std::endl;
     }
     if (this->description_.size() != 0) {
-    
+        out << textwrap(this->description_, CMDOPTS_LINE_WIDTH) << std::endl << std::endl;
     }
     for (std::vector<OptionArg *>::const_iterator oa = this->option_args_.begin();
             oa != this->option_args_.end();
