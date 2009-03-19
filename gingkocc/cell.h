@@ -44,13 +44,13 @@ class Cell {
          * environmental fitness factors.
          *
          * @param index     the index of this cell on the Landscape
-         * @param num_environmental_factors 
+         * @param num_fitness_factors 
          *                  the number of factors to be considered for fitness
          * @species         reference to the World species pool
          * @rng             reference to the World random number generator
          */
         Cell(CellIndexType index,
-             unsigned num_environmental_factors,
+             unsigned num_fitness_factors,
              Landscape& landscape, 
              const SpeciesPointerVector& species, 
              RandomNumberGenerator& rng);
@@ -118,7 +118,7 @@ class Cell {
          *
          * @return  number of active environmental fitness factors
          */              
-        unsigned get_num_environmental_factors() const {
+        unsigned get_num_fitness_factors() const {
             return this->num_fitness_factors_;
         } 
         

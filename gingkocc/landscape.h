@@ -64,9 +64,9 @@ class Landscape {
          *
          * @param size_x                    x-dimension
          * @param size_y                    y-dimension
-         * @param num_environmental_factors number of active fitness factors
+         * @param num_fitness_factors number of active fitness factors
          */
-        void generate(CellIndexType size_x, CellIndexType size_y, unsigned num_environmental_factors); 
+        void generate(CellIndexType size_x, CellIndexType size_y, unsigned num_fitness_factors); 
  
         // --- landscape access, control and mutation ---                                      
 

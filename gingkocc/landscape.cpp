@@ -50,14 +50,14 @@ Landscape::~Landscape() {
 
 // --- initialization and set up ---
 
-void Landscape::generate(CellIndexType size_x, CellIndexType size_y, unsigned num_environmental_factors) {
+void Landscape::generate(CellIndexType size_x, CellIndexType size_y, unsigned num_fitness_factors) {
     this->size_x_ = size_x;
     this->size_y_ = size_y;
     this->size_ = size_x * size_y;
     this->cells_.reserve(this->size_);
     for (CellIndexType x = 0, index = 0; x < size_x; ++x) {
         for (CellIndexType y = 0; y < size_y; ++y, ++index) {
-            Cell* cell = new Cell(index, num_environmental_factors, *this, this->species_, this->rng_);
+            Cell* cell = new Cell(index, num_fitness_factors, *this, this->species_, this->rng_);
             this->cells_.push_back(cell);
         }
     }

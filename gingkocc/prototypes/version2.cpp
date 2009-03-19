@@ -579,7 +579,7 @@ class Cell {
         Cell(CellIndexType index,
              CellIndexType x, 
              CellIndexType y, 
-             unsigned num_environmental_factors,
+             unsigned num_fitness_factors,
              Landscape& landscape, 
              const SpeciesPool& species, 
              RandomNumberGenerator& rng);
@@ -615,7 +615,7 @@ class Cell {
             assert(idx < this->_environment.size());
             return this->_environment[idx];
         }
-        unsigned get_num_environmental_factors() const {
+        unsigned get_num_fitness_factors() const {
             return this->_environment.size();
         }            
         
@@ -688,7 +688,7 @@ class Landscape {
         ~Landscape();
         
         // --- initialization and set up ---
-        void generate(CellIndexType size_x, CellIndexType size_y, unsigned num_environmental_factors); 
+        void generate(CellIndexType size_x, CellIndexType size_y, unsigned num_fitness_factors); 
  
         // --- landscape access, control and mutation ---                                      
         void set_cell_carrying_capacity(unsigned long carrying_capacity);
@@ -836,7 +836,7 @@ class World {
         }        
         
         // --- initialization and set up ---
-        void generate_landscape(CellIndexType size_x, CellIndexType size_y, unsigned num_environmental_factors);
+        void generate_landscape(CellIndexType size_x, CellIndexType size_y, unsigned num_fitness_factors);
         
         // actual implementation will load this from a file, as will
         // cell environment and species travel costs
@@ -934,7 +934,7 @@ Organisms Cell::new_offspring;             // scratch space for next gen
 Cell::Cell(CellIndexType index, 
            CellIndexType x, 
            CellIndexType y, 
-           unsigned num_environmental_factors,
+           unsigned num_fitness_factors,
            Landscape& landscape, 
            const SpeciesPool& species, 
            RandomNumberGenerator& rng)     
@@ -945,7 +945,7 @@ Cell::Cell(CellIndexType index,
       _species(species),
       _rng(rng) {      
     this->_carrying_capacity = 0;
-    this->_environment.assign(num_environmental_factors, 0);
+    this->_environment.assign(num_fitness_factors, 0);
 }
 
 // --- primary biogeographical and evolutionary processes ---
@@ -1077,14 +1077,14 @@ Landscape::~Landscape() {
 
 // --- initialization and set up ---
 
-void Landscape::generate(CellIndexType size_x, CellIndexType size_y, unsigned num_environmental_factors) {
+void Landscape::generate(CellIndexType size_x, CellIndexType size_y, unsigned num_fitness_factors) {
     this->_size_x = size_x;
     this->_size_y = size_y;
     this->_size = size_x * size_y;
     this->_cells.reserve(this->_size);
     for (CellIndexType x = 0, index = 0; x < size_x; ++x) {
         for (CellIndexType y = 0; y < size_y; ++y, ++index) {
-            Cell* cell = new Cell(index, x, y, num_environmental_factors, *this, this->_species, this->_rng);
+            Cell* cell = new Cell(index, x, y, num_fitness_factors, *this, this->_species, this->_rng);
             this->_cells.push_back(cell);
         }
     }
@@ -1123,9 +1123,9 @@ World::~World() {
 // --- initialization and set up ---
 
 //! Creates a new landscape.
-void World::generate_landscape(CellIndexType size_x, CellIndexType size_y, unsigned num_environmental_factors) {
-    this->_num_fitness_factors = num_environmental_factors;
-    this->_landscape.generate(size_x, size_y, num_environmental_factors);
+void World::generate_landscape(CellIndexType size_x, CellIndexType size_y, unsigned num_fitness_factors) {
+    this->_num_fitness_factors = num_fitness_factors;
+    this->_landscape.generate(size_x, size_y, num_fitness_factors);
 }
 
 //! Adds a new species definition to this world.

@@ -44,9 +44,9 @@ World::~World() {
 // --- initialization and set up ---
 
 //! Creates a new landscape.
-void World::generate_landscape(CellIndexType size_x, CellIndexType size_y, unsigned num_environmental_factors) {
-    this->num_fitness_factors_ = num_environmental_factors;
-    this->landscape_.generate(size_x, size_y, num_environmental_factors);
+void World::generate_landscape(CellIndexType size_x, CellIndexType size_y, unsigned num_fitness_factors) {
+    this->num_fitness_factors_ = num_fitness_factors;
+    this->landscape_.generate(size_x, size_y, num_fitness_factors);
 }
 
 //! Adds a new species definition to this world.
@@ -60,12 +60,12 @@ Species& World::new_species(const char* label) {
 }
 
 //! Populates the cell at (x,y) with organisms of the given species.
-void World::seed_population(CellIndexType x, CellIndexType y, unsigned species_index, CellIndexType size) {
+void World::seed_population(CellIndexType x, CellIndexType y, unsigned species_index, unsigned long size) {
     this->landscape_.at(x, y).generate_new_organisms(species_index, size);
 }
 
 //! Populates the cell cell_index with organisms of the given species.
-void World::seed_population(CellIndexType cell_index, unsigned species_index, CellIndexType size) {
+void World::seed_population(CellIndexType cell_index, unsigned species_index, unsigned long size) {
     this->landscape_.at(cell_index).generate_new_organisms(species_index, size);
 }
 
@@ -102,8 +102,8 @@ void World::cycle() {
     }    
 }
 
-void World::run(int num_generations) {    
-    for ( ; num_generations > 0; --num_generations) {
+void World::run(unsigned long num_generations) {    
+    for (unsigned long g=0; g < num_generations; ++g) {
         this->cycle();        
     }
 }
