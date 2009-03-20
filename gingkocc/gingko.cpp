@@ -104,8 +104,8 @@ int main(int argc, char* argv[]) {
     world.run(num_gens);
 
 
-    std::cerr << "\n#### FINAL STATUS ####\n"; 
-    world.landscape().dump(std::cerr);
+//     std::cerr << "\n#### FINAL STATUS ####\n"; 
+//     world.landscape().dump(std::cerr);
     
     std::cerr << "\n\n#### TREE(S) ####\n";
     gingko::Tree tree;
