@@ -31,7 +31,7 @@ int main(int argc, char* argv[]) {
 
     gingko::OptionParser parser = gingko::OptionParser("Tree Testing",
             NULL, 
-            "%prog [options] <NODE>[:<LABEL>] [<NODE>[:<LABEL>] [<NODE>[:<LABEL>] [<NODE>[:<LABEL>] ... ]]]");
+            "%prog [options] <NODE>[:<LABEL>] <NODE>[:<LABEL>] [<NODE>[:<LABEL>] ... ");
 
     parser.parse(argc, argv);
     std::vector< std::string > args = parser.get_args();
