@@ -72,7 +72,7 @@ void Cell::reproduction() {
         // organism level and subject to evolution
         unsigned num_offspring = (*sp)->get_mean_reproductive_rate();
         
-        this->extract_breeding_groups((*sp)->get_index(),
+        this->extract_breeding_groups((*sp),
             Cell::previous_gen,
             Cell::breeding_female_ptrs, 
             Cell::breeding_male_ptrs);
@@ -92,12 +92,9 @@ void Cell::reproduction() {
 
 void Cell::migration() {
 
-    for (OrganismVector::iterator og = this->organisms_.begin(); og != this->organisms_.end(); ++og) {
-    
-        assert(og->species_index() < this->species_.size());          
-        assert(!og->is_expired());        
-        
-        Species& sp = *this->species_[og->species_index()];
+    for (OrganismVector::iterator og = this->organisms_.begin(); og != this->organisms_.end(); ++og) {             
+        assert(!og->is_expired());                
+        Species& sp = og->species();
         int movement = sp.get_movement_capacity();
         CellIndexType curr_idx = this->index_;
                         
@@ -118,10 +115,9 @@ void Cell::migration() {
 }
 
 void Cell::survival() {
-    for (OrganismVector::iterator og = this->organisms_.begin(); og != this->organisms_.end(); ++og) {
-        assert(og->species_index() < this->species_.size());          
+    for (OrganismVector::iterator og = this->organisms_.begin(); og != this->organisms_.end(); ++og) {        
         assert(!og->is_expired());                
-        Species& sp = *this->species_[og->species_index()];
+        Species& sp = og->species();
         float fitness = sp.calc_fitness(*og, this->environment_);       
         og->set_fitness(fitness);
         if (this->rng_.uniform_real() > fitness) {
@@ -151,13 +147,12 @@ void Cell::competition() {
 
 //! Extracts pointers to male and female organisms of a particular species from 
 //! a vector of organisms passed to it.
-void Cell::extract_breeding_groups(unsigned species_index,
+void Cell::extract_breeding_groups(Species * sp_ptr,
         const OrganismVector& organisms,
         std::vector<const Organism*>& female_ptrs,
-        std::vector<const Organism*>& male_ptrs) const {
-    assert(species_index < this->species_.size());    
+        std::vector<const Organism*>& male_ptrs) const { 
     for (OrganismVector::const_iterator og = organisms.begin(); og != organisms.end(); ++og) {
-        if (og->species_index() == species_index) {
+        if (&og->species() == sp_ptr) {
             if (og->is_female()) {
                 female_ptrs.push_back(&(*og));
             } else {

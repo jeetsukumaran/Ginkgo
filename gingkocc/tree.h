@@ -34,20 +34,38 @@
 
 namespace gingko {
 
+/**
+ * Encapsulates the building of trees from a collection of GenealogyNode 
+ * objects.
+ */
 class Tree {
 
-    typedef std::map< long, std::string >           NodeLabelMap;
-    typedef std::map< GenealogyNode*, long >        NodeIndexMap;
-    typedef std::vector<GenealogyNode*>             NodeVector;
+    typedef std::map< long, std::string >           NodeIndexToLabelMap;
+    typedef std::map< GenealogyNode*, long >        NodeToIndexMap;
+    typedef std::vector<GenealogyNode *>            NodeVector;
     typedef std::vector<long>                       IndexVector;
 
     public:
-        Tree() 
-            : coalesce_multiple_roots_(true) {
+        /**
+         * Constructor.
+         *
+         * @param coalesce_multiple_roots if <code>false</code> throws
+         *                                exception if nodes do not coalesce
+         *                                into single ancestor
+         */
+        Tree(bool coalesce_multiple_roots=true) 
+            : coalesce_multiple_roots_(coalesce_multiple_roots) {
         }
     
-        Tree(std::vector<Organism>& organisms) 
-                : coalesce_multiple_roots_(true) {
+        /**
+         * Constructor.
+         *
+         * @param coalesce_multiple_roots if <code>false</code> throws
+         *                                exception if nodes do not coalesce
+         *                                into single ancestor
+         */ 
+        Tree(std::vector<Organism>& organisms, bool coalesce_multiple_roots=true) 
+                : coalesce_multiple_roots_(coalesce_multiple_roots) {
             std::vector<Organism*> organism_ptrs;
             organism_ptrs.reserve(organisms.size());
             for (std::vector<Organism>::iterator optr = organisms.begin();
@@ -83,7 +101,7 @@ class Tree {
                 return -1;
             }
 //             node->suppress_outdegree1();
-            NodeIndexMap::iterator nidx = this->node_indexes_.find(node);
+            NodeToIndexMap::iterator nidx = this->node_indexes_.find(node);
             if (nidx != this->node_indexes_.end()) {
                 return nidx->second;
             }            
@@ -172,7 +190,7 @@ class Tree {
                 }
                 out << ")";
             } else {
-                NodeLabelMap::iterator node_label = this->labels_.find(node_idx);
+                NodeIndexToLabelMap::iterator node_label = this->labels_.find(node_idx);
                 if (node_label == this->labels_.end()) {
                     std::cerr << "### NOT FOUND: " << node_idx << " ###\n";
                 } else {
@@ -202,10 +220,10 @@ class Tree {
         }
 
     private:
-        NodeIndexMap                        node_indexes_;
+        NodeToIndexMap                      node_indexes_;
         NodeVector                          nodes_to_coalesce_;
         IndexVector                         tree_nodes_;
-        NodeLabelMap                        labels_;
+        NodeIndexToLabelMap                 labels_;
         bool                                coalesce_multiple_roots_;
 };
 

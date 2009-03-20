@@ -209,14 +209,14 @@ class Cell {
          * Given a species index, extracts pointers to male and female 
          * organisms of the specified species within this cell.
          *
-         * @param species_index     index of species
+         * @param sp_ptr            pointer to Species object
          * @param organisms         vector of organisms (source)
          * @param female_ptrs       pointers to organisms in source vector
          *                          that are females of the specified species
          * @param male_ptrs         pointers to organisms in source vector
          *                          that are males of the specified species
          */         
-        void extract_breeding_groups(unsigned species_index, 
+        void extract_breeding_groups(Species * sp_ptr, 
             const OrganismVector& organisms,
             std::vector<const Organism *>& female_ptrs,
             std::vector<const Organism *>& male_ptrs) const;

@@ -497,18 +497,16 @@ class Organism {
          * Constructor instantiates a new organism with species, identity,
          * (fitness) genotype, and sex.
          *
-         * @param species_index     index of Species object in species pool
-         *                          of the World object to which this organism 
-         *                          belongs
+         * @param species           pointer to Species of this Organism
          * @param genotype          array of fitness factor values representing
          *                          the inheritable portion of fitness of this
          *                          individual organism
          * @param sex               gender of this organism
          */ 
-        Organism(unsigned species_index,
+        Organism(Species * species,
                  const FitnessFactors& new_genotype, 
                  Organism::Sex new_sex) 
-                : species_index_(species_index),
+                : species_(species),
                   sex_(new_sex),
                   fitness_(-1),
                   expired_(false) {
@@ -523,9 +521,9 @@ class Organism {
          *                          belongs
          * @param sex               gender of this organism
          */        
-        Organism(unsigned species_index,      
+        Organism(Species * species,      
                  Organism::Sex new_sex) 
-                : species_index_(species_index),              
+                : species_(species),              
                   sex_(new_sex),
                   fitness_(-1),
                   expired_(false) { }
@@ -549,7 +547,7 @@ class Organism {
             if (this == &ind) {
                 return *this;
             }
-            this->species_index_ = ind.species_index_;
+            this->species_ = ind.species_;
             memcpy(this->genotypic_fitness_factors_, ind.genotypic_fitness_factors_, MAX_FITNESS_FACTORS*sizeof(FitnessFactorType));                    
             this->sex_ = ind.sex_;
             this->fitness_ = ind.fitness_;
@@ -636,14 +634,12 @@ class Organism {
         // --- meta info ---
         
         /** 
-         * Returns the index of the pointer to the Species object representing
+         * Returns reference to the Species object representing
          * the species of this object in the species pool of the World.
          *
-         * @return  index of pointer to Species object in species pool
+         * @return  reference to Species of this organism
          */   
-        unsigned species_index() const {
-            return this->species_index_;
-        }       
+        Species& species() const;      
         
         /** 
          * Returns <code>true</code> if this organism is male.         
@@ -719,10 +715,10 @@ class Organism {
     private:
     
         /** 
-         * index of pointer to Species object in the World species pool of the
+         * pointer to Species object in the World species pool of the
          * species of this organism
          */
-        unsigned                species_index_;
+        Species *               species_;
         
         /** values of inheritable component of fitness */
         FitnessFactors          genotypic_fitness_factors_;
@@ -1022,7 +1018,7 @@ class Species {
          * @return  a default Organism object.
          */
         Organism new_organism() {
-            return Organism(this->index_, 
+            return Organism(this, 
                             this->default_genotypic_fitness_factors_, 
                             this->get_random_sex());
         }
@@ -1044,7 +1040,7 @@ class Species {
          * @return          offspring 
          */
         Organism new_organism(const Organism& female, const Organism& male) {
-            Organism organism(this->index_, this->get_random_sex());
+            Organism organism(this, this->get_random_sex());
             organism.inherit_genotypic_fitness_factors(female, 
                                                        male, 
                                                        this->num_fitness_factors_, 
