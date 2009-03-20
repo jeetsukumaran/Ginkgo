@@ -22,6 +22,8 @@
 #if !defined(GINGKO_DEFS_H)
 #define GINGKO_DEFS_H
 
+#define assert_m(cond, out, msg) if (!(cond)) { out << msg << std::endl; assert(cond); }
+
 namespace gingko {
 
 //! The maximum number of fitness factors in the system. A "fitness factor"
