@@ -1008,7 +1008,7 @@ class Species {
          * @param       organism to be labelled
          * @return      unique label for organism
          */
-         std::string get_organism_label(Organism& organism) {
+         const std::string& get_organism_label(Organism& organism) {
             std::map<Organism *, std::string>::const_iterator ol = this->organism_labels_.find(&organism);
             if (ol == this->organism_labels_.end()) {
                 return this->organism_labels_.insert(std::make_pair(&organism, this->new_organism_label())).first->second;

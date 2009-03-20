@@ -114,7 +114,7 @@ int main(int argc, char* argv[]) {
         for (gingko::OrganismVector::iterator oiter = ov.begin();
                 oiter != ov.end();
                 ++oiter) {
-            std::string label = sp1.new_organism_label();
+            std::string label = sp1.get_organism_label(*oiter);
             tree.process_node(oiter->haploid_marker().node(), &label);
         }                
     }    
