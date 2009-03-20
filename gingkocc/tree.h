@@ -46,16 +46,6 @@ class Tree {
     typedef std::vector<long>                       IndexVector;
 
     public:
-        /**
-         * Constructor.
-         *
-         * @param coalesce_multiple_roots if <code>false</code> throws
-         *                                exception if nodes do not coalesce
-         *                                into single ancestor
-         */
-        Tree(bool coalesce_multiple_roots=true) 
-            : coalesce_multiple_roots_(coalesce_multiple_roots) {
-        }
     
         /**
          * Constructor.
@@ -63,167 +53,87 @@ class Tree {
          * @param coalesce_multiple_roots if <code>false</code> throws
          *                                exception if nodes do not coalesce
          *                                into single ancestor
-         */ 
-        Tree(std::vector<Organism>& organisms, bool coalesce_multiple_roots=true) 
-                : coalesce_multiple_roots_(coalesce_multiple_roots) {
-            std::vector<Organism*> organism_ptrs;
-            organism_ptrs.reserve(organisms.size());
-            for (std::vector<Organism>::iterator optr = organisms.begin();
-                    optr != organisms.end();
-                    ++optr) {
-                organism_ptrs.push_back(&(*optr));                    
-            }
-            this->init(organism_ptrs);
-        }
+         */
+        Tree(bool coalesce_multiple_roots=true);
+        
+        /**
+         * Adds a node (and its lineage to the original ancestor) to the tree 
+         * if is not already there, and returns index of the node in the 
+         * parent array structure representing the tree.
+         *
+         * @param  node     pointer to GenealogyNode to be added to the tree
+         * @param  label    the label for this node (required if it is a leaf 
+         *                  node)
+         * @return          index of the node in the parent array (or -1 if node 
+         *                  was a null node, as would be the case if a node 
+         *                  without a parent passed its parent pointer to be 
+         *                  inserted into the array)
+         */
+        long process_node(GenealogyNode* node, const std::string * label=NULL);
+        
+        /**
+         * Given an index of a node in the parent array, returns the indexes
+         * of all its children.
+         *
+         * @param   parent  index of a node in the parent array
+         * @returns         vector of indexes of all nodes with this node as
+         *                  parent
+         */
+        std::vector<long> get_children(long parent);                
+        
+        /**
+         * Writes newick string representing the tree structure to the given
+         * output stream.
+         * 
+         * @param out   output stream to which to write the tree
+         */
+        void write_newick_tree(std::ostream& out);
+        
+        /**
+         * Writes the newick representation of a single node specified by its
+         * index the parent array structure to the given output stream.
+         *
+         * @param node_idx  index of node in the parent array structure
+         * @param out       output stream to which to write the newick string
+         */
+        void write_newick_node(long node_idx, std::ostream& out);
+        
+        /**
+         * Returns the current mode of treating multiple roots (as errors
+         * or as coalescence in infinity).
+         *
+         * @return  <code>true</code> if multiple roots get automatically 
+         *          coalesced
+         */
+        bool get_coalesce_multiple_roots() const;
+        
+        /**
+         * Sets the current mode of treating multiple roots (as errors
+         * or as coalescence in infinity).
+         *
+         * @param val   <code>true</code> if multiple roots get automatically 
+         *              coalesced
+         */        
+        void set_coalesce_multiple_roots(bool val);
 
-        Tree(std::vector<Organism*>& organism_ptrs) 
-                : coalesce_multiple_roots_(true) { 
-            this->init(organism_ptrs);
-        }
-
-        void init(std::vector<Organism*>& organism_ptrs) {
-            assert(this->nodes_to_coalesce_.size() == 0);
-            this->nodes_to_coalesce_.reserve(organism_ptrs.size());
-            for (std::vector<Organism*>::iterator optr_iter = organism_ptrs.begin();
-                    optr_iter != organism_ptrs.end();
-                    ++optr_iter) {
-                Organism& organism = *(*optr_iter);
-                // for now: just focus on the haploid markers
-                GenealogyNode* gnode = organism.haploid_marker().node();
-                this->process_node(gnode);
-            }
-        }
-        
-        // adds node if it is note already in the ancestor array
-        // returns index in array
-        unsigned long process_node(GenealogyNode* node, const std::string * label=NULL) {
-            if (node == NULL) {
-                return -1;
-            }
-//             node->suppress_outdegree1();
-            NodeToIndexMap::iterator nidx = this->node_indexes_.find(node);
-            if (nidx != this->node_indexes_.end()) {
-                return nidx->second;
-            }            
-            this->tree_nodes_.push_back(this->process_node(node->get_parent())); 
-            unsigned long idx = this->tree_nodes_.size() - 1;
-            this->node_indexes_.insert(std::make_pair(node, idx));
-            if (label != NULL) {
-                this->labels_.insert(std::make_pair(idx, *label));
-            } else {
-                // all terminals must have labels
-                assert(node->get_first_child() != NULL);
-            }
-//             if (node->has_label()) {              
-//                 this->labels_.insert(std::make_pair(idx, node->get_label()));
-//             } else {
-//                 // all nodes without labels must be internal nodes,
-//                 // which means they must have children
-//                 assert(node->get_first_child() != NULL);
-//             }
-//             this->edge_lens_.push_back(node->get_edge_len());
-            return idx;
-        }
-        
-        std::vector<long> get_children(long parent) {
-            std::vector<long> children;
-//             std::remove_copy_if(this->tree_nodes_.begin(), 
-//                                 this->tree_nodes_.end(), 
-//                                 std::back_inserter(children), 
-//                                 std::bind2nd(std::not_equal_to<long>(), parent));
-            for (unsigned long i = 0; i < this->tree_nodes_.size(); ++i) {
-                if (this->tree_nodes_[i] == parent) {
-                    children.push_back(i);
-                }
-            }
-            return children;
-        }                
-        
-        void write_newick_tree(std::ostream& out) {
-            int num_roots = std::count(this->tree_nodes_.begin(), this->tree_nodes_.end(), -1);         
-            assert(num_roots > 0);
-            if (this->coalesce_multiple_roots_ and num_roots > 1) {
-                IndexVector::iterator root = std::find(this->tree_nodes_.begin(), this->tree_nodes_.end(), -1);
-                out << "(";
-                this->write_newick_node(root-this->tree_nodes_.begin(), out);                
-                while (root != this->tree_nodes_.end()) {
-                    root = std::find(root+1, this->tree_nodes_.end(), -1);
-                    if (root != this->tree_nodes_.end()) {
-                        out << ",";
-                        this->write_newick_node(root-this->tree_nodes_.begin(), out);
-                    }                        
-                }
-                out << ");"; // add infinite branch length?                
-            } else {
-                assert(num_roots < 2); 
-                IndexVector::iterator root = std::find(this->tree_nodes_.begin(),
-                        this->tree_nodes_.end(), -1);
-                assert(root != this->tree_nodes_.end());                    
-                this->write_newick_node(root-this->tree_nodes_.begin(), out);
-                out << ";";
-            }                
-        }
-        
-        void write_newick_node(long node_idx, std::ostream& out) {
-            unsigned edge_length = 1; 
-            std::vector<long> children = this->get_children(node_idx);
-            while (children.size() == 1) {
-                // this deals with nodes of outdegree 1 still in the structure
-                ++edge_length;
-                long only_child = children[0];
-                children = this->get_children(only_child);
-                if (children.size() == 0) {
-                    // node has chain of outdegree 1 descendents all the way
-                    // to single terminal: collapse to child
-                    node_idx = only_child;
-                }
-            }
-            if (children.size() > 0) {
-                out << "(";
-                for (std::vector<long>::iterator child_iter = children.begin();
-                     child_iter != children.end();
-                     ++child_iter) {
-                     if (child_iter != children.begin()) {
-                        out << ", ";
-                     }
-                    this->write_newick_node(*child_iter, out);    
-                }
-                out << ")";
-            } else {
-                NodeIndexToLabelMap::iterator node_label = this->labels_.find(node_idx);
-                if (node_label == this->labels_.end()) {
-                    std::cerr << "### NOT FOUND: " << node_idx << " ###\n";
-                } else {
-                    out << node_label->second;
-                }                    
-            }
-            out << ":" << edge_length;
-        }
-        
-        bool get_coalesce_multiple_roots() const {
-            return this->coalesce_multiple_roots_;
-        }
-        
-        void set_coalesce_multiple_roots(bool val) {
-            this->coalesce_multiple_roots_ = val;
-        }
-                
-        void dump(std::ostream& out) {
-            out << std::setw(10) << "idx" << "   ";
-            out << std::setw(10) << "parent" << "   ";
-            out << std::setw(10) << "label" << "\n";        
-            for (unsigned i = 0; i < this->tree_nodes_.size(); ++i) {
-                out << std::setw(10) << i << "   ";
-                out << std::setw(10) << this->tree_nodes_[i] << "   ";
-                out << std::setw(10) << this->labels_[i] << "\n";
-            }
-        }
+        /**
+         * Writes out tree structure in human readable format for debugging.
+         * @param out   output stream to write to
+         */
+        void dump(std::ostream& out);
 
     private:
+        /** Maps node pointers to indexes of the corresponding node in the parent array */
         NodeToIndexMap                      node_indexes_;
-        NodeVector                          nodes_to_coalesce_;
+        /** 
+         * Parent array structure tracking nodes in a tree, where the value
+         * at each location in the array is the index of the parent of that
+         * node.
+         */
         IndexVector                         tree_nodes_;
+        /** Maps node indexes to their corresponding label. */
         NodeIndexToLabelMap                 labels_;
+        /** True if multiple roots are to be coalesced into a single node. */
         bool                                coalesce_multiple_roots_;
 };
 
