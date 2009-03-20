@@ -174,11 +174,8 @@ void Tree::write_newick_node(long node_idx, std::ostream& out) {
         out << ")";
     } else {
         NodeIndexToLabelMap::iterator node_label = this->labels_.find(node_idx);
-        if (node_label == this->labels_.end()) {
-            std::cerr << "### NOT FOUND: " << node_idx << " ###\n";
-        } else {
-            out << node_label->second;
-        }                    
+        assert(node_label != this->labels_.end());
+        out << node_label->second;
     }
     out << ":" << edge_length;
 }

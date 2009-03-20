@@ -19,9 +19,9 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#include <cassert>
 #include <string>
 #include <sstream>
+#include <vector>
 
 #if !defined(GINGKO_TEXTUTILS_H)
 #define GINGKO_TEXTUTILS_H
@@ -49,7 +49,27 @@ std::string textwrap(const std::string& source,
  * @param  source                   path to file
  * @return                          filename and extension
  */
-std::string extract_filename_from_path(const char * path);    
+std::string extract_filename_from_path(const char * path);
+
+/**
+ * Splits a const char source string into tokens as delimited by 
+ * <code>sep</code>.
+ *
+ * @param src   source string to be split
+ * @param sep   separator token (single or multiple characters)
+ * @return      vector of std::string tokens
+ */
+std::vector<std::string> split(const char * ssrc, const char * sep = " ");
+
+/**
+ * Splits a std::string source string into tokens as delimited by 
+ * <code>sep</code>.
+ *
+ * @param src   source string to be split
+ * @param sep   separator token (single or multiple characters)
+ * @return      vector of std::string tokens
+ */
+std::vector<std::string> split(const std::string& src, const char * sep = " ");
 
 } // namespace gingko
 
