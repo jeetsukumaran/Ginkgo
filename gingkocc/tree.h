@@ -43,7 +43,7 @@ class Tree {
     typedef std::map< long, std::string >           NodeIndexToLabelMap;
     typedef std::map< GenealogyNode*, long >        NodeToIndexMap;
     typedef std::vector<GenealogyNode *>            NodeVector;
-    typedef std::vector<long>                       IndexVector;
+    typedef std::vector<long>                       ParentIndexVector;
 
     public:
     
@@ -79,7 +79,24 @@ class Tree {
          * @returns         vector of indexes of all nodes with this node as
          *                  parent
          */
-        std::vector<long> get_children(long parent);                
+        std::vector<long> get_children(long parent);
+        
+        /**
+         * Returns label for given node.
+         *
+         * @param   node_idx    index of node
+         * @return              label for node
+         */
+         const std::string& get_label_for_node(long node_idx);
+         
+        /**
+         * Composes newick string representation of node relationships given
+         * in the parent array. Multiple trees are returned if the nodes have 
+         * not coalesced.
+         * 
+         * @param out   output stream to which to write the tree
+         */
+//         std::vector<std::string> Tree::compose_newick_tree()         
         
         /**
          * Writes newick string representing the tree structure to the given
@@ -130,7 +147,7 @@ class Tree {
          * at each location in the array is the index of the parent of that
          * node.
          */
-        IndexVector                         tree_nodes_;
+        ParentIndexVector                   tree_nodes_;
         /** Maps node indexes to their corresponding label. */
         NodeIndexToLabelMap                 labels_;
         /** True if multiple roots are to be coalesced into a single node. */

@@ -19,6 +19,8 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
+#include <map>
+#include <utility>
 #include "biosys.h"
 #include "tree.h"
 
@@ -81,7 +83,7 @@ long Tree::process_node(GenealogyNode* node, const std::string * label) {
 
 std::vector<long> Tree::get_children(long parent) {
     std::vector<long> children;
-    for (unsigned long i = 0; i < this->tree_nodes_.size(); ++i) {
+    for (unsigned long i = parent+1; i < this->tree_nodes_.size(); ++i) {
         if (this->tree_nodes_[i] == parent) {
             children.push_back(i);
         }
@@ -89,11 +91,42 @@ std::vector<long> Tree::get_children(long parent) {
     return children;
 }
 
+const std::string& Tree::get_label_for_node(long node_idx) {
+    NodeIndexToLabelMap::iterator node_label = this->labels_.find(node_idx);
+    assert(node_label != this->labels_.end());
+    return node_label->second;
+}
+
+// std::vector<std::string> Tree::compose_newick_tree() {
+//     std::vector<std::string> trees_as_newick;
+//     std::map<long, std::string> nodes_as_newick;
+//     for (long node_idx = this->tree_nodes_.size()-1; node_idx >= 0; --node_idx) {
+//         long parent_idx = this->tree_nodes_[node_idx];
+//         if (parent_idx == -1) {
+//             trees_as_newick.push_back("(" + nodes_as_newick[node_idx] + ")");
+//         } else {
+//             std::string& parent_newick_string = nodes_as_newick[parent_idx];
+//             if (parent_newick_string.size() > 0) {
+//                 parent_newick_string += ",";
+//             }        
+//             if (nodes_as_newick[node_idx].size() == 0) {
+//                 // leaf node: add label to parent
+//                 parent_newick_string += this->get_label_for_node(node_idx);
+//             } else {
+//                 // internal node: wrap in parentheses and then write to parent
+//                 // PROBLEM: Nodes of outdegree 1!
+//                 parent_newick_string += "(" + nodes_as_newick[node_idx] +")";
+//             }        
+//         }
+//         nodes_as_newick.erase(node_idx);
+//     }
+// }
+
 void Tree::write_newick_tree(std::ostream& out) {
     int num_roots = std::count(this->tree_nodes_.begin(), this->tree_nodes_.end(), -1);         
     assert(num_roots > 0);
     if (this->coalesce_multiple_roots_ and num_roots > 1) {
-        IndexVector::iterator root = std::find(this->tree_nodes_.begin(), this->tree_nodes_.end(), -1);
+        ParentIndexVector::iterator root = std::find(this->tree_nodes_.begin(), this->tree_nodes_.end(), -1);
         out << "(";
         this->write_newick_node(root-this->tree_nodes_.begin(), out);                
         while (root != this->tree_nodes_.end()) {
@@ -106,7 +139,7 @@ void Tree::write_newick_tree(std::ostream& out) {
         out << ");"; // add infinite branch length?                
     } else {
         assert(num_roots < 2); 
-        IndexVector::iterator root = std::find(this->tree_nodes_.begin(),
+        ParentIndexVector::iterator root = std::find(this->tree_nodes_.begin(),
                 this->tree_nodes_.end(), -1);
         assert(root != this->tree_nodes_.end());                    
         this->write_newick_node(root-this->tree_nodes_.begin(), out);
