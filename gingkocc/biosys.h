@@ -31,6 +31,8 @@
 #include <iomanip>
 #include <iostream>
 #include <sstream>
+#include <map>
+#include <utility>
 
 #include "gingko_defs.h"
 #include "randgen.h"
@@ -1000,6 +1002,31 @@ class Species {
         }
         
         /**
+         * Returns a label for the given organism, creating a new one if 
+         * it has not already been assigned.
+         *
+         * @param       organism to be labelled
+         * @return      unique label for organism
+         */
+         std::string get_organism_label(Organism& organism) {
+            std::map<Organism *, std::string>::const_iterator ol = this->organism_labels_.find(&organism);
+            if (ol == this->organism_labels_.end()) {
+                return this->organism_labels_.insert(std::make_pair(&organism, this->new_organism_label())).first->second;
+            } else {
+                return ol->second;
+            }
+         }
+         
+        /**
+         * Erases a label assigned to an organism.
+         *
+         * @param       organism label mapping to be erased
+         */
+         void erase_organism_label(Organism& organism) {
+            this->organism_labels_.erase(&organism);
+         }         
+        
+        /**
          * Returns male/female with uniform probability.
          *
          * @return      Organism::Male or Organism::Female
@@ -1060,31 +1087,33 @@ class Species {
     private:
     
         /** index of this species in World species pool */        
-        unsigned                    index_;
+        unsigned                            index_;
         /** unique identifier for this species */
-        std::string                 label_;
+        std::string                         label_;
         /** number of active fitness factors */
-        unsigned                    num_fitness_factors_;
+        unsigned                            num_fitness_factors_;
         /** coefficients for the fitness functions */
-        std::vector<float>          selection_strengths_;
+        std::vector<float>                  selection_strengths_;
         /** rate of mutation for the genotypic fitness factors */
-        float                       mutation_rate_;
+        float                               mutation_rate_;
         /** window for perturbations of fitness factor values */
-        FitnessFactorType           max_mutation_size_;        
+        FitnessFactorType                   max_mutation_size_;        
         /** mean number of offspring per female */
-        unsigned                    mean_reproductive_rate_;
+        unsigned                            mean_reproductive_rate_;
         /** allowing for evolution in fecundity */
-        unsigned                    reproductive_rate_mutation_size_;
+        unsigned                            reproductive_rate_mutation_size_;
         /** landscape migration potential for this species */
-        std::vector<int>            movement_costs_;
+        std::vector<int>                    movement_costs_;
         /** movement potential of each organism at the start of each round */
-        int                         movement_capacity_;
+        int                                 movement_capacity_;
         /** genotype for organisms created de novo */
-        FitnessFactors              default_genotypic_fitness_factors_;
+        FitnessFactors                      default_genotypic_fitness_factors_;
         /** source of random numbers of various distributions */
-        RandomNumberGenerator&      rng_;
+        RandomNumberGenerator&              rng_;
         /** tracks the number of labels assigned to organisms of this species */
-        unsigned long               label_index_;
+        unsigned long                       label_index_;
+        /** tracks the organism to label assignment */
+        std::map<Organism *, std::string>   organism_labels_;
 
 };
 // Species
