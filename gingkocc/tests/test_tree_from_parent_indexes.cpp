@@ -20,7 +20,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "../tree.h"
-#include "../cmdopts.h"
 #include "../textutils.h"
 #include <iostream>
 #include <vector>
@@ -28,24 +27,15 @@
 
 int main(int argc, char* argv[]) {
 
-    gingko::OptionParser parser = gingko::OptionParser("Tree Testing",
-            "Given a list of parent indexes (with optional labels), returns a NEWICK representation of the tree (root will be automatically added in position 0).", 
-            "%prog [options] <PARENT INDEX>[:<LABEL>] <PARENT INDEX>[:<LABEL>] [<PARENT INDEX>[:<LABEL>] ... ");
-
-    parser.parse(argc, argv);
-    std::vector< std::string > args = parser.get_args();
-    if (args.size() == 0) {
+    if (argc == 1) {
         std::cerr << "No parent indexes specified" << std::endl;
         exit(1);
     }
     
     gingko::Tree tree(true);
-    tree.add_indexed_node(-1);
     const char * label;
-    for (std::vector< std::string >::iterator arg_iter = args.begin();
-         arg_iter != args.end();
-         ++arg_iter) {
-        std::vector< std::string > parts = gingko::split(*arg_iter, ":");
+    for (int i = 1; i < argc; ++i) {
+        std::vector< std::string > parts = gingko::split(argv[i], ":");
         unsigned long idx = atol(parts[0].c_str());            
         if (parts.size() > 1) {
             label = parts[1].c_str();

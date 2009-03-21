@@ -10,7 +10,6 @@ test_cmdopts_SOURCES = \
     
 test_tree_from_parent_indexes_SOURCES = \
     test_tree_from_parent_indexes.cpp \
-    ../cmdopts.cpp \
     ../textutils.cpp \
     ../tree.cpp
     
