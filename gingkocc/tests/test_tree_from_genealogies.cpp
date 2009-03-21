@@ -162,6 +162,58 @@ std::string build_tree2() {
     return s.str();
 }
 
+std::string build_tree3() {
+    gingko::HaploidMarker h0;
+    gingko::HaploidMarker h1;
+    gingko::HaploidMarker h2;   
+    h1.inherit(h0);
+    h2.inherit(h0);
+    gingko::HaploidMarker h3;
+    gingko::HaploidMarker h4;
+    gingko::HaploidMarker h5;
+    h3.inherit(h1);
+    h4.inherit(h1);
+    h5.inherit(h2);
+    gingko::HaploidMarker h6;
+    gingko::HaploidMarker h7;
+    gingko::HaploidMarker h8;
+    gingko::HaploidMarker h9;
+    h6.inherit(h3);
+    h7.inherit(h3);
+    h8.inherit(h4);
+    h9.inherit(h5);
+    gingko::HaploidMarker ha;
+    gingko::HaploidMarker hb;
+    gingko::HaploidMarker hc;
+    gingko::HaploidMarker hd;
+    gingko::HaploidMarker he;
+    gingko::HaploidMarker hf;    
+    ha.inherit(h6);
+    hb.inherit(h6);
+    hc.inherit(h7);
+    hd.inherit(h7);
+    he.inherit(h8);
+    hf.inherit(h9);
+    
+    gingko::Tree tree;
+    
+    std::string label_a("a");
+    tree.process_node(ha.node(), &label_a);    
+    std::string label_b("b");
+    tree.process_node(hb.node(), &label_b);
+    std::string label_c("c");
+    tree.process_node(hc.node(), &label_c);
+    std::string label_d("d");
+    tree.process_node(hd.node(), &label_d);
+    std::string label_e("e");
+    tree.process_node(he.node(), &label_e);
+    std::string label_f("f");
+    tree.process_node(hf.node(), &label_f);
+    std::ostringstream s;
+    tree.write_newick_tree(s);
+    return s.str();
+}
+
 int main(int, char *) {
 
     std::string expected = "((((a:1,b:1):1,(c:1,d:1):1):1,e:3):1,f:4):1;";
@@ -185,6 +237,15 @@ int main(int, char *) {
         std::cerr << tree2 << std::endl;
         exit(1);
     }    
-    
+   
+    std::string tree3 = build_tree1();
+    if (expected.compare(tree3) != 0) {
+        std::cout << "FAIL" << std::endl;
+        std::cerr << "Expecting:" << std::endl;
+        std::cerr << expected << std::endl;
+        std::cerr << "Observed:" << std::endl;
+        std::cerr << tree3 << std::endl;
+        exit(1);
+    }    
     std::cout << "SUCCESS" << std::endl;
 }
