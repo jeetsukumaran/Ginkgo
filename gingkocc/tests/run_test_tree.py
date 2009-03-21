@@ -65,7 +65,7 @@ class ParentArrayTreeRoundTripTest(unittest.TestCase):
         tree1 = d1.trees_from_string(tree_str, format="newick")[0]
         pa, edge_lens = to_parent_array(tree1, True, False)
         _LOG.info('Original tree: %s' % tree_str)
-        cmd = self.prog_path + " " + " ".join(pa[1:])
+        cmd = self.prog_path + " " + " ".join(pa)
         stdout, stderr, returncode = run_program(cmd)
         assert returncode == 0, "Program exited with error:\n%s" % stderr
         _LOG.info('Returned tree: %s' % stdout)
