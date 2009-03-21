@@ -62,8 +62,8 @@ class Tree {
          * parent array structure representing the tree.
          *
          * @param  node     pointer to GenealogyNode to be added to the tree
-         * @param  label    the label for this node (required if it is a leaf 
-         *                  node)
+         * @param  label    pointer to std::string reprensting the label for 
+         *                  this node (required if it is a leaf node)
          * @return          index of the node in the parent array (or -1 if node 
          *                  was a null node, as would be the case if a node 
          *                  without a parent passed its parent pointer to be 

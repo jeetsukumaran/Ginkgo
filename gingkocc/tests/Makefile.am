@@ -17,5 +17,5 @@ test_tree_from_parent_indexes_SOURCES = \
     
 test_tree_from_genealogies_SOURCES = \
     test_tree_from_genealogies.cpp \
-    ../textutils.cpp \
+    ../biosys.cpp \
     ../tree.cpp
