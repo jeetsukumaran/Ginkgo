@@ -188,6 +188,15 @@ void Tree::set_coalesce_multiple_roots(bool val) {
     this->coalesce_multiple_roots_ = val;
 }
 
+void Tree::add_indexed_node(unsigned long parent_index, const char * label) {
+    this->tree_nodes_.push_back(parent_index);
+    if (label != NULL) {
+        std::string label_str(label);
+        unsigned long idx = this->tree_nodes_.size() - 1;
+        this->labels_.insert(std::make_pair(idx, label_str));
+    }
+}
+
 void Tree::dump(std::ostream& out) {
     out << std::setw(10) << "idx" << "   ";
     out << std::setw(10) << "parent" << "   ";

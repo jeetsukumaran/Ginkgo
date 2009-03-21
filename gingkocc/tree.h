@@ -138,6 +138,14 @@ class Tree {
          * @param out   output stream to write to
          */
         void dump(std::ostream& out);
+        
+        /**
+         * Directly adds an element into the parent index array.
+         *
+         * @param parent_idx    index of parent of the node
+         * @param label         label of the node
+         */
+        void add_indexed_node(unsigned long parent_index, const char * label = NULL);
 
     private:
         /** Maps node pointers to indexes of the corresponding node in the parent array */

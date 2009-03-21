@@ -278,7 +278,7 @@ class OptionParser {
         typedef std::vector< std::string >  PosArgs;
         
         /** Constructor. */
-        OptionParser(const char * description=NULL, const char * version=NULL, const char * usage=NULL);    
+        OptionParser(const char * version=NULL, const char * description=NULL, const char * usage=NULL);    
         
         /** Destructor: frees memory associated with OptionArg objects. */
         ~OptionParser();

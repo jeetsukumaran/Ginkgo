@@ -104,8 +104,8 @@ void TypedOptionArg<std::string>::process_value_string(const std::string& val_st
 ///////////////////////////////////////////////////////////////////////////////
 // OptionParser
 
-OptionParser::OptionParser(const char * description, 
-        const char * version,
+OptionParser::OptionParser(const char * version,
+        const char * description, 
         const char * usage)
     : show_help_(false),
       show_version_(false) {

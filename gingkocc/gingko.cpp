@@ -39,8 +39,8 @@ int main(int argc, char* argv[]) {
     unsigned long rand_seed = time(0);
     unsigned int num_cells_init = 1;
 
-    gingko::OptionParser parser = gingko::OptionParser("Gingko Biogeographical Evolution Simulator", 
-            "Version 0.01", 
+    gingko::OptionParser parser = gingko::OptionParser("Gingko 0.01",
+            "Gingko Biogeographical Evolution Simulator",
             "%prog [options]");
     
     parser.add_option<unsigned long>(&size_x, "-x", "--dim-x", 
