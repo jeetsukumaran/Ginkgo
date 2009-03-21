@@ -145,7 +145,7 @@ class Tree {
          * @param parent_idx    index of parent of the node
          * @param label         label of the node
          */
-        void add_indexed_node(unsigned long parent_index, const char * label = NULL);
+        void add_indexed_node(long parent_index, const char * label = NULL);
 
     private:
         /** Maps node pointers to indexes of the corresponding node in the parent array */

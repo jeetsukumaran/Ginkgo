@@ -29,7 +29,7 @@
 int main(int argc, char* argv[]) {
 
     gingko::OptionParser parser = gingko::OptionParser("Tree Testing",
-            "Given a list of parent indexes (with optional labels), returns a NEWICK representation of the tree", 
+            "Given a list of parent indexes (with optional labels), returns a NEWICK representation of the tree (root will be automatically added in position 0).", 
             "%prog [options] <PARENT INDEX>[:<LABEL>] <PARENT INDEX>[:<LABEL>] [<PARENT INDEX>[:<LABEL>] ... ");
 
     parser.parse(argc, argv);
@@ -40,6 +40,7 @@ int main(int argc, char* argv[]) {
     }
     
     gingko::Tree tree(true);
+    tree.add_indexed_node(-1);
     const char * label;
     for (std::vector< std::string >::iterator arg_iter = args.begin();
          arg_iter != args.end();

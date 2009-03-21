@@ -167,7 +167,7 @@ void Tree::write_newick_node(long node_idx, std::ostream& out) {
              child_iter != children.end();
              ++child_iter) {
              if (child_iter != children.begin()) {
-                out << ", ";
+                out << ",";
              }
             this->write_newick_node(*child_iter, out);    
         }
@@ -188,7 +188,7 @@ void Tree::set_coalesce_multiple_roots(bool val) {
     this->coalesce_multiple_roots_ = val;
 }
 
-void Tree::add_indexed_node(unsigned long parent_index, const char * label) {
+void Tree::add_indexed_node(long parent_index, const char * label) {
     this->tree_nodes_.push_back(parent_index);
     if (label != NULL) {
         std::string label_str(label);
