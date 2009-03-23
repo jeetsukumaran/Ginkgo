@@ -75,9 +75,10 @@ long Tree::process_node(GenealogyNode* node, const std::string * label) {
     // map
     if (label != NULL) {
         this->labels_.insert(std::make_pair(idx, *label));
-    } else {
-        assert(node->get_first_child() != NULL);
-    }
+    } 
+//     else {
+//         assert(node->get_first_child() != NULL);
+//     }
     return idx;
 }
 

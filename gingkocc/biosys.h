@@ -64,8 +64,8 @@ class GenealogyNode {
         /** Constructs a node with no antecedents. */
         GenealogyNode()
         : parent_(NULL),
-          first_child_(NULL),
-          next_sib_(NULL),
+//           first_child_(NULL),
+//           next_sib_(NULL),
           reference_count_(1)
           { }
                   
@@ -78,7 +78,7 @@ class GenealogyNode {
             if (this->parent_) {                
                 this->unlink();                         
             }                
-            assert(this->first_child_ == NULL);                
+//             assert(this->first_child_ == NULL);                
             assert(this->reference_count_ == 0 || this->reference_count_ == 1);
         }
           
@@ -106,19 +106,19 @@ class GenealogyNode {
          */
 		void remove_child(GenealogyNode * child) {
 			assert(this);
-			GenealogyNode * g = this->first_child_;
-			if (g == child) {
-				this->first_child_ = g->next_sib_;
-			} else { // parent's first child is not self ...
-				// search for self amongst parent's children
-				while (g->next_sib_ != child) {
-					g = g->next_sib_;
-					assert(g);
-				}
-				assert(g->next_sib_ == child);
-				// set previous sib to point to self's next sib
-				g->next_sib_ = child->next_sib_;
-			}
+// 			GenealogyNode * g = this->first_child_;
+// 			if (g == child) {
+// 				this->first_child_ = g->next_sib_;
+// 			} else { // parent's first child is not self ...
+// 				// search for self amongst parent's children
+// 				while (g->next_sib_ != child) {
+// 					g = g->next_sib_;
+// 					assert(g);
+// 				}
+// 				assert(g->next_sib_ == child);
+// 				// set previous sib to point to self's next sib
+// 				g->next_sib_ = child->next_sib_;
+// 			}
 			child->parent_ = NULL;
 			this->decrement_count();
 		}
@@ -138,19 +138,19 @@ class GenealogyNode {
 			assert(this != child);
 			child->parent_ = this;
 			this->increment_count();
-			if (this->first_child_ == NULL) {
-				// parent has no children: self is first child.
-				this->first_child_ = child;
-			} else {
-				// parent has children
-				GenealogyNode * g = this->first_child_;
-				// search for the first child with no sibling
-				while (g->next_sib_ != NULL) {
-					g = g->next_sib_;       
-				}
-				// insert self as sibling                    
-				g->next_sib_ = child;
-			}
+// 			if (this->first_child_ == NULL) {
+// 				// parent has no children: self is first child.
+// 				this->first_child_ = child;
+// 			} else {
+// 				// parent has children
+// 				GenealogyNode * g = this->first_child_;
+// 				// search for the first child with no sibling
+// 				while (g->next_sib_ != NULL) {
+// 					g = g->next_sib_;       
+// 				}
+// 				// insert self as sibling                    
+// 				g->next_sib_ = child;
+// 			}
 		}		
 		
         /**          
@@ -165,7 +165,7 @@ class GenealogyNode {
             	return;
             this->parent_->remove_child(this);
 			this->parent_ = NULL;
-			this->next_sib_ = NULL;
+// 			this->next_sib_ = NULL;
         }
           
         /**
@@ -196,7 +196,7 @@ class GenealogyNode {
          */        
         void decrement_count() {
             if (this->reference_count_ == 1) {
-            	assert(this->first_child_ == 0L);
+//             	assert(this->first_child_ == 0L);
                 delete this;
             }
             this->reference_count_ -= 1;
@@ -235,36 +235,36 @@ class GenealogyNode {
          * 
          * @return      pointer to first child
          */          
-        GenealogyNode * get_first_child() {
-            return this->first_child_;
-        }
+//         GenealogyNode * get_first_child() {
+//             return this->first_child_;
+//         }
         
         /**
          * Sets pointer to first child.
          * 
          * @param first_child    pointer to first child
          */         
-        void set_first_child(GenealogyNode * first_child) {
-            this->first_child_ = first_child;
-        }
+//         void set_first_child(GenealogyNode * first_child) {
+//             this->first_child_ = first_child;
+//         }
         
         /**
          * Returns pointer to this node's (right) sibling.
          * 
          * @return      pointer to this node's right sibling
          */          
-        GenealogyNode * get_next_sib() {
-            return this->next_sib_;
-        }
+//         GenealogyNode * get_next_sib() {
+//             return this->next_sib_;
+//         }
         
         /**
          * Sets pointer to this node's (right) sibling.
          * 
          * @param      pointer to this node's right sibling
          */         
-        void set_next_sib(GenealogyNode * next_sib) {
-            this->next_sib_ = next_sib;
-        }      
+//         void set_next_sib(GenealogyNode * next_sib) {
+//             this->next_sib_ = next_sib;
+//         }      
         
     private:
     
@@ -278,13 +278,13 @@ class GenealogyNode {
          * Pointer to the first child of this node (<code>NULL</code> if no 
          * children).
          */
-        GenealogyNode *     first_child_;
+//         GenealogyNode *     first_child_;
         
         /** 
          * Pointer to next sibling of this node (<code>NULL</code> if this node
          * is the last child).
          */        
-        GenealogyNode *     next_sib_;
+//         GenealogyNode *     next_sib_;
         
         /** 
          * Number of objects that point to or reference this object (including
