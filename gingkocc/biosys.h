@@ -64,8 +64,6 @@ class GenealogyNode {
         /** Constructs a node with no antecedents. */
         GenealogyNode()
         : parent_(NULL),
-//           first_child_(NULL),
-//           next_sib_(NULL),
           reference_count_(1)
           { }
                   
@@ -76,9 +74,9 @@ class GenealogyNode {
         ~GenealogyNode() {
             assert(this->parent_ != this);
             if (this->parent_) {                
-                this->unlink();                         
+                this->parent_->decrement_count();      
+                this->parent_ = NULL;
             }                
-//             assert(this->first_child_ == NULL);                
             assert(this->reference_count_ == 0 || this->reference_count_ == 1);
         }
           
@@ -92,82 +90,6 @@ class GenealogyNode {
         
     public:        
           
-        /**          
-         * Nullifies all pointers to the specified node in this node and 
-         * its children.
-         *
-         * Ensures that nothing points to <code>c</code>, either this node 
-         * itself (through <code>first_child_</code>, or any of this node's 
-         * children (through this node's children's <code>next_sib_</code>).
-         * Also sets the child node's parent to NULL, and then decrements the 
-         * count of references to self.
-         *
-         * @param child     pointer to the child node to be removed
-         */
-		void remove_child(GenealogyNode * child) {
-			assert(this);
-// 			GenealogyNode * g = this->first_child_;
-// 			if (g == child) {
-// 				this->first_child_ = g->next_sib_;
-// 			} else { // parent's first child is not self ...
-// 				// search for self amongst parent's children
-// 				while (g->next_sib_ != child) {
-// 					g = g->next_sib_;
-// 					assert(g);
-// 				}
-// 				assert(g->next_sib_ == child);
-// 				// set previous sib to point to self's next sib
-// 				g->next_sib_ = child->next_sib_;
-// 			}
-			child->parent_ = NULL;
-			this->decrement_count();
-		}
-		
-        /**          
-         * Adds a node as a child of this node.
-         *
-         * If this node has no children, then this node's 
-         * <code>first_child_</code> pointer is set to point to the new child
-         * node, otherwise the first null <code>next_sib_</code> is set to 
-         * point to child. Also sets the child node's parent to this node, and 
-         * increments count of references to self.
-         *
-         * @param child     pointer to the child node to be added
-         */
-		void add_child(GenealogyNode * child) {
-			assert(this != child);
-			child->parent_ = this;
-			this->increment_count();
-// 			if (this->first_child_ == NULL) {
-// 				// parent has no children: self is first child.
-// 				this->first_child_ = child;
-// 			} else {
-// 				// parent has children
-// 				GenealogyNode * g = this->first_child_;
-// 				// search for the first child with no sibling
-// 				while (g->next_sib_ != NULL) {
-// 					g = g->next_sib_;       
-// 				}
-// 				// insert self as sibling                    
-// 				g->next_sib_ = child;
-// 			}
-		}		
-		
-        /**          
-         * Removes this node from a genealogy tree.
-         *
-         * Disconnects this node from the pointer graph of a genealogy 
-         * tree by asking this node's parent to remove self, and then nulling 
-         * out this node's parent pointers.
-         */
-        void unlink() {
-            if (this->parent_ == NULL)
-            	return;
-            this->parent_->remove_child(this);
-			this->parent_ = NULL;
-// 			this->next_sib_ = NULL;
-        }
-          
         /**
          * Inserts this node into a genealogy tree as child of given parent.
          * 
@@ -179,11 +101,12 @@ class GenealogyNode {
          */
         void link(GenealogyNode * parent) {
             assert(parent != this);
-        	this->unlink();
-        	if (parent == NULL) {
-        	    return;
-        	}
-			parent->add_child(this);
+            if (this->parent_ != NULL)
+                this->parent_->decrement_count();
+            this->parent_ = parent;                
+        	if (this->parent_ != NULL) {     	
+                this->parent_->increment_count();
+            }                
         }
 
         /**
@@ -196,7 +119,6 @@ class GenealogyNode {
          */        
         void decrement_count() {
             if (this->reference_count_ == 1) {
-//             	assert(this->first_child_ == 0L);
                 delete this;
             }
             this->reference_count_ -= 1;
@@ -228,43 +150,7 @@ class GenealogyNode {
          */          
         void set_parent(GenealogyNode * parent) {
             this->parent_ = parent;
-        }
-        
-        /**
-         * Returns pointer to first child.
-         * 
-         * @return      pointer to first child
-         */          
-//         GenealogyNode * get_first_child() {
-//             return this->first_child_;
-//         }
-        
-        /**
-         * Sets pointer to first child.
-         * 
-         * @param first_child    pointer to first child
-         */         
-//         void set_first_child(GenealogyNode * first_child) {
-//             this->first_child_ = first_child;
-//         }
-        
-        /**
-         * Returns pointer to this node's (right) sibling.
-         * 
-         * @return      pointer to this node's right sibling
-         */          
-//         GenealogyNode * get_next_sib() {
-//             return this->next_sib_;
-//         }
-        
-        /**
-         * Sets pointer to this node's (right) sibling.
-         * 
-         * @param      pointer to this node's right sibling
-         */         
-//         void set_next_sib(GenealogyNode * next_sib) {
-//             this->next_sib_ = next_sib;
-//         }      
+        }       
         
     private:
     
@@ -273,18 +159,6 @@ class GenealogyNode {
          * children).
          */
         GenealogyNode *     parent_;
-        
-        /** 
-         * Pointer to the first child of this node (<code>NULL</code> if no 
-         * children).
-         */
-//         GenealogyNode *     first_child_;
-        
-        /** 
-         * Pointer to next sibling of this node (<code>NULL</code> if this node
-         * is the last child).
-         */        
-//         GenealogyNode *     next_sib_;
         
         /** 
          * Number of objects that point to or reference this object (including
