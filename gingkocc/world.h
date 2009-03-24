@@ -22,12 +22,39 @@
 #if !defined(WORLD_H)
 #define WORLD_H
 
+#include <map>
+#include <utility>
+#include <istream>
+
 #include "gingko_defs.h"
 #include "randgen.h"
 #include "cell.h"
 #include "landscape.h"
 
 namespace gingko {
+
+/**
+ * Events that will be executed at the start of a generation, modelling 
+ * climate change, changes in landscape etc.
+ */
+struct WorldEvents {
+
+    /** The generation # that this set of events will take place. */
+    unsigned long                       generation;
+    
+    /** 
+     * Environmental regimes that need to be changed/set (expressed as factor
+     * indexes mapped to ESRI ASCII Grid file paths). 
+     */
+    std::map<unsigned, std::string>     environments;
+    
+    /** 
+     * Movement costs that need to be changed/set. (expressed as species labels
+     * mapped to ESRI ASCII Grid file paths). 
+     */
+    std::map<std::string, std::string>  movement_costs;
+
+}; // WorldEvents
 
 /**
  * Meta-framework that binds everything together.
@@ -188,6 +215,17 @@ class World {
          */        
         void seed_population(CellIndexType cell_index, const std::string& species_label, unsigned long size);
         
+        // --- event handlers ---
+        
+        /**
+         * Add a set of "events" that reconfigure the world environment.
+         *
+         * @param   generation  generation number for this set of events
+         *                      to be activated
+         * @param   events      WorldEvents data
+         */
+        void add_event_group(unsigned long generation, const WorldEvents& events);
+        
         // --- simulation cycles ---
         
         /**
@@ -204,15 +242,17 @@ class World {
     private:
     
         /** Collection of pointers to the Species objects of this World. */
-        SpeciesByLabel                      species_;
+        SpeciesByLabel                          species_;
         /** The RandomNumberGenerator that is used by all objects of this World. */
-        RandomNumberGenerator               rng_;
+        RandomNumberGenerator                   rng_;
         /** The geospatial framework of this World. */
-        Landscape                           landscape_;
+        Landscape                               landscape_;
         /** The number of dimensions to the fitness function. */
-        unsigned                            num_fitness_factors_;
+        unsigned                                num_fitness_factors_;
         /** Tracks the number of generations that have been run. */
-        unsigned long                       current_generation_;                
+        unsigned long                           current_generation_;
+        /** Collection of events (scheduled to occur at specific generations */
+        std::map<unsigned long, WorldEvents>    world_events_;
 
     private:
         /** Disabled copy constructor. */
@@ -220,7 +260,28 @@ class World {
 		/** Disabled assignment operator. */
 		World & operator=(const World &);
     
-}; 
+}; // World
+
+
+/**
+ * Parses a configuration file, creating and returning a correspondingly 
+ * configured and populated World object.
+ */
+class WorldFactory {
+
+    public:
+        
+        /**
+         * Parses the given input stream and returns a World object based on 
+         * this.
+         *
+         * @param   src     reference to input stream describing the World
+         * @return          a new World object
+         */
+        World build(std::istream& src);
+
+}; // ConfigurationFileTokenizer
+
 
 } // gingko namespace
 

@@ -76,7 +76,11 @@ void World::seed_population(CellIndexType cell_index, const std::string& species
     this->landscape_.at(cell_index).generate_new_organisms(this->species_[species_label], size);
 }
 
-// --- species configuration ---
+// --- event handlers ---
+
+void World::add_event_group(unsigned long generation, const WorldEvents& events) {
+    this->world_events_[generation] = events;
+}
 
 
 // --- simulation cycles ---
