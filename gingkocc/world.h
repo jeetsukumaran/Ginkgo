@@ -115,44 +115,41 @@ class World {
          * Set the costs for entering particular cells on the landscape for 
          * a particular species.
          *
-         * @param species_index index of pointer to the Species object in the
-         *                      Species pool of the Landscape/World
+         * @param species_label  label of the Species object
          * @param costs         vector of costs for entering a cell, with 
          *                      cost for cell \f$i\f$ in the landscape given
          *                      by element \f$i\f$ in the costs vector
          */
-        void set_species_movement_costs(unsigned species_index, const std::vector<int>& costs) {
-            assert(species_index < this->species_.size());
+        void set_species_movement_costs(const std::string& species_label, const std::vector<int>& costs) {
+            assert(this->species_.find(species_label) != this->species_.end());
             assert(costs.size() == static_cast<unsigned long>(this->landscape_.size()));
-            this->species_[species_index]->set_movement_costs(costs);
+            this->species_[species_label]->set_movement_costs(costs);
         }
         
         /**
          * Sets the weight for each fitness factor for a particular species.
          *
-         * @param species_index index of pointer to the Species object in the
-         *                      Species pool of the Landscape/World
+         * @param species_label  label of the Species object
          * @param strengths     vector coeffecients to the Gaussian distance
          *                      equation used to evaluate fitness
          */
-        void set_species_selection_strengths(unsigned species_index, const std::vector<float>& strengths) {
-            assert(species_index < this->species_.size());        
+        void set_species_selection_strengths(const std::string& species_label, const std::vector<float>& strengths) {
+            assert(this->species_.find(species_label) != this->species_.end());    
             assert(strengths.size() == this->num_fitness_factors_);
-            this->species_[species_index]->set_selection_strengths(strengths);
+            this->species_[species_label]->set_selection_strengths(strengths);
         }
         
         /**
          * Sets the default genotypic (inheritable) component of fitness for a 
          * organisms of the given species when generated de novo.
          *
-         * @param species_index index of pointer to the Species object in the
-         *                      Species pool of the Landscape/World
+         * @param species_label  label of the Species object
          * @param genotype      vector genotypic fitness values for a new 
          *                      organism of the given species
          */        
-        void set_species_default_genotype(unsigned species_index, const FitnessFactors& genotype) {
-            assert(species_index < this->species_.size());        
-            this->species_[species_index]->set_default_genotype(genotype);
+        void set_species_default_genotype(const std::string& species_label, const FitnessFactors& genotype) {
+            assert(this->species_.find(species_label) != this->species_.end());    
+            this->species_[species_label]->set_default_genotype(genotype);
         }        
                                 
         // --- setup, initialization and seeding ---
@@ -163,7 +160,7 @@ class World {
          *
          * @param label     unique label identifying species
          */
-        Species& new_species(const char *label);        
+        Species& new_species(const std::string& label);        
         
         /**
          * Generates specified number of new Organism objects of the specified 
@@ -174,11 +171,10 @@ class World {
          *                       which the new Organism objects will added
          * @param y              the geospatial y-coordinate of the Cell into 
          *                       which the new Organism objects will added
-         * @param species_index  index of pointer to the Species object in the
-         *                       Species pool of the Landscape/World
+         * @param species_label  label of the Species object
          * @param size           number of new Organism objects to generate
          */
-        void seed_population(CellIndexType x, CellIndexType y, unsigned species_index, unsigned long size);
+        void seed_population(CellIndexType x, CellIndexType y, const std::string& species_label, unsigned long size);
         
         /**
          * Generates specified number of new Organism objects of the specified 
@@ -190,7 +186,7 @@ class World {
          *                       Species pool of the Landscape/World
          * @param size           number of new Organism objects to generate
          */        
-        void seed_population(CellIndexType cell_index, unsigned species_index, unsigned long size);
+        void seed_population(CellIndexType cell_index, const std::string& species_label, unsigned long size);
         
         // --- simulation cycles ---
         
@@ -208,7 +204,7 @@ class World {
     private:
     
         /** Collection of pointers to the Species objects of this World. */
-        SpeciesPointerVector                species_;
+        SpeciesByLabel                      species_;
         /** The RandomNumberGenerator that is used by all objects of this World. */
         RandomNumberGenerator               rng_;
         /** The geospatial framework of this World. */

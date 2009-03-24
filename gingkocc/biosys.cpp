@@ -35,16 +35,13 @@ Species& Organism::species() const {
 
 // --- lifecycle and assignment ---
 
-Species::Species(unsigned index,
-                 const char* label, 
+Species::Species(const std::string& label, 
                  unsigned num_fitness_factors,
                  RandomNumberGenerator& rng) 
-    : index_(index),
-      label_(label),
+    : label_(label),
       num_fitness_factors_(num_fitness_factors),
       rng_(rng),
-      label_index_(0) {
-    this->index_ = index;
+      organism_label_index_(0) {
     this->mutation_rate_ = 0.1;
     this->max_mutation_size_ = 1;
     this->mean_reproductive_rate_ = 6;

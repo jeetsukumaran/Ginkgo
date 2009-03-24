@@ -21,6 +21,9 @@
 
 #include "world.h"
 #include <iostream>
+#include <string>
+#include <map>
+#include <utility>
 
 using namespace gingko;
 
@@ -34,10 +37,13 @@ World::World(unsigned long seed)
 
 //! clean up species pool
 World::~World() {
-    for (std::vector<Species*>::iterator sp = this->species_.begin();
+    for (SpeciesByLabel::iterator sp = this->species_.begin();
             sp != this->species_.end();
             ++sp) {
-        delete *sp;            
+        assert (sp->second != NULL);            
+        delete sp->second;
+        sp->second = NULL;
+        this->species_.erase(sp);
     }            
 }
 
@@ -50,23 +56,24 @@ void World::generate_landscape(CellIndexType size_x, CellIndexType size_y, unsig
 }
 
 //! Adds a new species definition to this world.
-Species& World::new_species(const char* label) {
-    Species* sp = new Species(this->species_.size(),
-                              label, 
+Species& World::new_species(const std::string& label) {
+    Species* sp = new Species(label, 
                               this->num_fitness_factors_, 
                               this->rng_);
-    this->species_.push_back(sp);
+    this->species_.insert(std::make_pair(std::string(label), sp));
     return *sp;
 }
 
 //! Populates the cell at (x,y) with organisms of the given species.
-void World::seed_population(CellIndexType x, CellIndexType y, unsigned species_index, unsigned long size) {
-    this->landscape_.at(x, y).generate_new_organisms(species_index, size);
+void World::seed_population(CellIndexType x, CellIndexType y, const std::string& species_label, unsigned long size) {
+    assert(this->species_.find(species_label) != this->species_.end());
+    this->landscape_.at(x, y).generate_new_organisms(this->species_[species_label], size);
 }
 
 //! Populates the cell cell_index with organisms of the given species.
-void World::seed_population(CellIndexType cell_index, unsigned species_index, unsigned long size) {
-    this->landscape_.at(cell_index).generate_new_organisms(species_index, size);
+void World::seed_population(CellIndexType cell_index, const std::string& species_label, unsigned long size) {
+    assert(this->species_.find(species_label) != this->species_.end());
+    this->landscape_.at(cell_index).generate_new_organisms(this->species_[species_label], size);
 }
 
 // --- species configuration ---

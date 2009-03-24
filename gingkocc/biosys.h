@@ -42,8 +42,8 @@ namespace gingko {
 class Organism;
 class Species;
 
-/** collection of pointers to Species objects */
-typedef std::vector<Species *>  SpeciesPointerVector;
+/** collection of Species Pointers */
+typedef std::map<std::string, Species *> SpeciesByLabel;
 
 /** collection of Organism objects */
 typedef std::vector<Organism>   OrganismVector;
@@ -632,14 +632,11 @@ class Species {
         /**
          * Constructor.
          *
-         * @param index                 index of pointer to this species object
-         *                              in World species pool
          * @param label                 identifier string for this species
          * @param num_fitness_factors   number of factors in fitness function
          * @param rng                   random number generator
          */
-        Species(unsigned index,
-                const char* label, 
+        Species(const std::string& label, 
                 unsigned num_fitness_factors,
                 RandomNumberGenerator& rng);              
                 
@@ -651,13 +648,13 @@ class Species {
         // --- access and mutation ---
         
         /**
-         * Returns index of pointer to this species in World species pool.
+         * Returns label of this species.
          *
-         * @return index of pointer to this species in World species pool
+         * @return label of this species.
          */
-        unsigned get_index() const {
-            return this->index_;
-        }
+        std::string get_label() const {
+            return this->label_;
+        }        
         
         /**
          * Returns number of fitness factors.
@@ -859,8 +856,8 @@ class Species {
         /**
          * Resets the count of the number of labels produced.
          */                 
-        void reset_label_index() {
-            this->label_index_ = 0;
+        void reset_organism_label_index() {
+            this->organism_label_index_ = 0;
         }
         
         /**
@@ -871,7 +868,7 @@ class Species {
          */
         std::string new_organism_label() {
             std::ostringstream label_ostr;
-            label_ostr << this->label_ << "_" << this->label_index_++;
+            label_ostr << this->label_ << "_" << this->organism_label_index_++;
             return label_ostr.str();
         }
         
@@ -959,9 +956,6 @@ class Species {
         const Species& operator=(const Species&);
         
     private:
-    
-        /** index of this species in World species pool */        
-        unsigned                            index_;
         /** unique identifier for this species */
         std::string                         label_;
         /** number of active fitness factors */
@@ -985,7 +979,7 @@ class Species {
         /** source of random numbers of various distributions */
         RandomNumberGenerator&              rng_;
         /** tracks the number of labels assigned to organisms of this species */
-        unsigned long                       label_index_;
+        unsigned long                       organism_label_index_;
         /** tracks the organism to label assignment */
         std::map<Organism *, std::string>   organism_labels_;
 

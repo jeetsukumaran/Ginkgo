@@ -49,10 +49,10 @@ class Landscape {
          * Constructs a landscape object, binding a species pool and a random
          * number generator.
          *
-         * @param species   reference vector of pointer to Species objects
+         * @param species   reference to map of Species objects
          * @param rng       reference to a RandomNumberGenerator
          */
-        Landscape(const SpeciesPointerVector& species, RandomNumberGenerator& rng);
+        Landscape(const SpeciesByLabel& species, RandomNumberGenerator& rng);
         
         /** Destructor */
         ~Landscape();
@@ -251,7 +251,7 @@ class Landscape {
         /** Collection migration events. */
         MigrationEvents                 migrants_;
         /** Reference to collection of pointers to Species objects in the World. */
-        const SpeciesPointerVector&     species_;
+        const SpeciesByLabel&           species_;
         /** Reference to RandomNumberGenerator of the World. */
         RandomNumberGenerator&          rng_;
 };

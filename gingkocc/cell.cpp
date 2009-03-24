@@ -39,7 +39,7 @@ OrganismVector Cell::previous_gen;                       // scratch space to hol
 Cell::Cell(CellIndexType index, 
            unsigned num_fitness_factors,
            Landscape& landscape, 
-           const SpeciesPointerVector& species, 
+           const SpeciesByLabel& species, 
            RandomNumberGenerator& rng)     
     : index_(index),
       carrying_capacity_(0),
@@ -50,10 +50,10 @@ Cell::Cell(CellIndexType index,
 
 // --- basic biotics ---
 
-void Cell::generate_new_organisms(unsigned species_index, CellIndexType num) {
+void Cell::generate_new_organisms(Species * sp, CellIndexType num) {
     this->organisms_.reserve(this->organisms_.size() + num);
     for ( ; num > 0; --num) {
-        this->organisms_.push_back(this->species_.at(species_index)->new_organism());
+        this->organisms_.push_back(sp->new_organism());
     }
 }
 
@@ -64,15 +64,16 @@ void Cell::reproduction() {
 	Cell::previous_gen.clear();
 	Cell::previous_gen.swap(this->organisms_);
 		
-    for (SpeciesPointerVector::const_iterator sp = this->species_.begin(); sp != this->species_.end(); ++sp) {
+    for (SpeciesByLabel::const_iterator spi = this->species_.begin(); spi != this->species_.end(); ++spi) {
+        Species * sp = spi->second;
 		Cell::breeding_female_ptrs.clear();
 		Cell::breeding_male_ptrs.clear();
 
         // species-level reproduction rate for now: later this will be at the 
         // organism level and subject to evolution
-        unsigned num_offspring = (*sp)->get_mean_reproductive_rate();
+        unsigned num_offspring = sp->get_mean_reproductive_rate();
         
-        this->extract_breeding_groups((*sp),
+        this->extract_breeding_groups(sp,
             Cell::previous_gen,
             Cell::breeding_female_ptrs, 
             Cell::breeding_male_ptrs);
@@ -83,7 +84,7 @@ void Cell::reproduction() {
                 for (unsigned n = 0; n <= num_offspring; ++n) {                    
                     const Organism* male = this->rng_.select(breeding_male_ptrs);
                     const Organism* female = *fptr;
-                    this->organisms_.push_back((*sp)->new_organism(*female, *male));
+                    this->organisms_.push_back(sp->new_organism(*female, *male));
                 } // for each offspring     
             } // for each female
         } // if females > 0 and males > 0

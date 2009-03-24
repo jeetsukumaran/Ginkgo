@@ -31,7 +31,7 @@ using namespace gingko;
 
 // --- lifecycle and assignment --- 
 
-Landscape::Landscape(const SpeciesPointerVector& species, RandomNumberGenerator& rng)
+Landscape::Landscape(const SpeciesByLabel& species, RandomNumberGenerator& rng)
     : species_(species),
       rng_(rng) {
     this->size_x_ = 0;

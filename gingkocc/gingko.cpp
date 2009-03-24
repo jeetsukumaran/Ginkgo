@@ -97,7 +97,7 @@ int main(int argc, char* argv[]) {
         }
         std::cerr << "(seeding cell " << cell_index << " with " << cc << " individuals" << ")" << std::endl;
         seeded.insert(cell_index);
-        world.seed_population(cell_index, sp1.get_index(), cc);
+        world.seed_population(cell_index, sp1.get_label(), cc);
     }
     
     std::cerr << "(running cycles)\n";

@@ -52,7 +52,7 @@ class Cell {
         Cell(CellIndexType index,
              unsigned num_fitness_factors,
              Landscape& landscape, 
-             const SpeciesPointerVector& species, 
+             const SpeciesByLabel& species, 
              RandomNumberGenerator& rng);
              
         /**
@@ -146,11 +146,10 @@ class Cell {
          * Creates the specified number of organisms of the specified species 
          * and adds them to the population of this cell.
          *
-         * @param species_index index of the pointer to the Species object in 
-         *                      the World species pool
+         * @param species       pointer to Species object
          * @param num           number of organisms to create
          */
-        void generate_new_organisms(unsigned species_index, CellIndexType num);
+        void generate_new_organisms(Species * sp, CellIndexType num);
         
         /**
          * Adds a single organism to the population of this cell.
@@ -241,7 +240,7 @@ class Cell {
         /** reference to Landscape in which this cell is located */
         Landscape&                              landscape_;
         /** reference to pool of species in the World of this cell */
-        const SpeciesPointerVector&             species_;
+        const SpeciesByLabel&                   species_;
         /** reference to random number generator of the World of this cell */
         RandomNumberGenerator&                  rng_;
 
