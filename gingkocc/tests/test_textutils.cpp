@@ -131,10 +131,31 @@ void test_split_on_any() {
     check_split( split_on_any("a+b***c&&&d%e f g h&i", "+*&%,!", 3, false), a5, 4);     
 }
 
+void assert_str_equal(const std::string& result, const char * expected) {
+    std::cout << "Expecting: \"" << expected << "\", received \"" << result << "\"" << std::endl;
+    assert(result == expected);
+}
+
+void test_strip() {
+    std::cout << "Testing string stripping ... " << std::endl;
+    assert_str_equal(strip("   hello    "), "hello");
+    assert_str_equal(strip("   hello"), "hello");
+    assert_str_equal(strip("hello"), "hello"); 
+    assert_str_equal(strip("he llo"), "he llo");
+    assert_str_equal(strip(" he llo  "), "he llo");
+    assert_str_equal(strip("\n\th\tello\n\n\n \t\n"), "h\tello");
+    assert_str_equal(strip("### hello ###", "#"), " hello ");
+    assert_str_equal(strip("!### hello ###", "#"), "!### hello ");
+    assert_str_equal(strip("!### hello ###  ", "!"), "### hello ###  ");
+    assert_str_equal(strip("!### hello ###  ", "!#"), " hello ###  ");
+    assert_str_equal(strip("!### hello ###  ", "!# "), "hello");    
+}
+
 int main(int, char * []) {
     test_extract_filename_from_path();
     test_splits();
     test_split_on_any();
+    test_strip();
 }
 
 
