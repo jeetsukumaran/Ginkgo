@@ -24,6 +24,7 @@
 #include <sstream>
 #include <cstdlib>
 #include <vector>
+#include <cassert>
 
 #include "../textutils.h"
 
