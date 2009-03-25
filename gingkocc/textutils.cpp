@@ -124,4 +124,16 @@ std::vector<std::string> split(const std::string& src, const char * sep) {
     return v;
 }
 
+///////////////////////////////////////////////////////////////////////////////
+// Strip characters from a string
+std::string strip(const std::string& s, const char * to_strip) {
+    if (!s.empty()) {
+        int start = s.find_first_not_of(to_strip);
+        int end = s.find_last_not_of(to_strip);
+        return s.substr(start, end-start+1);
+    } else {
+        return s;
+    }
+}
+
 } // gingko namespace

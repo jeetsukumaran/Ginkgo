@@ -71,6 +71,18 @@ std::vector<std::string> split(const char * ssrc, const char * sep = " ");
  */
 std::vector<std::string> split(const std::string& src, const char * sep = " ");
 
+
+/**
+ * Returns copy of given string with specified characters stripped from
+ * beginning and end.
+ *
+ * @param s         source string
+ * @param to_strip  characters to remove
+ * @return          copy of source with specified characters removed from
+ *                  beginning and end
+ */
+std::string strip(const std::string& s, const char * to_strip=" \t\n\r");
+
 } // namespace gingko
 
 #endif
