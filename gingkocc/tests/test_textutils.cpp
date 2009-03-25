@@ -98,7 +98,12 @@ void test_splits() {
     
     char * e7 [] = {"a", ",b,,,c,,"};
     check_split( split(",,a,,b,,,c,,", ",", 1, false), e7, 2 );
+        
+    char * e8 [] = {"", "", "a,,b,,,c,,"};
+    check_split( split(",,a,,b,,,c,,", ",", 2, true), e8, 3 );
     
+    char * e9 [] = {"a", "b", ",,c,,"};
+    check_split( split(",,a,,b,,,c,,", ",", 2, false), e9, 3 );    
 }
 
 int main(int, char * []) {
