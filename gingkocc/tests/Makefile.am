@@ -1,12 +1,13 @@
 AM_CPPFLAGS = @CPPFLAGS@
 AM_LDFLAGS  = @LDFLAGS@
 
-# Install my_script in $(bindir) and distribute it. 
-dist_bin_SCRIPTS = run_tests.py \
+gingkotestsdir = $(bindir)/gingko-tests
+ 
+dist_gingkotests_SCRIPTS = run_tests.py \
                    run_test_cmdopts.py \
                    run_test_tree.py 
 
-bin_PROGRAMS = test_cmdopts \
+gingkotests_PROGRAMS = test_cmdopts \
                test_tree_from_parent_indexes \
                test_tree_from_genealogies \
                test_conf_parse_block
