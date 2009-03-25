@@ -85,16 +85,16 @@ void ConfigurationBlockParser::parse(std::istream& in) {
         throw ConfigurationParseError(this->compose_error_message(start_pos, msg.str()));
     }     
     
-    std::vector<std::string> head_parts = split(parts[0], " ", true);
+    std::vector<std::string> head_parts = split(strip(parts[0]), " ", true);
     
     if (head_parts.size() < 2) {
         throw ConfigurationParseError(this->compose_error_message(start_pos, "found only one element in block header, but expecting two (type and name)"));
     }
     
     if (head_parts.size() > 2) {
-        for (std::vector<std::string>::const_iterator i = head_parts.begin(); i != head_parts.end(); ++i) {
-            std::cout << i-head_parts.begin() + 1 << ": \"" << *i << "\"" << std::endl;
-        }
+//         for (std::vector<std::string>::const_iterator i = head_parts.begin(); i != head_parts.end(); ++i) {
+//             std::cout << i-head_parts.begin() + 1 << ": \"" << *i << "\"" << std::endl;
+//         }
         throw ConfigurationParseError(this->compose_error_message(start_pos, "found multiple elements in block header, but expecting only two (type and name)"));
     }   
 }

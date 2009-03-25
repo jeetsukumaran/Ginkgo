@@ -81,7 +81,17 @@ int main(int, char * []) {
     catch_block_parse_exception("(testing missing block open error)", s1);          
       
     s1.insert(s1_pos, "{{");    
-    catch_block_parse_exception("(testing multiple block open error)", s1);    
+    catch_block_parse_exception("(testing multiple block open error)", s1);
+    
+    s1 = species_block_str;
+    s1_pos = s1.find(" Sp1");
+    s1[s1_pos] = '_';
+    catch_block_parse_exception("(testing single elemnt in head lack of label/name separation)", s1);
+    
+    s1 = species_block_str;
+    s1_pos = s1.find(" Sp1");
+    s1.insert(s1_pos, " extra");
+    catch_block_parse_exception("(testing too many elements in head)", s1);    
     
     std::istringstream in1(species_block_str);
     ConfigurationBlockParser species_block(in1);   
