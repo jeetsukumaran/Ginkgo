@@ -15,4 +15,5 @@ gingko_SOURCES = \
     world.cpp \
     cmdopts.cpp \
     textutils.cpp \
-    tree.cpp
+    tree.cpp \
+    conf.cpp
