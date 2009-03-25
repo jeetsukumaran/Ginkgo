@@ -71,7 +71,7 @@ void ConfigurationBlockParser::parse(std::istream& in) {
         throw ConfigurationParseError(this->compose_error_message(start_pos, msg.str()));                        
     }
     
-    std::vector<std::string> parts = split(raw, "{");
+    std::vector<std::string> parts = split(raw, "{", false);
     
     if (parts.size() < 2) {
         std::ostringstream msg;
@@ -83,8 +83,9 @@ void ConfigurationBlockParser::parse(std::istream& in) {
         std::ostringstream msg;
         msg << "multiple block body initiators ('" << END_BLOCK_BODY << "')";    
         throw ConfigurationParseError(this->compose_error_message(start_pos, msg.str()));
-    }        
+    }     
     
+    std::vector<std::string> head_parts = split(parts[0], " ", true);
 }
 
 } // namespace gingko

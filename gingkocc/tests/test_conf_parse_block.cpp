@@ -40,7 +40,7 @@ bool catch_block_parse_exception(const char * message, std::string s) {
         exception_thrown = false;
     } catch (const ConfigurationParseError& e) {
         exception_thrown = true;
-        std::cerr << "Exception caught: \"" << e.what() << "\"" << std::endl;
+        std::cerr << "Exception correctly thrown: \"" << e.what() << "\"" << std::endl;
     }
     assert(exception_thrown);
     return exception_thrown;
