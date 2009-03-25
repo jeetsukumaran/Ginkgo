@@ -26,11 +26,11 @@ from gingko_tests import get_logger
 from gingko_tests import get_gingko_program_path
 from gingko_tests import run_program
 
-_LOG = get_logger("test_conf_parser")
+_LOG = get_logger("test_textutils")
 
-class ParseConfBlockTest(unittest.TestCase):
+class TextUtilsTest(unittest.TestCase):
     def setUp(self):
-        self.prog_path = get_gingko_program_path("test_parse_conf_block")
+        self.prog_path = get_gingko_program_path("test_textutils")
             
 if __name__ == "__main__":
     unittest.main()
