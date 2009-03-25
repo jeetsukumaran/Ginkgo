@@ -3,7 +3,7 @@ AM_LDFLAGS  = @LDFLAGS@
 
 gingkotestsdir = $(bindir)/gingko-tests
  
-dist_gingkotests_SCRIPTS = run_tests.py \
+dist_gingkotests_SCRIPTS = gingko_tests.py \
                    run_test_cmdopts.py \
                    run_test_tree.py 
 

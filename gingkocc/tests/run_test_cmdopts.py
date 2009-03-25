@@ -24,9 +24,9 @@
 import unittest
 import subprocess
 
-from run_tests import get_logger
-from run_tests import get_gingko_program_path
-from run_tests import run_program
+from gingko_tests import get_logger
+from gingko_tests import get_gingko_program_path
+from gingko_tests import run_program
 
 _LOG = get_logger("test_cmdopts")
 
