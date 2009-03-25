@@ -96,7 +96,10 @@ void ConfigurationBlockParser::parse(std::istream& in) {
 //             std::cout << i-head_parts.begin() + 1 << ": \"" << *i << "\"" << std::endl;
 //         }
         throw ConfigurationParseError(this->compose_error_message(start_pos, "found multiple elements in block header, but expecting only two (type and name)"));
-    }   
+    }
+    
+    this->type_ = strip(head_parts[0]);
+    this->name_ = strip(head_parts[1]);
 }
 
 } // namespace gingko
