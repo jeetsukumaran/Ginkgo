@@ -49,6 +49,13 @@ bool check_split(std::vector<std::string> result,
     std::cout << "Testing string splitting ..." << std::endl;
     std::cout << "Expecting size: " << expected_count << std::endl;
     std::cout << "Resulting size: " << result.size() << std::endl;
+    if (result.size() != expected_count) {
+        std::cerr << " *** INCORRECT RESULT SIZE: ";
+        for (std::vector<std::string>::iterator r = result.begin(); r != result.end(); ++r) {
+            std::cerr << " [" << *r << "] ";
+        }
+        std::cerr << std::endl;
+    }    
     assert(result.size() == expected_count);
     std::cout << "Expecting values: ";
     for (unsigned i = 0; i < expected_count; ++i) {
@@ -83,7 +90,7 @@ int main(int, char * []) {
                 e3, 3);
                 
     char * e4 [] = {"", "", "a", "", "b", "", "", "c", "", ""};
-    check_split( split(",,a,,b,,c,,", 0, true, e4, 10) );
+    check_split( split(",,a,,b,,,c,,", ",", 0, true), e4, 10 );
 }
 
 
