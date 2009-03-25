@@ -19,8 +19,8 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#if !defined(WORLD_H)
-#define WORLD_H
+#if !defined(GINGKO_WORLD_H)
+#define GINGKO_WORLD_H
 
 #include <map>
 #include <utility>
