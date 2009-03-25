@@ -60,7 +60,7 @@ std::string extract_filename_from_path(const char * path);
  * @param merge_consecutive_sep treat consecutive delimiters as single?
  * @return      vector of std::string tokens
  */
-std::vector<std::string> split(const char * ssrc, const char * sep = " ", bool merge_consecutive_sep=false);
+std::vector<std::string> split(const char * ssrc, const char * sep = " ", bool skip_blank_tokens=false);
 
 /**
  * Splits a std::string source string into tokens as delimited by 
@@ -71,7 +71,7 @@ std::vector<std::string> split(const char * ssrc, const char * sep = " ", bool m
  * @param merge_consecutive_sep treat consecutive delimiters as single?
  * @return      vector of std::string tokens
  */
-std::vector<std::string> split(const std::string& src, const char * sep = " ", bool merge_consecutive_sep=false);
+std::vector<std::string> split(const std::string& src, const char * sep = " ", bool skip_blank_tokens=false);
 
 
 /**
