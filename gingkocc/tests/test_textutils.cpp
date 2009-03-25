@@ -113,7 +113,22 @@ void test_split_on_any() {
     char * e2[] = {"a", "b", "c", "", "", "d", "e f g h", "i"};
     check_split( split_on_any("a+b*c&&&d%e f g h&i", "+*&%,!", 0, true), e2, 8);
     char * e3[] = {"a", "b*c&&&d%e f g h&i"};
-    check_split( split_on_any("a+b*c&&&d%e f g h&i", "+*&%,!", 1, true), e3, 2);    
+    check_split( split_on_any("a+b*c&&&d%e f g h&i", "+*&%,!", 1, true), e3, 2);
+    char * e4[] = {"a", "b", "**c&&&d%e f g h&i"};
+    check_split( split_on_any("a+b***c&&&d%e f g h&i", "+*&%,!", 2, true), e4, 3);
+    char * e5[] = {"a", "b", "", "*c&&&d%e f g h&i"};
+    check_split( split_on_any("a+b***c&&&d%e f g h&i", "+*&%,!", 3, true), e5, 4);    
+    
+    char * a1[] = {"a", "b", "c", "d", "e f g h", "i"};
+    check_split( split_on_any("a+b*c&d%e f g h&i", "+*&%,!", 0, false), a1, 6);
+    char * a2[] = {"a", "b", "c", "d", "e f g h", "i"};
+    check_split( split_on_any("a+b*c&&&d%e f g h&i", "+*&%,!", 0, false), a2, 6);
+    char * a3[] = {"a", "b*c&&&d%e f g h&i"};
+    check_split( split_on_any("a+b*c&&&d%e f g h&i", "+*&%,!", 1, false), a3, 2);
+    char * a4[] = {"a", "b", "**c&&&d%e f g h&i"};
+    check_split( split_on_any("a+b***c&&&d%e f g h&i", "+*&%,!", 2, false), a4, 3);
+    char * a5[] = {"a", "b", "c", "&&d%e f g h&i"};
+    check_split( split_on_any("a+b***c&&&d%e f g h&i", "+*&%,!", 3, false), a5, 4);     
 }
 
 int main(int, char * []) {
