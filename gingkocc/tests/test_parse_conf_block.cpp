@@ -24,6 +24,7 @@
 #include <istream>
 #include <string>
 #include <sstream>
+#include <cassert>
 
 #include "../conf.h"
 
