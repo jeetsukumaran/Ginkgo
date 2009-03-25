@@ -55,11 +55,12 @@ std::string extract_filename_from_path(const char * path);
  * Splits a const char source string into tokens as delimited by 
  * <code>sep</code>.
  *
- * @param src   source string to be split
- * @param sep   separator token (single or multiple characters)
+ * @param src           source string to be split
+ * @param sep           separator token (single or multiple characters)
+ * @param include_empty include blank tokens?
  * @return      vector of std::string tokens
  */
-std::vector<std::string> split(const char * ssrc, const char * sep = " ");
+std::vector<std::string> split(const char * ssrc, const char * sep = " ", bool include_empty=true);
 
 /**
  * Splits a std::string source string into tokens as delimited by 
@@ -67,9 +68,10 @@ std::vector<std::string> split(const char * ssrc, const char * sep = " ");
  *
  * @param src   source string to be split
  * @param sep   separator token (single or multiple characters)
+ * @param include_empty include blank tokens? 
  * @return      vector of std::string tokens
  */
-std::vector<std::string> split(const std::string& src, const char * sep = " ");
+std::vector<std::string> split(const std::string& src, const char * sep = " ", bool include_empty=true);
 
 
 /**

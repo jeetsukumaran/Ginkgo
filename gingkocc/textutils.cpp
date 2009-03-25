@@ -105,18 +105,21 @@ std::string extract_filename_from_path(const char * path) {
 
 ///////////////////////////////////////////////////////////////////////////////
 // Split a string by given separator delimiter
-std::vector<std::string> split(const char * ssrc, const char * sep) {
+std::vector<std::string> split(const char * ssrc, const char * sep, bool include_empty) {
     return split(std::string(ssrc), sep);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 // Split a string by given separator delimiter
-std::vector<std::string> split(const std::string& src, const char * sep) {
+std::vector<std::string> split(const std::string& src, const char * sep, bool include_empty) {
     std::vector< std::string > v;
     std::string::size_type start_pos = 0;
     std::string::size_type end_pos = src.find(sep, start_pos);
     while (end_pos != std::string::npos) {
-        v.push_back(src.substr(start_pos, end_pos-start_pos));
+        std::string result = src.substr(start_pos, end_pos-start_pos);
+        if (result.size() != 0 or include_empty) {
+            v.push_back(result);
+        }            
         start_pos = end_pos+1;
         end_pos = src.find(sep, start_pos);
     }
