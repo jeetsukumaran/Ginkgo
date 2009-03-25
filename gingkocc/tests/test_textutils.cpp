@@ -80,7 +80,10 @@ int main(int, char * []) {
                 
     char * e3[] = {"the", "quick", "brown fox jumps over the lazy dog"};
     check_split( split("the quick brown fox jumps over the lazy dog", " ", 2, true),
-                e3, 3);                    
+                e3, 3);
+                
+    char * e4 [] = {"", "", "a", "", "b", "", "", "c", "", ""};
+    check_split( split(",,a,,b,,c,,", 0, true, e4, 10) );
 }
 
 
