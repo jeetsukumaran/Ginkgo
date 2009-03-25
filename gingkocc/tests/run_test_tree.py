@@ -80,6 +80,17 @@ class ParentArrayTreeRoundTripTest(unittest.TestCase):
         for t in self.src_trees:
             self.check_tree(t)
             
+class GenealogyTreeTest(unittest.TestCase):
+    def setUp(self):
+        self.prog_path = get_gingko_program_path("test_tree_from_genealogies")
+
+    def testTreesFromGenealogies(self):
+        _LOG.info('Testing trees from genealogies')
+        cmd = self.prog_path
+        stdout, stderr, returncode = run_program(cmd)
+        assert returncode == 0, "Program exited with error:\n%s" % stderr  
+        _LOG.info('Trees from genealogies returned SUCCESS')
+            
 if __name__ == "__main__":
     unittest.main()
     
