@@ -97,11 +97,11 @@ class ConfigurationBlockParser {
 
     private:
         /** The type of block (e.g. "species", "world", "generation") */
-        std::string                             block_type;
+        std::string                             type_;
         /** The name of the block (e.g. "Sp1"). */
-        std::string                             block_label;
+        std::string                             name_;
         /** Key-value pairs making up the block body. */
-        std::map< std::string, std::string >    block_entries;
+        std::map< std::string, std::string >    entries_;
 }; // ConfigurationBlockParser
 
 
