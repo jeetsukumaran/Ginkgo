@@ -1,4 +1,4 @@
-///////////////////////////////////////////////////////////////////////////////
+
 //
 // GINGKO Biogeographical Evolution Simulator.
 //
@@ -17,7 +17,7 @@
 // You should have received a copy of the GNU General Public License along
 // with this program. If not, see <http://www.gnu.org/licenses/>.
 //
-///////////////////////////////////////////////////////////////////////////////
+
 
 #include <iostream>
 #include <cassert>
@@ -28,7 +28,7 @@
 
 namespace gingko {
 
-///////////////////////////////////////////////////////////////////////////////
+
 // Wraps text (preferably at word boundaries).
 std::string textwrap(const std::string& source, 
         unsigned line_width,
@@ -77,7 +77,7 @@ std::string textwrap(const std::string& source,
     return wrapped;
 } 
 
-///////////////////////////////////////////////////////////////////////////////
+
 // Extracts filenames from path
 std::string extract_filename_from_path(const char * path) {
     
@@ -103,34 +103,77 @@ std::string extract_filename_from_path(const char * path) {
     }    
 } 
 
-///////////////////////////////////////////////////////////////////////////////
+
 // Split a string by given separator delimiter
-std::vector<std::string> split(const char * ssrc, const char * sep, bool skip_blank_tokens) {
-    return split(std::string(ssrc), sep, skip_blank_tokens);
+std::vector<std::string> split(const char * ssrc, 
+                               const char * sep, 
+                               unsigned max_splits, 
+                               bool include_empty_tokens) {
+    return split(std::string(ssrc), sep, include_empty_tokens);
 }
 
-///////////////////////////////////////////////////////////////////////////////
+
 // Split a string by given separator delimiter
-std::vector<std::string> split(const std::string& src, const char * sep, bool skip_blank_tokens) {
+std::vector<std::string> split(const std::string& src, 
+                               const char * sep, 
+                               unsigned max_splits, 
+                               bool include_empty_tokens) {
     std::vector< std::string > v;
     std::string::size_type start_pos = 0;
     std::string::size_type end_pos = src.find(sep, start_pos);
-    while (end_pos != std::string::npos) {
+    unsigned num_splits = 0;
+    while (end_pos != std::string::npos and (max_splits == 0 or num_splits < max_splits)) {
+        num_splits += 1;
         std::string result = src.substr(start_pos, end_pos-start_pos);
-        if (result.size() != 0 or !skip_blank_tokens) {
+        if (result.size() != 0 or include_empty_tokens) {
             v.push_back(result);
         }            
         start_pos = end_pos+1;
         end_pos = src.find(sep, start_pos);
     }
-    std::string result = src.substr(start_pos, end_pos-start_pos);
-    if (result.size() != 0 or !skip_blank_tokens) {
+    std::string result = src.substr(start_pos, std::string::npos);
+    if (result.size() != 0 or include_empty_tokens) {
         v.push_back(result);
     } 
     return v;
 }
 
-///////////////////////////////////////////////////////////////////////////////
+
+// Split a string by any character in given list of separators/delimiter
+std::vector<std::string> split_on_any(const char * ssrc, 
+                                      const char * sep, 
+                                      unsigned max_splits, 
+                                      bool include_empty_tokens) {
+    return split_on_any(std::string(ssrc), sep, include_empty_tokens);
+}
+
+
+// Split a string by any character in given list of separators/delimiter
+std::vector<std::string> split_on_any(const std::string& src, 
+                                      const char * sep, 
+                                      unsigned max_splits, 
+                                      bool include_empty_tokens) {
+    std::vector< std::string > v;
+    std::string::size_type start_pos = 0;
+    std::string::size_type end_pos = src.find_first_of(sep, start_pos);
+    unsigned num_splits = 0;
+    while (end_pos != std::string::npos and (max_splits == 0 or num_splits < max_splits)) {
+        num_splits += 1;
+        std::string result = src.substr(start_pos, end_pos-start_pos);
+        if (result.size() != 0 or include_empty_tokens) {
+            v.push_back(result);
+        }            
+        start_pos = end_pos+1;
+        end_pos = src.find_first_of(sep, start_pos);
+    }
+    std::string result = src.substr(start_pos, std::string::npos);
+    if (result.size() != 0 or include_empty_tokens) {
+        v.push_back(result);
+    } 
+    return v;
+}
+
+
 // Strip characters from a string
 std::string strip(const std::string& s, const char * to_strip) {
     if (!s.empty()) {

@@ -57,10 +57,11 @@ std::string extract_filename_from_path(const char * path);
  *
  * @param src           source string to be split
  * @param sep           separator token (single or multiple characters)
- * @param merge_consecutive_sep treat consecutive delimiters as single?
+ * @max_splits          maximum number of splits (0 = no limit)
+ * @param include_empty_tokens treat consecutive delimiters as single?
  * @return      vector of std::string tokens
  */
-std::vector<std::string> split(const char * ssrc, const char * sep = " ", bool skip_blank_tokens=false);
+std::vector<std::string> split(const char * ssrc, const char * sep = " ", unsigned max_splits=0, bool include_empty_tokens=true);
 
 /**
  * Splits a std::string source string into tokens as delimited by 
@@ -68,10 +69,35 @@ std::vector<std::string> split(const char * ssrc, const char * sep = " ", bool s
  *
  * @param src   source string to be split
  * @param sep   separator token (single or multiple characters)
- * @param merge_consecutive_sep treat consecutive delimiters as single?
+ * @max_splits          maximum number of splits (0 = no limit) 
+ * @param include_empty_tokens treat consecutive delimiters as single?
  * @return      vector of std::string tokens
  */
-std::vector<std::string> split(const std::string& src, const char * sep = " ", bool skip_blank_tokens=false);
+std::vector<std::string> split(const std::string& src, const char * sep = " ", unsigned max_splits=0, bool include_empty_tokens=true);
+
+/**
+ * Splits a const char source string into tokens as delimited by any character
+ * given in <code>sep</code>.
+ *
+ * @param src           source string to be split
+ * @param sep           separator token (single or multiple characters)
+ * @max_splits          maximum number of splits (0 = no limit)
+ * @param include_empty_tokens treat consecutive delimiters as single?
+ * @return      vector of std::string tokens
+ */
+std::vector<std::string> split_on_any(const char * ssrc, const char * sep = " ", unsigned max_splits=0, bool include_empty_tokens=true);
+
+/**
+ * Splits a const char source string into tokens as delimited by any character
+ * given in <code>sep</code>.
+ *
+ * @param src   source string to be split
+ * @param sep   separator token (single or multiple characters)
+ * @max_splits          maximum number of splits (0 = no limit) 
+ * @param include_empty_tokens treat consecutive delimiters as single?
+ * @return      vector of std::string tokens
+ */
+std::vector<std::string> split_on_any(const std::string& src, const char * sep = " ", unsigned max_splits=0, bool include_empty_tokens=true);
 
 
 /**
