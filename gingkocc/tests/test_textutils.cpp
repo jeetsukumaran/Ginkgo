@@ -107,9 +107,19 @@ void test_splits() {
     check_split( split(",,a,,b,,,c,,", ",", 2, false), e9, 3 );    
 }
 
+void test_split_on_any() {
+    char * e1[] = {"a", "b", "c", "d", "e f g h", "i"};
+    check_split( split_on_any("a+b*c&d%e f g h&i", "+*&%,!", 0, true), e1, 6);
+    char * e2[] = {"a", "b", "c", "", "", "d", "e f g h", "i"};
+    check_split( split_on_any("a+b*c&&&d%e f g h&i", "+*&%,!", 0, true), e2, 8);
+    char * e3[] = {"a", "b*c&&&d%e f g h&i"};
+    check_split( split_on_any("a+b*c&&&d%e f g h&i", "+*&%,!", 1, true), e3, 2);    
+}
+
 int main(int, char * []) {
     test_extract_filename_from_path();
     test_splits();
+    test_split_on_any();
 }
 
 
