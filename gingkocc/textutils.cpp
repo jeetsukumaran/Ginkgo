@@ -122,10 +122,10 @@ std::vector<std::string> split(const std::string& src,
     std::string::size_type start_pos = 0;
     std::string::size_type end_pos = src.find(sep, start_pos);
     unsigned num_splits = 0;
-    while (end_pos != std::string::npos and (max_splits == 0 or num_splits < max_splits)) {
-        num_splits += 1;
+    while (end_pos != std::string::npos and (max_splits == 0 or num_splits < max_splits)) {        
         std::string result = src.substr(start_pos, end_pos-start_pos);
         if (result.size() != 0 or include_empty_tokens) {
+            num_splits += 1;
             v.push_back(result);
         }            
         start_pos = end_pos+1;
@@ -157,10 +157,10 @@ std::vector<std::string> split_on_any(const std::string& src,
     std::string::size_type start_pos = 0;
     std::string::size_type end_pos = src.find_first_of(sep, start_pos);
     unsigned num_splits = 0;
-    while (end_pos != std::string::npos and (max_splits == 0 or num_splits < max_splits)) {
-        num_splits += 1;
+    while (end_pos != std::string::npos and (max_splits == 0 or num_splits < max_splits)) {        
         std::string result = src.substr(start_pos, end_pos-start_pos);
         if (result.size() != 0 or include_empty_tokens) {
+            num_splits += 1;
             v.push_back(result);
         }            
         start_pos = end_pos+1;

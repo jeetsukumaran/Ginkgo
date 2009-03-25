@@ -74,9 +74,7 @@ bool check_split(std::vector<std::string> result,
     return true;
 }
 
-int main(int, char * []) {
-    test_extract_filename_from_path();
-    
+void test_splits() {
     char * e1[] = {"the", "quick", "brown", "fox", "jumps", "over", "the", "lazy", "dog"};
     check_split( split("the quick brown fox jumps over the lazy dog", " ", 0, true),
                 e1, 9);
@@ -91,6 +89,21 @@ int main(int, char * []) {
                 
     char * e4 [] = {"", "", "a", "", "b", "", "", "c", "", ""};
     check_split( split(",,a,,b,,,c,,", ",", 0, true), e4, 10 );
+    
+    char * e5 [] = {"a", "b", "c"};
+    check_split( split(",,a,,b,,,c,,", ",", 0, false), e5, 3 );
+    
+    char * e6 [] = {"", ",a,,b,,,c,,"};
+    check_split( split(",,a,,b,,,c,,", ",", 1, true), e6, 2 );
+    
+    char * e7 [] = {"a", ",b,,,c,,"};
+    check_split( split(",,a,,b,,,c,,", ",", 1, false), e7, 2 );
+    
+}
+
+int main(int, char * []) {
+    test_extract_filename_from_path();
+    test_splits();
 }
 
 
