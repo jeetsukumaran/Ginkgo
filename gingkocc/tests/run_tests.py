@@ -116,6 +116,8 @@ def get_gingko_bin_path():
         if not os.path.exists(gingko_bin_path):
             sys.stderr.write('Path "%s" specified by environmental variable "%s" does not exist.\n' % (gingko_bin_path, GINGKO_BIN_PATH_ENVAR))
             sys.exit(1)
+    else:
+        gingko_bin_path = os.path.dirname(__file__)
     return gingko_bin_path            
             
 def get_gingko_program_path(prog_name):
