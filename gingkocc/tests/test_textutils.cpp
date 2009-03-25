@@ -50,14 +50,14 @@ bool check_split(std::vector<std::string> result,
     std::cout << "Expecting size: " << expected_count << std::endl;
     std::cout << "Resulting size: " << result.size() << std::endl;
     assert(result.size() == expected_count);
-    std::cout << "Expecting values:";
+    std::cout << "Expecting values: ";
     for (unsigned i = 0; i < expected_count; ++i) {
-        std::cout << " " << expected[i];
+        std::cout << " [" << expected[i] << "] ";
     }
     std::cout << std::endl;
-    std::cout << "Resulting values:";
+    std::cout << "Resulting values: ";
     for (unsigned i = 0; i < expected_count; ++i) {
-        std::cout << " " << result[i];
+        std::cout << " [" << result[i] << "] ";
     }
     std::cout << std::endl;    
     for (unsigned i = 0; i < expected_count; ++i) {
@@ -71,9 +71,16 @@ int main(int, char * []) {
     test_extract_filename_from_path();
     
     char * e1[] = {"the", "quick", "brown", "fox", "jumps", "over", "the", "lazy", "dog"};
-//     split("the quick brown fox jumps over the lazy dog", " ", 0, true);
     check_split( split("the quick brown fox jumps over the lazy dog", " ", 0, true),
                 e1, 9);
+       
+    char * e2[] = {"the", "quick brown fox jumps over the lazy dog"};
+    check_split( split("the quick brown fox jumps over the lazy dog", " ", 1, true),
+                e2, 2);    
+                
+    char * e3[] = {"the", "quick", "brown fox jumps over the lazy dog"};
+    check_split( split("the quick brown fox jumps over the lazy dog", " ", 2, true),
+                e3, 3);                    
 }
 
 
