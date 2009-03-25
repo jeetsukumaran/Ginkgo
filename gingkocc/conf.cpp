@@ -24,14 +24,18 @@
 
 namespace gingko {
 
+// default constructor
 ConfigurationBlockParser::ConfigurationBlockParser() { }
 
+// construct and parse
 ConfigurationBlockParser::ConfigurationBlockParser(std::istream& in) {   
     this->parse(in);
 }        
 
+// default do-nothing destructor
 ConfigurationBlockParser::~ConfigurationBlockParser() {}   
 
+// wrap up some of the tedium
 std::string ConfigurationBlockParser::compose_error_message(unsigned long pos, const char * desc) {
     std::ostringstream msg;
     msg << "Block starting at character position " <<  pos+1 << ": ";
@@ -39,10 +43,12 @@ std::string ConfigurationBlockParser::compose_error_message(unsigned long pos, c
     return msg.str();
  }
  
+ // using std string object
  std::string ConfigurationBlockParser::compose_error_message(unsigned long pos, const std::string& desc) {
     return this->compose_error_message(pos, desc.c_str());
  }
 
+// workhorse
 void ConfigurationBlockParser::parse(std::istream& in) {                
     std::string raw;
     unsigned long start_pos(in.tellg());
@@ -63,7 +69,22 @@ void ConfigurationBlockParser::parse(std::istream& in) {
         std::ostringstream msg;
         msg << "EOF before block body terminator ('" << END_BLOCK_BODY << "')";
         throw ConfigurationParseError(this->compose_error_message(start_pos, msg.str()));                        
-    }            
+    }
+    
+    std::vector<std::string> parts = split(raw, "{");
+    
+    if (parts.size() < 2) {
+        std::ostringstream msg;
+        msg << "missing block body initiator ('" << END_BLOCK_BODY << "')";    
+        throw ConfigurationParseError(this->compose_error_message(start_pos, msg.str()));
+    }
+    
+    if (parts.size() > 2) {
+        std::ostringstream msg;
+        msg << "multiple block body initiators ('" << END_BLOCK_BODY << "')";    
+        throw ConfigurationParseError(this->compose_error_message(start_pos, msg.str()));
+    }        
+    
 }
 
 } // namespace gingko

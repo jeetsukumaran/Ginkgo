@@ -30,43 +30,17 @@
 using namespace gingko;
 
 // -- tests -- 
-bool test_empty_block() {
-    std::cerr << "(testing empty block)" << std::endl;
-    bool exception_thrown = false;
-    std::istringstream in0("");
-    try {
-        ConfigurationBlockParser species_block(in0);
-        exception_thrown = false;
-    } catch (const ConfigurationParseError& e) {
-        exception_thrown = true;    
-    }
-    assert(exception_thrown);
-    return exception_thrown;
-}
 
-bool test_missing_block_open(std::string s) {
-    std::cerr << "(testing missing block open)" << std::endl;
+bool catch_block_parse_exception(const char * message, std::string s) {
+    std::cerr << message << std::endl;
     bool exception_thrown = false;
     std::istringstream in0(s);
     try {
         ConfigurationBlockParser species_block(in0);
         exception_thrown = false;
     } catch (const ConfigurationParseError& e) {
-        exception_thrown = true;    
-    }
-    assert(exception_thrown);
-    return exception_thrown;
-}
-
-bool test_missing_block_close(std::string s) {
-    std::cerr << "(testing missing block close)" << std::endl;
-    bool exception_thrown = false;                                        
-    std::istringstream in0(s);   
-    try {
-        ConfigurationBlockParser species_block(in0);
-        exception_thrown = false;
-    } catch (const ConfigurationParseError& e) {
-        exception_thrown = true;    
+        exception_thrown = true;
+        std::cerr << "Exception caught: \"" << e.what() << "\"" << std::endl;
     }
     assert(exception_thrown);
     return exception_thrown;
@@ -92,17 +66,22 @@ int main(int, char * []) {
                                         "}\n";
     std::string species_block_str(species_block_cstr);
     
-    // confirm that exception will be thrown if block is empty
-    test_empty_block();    
 
-    // confirm that exception will be thrown if block does not start with 
-    // correct leading character ("@")
-    test_missing_block_open(species_block_str.substr(2, species_block_str.size()));
+    catch_block_parse_exception("(testing empty block error)", "");
     
-    // confirm that exception will be thrown if block does not start with 
-    // correct block close ("}")
-    test_missing_block_close(species_block_str.substr(0, species_block_str.size()-2));
-    
+    catch_block_parse_exception("(testing missing block open error)", 
+        species_block_str.substr(2, species_block_str.size()));
+        
+    catch_block_parse_exception("(testing missing block close error)", 
+        species_block_str.substr(0, species_block_str.size()-2));
+
+    std::string s1 = species_block_str;
+    std::string::size_type s1_pos = s1.find("{");
+    s1[s1_pos] = 'X';
+    catch_block_parse_exception("(testing missing block open error)", s1);          
+      
+    s1.insert(s1_pos, "{{");    
+    catch_block_parse_exception("(testing multiple block open error)", s1);    
     
     std::istringstream in1(species_block_str);
     ConfigurationBlockParser species_block(in1);   
