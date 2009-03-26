@@ -138,6 +138,9 @@ void assert_str_equal(const std::string& result, const char * expected) {
 
 void test_strip() {
     std::cout << "Testing string stripping ... " << std::endl;
+    assert_str_equal(strip("    ", " "), "");
+    assert_str_equal(strip("  a  ", " "), "a");
+    assert_str_equal(strip("  a  ", " a"), "");
     assert_str_equal(strip("   hello    "), "hello");
     assert_str_equal(strip("   hello"), "hello");
     assert_str_equal(strip("hello"), "hello"); 
@@ -152,9 +155,9 @@ void test_strip() {
 }
 
 int main(int, char * []) {
-    test_extract_filename_from_path();
-    test_splits();
-    test_split_on_any();
+//     test_extract_filename_from_path();
+//     test_splits();
+//     test_split_on_any();
     test_strip();
 }
 
