@@ -146,6 +146,17 @@ def run_program(cmd, log=None):
                            stderr=subprocess.PIPE)
     stdout, stderr = p1.communicate()
     return stdout, stderr, p1.returncode
+    
+def run_external_tests(cmd, log, title=None):
+    if title is not None:
+        log.info('%s: BEGIN' % title)
+    stdout, stderr, returncode = run_program(cmd)
+    assert returncode == 0, "Program exited with error:\n%s\n%s" % (stdout, stderr)
+    for line in stdout.split("\n"):
+        if line:
+            log.info(line)
+    if title is not None:        
+        log.info('%s: PASS' % title)  
 
 ###############################################################################
 ## TESTS RUN    

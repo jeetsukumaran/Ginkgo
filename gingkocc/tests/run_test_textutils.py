@@ -25,6 +25,7 @@ import unittest
 from gingko_tests import get_logger
 from gingko_tests import get_gingko_program_path
 from gingko_tests import run_program
+from gingko_tests import run_external_tests
 
 _LOG = get_logger("test_textutils")
 
@@ -34,13 +35,7 @@ class TextUtilsTest(unittest.TestCase):
         self.prog_path = get_gingko_program_path("test_textutils")
 
     def testTextUtils(self):
-        _LOG.info('Testing text utilities')
-        cmd = self.prog_path
-        stdout, stderr, returncode = run_program(cmd)
-        assert returncode == 0, "Program exited with error:\n%s\n%s" % (stdout, stderr)
-        for line in stdout.split("\n"):
-            _LOG.info(line)
-        _LOG.info('Text utilities: SUCCESS')            
+        run_external_tests(self.prog_path, _LOG, "textutils tests")       
             
 if __name__ == "__main__":
     unittest.main()
