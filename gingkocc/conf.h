@@ -30,6 +30,7 @@
 #include <map>
 #include <utility>
 #include <stdexcept>
+#include <vector>
 
 namespace gingko {
 
@@ -65,7 +66,35 @@ class ConfigurationBlockParser {
         /**
          * Default destructor.
          */
-        ~ConfigurationBlockParser();       
+        ~ConfigurationBlockParser();
+        
+        /**
+         * Returns type label of the block.
+         *
+         * @return type label of block
+         */
+        std::string get_type() const;
+
+        /**
+         * Returns type label of the block.
+         *
+         * @return type label of block
+         */
+        std::string get_name() const;
+        
+        /**
+         * Returns value for given key.
+         *
+         * @param   key key for entry
+         * @return      value for entry
+         */
+        std::string get_entry(const std::string& key) const;   
+        
+        /**
+         * Returns vector of keys in entries.
+         * @return      vector of keys in entries
+         */
+        std::vector<std::string> get_keys() const;
         
         /**
          * Composes exception message.

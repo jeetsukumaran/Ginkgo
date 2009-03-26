@@ -25,8 +25,11 @@
 namespace gingko {
 
 const char * BLOCK_START = "@";
-const char * START_BLOCK_BODY = "{";
-const char * END_BLOCK_BODY = "}";
+const char * BLOCK_BODY_START = "{";
+const char * BLOCK_BODY_END = "}";
+const char * BLOCK_BODY_LINE_TERM = ";\n";
+const char * BLOCK_BODY_KEY_VAL_SEP = "=";
+const char * WHITESPACE = " \t\n";
 
 // default constructor
 ConfigurationBlockParser::ConfigurationBlockParser() { }
@@ -39,6 +42,35 @@ ConfigurationBlockParser::ConfigurationBlockParser(std::istream& in) {
 // default do-nothing destructor
 ConfigurationBlockParser::~ConfigurationBlockParser() {}   
 
+// return type
+std::string ConfigurationBlockParser::get_type() const {
+    return this->type_;
+}
+
+// return name
+std::string ConfigurationBlockParser::get_name() const {
+    return this->name_;
+}
+
+// get entry values by keys
+std::string ConfigurationBlockParser::get_entry(const std::string& key) const {
+    std::map< std::string, std::string >::const_iterator val = this->entries_.find(key);
+    assert(val != this->entries_.end());
+    return val->second;
+}
+
+// get keys
+std::vector<std::string> ConfigurationBlockParser::get_keys() const {
+    std::vector<std::string> keys;
+    keys.reserve(this->entries_.size());
+    for (std::map< std::string, std::string >::const_iterator e = this->entries_.begin();
+            e != this->entries_.end();
+            ++e) {
+        keys.push_back(e->second);           
+    }
+    return keys;
+}
+
 // wrap up some of the tedium
 std::string ConfigurationBlockParser::compose_error_message(unsigned long pos, const char * desc) {
     std::ostringstream msg;
@@ -48,17 +80,16 @@ std::string ConfigurationBlockParser::compose_error_message(unsigned long pos, c
  }
  
  // using std string object
- std::string ConfigurationBlockParser::compose_error_message(unsigned long pos, const std::string& desc) {
+std::string ConfigurationBlockParser::compose_error_message(unsigned long pos, const std::string& desc) {
     return this->compose_error_message(pos, desc.c_str());
- }
+}
 
-// workhorse
+// workhorse parser
 void ConfigurationBlockParser::parse(std::istream& in) {                
     std::string raw;
     unsigned long start_pos(in.tellg());
-    std::getline(in, raw, END_BLOCK_BODY[0]);
+    std::getline(in, raw, BLOCK_BODY_END[0]);
     raw = strip(raw);
-    const char * WHITESPACE = " \t\n";
     
     if (raw.size() == 0) {
         throw ConfigurationParseError(this->compose_error_message(start_pos, "empty block"));                
@@ -72,21 +103,21 @@ void ConfigurationBlockParser::parse(std::istream& in) {
     
     if (in.eof()) {
         std::ostringstream msg;
-        msg << "EOF before block body terminator ('" << END_BLOCK_BODY << "')";
+        msg << "EOF before block body terminator ('" << BLOCK_BODY_END << "')";
         throw ConfigurationParseError(this->compose_error_message(start_pos, msg.str()));                        
     }
     
-    std::vector<std::string> parts = split(raw, START_BLOCK_BODY, false);
+    std::vector<std::string> parts = split(raw, BLOCK_BODY_START, false);
     
     if (parts.size() < 2) {
         std::ostringstream msg;
-        msg << "missing block body initiator ('" << START_BLOCK_BODY << "')";    
+        msg << "missing block body initiator ('" << BLOCK_BODY_START << "')";    
         throw ConfigurationParseError(this->compose_error_message(start_pos, msg.str()));
     }
     
     if (parts.size() > 2) {
         std::ostringstream msg;
-        msg << "multiple block body initiators ('" << START_BLOCK_BODY << "')";    
+        msg << "multiple block body initiators ('" << BLOCK_BODY_START << "')";    
         throw ConfigurationParseError(this->compose_error_message(start_pos, msg.str()));
     }     
     
@@ -97,14 +128,27 @@ void ConfigurationBlockParser::parse(std::istream& in) {
     }
     
     if (head_parts.size() > 2) {
-//         for (std::vector<std::string>::const_iterator i = head_parts.begin(); i != head_parts.end(); ++i) {
-//             std::cout << i-head_parts.begin() + 1 << ": \"" << *i << "\"" << std::endl;
-//         }
         throw ConfigurationParseError(this->compose_error_message(start_pos, "found multiple elements in block header, but expecting only two (type and name)"));
     }
     
     this->type_ = strip(head_parts[0]);
     this->name_ = strip(head_parts[1]);
+    
+    unsigned entry_count = 0;
+    std::vector<std::string> body_parts = split_on_any(strip(parts[1]), BLOCK_BODY_LINE_TERM, false);
+    for (std::vector<std::string>::const_iterator s = body_parts.begin(); s != body_parts.end(); ++s) {
+        std::string entry = strip(*s, WHITESPACE);
+        entry_count += 1;
+        if (entry.size() > 0) {
+            std::vector<std::string> entry_parts = split(entry, BLOCK_BODY_KEY_VAL_SEP, 1, false);
+            if (entry_parts.size() < 2) {
+                std::ostringstream msg;
+                msg << "incomplete key-value specification in entry #" << entry_count << " (missing \"=\")";            
+                throw ConfigurationParseError(this->compose_error_message(start_pos, msg.str()));
+            }
+            this->entries_[strip(entry_parts[0], WHITESPACE)] = strip(entry_parts[1], WHITESPACE) ;
+        }
+    }
 }
 
 } // namespace gingko

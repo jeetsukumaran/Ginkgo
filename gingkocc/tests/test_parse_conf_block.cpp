@@ -30,73 +30,78 @@
 
 using namespace gingko;
 
-// -- tests -- 
+const char * SPECIES_BLOCK_CSTR = "\n\n@species Sp1 { \n"
+                                    "   selection = 1 1 1 1 ; \n"
+                                    "   genotype =  0 0 0 0 ;  \n" 
+                                    "   mutation-rate = 0.01 ;\n"
+                                    "   max-mutation-size = 1 \n"
+                                    "   fecundity =    8 ; \n"
+                                    "   fecundity-evolution-size = 2;\n"
+                                    "   movement-capacity = 10;\n"
+                                    "   movement-costs = /Users/user/data/grid.asc \n"
+                                    "}\n\n";
 
 bool catch_block_parse_exception(const char * message, std::string s) {
     std::cout << message << std::endl;
-    bool exception_thrown = false;
+    bool is_exception = false;
     std::istringstream in0(s);
     try {
         ConfigurationBlockParser species_block(in0);
-        exception_thrown = false;
+        is_exception = false;
     } catch (const ConfigurationParseError& e) {
-        exception_thrown = true;
+        is_exception = true;
         std::cout << "Exception correctly thrown: \"" << e.what() << "\"" << std::endl;
     }
-    assert(exception_thrown);
-    return exception_thrown;
+    assert(is_exception);
+    return is_exception;
 }
 
-int main(int, char * []) {
-//     const char * src = "setup.conf";
-//     std::ifstream in(src);
-//     std::string s;
-//     while (in) {
-//         std::getline(in, s);
-//         std::cout << "'" << s << "'" << std::endl;
-//     }
-    
-    const char * species_block_cstr = " @species Sp1 { \n"
-                                        "   selection = (1,1,1,1); \n"
-                                        "   genotype = (0,0,0,0);\n" 
-                                        "   mutation-rate = 0.01;\n"
-                                        "   max-mutation-size = 1;\n"
-                                        "   fecundity = 8;\n"
-                                        "   fecundity-evolution-size = 2;\n"
-                                        "   movement-capacity = 10;\n"
-                                        "}\n";
-    std::string species_block_str(species_block_cstr);
-    
-
-    catch_block_parse_exception("(testing empty block error)", "");
-    
+void test_parse_errors() {
+    std::cout << "Testing configuration block parse error detection ..." << std::endl;
+    std::string species_block_str(SPECIES_BLOCK_CSTR);    
+    catch_block_parse_exception("(testing empty block error)", "");    
     catch_block_parse_exception("(testing missing block open error)", 
-        species_block_str.substr(2, species_block_str.size()));
-        
+        species_block_str.substr(3, species_block_str.size()));        
     catch_block_parse_exception("(testing missing block close error)", 
-        species_block_str.substr(0, species_block_str.size()-2));
-
+        species_block_str.substr(0, species_block_str.size()-3));
     std::string s1 = species_block_str;
     std::string::size_type s1_pos = s1.find("{");
     s1[s1_pos] = 'X';
-    catch_block_parse_exception("(testing missing block open error)", s1);          
-      
+    catch_block_parse_exception("(testing missing block open error)", s1);      
     s1.insert(s1_pos, "{{");    
-    catch_block_parse_exception("(testing multiple block open error)", s1);
-    
+    catch_block_parse_exception("(testing multiple block open error)", s1);    
     s1 = species_block_str;
     s1_pos = s1.find(" Sp1");
     s1[s1_pos] = '_';
-    catch_block_parse_exception("(testing single elemnt in head lack of label/name separation)", s1);
-    
+    catch_block_parse_exception("(testing single elemnt in head lack of label/name separation)", s1);    
     s1 = species_block_str;
     s1_pos = s1.find(" Sp1");
     s1.insert(s1_pos, " extra");
-    catch_block_parse_exception("(testing too many elements in head)", s1);    
-    
-    std::istringstream in1(species_block_str);
-    ConfigurationBlockParser species_block(in1);
-    
+    catch_block_parse_exception("(testing too many elements in head)", s1);
+    s1 = species_block_str;
+    s1_pos = s1.find("=");
+    s1[s1_pos] = 'X';
+    catch_block_parse_exception("(testing incomplete key-val entry)", s1);      
+}    
+
+void test_parse_correct() {
+    std::cout << "Testing configuration block parse ..." << std::endl;
+    std::string species_block_str(SPECIES_BLOCK_CSTR);
+    std::istringstream in0(species_block_str);
+    ConfigurationBlockParser species_block = ConfigurationBlockParser(in0);
+    assert(species_block.get_entry("selection") == "1 1 1 1");
+    assert(species_block.get_entry("genotype") == "0 0 0 0");
+    assert(species_block.get_entry("mutation-rate") == "0.01");
+    assert(species_block.get_entry("max-mutation-size") == "1");
+    assert(species_block.get_entry("fecundity") == "8");
+    assert(species_block.get_entry("movement-capacity") == "10");    
+    assert(species_block.get_entry("movement-costs") == "/Users/user/data/grid.asc");   
+    assert(species_block.get_keys().size() == 8);
+}
+
+int main(int, char * []) {
+    test_parse_correct();
+    test_parse_errors();
     std::cout << "\nPASS\n" << std::endl;
 }
 
