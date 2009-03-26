@@ -33,10 +33,6 @@
 
 namespace gingko {
 
-const char BLOCK_START = '@';
-const char START_BLOCK_BODY = '{';
-const char END_BLOCK_BODY = '}';
-
 /**
  * General configuration format error.
  */

@@ -33,7 +33,7 @@ using namespace gingko;
 // -- tests -- 
 
 bool catch_block_parse_exception(const char * message, std::string s) {
-    std::cerr << message << std::endl;
+    std::cout << message << std::endl;
     bool exception_thrown = false;
     std::istringstream in0(s);
     try {
@@ -41,7 +41,7 @@ bool catch_block_parse_exception(const char * message, std::string s) {
         exception_thrown = false;
     } catch (const ConfigurationParseError& e) {
         exception_thrown = true;
-        std::cerr << "Exception correctly thrown: \"" << e.what() << "\"" << std::endl;
+        std::cout << "Exception correctly thrown: \"" << e.what() << "\"" << std::endl;
     }
     assert(exception_thrown);
     return exception_thrown;
@@ -95,7 +95,9 @@ int main(int, char * []) {
     catch_block_parse_exception("(testing too many elements in head)", s1);    
     
     std::istringstream in1(species_block_str);
-    ConfigurationBlockParser species_block(in1);   
+    ConfigurationBlockParser species_block(in1);
+    
+    std::cout << "\nPASS\n" << std::endl;
 }
 
 
