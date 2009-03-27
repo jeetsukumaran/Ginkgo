@@ -1,7 +1,11 @@
 AM_CPPFLAGS = @CPPFLAGS@
 AM_LDFLAGS  = @LDFLAGS@
 
-gingkotestsdir = $(bindir)/gingko-tests
+gingkotestsdir = $(prefix)/@PACKAGE@/test
+gingkotestsdatadir = $(gingkotestsdir)/data
+
+dist_gingkotestsdata_DATA = data/simple1.grd \
+                           data/simple2.grd
  
 dist_gingkotests_SCRIPTS = gingko_tests.py \
                    run_test_cmdopts.py \

@@ -1,6 +1,8 @@
 AM_CPPFLAGS = @CPPFLAGS@
 AM_LDFLAGS  = @LDFLAGS@
 
+bindir = ${prefix}/@PACKAGE@/bin
+
 bin_PROGRAMS = gingko
 
 noinst_HEADERS = \
