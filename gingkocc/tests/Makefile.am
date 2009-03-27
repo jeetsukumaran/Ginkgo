@@ -17,12 +17,13 @@ gingkotests_PROGRAMS = test_cmdopts \
                test_tree_from_parent_indexes \
                test_tree_from_genealogies \
                test_parse_conf_block \
-               test_textutils
+               test_textutils \
+               test_asciigrid
                
 test_cmdopts_SOURCES = \
     test_cmdopts.cpp \
     ../cmdopts.cpp \
-    ../textutils.cpp
+    ../textutils.cpp 
     
 test_tree_from_parent_indexes_SOURCES = \
     test_tree_from_parent_indexes.cpp \
@@ -42,4 +43,8 @@ test_parse_conf_block_SOURCES = \
 test_textutils_SOURCES = \
     test_textutils.cpp \
     ../textutils.cpp 
-    
+
+test_asciigrid_SOURCES = \
+    test_asciigrid.cpp \
+    ../asciigrid.cpp 
+        

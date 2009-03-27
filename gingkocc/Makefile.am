@@ -18,4 +18,5 @@ gingko_SOURCES = \
     cmdopts.cpp \
     textutils.cpp \
     tree.cpp \
-    conf.cpp
+    conf.cpp \
+    asciigrid.cpp 
