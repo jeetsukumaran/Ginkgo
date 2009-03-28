@@ -61,6 +61,11 @@ class World {
     public:
     
         // --- lifecycle --
+        
+        /** 
+         * Default constructor.
+         */
+        World();                
 
         /** 
          * Constructs a World with a given RNG seed.

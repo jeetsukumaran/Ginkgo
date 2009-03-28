@@ -24,6 +24,26 @@
 
 namespace gingko {
 
+///////////////////////////////////////////////////////////////////////////////
+// Client code should call one of the following to configure World objects.
+
+World& configure_world(World& world, std::istream& conf_src) {
+    return world;
+}
+
+World& configure_world(World& world, const char * conf_fpath) {
+    std::ifstream f(conf_fpath);
+    return configure_world(world, f);
+}
+
+World& configure_world(World& world, const std::string& conf_fpath) {
+    std::ifstream f(conf_fpath.c_str());
+    return configure_world(world, f);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// Supporting Classes and Constructs
+
 const char * BLOCK_START = "@";
 const char * BLOCK_BODY_START = "{";
 const char * BLOCK_BODY_END = "}";
@@ -32,7 +52,7 @@ const char * BLOCK_BODY_KEY_VAL_SEP = "=";
 const char * WHITESPACE = " \t\n";
 
 ///////////////////////////////////////////////////////////////////////////////
-// ConfigurationBlockParser
+// ConfigurationFileParser
 
 ConfigurationFileParser::ConfigurationFileParser(std::istream& src)
         : src_(src) {

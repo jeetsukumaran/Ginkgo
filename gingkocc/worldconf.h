@@ -19,8 +19,6 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#if !defined(GINGKO_WORLDCONF_H)
-#define GINGKO_WORLDCONF_H
 
 #include <iostream>
 #include <fstream>
@@ -32,7 +30,42 @@
 #include <stdexcept>
 #include <vector>
 
+#include "world.h"
+
+#if !defined(GINGKO_WORLDCONF_H)
+#define GINGKO_WORLDCONF_H
+
 namespace gingko {
+
+///////////////////////////////////////////////////////////////////////////////
+// Client code should call one of the following to configure World objects.
+
+/**
+ * Build/populate a World object according to a given configuration source.
+ * @param   world       World object to configure
+ * @param   conf_src    input stream source of configuration file
+ * @return              World object
+ */
+World& configure_world(World& world, std::istream& conf_src);
+
+/**
+ * Build/populate a World object according to a given configuration source file.
+ * @param   world       World object to configure
+ * @param   conf_fpath  path of configuration file
+ * @return              World object
+ */
+World& configure_world(World& world, const char * conf_fpath);
+
+/**
+ * Build/populate a World object according to a given configuration source file.
+ * @param   world       World object to configure 
+ * @param   conf_fpath  path of configuration file
+ * @return              World object
+ */
+World& configure_world(World& world, const std::string& conf_fpath);
+
+///////////////////////////////////////////////////////////////////////////////
+// Infrastructure supporting above functions.
 
 /**
  * General i/o error.

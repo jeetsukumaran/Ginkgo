@@ -27,7 +27,15 @@
 
 using namespace gingko;
 
-//! constructor: calls
+// constructor
+World::World() 
+    : species_(),
+      rng_(),
+      landscape_(species_, rng_) {
+    this->current_generation_ = 0;    
+}
+
+// constructor
 World::World(unsigned long seed) 
     : species_(),
       rng_(seed),
@@ -35,7 +43,7 @@ World::World(unsigned long seed)
     this->current_generation_ = 0;    
 }    
 
-//! clean up species pool
+// clean up species pool
 World::~World() {
     for (SpeciesByLabel::iterator sp = this->species_.begin();
             sp != this->species_.end();
@@ -49,13 +57,13 @@ World::~World() {
 
 // --- initialization and set up ---
 
-//! Creates a new landscape.
+// Creates a new landscape.
 void World::generate_landscape(CellIndexType size_x, CellIndexType size_y, unsigned num_fitness_factors) {
     this->num_fitness_factors_ = num_fitness_factors;
     this->landscape_.generate(size_x, size_y, num_fitness_factors);
 }
 
-//! Adds a new species definition to this world.
+// Adds a new species definition to this world.
 Species& World::new_species(const std::string& label) {
     Species* sp = new Species(label, 
                               this->num_fitness_factors_, 
@@ -64,13 +72,13 @@ Species& World::new_species(const std::string& label) {
     return *sp;
 }
 
-//! Populates the cell at (x,y) with organisms of the given species.
+// Populates the cell at (x,y) with organisms of the given species.
 void World::seed_population(CellIndexType x, CellIndexType y, const std::string& species_label, unsigned long size) {
     assert(this->species_.find(species_label) != this->species_.end());
     this->landscape_.at(x, y).generate_new_organisms(this->species_[species_label], size);
 }
 
-//! Populates the cell cell_index with organisms of the given species.
+// Populates the cell cell_index with organisms of the given species.
 void World::seed_population(CellIndexType cell_index, const std::string& species_label, unsigned long size) {
     assert(this->species_.find(species_label) != this->species_.end());
     this->landscape_.at(cell_index).generate_new_organisms(this->species_[species_label], size);
