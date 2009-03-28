@@ -31,6 +31,41 @@ const char * BLOCK_BODY_LINE_TERM = ";\n";
 const char * BLOCK_BODY_KEY_VAL_SEP = "=";
 const char * WHITESPACE = " \t\n";
 
+///////////////////////////////////////////////////////////////////////////////
+// ConfigurationBlockParser
+
+ConfigurationFileParser::ConfigurationFileParser(std::istream& src)
+        : src_(src) {
+    if (not this->src_) {
+        throw ConfigurationIOError("invalid source stream");
+    }
+}
+
+ConfigurationFileParser::ConfigurationFileParser(const char * fpath)
+        : fsrc_(fpath),
+          src_(fsrc_) {
+    if (not this->src_) {
+        std::ostringstream msg;
+        msg << "invalid source \"" << fpath << "\"";
+        throw ConfigurationIOError(msg.str());
+    }          
+}
+
+ConfigurationFileParser::ConfigurationFileParser(const std::string& fpath) 
+        : fsrc_(fpath.c_str()),
+          src_(fsrc_) {
+    if (not this->src_) {
+        std::ostringstream msg;
+        msg << "invalid source \"" << fpath << "\"";
+        throw ConfigurationIOError(msg.str());
+    }
+}
+
+ConfigurationFileParser::~ConfigurationFileParser() { }
+
+///////////////////////////////////////////////////////////////////////////////
+// ConfigurationBlockParser
+
 // default constructor
 ConfigurationBlockParser::ConfigurationBlockParser() { }
 
@@ -92,19 +127,19 @@ void ConfigurationBlockParser::parse(std::istream& in) {
     raw = textutils::strip(raw);
     
     if (raw.size() == 0) {
-        throw ConfigurationParseError(this->compose_error_message(start_pos, "empty block"));                
+        throw ConfigurationSyntaxError(this->compose_error_message(start_pos, "empty block"));                
     }
     
     if (raw[0] != BLOCK_START[0]) {
         std::ostringstream msg;
         msg << "does not begin with '" << BLOCK_START << "'";
-        throw ConfigurationParseError(this->compose_error_message(start_pos, msg.str()));
+        throw ConfigurationSyntaxError(this->compose_error_message(start_pos, msg.str()));
     }
     
     if (in.eof()) {
         std::ostringstream msg;
         msg << "EOF before block body terminator ('" << BLOCK_BODY_END << "')";
-        throw ConfigurationParseError(this->compose_error_message(start_pos, msg.str()));                        
+        throw ConfigurationSyntaxError(this->compose_error_message(start_pos, msg.str()));                        
     }
     
     std::vector<std::string> parts = textutils::split(raw, BLOCK_BODY_START, false);
@@ -112,23 +147,23 @@ void ConfigurationBlockParser::parse(std::istream& in) {
     if (parts.size() < 2) {
         std::ostringstream msg;
         msg << "missing block body initiator ('" << BLOCK_BODY_START << "')";    
-        throw ConfigurationParseError(this->compose_error_message(start_pos, msg.str()));
+        throw ConfigurationSyntaxError(this->compose_error_message(start_pos, msg.str()));
     }
     
     if (parts.size() > 2) {
         std::ostringstream msg;
         msg << "multiple block body initiators ('" << BLOCK_BODY_START << "')";    
-        throw ConfigurationParseError(this->compose_error_message(start_pos, msg.str()));
+        throw ConfigurationSyntaxError(this->compose_error_message(start_pos, msg.str()));
     }     
     
     std::vector<std::string> head_parts = textutils::split_on_any(textutils::strip(parts[0]), WHITESPACE, false);
     
     if (head_parts.size() < 2) {
-        throw ConfigurationParseError(this->compose_error_message(start_pos, "found only one element in block header, but expecting two (type and name)"));
+        throw ConfigurationSyntaxError(this->compose_error_message(start_pos, "found only one element in block header, but expecting two (type and name)"));
     }
     
     if (head_parts.size() > 2) {
-        throw ConfigurationParseError(this->compose_error_message(start_pos, "found multiple elements in block header, but expecting only two (type and name)"));
+        throw ConfigurationSyntaxError(this->compose_error_message(start_pos, "found multiple elements in block header, but expecting only two (type and name)"));
     }
     
     this->type_ = textutils::strip(head_parts[0]);
@@ -144,7 +179,7 @@ void ConfigurationBlockParser::parse(std::istream& in) {
             if (entry_parts.size() < 2) {
                 std::ostringstream msg;
                 msg << "incomplete key-value specification in entry #" << entry_count << " (missing \"=\")";            
-                throw ConfigurationParseError(this->compose_error_message(start_pos, msg.str()));
+                throw ConfigurationSyntaxError(this->compose_error_message(start_pos, msg.str()));
             }
             this->entries_[textutils::strip(entry_parts[0], WHITESPACE)] = textutils::strip(entry_parts[1], WHITESPACE) ;
         }

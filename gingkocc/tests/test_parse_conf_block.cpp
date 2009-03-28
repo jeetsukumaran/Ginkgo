@@ -48,7 +48,7 @@ bool catch_block_parse_exception(const char * message, std::string s) {
     try {
         ConfigurationBlockParser species_block(in0);
         is_exception = false;
-    } catch (const ConfigurationParseError& e) {
+    } catch (const ConfigurationSyntaxError& e) {
         is_exception = true;
         std::cout << "Exception correctly thrown: \"" << e.what() << "\"" << std::endl;
     }

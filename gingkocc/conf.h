@@ -35,13 +35,65 @@
 namespace gingko {
 
 /**
+ * General i/o error.
+ */
+class ConfigurationIOError : public std::runtime_error {
+    public:
+        ConfigurationIOError(const char * msg) : std::runtime_error(msg) {}
+        ConfigurationIOError(const std::string& msg) : std::runtime_error(msg.c_str()) {}
+};
+
+/**
  * General configuration format error.
  */
-class ConfigurationParseError : public std::runtime_error {
+class ConfigurationSyntaxError : public std::runtime_error {
     public:
-        ConfigurationParseError(const char * msg) : std::runtime_error(msg) {}
-        ConfigurationParseError(const std::string& msg) : std::runtime_error(msg.c_str()) {}
+        ConfigurationSyntaxError(const char * msg) : std::runtime_error(msg) {}
+        ConfigurationSyntaxError(const std::string& msg) : std::runtime_error(msg.c_str()) {}
 };
+
+/**
+ * Encapsulates parsing of a configuration file, and instantiation of 
+ * corresponding World object.
+ */
+class ConfigurationFileParser {
+
+    public:
+        
+        /**
+         * Initializes metadata and binds to source stream.
+         *
+         * @param src   data source
+         */
+        ConfigurationFileParser(std::istream& src);
+        
+        /**
+         * Initializes metadata and binds to source file.
+         *
+         * @param fpath filepath of data source
+         */
+        ConfigurationFileParser(const char * fpath);
+        
+        /**
+         * Initializes metadata and binds to source file.
+         *
+         * @param fpath filepath of data source
+         */
+        ConfigurationFileParser(const std::string& fpath);        
+        
+        /**
+         * Default no-op destructor.
+         */
+        ~ConfigurationFileParser();
+        
+    private: 
+    
+        /** Input (file) stream. */
+        std::ifstream       fsrc_;
+        
+        /** Input stream. */
+        std::istream&       src_;     
+};        
 
 /**
  * Generic configuration block with a file.
