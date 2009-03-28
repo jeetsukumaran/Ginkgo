@@ -31,6 +31,15 @@ namespace gingko {
 namespace asciigrid {
 
 /**
+ * General i/o error.
+ */
+class AsciiGridIOError : public std::runtime_error {
+    public:
+        AsciiGridIOError(const char * msg) : std::runtime_error(msg) {}
+        AsciiGridIOError(const std::string& msg) : std::runtime_error(msg.c_str()) {}
+};
+
+/**
  * General format error.
  */
 class AsciiGridFormatError : public std::runtime_error {

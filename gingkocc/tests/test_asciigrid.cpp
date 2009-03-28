@@ -100,23 +100,23 @@ bool check_against_expected_grid2(asciigrid::AsciiGrid& ag) {
 }
  
 void run_internal_tests() {
-    std::cout << "Testing Grid 1 (from string)" << std::endl;
-    std::istringstream g1(TEST_GRID1);
-    asciigrid::AsciiGrid ag1(g1);
-    assert(check_against_expected_grid1(ag1));
-    std::cout << "Grid 1 (from string): PASS" << std::endl;
-    
-    std::cout << "Testing Grid 2 (from string)" << std::endl;    
-    std::istringstream g2(TEST_GRID2);
-    asciigrid::AsciiGrid ag2(g2);
-    assert(check_against_expected_grid2(ag2));
-    std::cout << "Grid 2 (from string): PASS" << std::endl;
-//     
-//     std::cout << "Testing Grid 1 (from file)" << std::endl;
-//     asciigrid::AsciiGrid ag1f("data/simple_grid1.grd");
-//     assert(check_against_expected_grid1(agf1));
+//     std::cout << "Testing Grid 1 (from string)" << std::endl;
+//     std::istringstream g1(TEST_GRID1);
+//     asciigrid::AsciiGrid ag1(g1);
+//     assert(check_against_expected_grid1(ag1));
 //     std::cout << "Grid 1 (from string): PASS" << std::endl;
 //     
+//     std::cout << "Testing Grid 2 (from string)" << std::endl;    
+//     std::istringstream g2(TEST_GRID2);
+//     asciigrid::AsciiGrid ag2(g2);
+//     assert(check_against_expected_grid2(ag2));
+//     std::cout << "Grid 2 (from string): PASS" << std::endl;
+    
+    std::cout << "Testing Grid 1 (from file)" << std::endl;
+    asciigrid::AsciiGrid ag1f("data/simple_grid1.grd");
+    assert(check_against_expected_grid1(ag1f));
+    std::cout << "Grid 1 (from file): PASS" << std::endl;
+    
 //     std::cout << "Testing Grid 2 (from string)" << std::endl;    
 //     std::istringstream g2(TEST_GRID1);
 //     asciigrid::AsciiGrid ag2f(g2);

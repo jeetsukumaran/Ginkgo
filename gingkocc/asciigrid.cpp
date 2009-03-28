@@ -32,18 +32,31 @@ namespace asciigrid {
 
 AsciiGrid::AsciiGrid(std::istream& src)
         : src_(src) {
+    if (not this->src_) {
+        throw AsciiGridIOError("invalid source stream");
+    }
     this->init_();
 }
 
 AsciiGrid::AsciiGrid(const char * fpath)
         : fsrc_(fpath),
           src_(fsrc_) {
+    if (not this->src_) {
+        std::ostringstream msg;
+        msg << "invalid source \"" << fpath << "\"";
+        throw AsciiGridIOError(msg.str());
+    }          
     this->init_();
 }
 
 AsciiGrid::AsciiGrid(const std::string& fpath) 
         : fsrc_(fpath.c_str()),
           src_(fsrc_) {
+    if (not this->src_) {
+        std::ostringstream msg;
+        msg << "invalid source \"" << fpath << "\"";
+        throw AsciiGridIOError(msg.str());
+    }              
     this->init_();
 }
 
@@ -63,6 +76,7 @@ void AsciiGrid::init_() {
 }
 
 void AsciiGrid::read_metadata_(std::string& metadata_name, long& metadata_value) {
+    assert(this->src_);
     this->src_ >> metadata_name;
     if (this->src_.eof()) {
         throw AsciiGridFormatEofError("unexpected EOF while reading metadata");
@@ -72,11 +86,12 @@ void AsciiGrid::read_metadata_(std::string& metadata_name, long& metadata_value)
         throw AsciiGridFormatEofError("unexpected EOF while reading metadata");
     }
     if (this->src_.fail()) {    
-        throw AsciiGridFormatValueError("Value error while reading metadata");
+        throw AsciiGridFormatValueError("value error while reading metadata (expecting long)");
     }
 }
 
 void AsciiGrid::read_metadata_(std::string& metadata_name, unsigned long& metadata_value) {
+    assert(this->src_);
     this->src_ >> metadata_name;
     if (this->src_.eof()) {
         throw AsciiGridFormatEofError("unexpected EOF while reading metadata");
@@ -86,11 +101,12 @@ void AsciiGrid::read_metadata_(std::string& metadata_name, unsigned long& metada
         throw AsciiGridFormatEofError("unexpected EOF while reading metadata");
     }
     if (this->src_.fail()) {    
-        throw AsciiGridFormatValueError("Value error while reading metadata");
+        throw AsciiGridFormatValueError("value error while reading metadata (expecting unsigned long)");
     }
 }
 
 void AsciiGrid::read_metadata_(std::string& metadata_name, float& metadata_value) {
+    assert(this->src_);
     this->src_ >> metadata_name;
     if (this->src_.eof()) {
         throw AsciiGridFormatEofError("unexpected EOF while reading metadata");
@@ -100,7 +116,7 @@ void AsciiGrid::read_metadata_(std::string& metadata_name, float& metadata_value
         throw AsciiGridFormatEofError("unexpected EOF while reading metadata");
     }
     if (this->src_.fail()) {    
-        throw AsciiGridFormatValueError("value error while reading metadata");
+        throw AsciiGridFormatValueError("value error while reading metadata (expecting float)");
     }
 }
 
