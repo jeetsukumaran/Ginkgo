@@ -19,15 +19,38 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "textutils.h"
-#include "asciigrid.h"
+#include <fstream>
 #include <sstream>
 #include <cstdlib>
+#include <cassert>
+#include "textutils.h"
+#include "asciigrid.h"
 
 namespace gingko {
 namespace asciigrid {
 
-AsciiGrid::AsciiGrid() {
+AsciiGrid::AsciiGrid(std::istream& src)
+        : src_(src) {
+    this->init_();
+}
+
+AsciiGrid::AsciiGrid(const char * fpath)
+        : fsrc_(fpath),
+          src_(fsrc_) {
+    this->init_();
+}
+
+AsciiGrid::AsciiGrid(const std::string& fpath) 
+        : fsrc_(fpath.c_str()),
+          src_(fsrc_) {
+    this->init_();
+}
+
+AsciiGrid::~AsciiGrid() { }
+
+void AsciiGrid::init_() {
+    this->is_metadata_loaded_ = false;
+    this->is_cell_values_loaded_ = false;
     this->ncols_ = 0;
     this->nrows_ = 0;
     this->xllcorner_ = 0;
@@ -38,99 +61,66 @@ AsciiGrid::AsciiGrid() {
     this->nodata_value_ = -99999;
 }
 
-AsciiGrid::~AsciiGrid() { }
-
-// std::string AsciiGrid::get_token(std::istream& src, const char * eof_msg) {
-//     std::string token;
-//     src >> token;
-//     if (src.eof() && src.fail()) {        
-//         throw AsciiGridFormatEofError(eof_msg);
-//     }
-//     return token;
-// }
-// 
-// std::string AsciiGrid::read_metadata_name(std::istream& src, const char * expected_token) {
-//     std::string token = this->get_token(src, "unexpected EOF while try to read metadata row");
-//     if (expected_token != NULL) {
-//         if (token != expected_token) {
-//             std::ostringstream msg;
-//             msg << "expecting \"" << expected_token << "\" but found \"" << token << "\"";
-//             throw AsciiGridFormatTokenError(msg.str());
-//         }
-//     }
-//     return token;
-// }
-// 
-// void AsciiGrid::read_metadata_value(std::istream& src, const char * expected_token, unsigned long& val) {
-//     this->read_metadata_name(expected_token);
-//     std::string val_str = 
-// }
-// 
-// void AsciiGrid::read_metadata_value(std::istream& src, const char * expected_token, long& val) {
-// 
-// }
-// 
-
-void AsciiGrid::read_metadata(std::istream& src, std::string& metadata_name, long& metadata_value) {
-    src >> metadata_name;
-    if (src.eof()) {
+void AsciiGrid::read_metadata_(std::string& metadata_name, long& metadata_value) {
+    this->src_ >> metadata_name;
+    if (this->src_.eof()) {
         throw AsciiGridFormatEofError("unexpected EOF while reading metadata");
     }
-    src >> metadata_value;
-    if (src.eof()) {
+    this->src_ >> metadata_value;
+    if (this->src_.eof()) {
         throw AsciiGridFormatEofError("unexpected EOF while reading metadata");
     }
-    if (src.fail()) {    
+    if (this->src_.fail()) {    
         throw AsciiGridFormatValueError("Value error while reading metadata");
     }
 }
 
-void AsciiGrid::read_metadata(std::istream& src, std::string& metadata_name, unsigned long& metadata_value) {
-    src >> metadata_name;
-    if (src.eof()) {
+void AsciiGrid::read_metadata_(std::string& metadata_name, unsigned long& metadata_value) {
+    this->src_ >> metadata_name;
+    if (this->src_.eof()) {
         throw AsciiGridFormatEofError("unexpected EOF while reading metadata");
     }
-    src >> metadata_value;
-    if (src.eof()) {
+    this->src_ >> metadata_value;
+    if (this->src_.eof()) {
         throw AsciiGridFormatEofError("unexpected EOF while reading metadata");
     }
-    if (src.fail()) {    
+    if (this->src_.fail()) {    
         throw AsciiGridFormatValueError("Value error while reading metadata");
     }
 }
 
-void AsciiGrid::read_metadata(std::istream& src, std::string& metadata_name, float& metadata_value) {
-    src >> metadata_name;
-    if (src.eof()) {
+void AsciiGrid::read_metadata_(std::string& metadata_name, float& metadata_value) {
+    this->src_ >> metadata_name;
+    if (this->src_.eof()) {
         throw AsciiGridFormatEofError("unexpected EOF while reading metadata");
     }
-    src >> metadata_value;
-    if (src.eof()) {
+    this->src_ >> metadata_value;
+    if (this->src_.eof()) {
         throw AsciiGridFormatEofError("unexpected EOF while reading metadata");
     }
-    if (src.fail()) {    
+    if (this->src_.fail()) {    
         throw AsciiGridFormatValueError("value error while reading metadata");
     }
 }
 
-void AsciiGrid::parse_metadata(std::istream& src) {
+void AsciiGrid::parse_metadata_() {
     std::string name;
     
-    this->read_metadata(src, name, this->ncols_);
+    this->read_metadata_(name, this->ncols_);
     if (textutils::lower(name) != "ncols") {
         std::ostringstream msg;
         msg << "expecting \"ncols\" but found \"" << name << "\"";
         throw AsciiGridFormatTokenError(msg.str());
     }    
     
-    this->read_metadata(src, name, this->nrows_);
+    this->read_metadata_(name, this->nrows_);
     if (textutils::lower(name) != "nrows") {
         std::ostringstream msg;
         msg << "expecting \"nrows\" but found \"" << name << "\"";
         throw AsciiGridFormatTokenError(msg.str());
     }
     
-    this->read_metadata(src, name, this->xllcorner_);
+    this->read_metadata_(name, this->xllcorner_);
     if (textutils::lower(name) == "xllcorner") {
         // pass
     } else if (textutils::lower(name) == "xllcenter") {
@@ -142,7 +132,7 @@ void AsciiGrid::parse_metadata(std::istream& src) {
         throw AsciiGridFormatTokenError(msg.str());
     }
     
-    this->read_metadata(src, name, this->yllcorner_);
+    this->read_metadata_(name, this->yllcorner_);
     if (textutils::lower(name) == "yllcorner") {
         // pass
     } else if (textutils::lower(name) == "yllcenter") {
@@ -154,37 +144,44 @@ void AsciiGrid::parse_metadata(std::istream& src) {
         throw AsciiGridFormatTokenError(msg.str());
     }
     
-    this->read_metadata(src, name, this->cell_size_);
+    this->read_metadata_(name, this->cell_size_);
     if (textutils::lower(name) != "cellsize") {
         std::ostringstream msg;
         msg << "expecting \"cellsize\" but found \"" << name << "\"";
         throw AsciiGridFormatTokenError(msg.str());
-    }       
+    }
+    
+    this->is_metadata_loaded_ = true;
 }
 
-void AsciiGrid::parse(std::istream& src) {     
+void AsciiGrid::parse_cell_values_() {   
 
-    // process mandatory metadata
-    this->parse_metadata(src);
+    if (not this->is_metadata_loaded_) {
+        this->parse_metadata_();
+    }
+    assert(this->ncols_ != 0);    
+    assert(this->nrows_ != 0);
     
     // reserve memory
+    this->cell_values_.clear();
+    this->cell_values_.reserve(this->nrows_ * this->ncols_);
+    
+    // track position (for error reporting)
     unsigned long x = 0;
     unsigned long y = 0;
-    this->values_.clear();
-    this->values_.reserve(this->nrows_ * this->ncols_);
     
-    // process option nodata value
+    // process optional nodata value
     std::string token;
-    src >> token;
-    if (src.eof()) {
+    this->src_ >> token;
+    if (this->src_.eof()) {
         throw AsciiGridFormatEofError("unexpected EOF while reading data");
     }    
     if (textutils::lower(token) == "nodata_value") {
-        src >> this->nodata_value_;
-        if (src.eof()) {
+        this->src_ >> this->nodata_value_;
+        if (this->src_.eof()) {
             throw AsciiGridFormatEofError("unexpected EOF while reading data");
         }
-        if (src.fail()) {
+        if (this->src_.fail()) {
             throw AsciiGridFormatValueError("invalid value specified for NODATA_value");
         }           
     } else {
@@ -193,28 +190,34 @@ void AsciiGrid::parse(std::istream& src) {
         s >> v;
         if (s.fail()) {
             std::ostringstream msg;
-            msg << "invalid value specified for cell (0,0) in file character position " << src.tellg();
+            msg << "invalid value specified for cell (0,0) in file character position " << this->src_.tellg();
             throw AsciiGridFormatValueError(msg.str());
         }
-        this->values_.push_back(v);
+        this->cell_values_.push_back(v);        
+        x+= 1;
+        if (x > this->ncols_) {
+            x = 0;
+            y += 1;
+        }
     }
     
     unsigned long cell_value;
-    src >> cell_value;
-    while (not src.eof()) {
-        if (src.fail()) {
+    this->src_ >> cell_value;
+    while (not this->src_.eof()) {
+        if (this->src_.fail()) {
             std::ostringstream msg;
-            msg << "invalid value specified for cell (" << x << ", " << y << ") in file character position " << src.tellg();
+            msg << "invalid value specified for cell (" << x << ", " << y << ") in file character position " << this->src_.tellg();
             throw AsciiGridFormatValueError(msg.str());
         }
-        this->values_.push_back(cell_value);
+        this->cell_values_.push_back(cell_value);
         x += 1;
         if (x >= this->ncols_) {
             x = 0;
             y += 1;
         }
-        src >> cell_value;
+        this->src_ >> cell_value;
     }
+    this->is_cell_values_loaded_ = true;
     
 }
 

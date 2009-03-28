@@ -23,6 +23,8 @@
 #define GINGKO_ASCIIGRID_H
 
 #include <vector>
+#include <fstream>
+#include <istream>
 #include <stdexcept>
 
 namespace gingko {
@@ -128,61 +130,39 @@ class AsciiGrid {
     public:
         
         /**
-         * Default constructor, initializes values.
+         * Initializes metadata and binds to source stream.
+         *
+         * @param src   data source
          */
-        AsciiGrid();
+        AsciiGrid(std::istream& src);
+        
+        /**
+         * Initializes metadata and binds to source file.
+         *
+         * @param fpath filepath of data source
+         */
+        AsciiGrid(const char * fpath);
+        
+        /**
+         * Initializes metadata and binds to source file.
+         *
+         * @param fpath filepath of data source
+         */
+        AsciiGrid(const std::string& fpath);        
         
         /**
          * Default no-op destructor.
          */
         ~AsciiGrid();
-        
-        /**
-         * Read and parse a metadata row into into its components.
-         *
-         * @param src               input stream
-         * @param metadata_name     store name of metadata
-         * @param metadata_value    store value of metadata (as long)
-         */       
-        void read_metadata(std::istream& src, std::string& metadata_name, long& metadata_value);
-        
-        /**
-         * Read and parse a metadata row into into its components.
-         *
-         * @param src               input stream
-         * @param metadata_name     store name of metadata
-         * @param metadata_value    store value of metadata (as unsigned long)
-         */       
-        void read_metadata(std::istream& src, std::string& metadata_name, unsigned long& metadata_value);        
-        
-        /**
-         * Read and parse a metadata row into into its components.
-         *
-         * @param src               input stream
-         * @param metadata_name     store name of metadata
-         * @param metadata_value    store value of metadata (as float)
-         */       
-        void read_metadata(std::istream& src, std::string& metadata_name, float& metadata_value);
-        
-        /**
-         * Load metadata from an input stream.
-         *
-         * @param src   input stream
-         */
-         void parse_metadata(std::istream& src);        
-                
-        /**
-         * Load metadata and data from an input stream.
-         *
-         * @param src   input stream
-         */
-         void parse(std::istream& src);
-         
+
         /**
          * Returns number of columns in grid.
          * @return number of columns in grid
          */
         unsigned long get_ncols() {
+            if (not this->is_metadata_loaded_) {
+                this->parse_metadata_();
+            }
             return this->ncols_;
         }
             
@@ -191,18 +171,91 @@ class AsciiGrid {
          * @return number of rows in grid
          */
         unsigned long get_nrows() {
+            if (not this->is_metadata_loaded_) {
+                this->parse_metadata_();
+            }        
             return this->nrows_;
         }
         
         /**
-         * Returns the missing data flag value.
-         * @return missing data flag value
-         */       
-        long get_no_data_value() {
-            return this->nodata_value_;
+         * Returns values of cells loaded from grid.
+         * @return vector of values of cells loaded from grid
+         */
+        std::vector<long> get_cell_values() {
+            if (not this->is_cell_values_loaded_) {
+                this->parse_cell_values_();
+            }        
+            return this->cell_values_;
         }
-                 
+        
+        /**
+         * Returns <code>true</code> if grid metadata specifies the same 
+         * dimensions as that required.
+         * @param   x   required x dimension of grid
+         * @param   y   required y dimension of grid
+         * @return      <code>true</code> if grid dimensions are as specified
+         */
+        bool require_size(unsigned long x, unsigned long y) {
+            if (this->get_ncols() == x && this->get_nrows() == y) {
+                return true;
+            } else {
+                return false;
+            }
+        }           
+        
+    private:    
+        
+        /**
+         * Initializes metadata.
+         */
+        void init_();        
+
+        /**
+         * Read and parse a metadata row into into its components.
+         *
+         * @param metadata_name     store name of metadata
+         * @param metadata_value    store value of metadata (as long)
+         */       
+        void read_metadata_(std::string& metadata_name, long& metadata_value);
+        
+        /**
+         * Read and parse a metadata row into into its components.
+         *
+         * @param metadata_name     store name of metadata
+         * @param metadata_value    store value of metadata (as unsigned long)
+         */       
+        void read_metadata_(std::string& metadata_name, unsigned long& metadata_value);        
+        
+        /**
+         * Read and parse a metadata row into into its components.
+         *
+         * @param metadata_name     store name of metadata
+         * @param metadata_value    store value of metadata (as float)
+         */       
+        void read_metadata_(std::string& metadata_name, float& metadata_value);    
+                        
+        /**
+         * Load metadata from an input stream.
+         */
+         void parse_metadata_();
+         
+        /**
+         * Load cell values from an input stream into given structure.
+         *
+         * @param cell_values   container to which extracted values will be
+         *                      stored (existing values will be cleared)
+         */
+         void parse_cell_values_();    
+                                     
     private: 
+        /** Input (file) stream. */
+        std::ifstream       fsrc_;
+        /** Input stream. */
+        std::istream&       src_;
+        /** Tracks whether or not metadata has been parsed. */
+        bool                is_metadata_loaded_;
+        /** Tracks whether or not metadata has been parsed. */
+        bool                is_cell_values_loaded_;        
         /** Number of columns in the grid. */
         unsigned long       ncols_;
         /** Number of rows in the grid. */
@@ -219,9 +272,8 @@ class AsciiGrid {
         float               cell_size_;             
         /** Value of flag indicating missing data. */
         long                nodata_value_;
-        /** Values in grid. */
-        std::vector<long>   values_;
-
+        /** Cell values. */
+        std::vector<long>   cell_values_;
 
 };
 
