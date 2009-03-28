@@ -100,28 +100,17 @@ bool check_against_expected_grid2(asciigrid::AsciiGrid& ag) {
 }
  
 void run_internal_tests() {
-//     std::cout << "Testing Grid 1 (from string)" << std::endl;
-//     std::istringstream g1(TEST_GRID1);
-//     asciigrid::AsciiGrid ag1(g1);
-//     assert(check_against_expected_grid1(ag1));
-//     std::cout << "Grid 1 (from string): PASS" << std::endl;
-//     
-//     std::cout << "Testing Grid 2 (from string)" << std::endl;    
-//     std::istringstream g2(TEST_GRID2);
-//     asciigrid::AsciiGrid ag2(g2);
-//     assert(check_against_expected_grid2(ag2));
-//     std::cout << "Grid 2 (from string): PASS" << std::endl;
+    std::cout << "Testing Grid 1 (from string)" << std::endl;
+    std::istringstream g1(TEST_GRID1);
+    asciigrid::AsciiGrid ag1(g1);
+    assert(check_against_expected_grid1(ag1));
+    std::cout << "Grid 1 (from string): PASS" << std::endl;
     
-    std::cout << "Testing Grid 1 (from file)" << std::endl;
-    asciigrid::AsciiGrid ag1f("data/simplegrid1.grd");
-    assert(check_against_expected_grid1(ag1f));
-    std::cout << "Grid 1 (from file): PASS" << std::endl;
-    
-//     std::cout << "Testing Grid 2 (from string)" << std::endl;    
-//     std::istringstream g2(TEST_GRID1);
-//     asciigrid::AsciiGrid ag2f(g2);
-//     assert(check_against_expected_grid1(agf2));
-//     std::cout << "Grid 2 (from string): PASS" << std::endl;    
+    std::cout << "Testing Grid 2 (from string)" << std::endl;    
+    std::istringstream g2(TEST_GRID2);
+    asciigrid::AsciiGrid ag2(g2);
+    assert(check_against_expected_grid2(ag2));
+    std::cout << "Grid 2 (from string): PASS" << std::endl;
 }
 
 int main(int argc, char * argv[]) {
@@ -129,6 +118,10 @@ int main(int argc, char * argv[]) {
         run_internal_tests();
     } else {       
         asciigrid::AsciiGrid ag(argv[1]);
+        std::vector<long> v = ag.get_cell_values();
+        for (std::vector<long>::const_iterator i = v.begin(); i != v.end(); ++i) {
+            std::cout << *i << std::endl;
+        }
     }   
 }
 
