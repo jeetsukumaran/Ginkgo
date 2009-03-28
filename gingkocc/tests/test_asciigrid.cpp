@@ -60,9 +60,11 @@ const char * TEST_GRID2 =
 bool check_against_expected_grid1(asciigrid::AsciiGrid& ag) {
     assert(ag.get_ncols() == 4);
     assert(ag.get_nrows() == 6);
-    std::cout << "Grid 1: size OK" << std::endl;
+    assert(ag.has_size(4,6));
+    std::cout << "Grid 1: reported size OK" << std::endl;
     std::vector<long> cell_vals = ag.get_cell_values();
     assert(cell_vals.size() == 24);
+    std::cout << "Grid 1: actual size OK" << std::endl;    
     long expected[] = {-9999, -9999,   5,     2, 
                        -9999,    20, 100,    36, 
                            3,     8,  35,    10,
@@ -72,15 +74,18 @@ bool check_against_expected_grid1(asciigrid::AsciiGrid& ag) {
     for (int i=0; i<24; ++i) {
         assert(cell_vals[i] == expected[i]);
     }
+    std::cout << "Grid 1: values OK" << std::endl;
     return true;
 }
  
 bool check_against_expected_grid2(asciigrid::AsciiGrid& ag) {
     assert(ag.get_ncols() == 10);
     assert(ag.get_nrows() == 6);
-    std::cout << "Grid 2: size OK" << std::endl;    
+    assert(ag.has_size(10,6));
+    std::cout << "Grid 2: reported size OK" << std::endl;    
     std::vector<long> cell_vals = ag.get_cell_values();
     assert(cell_vals.size() == 60);
+    std::cout << "Grid 2: actual size OK" << std::endl;    
     long expected[] = { 0,  1,  2,  3,  4,  5,  6,  7,  8,  9, 
                        10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 
                        20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 
@@ -90,6 +95,7 @@ bool check_against_expected_grid2(asciigrid::AsciiGrid& ag) {
     for (int i=0; i<24; ++i) {
         assert(cell_vals[i] == expected[i]);
     }
+    std::cout << "Grid 2: values OK" << std::endl;    
     return true;
 }
  
@@ -101,10 +107,21 @@ void run_internal_tests() {
     std::cout << "Grid 1 (from string): PASS" << std::endl;
     
     std::cout << "Testing Grid 2 (from string)" << std::endl;    
-    std::istringstream g2(TEST_GRID1);
+    std::istringstream g2(TEST_GRID2);
     asciigrid::AsciiGrid ag2(g2);
-    assert(check_against_expected_grid1(ag2));
+    assert(check_against_expected_grid2(ag2));
     std::cout << "Grid 2 (from string): PASS" << std::endl;
+//     
+//     std::cout << "Testing Grid 1 (from file)" << std::endl;
+//     asciigrid::AsciiGrid ag1f("data/simple_grid1.grd");
+//     assert(check_against_expected_grid1(agf1));
+//     std::cout << "Grid 1 (from string): PASS" << std::endl;
+//     
+//     std::cout << "Testing Grid 2 (from string)" << std::endl;    
+//     std::istringstream g2(TEST_GRID1);
+//     asciigrid::AsciiGrid ag2f(g2);
+//     assert(check_against_expected_grid1(agf2));
+//     std::cout << "Grid 2 (from string): PASS" << std::endl;    
 }
 
 int main(int argc, char * argv[]) {

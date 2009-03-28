@@ -195,7 +195,7 @@ class AsciiGrid {
          * @param   y   required y dimension of grid
          * @return      <code>true</code> if grid dimensions are as specified
          */
-        bool require_size(unsigned long x, unsigned long y) {
+        bool has_size(unsigned long x, unsigned long y) {
             if (this->get_ncols() == x && this->get_nrows() == y) {
                 return true;
             } else {
