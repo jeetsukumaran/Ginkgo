@@ -78,8 +78,8 @@ void World::seed_population(CellIndexType cell_index, const std::string& species
 
 // --- event handlers ---
 
-void World::add_event_group(unsigned long generation, const WorldEvents& events) {
-    this->world_events_[generation] = events;
+void World::add_world_changes(unsigned long generation, const WorldChanges& world_changes) {
+    this->world_changes_[generation] = world_changes;
 }
 
 

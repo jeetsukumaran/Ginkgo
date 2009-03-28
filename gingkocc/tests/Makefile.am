@@ -38,7 +38,7 @@ test_tree_from_genealogies_SOURCES = \
 test_parse_conf_block_SOURCES = \
     test_parse_conf_block.cpp \
     ../textutils.cpp \
-    ../conf.cpp
+    ../worldconf.cpp
     
 test_textutils_SOURCES = \
     test_textutils.cpp \
@@ -46,6 +46,6 @@ test_textutils_SOURCES = \
 
 test_asciigrid_SOURCES = \
     test_asciigrid.cpp \
-    ../asciigrid.cpp  \    
+    ../asciigrid.cpp \
     ../textutils.cpp
         
