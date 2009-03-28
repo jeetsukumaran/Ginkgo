@@ -19,6 +19,7 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
+#include <iostream>
 #include <fstream>
 #include <sstream>
 #include <cstdlib>
@@ -201,7 +202,7 @@ void AsciiGrid::parse_cell_values_() {
         }
     }
     
-    unsigned long cell_value;
+    long cell_value;
     this->src_ >> cell_value;
     while (not this->src_.eof()) {
         if (this->src_.fail()) {

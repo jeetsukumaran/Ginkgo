@@ -245,7 +245,13 @@ class AsciiGrid {
          * @param cell_values   container to which extracted values will be
          *                      stored (existing values will be cleared)
          */
-         void parse_cell_values_();    
+         void parse_cell_values_();   
+         
+    private:
+        /** Disabled copy constructor. */
+        AsciiGrid(const AsciiGrid&);
+        /** Disabled assignment operator. */
+        const AsciiGrid& operator=(const AsciiGrid&);
                                      
     private: 
         /** Input (file) stream. */
