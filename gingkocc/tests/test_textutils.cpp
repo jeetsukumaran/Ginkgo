@@ -154,10 +154,15 @@ void test_strip() {
     assert_str_equal(strip("!### hello ###  ", "!# "), "hello");    
 }
 
+void test_casing() {
+    assert_str_equal(lower(" 12abcdABCD21 "), " 12abcdabcd21 ");
+    assert_str_equal(upper(" 12abcdABCD21 "), " 12ABCDABCD21 "); 
+}
+
 int main(int, char * []) {
-//     test_extract_filename_from_path();
-//     test_splits();
-//     test_split_on_any();
+    test_extract_filename_from_path();
+    test_splits();
+    test_split_on_any();
     test_strip();
 }
 

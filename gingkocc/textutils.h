@@ -22,6 +22,7 @@
 #include <string>
 #include <sstream>
 #include <vector>
+#include <algorithm>
 
 #if !defined(GINGKO_TEXTUTILS_H)
 #define GINGKO_TEXTUTILS_H
@@ -110,6 +111,22 @@ std::vector<std::string> split_on_any(const std::string& src, const char * sep =
  *                  beginning and end
  */
 std::string strip(const std::string& s, const char * to_strip=" \t\n\r");
+
+/** 
+ * Converts a string to lower case.
+ *
+ * @param s         source string
+ * @return          copy of string in all lower case characters.
+ */
+std::string lower(const std::string& s);
+
+/** 
+ * Converts a string to upper case.
+ *
+ * @param s         source string
+ * @return          copy of string in all upper case characters.
+ */
+std::string upper(const std::string& s);
 
 } // namespace gingko
 

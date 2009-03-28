@@ -24,6 +24,7 @@
 #include <string>
 #include <sstream>
 #include <vector>
+#include <cctype>
 #include "textutils.h"
 
 namespace gingko {
@@ -186,6 +187,18 @@ std::string strip(const std::string& s, const char * to_strip) {
     } else {
         return s;
     }
+}
+
+std::string lower(const std::string& s) {
+    std::string result = s;
+    std::transform(s.begin(), s.end(), result.begin(), (int(*)(int))std::tolower);
+    return result;
+}
+
+std::string upper(const std::string& s) {
+    std::string result = s;
+    std::transform(s.begin(), s.end(), result.begin(), (int(*)(int))std::toupper);
+    return result;
 }
 
 } // gingko namespace
