@@ -113,7 +113,7 @@ void run_internal_tests() {
 //     std::cout << "Grid 2 (from string): PASS" << std::endl;
     
     std::cout << "Testing Grid 1 (from file)" << std::endl;
-    asciigrid::AsciiGrid ag1f("data/simple_grid1.grd");
+    asciigrid::AsciiGrid ag1f("data/simplegrid1.grd");
     assert(check_against_expected_grid1(ag1f));
     std::cout << "Grid 1 (from file): PASS" << std::endl;
     
