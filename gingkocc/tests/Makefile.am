@@ -46,5 +46,6 @@ test_textutils_SOURCES = \
 
 test_asciigrid_SOURCES = \
     test_asciigrid.cpp \
-    ../asciigrid.cpp 
+    ../asciigrid.cpp  \    
+    ../textutils.cpp
         

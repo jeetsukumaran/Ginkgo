@@ -38,6 +38,34 @@ class AsciiGridFormatError : public std::runtime_error {
 };
 
 /**
+ * EOF error.
+ */
+class AsciiGridFormatEofError : public AsciiGridFormatError {
+    public:
+        AsciiGridFormatEofError(const char * msg) : AsciiGridFormatError(msg) {}
+        AsciiGridFormatEofError(const std::string& msg) : AsciiGridFormatError(msg) {}
+};
+
+/**
+ * Unexpected token error.
+ */
+class AsciiGridFormatTokenError : public AsciiGridFormatError {
+    public:
+        AsciiGridFormatTokenError(const char * msg) : AsciiGridFormatError(msg) {}
+        AsciiGridFormatTokenError(const std::string& msg) : AsciiGridFormatError(msg) {}
+};
+
+/**
+ * Value error.
+ */
+class AsciiGridFormatValueError : public AsciiGridFormatError {
+    public:
+        AsciiGridFormatValueError(const char * msg) : AsciiGridFormatError(msg) {}
+        AsciiGridFormatValueError(const std::string& msg) : AsciiGridFormatError(msg) {}
+};
+
+
+/**
  * Encapsulates parsing of an ESRI ASCII Grid format file into a vector
  * of unsigned longs.
  *
@@ -107,10 +135,44 @@ class AsciiGrid {
         /**
          * Default no-op destructor.
          */
-        ~AsciiGrid();       
+        ~AsciiGrid();
+        
+        /**
+         * Read and parse a metadata row into into its components.
+         *
+         * @param src               input stream
+         * @param metadata_name     store name of metadata
+         * @param metadata_value    store value of metadata (as long)
+         */       
+        void read_metadata(std::istream& src, std::string& metadata_name, long& metadata_value);
+        
+        /**
+         * Read and parse a metadata row into into its components.
+         *
+         * @param src               input stream
+         * @param metadata_name     store name of metadata
+         * @param metadata_value    store value of metadata (as unsigned long)
+         */       
+        void read_metadata(std::istream& src, std::string& metadata_name, unsigned long& metadata_value);        
+        
+        /**
+         * Read and parse a metadata row into into its components.
+         *
+         * @param src               input stream
+         * @param metadata_name     store name of metadata
+         * @param metadata_value    store value of metadata (as float)
+         */       
+        void read_metadata(std::istream& src, std::string& metadata_name, float& metadata_value);
         
         /**
          * Load metadata from an input stream.
+         *
+         * @param src   input stream
+         */
+         void parse_metadata(std::istream& src);        
+                
+        /**
+         * Load metadata and data from an input stream.
          *
          * @param src   input stream
          */
@@ -145,10 +207,16 @@ class AsciiGrid {
         unsigned long       ncols_;
         /** Number of rows in the grid. */
         unsigned long       nrows_;
-        /** Geographical X-coordinate of the lower-left corner of the grid. */
+        /** Geographical X-coordinate of the lower-left cell corner of the grid. */
         float               xllcorner_;
-        /** Geographical Y-coordinate of the lower-left corner of the grid.  */
+        /** Geographical Y-coordinate of the lower-left cell corner of the grid.  */
         float               yllcorner_;
+        /** Geographical X-coordinate of the lower-left cell center of the grid. */
+        float               xllcenter_;
+        /** Geographical Y-coordinate of the lower-left cell center of the grid.  */
+        float               yllcenter_;
+        /** Size of cell.  */
+        float               cell_size_;             
         /** Value of flag indicating missing data. */
         long                nodata_value_;
         /** Values in grid. */
