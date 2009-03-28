@@ -28,6 +28,7 @@
 #define GINGKO_TEXTUTILS_H
 
 namespace gingko {
+namespace textutils {
 
 /**
  * Wraps a line of text to specified width.
@@ -128,6 +129,7 @@ std::string lower(const std::string& s);
  */
 std::string upper(const std::string& s);
 
+} // namespace textutils
 } // namespace gingko
 
 #endif

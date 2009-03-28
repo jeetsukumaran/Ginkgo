@@ -28,7 +28,7 @@
 
 #include "../textutils.h"
 
-using namespace gingko;
+using namespace gingko::textutils;
 
 void test_extract_filename_from_path() {
     char * input[] = {"/home/user/filename", "user/filename", "filename", ""};

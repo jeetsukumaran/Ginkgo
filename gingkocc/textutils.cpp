@@ -28,6 +28,7 @@
 #include "textutils.h"
 
 namespace gingko {
+namespace textutils {
 
 
 // Wraps text (preferably at word boundaries).
@@ -201,4 +202,5 @@ std::string upper(const std::string& s) {
     return result;
 }
 
+} // textutils namespace
 } // gingko namespace

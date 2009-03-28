@@ -35,7 +35,7 @@ int main(int argc, char* argv[]) {
     gingko::Tree tree(true);
     const char * label;
     for (int i = 1; i < argc; ++i) {
-        std::vector< std::string > parts = gingko::split(argv[i], ":");
+        std::vector< std::string > parts = gingko::textutils::split(argv[i], ":");
         unsigned long idx = atol(parts[0].c_str());            
         if (parts.size() > 1) {
             label = parts[1].c_str();
