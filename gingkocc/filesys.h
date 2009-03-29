@@ -27,6 +27,9 @@
 namespace gingko {
 namespace filesys {
      
+///////////////////////////////////////////////////////////////////////////////
+// PATH TEXT/STRING OPERATIONS
+
 /**
  * Returns filename (and extension) from supplied path.
  *
@@ -37,12 +40,34 @@ namespace filesys {
 std::string extract_filename_from_path(const char * path);
 
 /**
+ * Joins elements of a path.
+ *
+ * @param parent  parent path element
+ * @param child   child path element
+ * @return        fully composed path
+ */
+std::string compose_path(const std::string& parent, const std::string& child);
+
+/**
+ * Given a relative path assumed to be rooted in the current working directory,
+ * return an absolute path.
+ *
+ * @param rel_path  path relative to current working directory
+ * @return          absolute path
+ */
+std::string abs_path_from_cwd(const std::string& rel_path); 
+
+///////////////////////////////////////////////////////////////////////////////
+// OPERATING/FILE SYSTEM INTERACTIONS
+
+/**
  * Returns the current working directory.
  * @return      current working directory
  */
 std::string current_working_dir();
 
 } // filesys
+
 } // gingko
 
 #endif

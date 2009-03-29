@@ -21,11 +21,17 @@
 
 #include <cstdlib>
 #include <string>
+#include "filesys.h"
 
 namespace gingko {
 namespace filesys {
 
-// Extracts filenames from path
+const char * PATH_SEPARATOR = "/";
+
+///////////////////////////////////////////////////////////////////////////////
+// PATH TEXT/STRING OPERATIONS
+
+// extracts filenames from path
 std::string extract_filename_from_path(const char * path) {
     
     // copy of string
@@ -49,6 +55,19 @@ std::string extract_filename_from_path(const char * path) {
         }
     }    
 } 
+
+// put together file path
+std::string compose_path(const std::string& parent, const std::string& child) {
+    return parent + PATH_SEPARATOR + child;
+}
+
+// join rel_path to current working directory
+std::string abs_path_from_cwd(const std::string& rel_path) {
+    return current_working_dir() + PATH_SEPARATOR + rel_path;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// OPERATING/FILE SYSTEM INTERACTIONS
 
 // returns current working directory
 std::string current_working_dir() {
