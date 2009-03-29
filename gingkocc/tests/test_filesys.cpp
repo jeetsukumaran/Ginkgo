@@ -30,20 +30,20 @@
 
 using namespace gingko::filesys;
 
-void test_extract_filename_from_path() {
+void test_get_filename() {
     char * input[] = {"/home/user/filename", "user/filename", "filename", ""};
     char ** check = input;
-    std::cout << "Testing \"extract_filename_from_path\" ..." << std::endl;
+    std::cout << "Testing \"get_filename\" ..." << std::endl;
     while (strcmp(*check, "") != 0) {
         std::cout << "\"" << *check << "\" => ";
-        std::string result = extract_filename_from_path(*check);
+        std::string result = get_filename(*check);
         std::cout << "\"" << result << "\"" << std::endl;
         assert(strcmp(result.c_str(), "filename") == 0);
         ++check;
     }
-    std::cout << "\"extract_filename_from_path\" tests: PASS" << std::endl;
+    std::cout << "\"get_filename\" tests: PASS" << std::endl;
 }
 
 int main(int, char * []) {
-    test_extract_filename_from_path();
+    test_get_filename();
 }

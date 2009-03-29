@@ -37,7 +37,16 @@ namespace filesys {
  * @param  path path to file
  * @return      filename and extension
  */
-std::string extract_filename_from_path(const char * path);
+std::string get_filename(const char * path);
+
+/**
+ * Returns filename (and extension) from supplied path.
+ *
+ * Technically, returns the final element of a "/"-separated path.
+ * @param  path path to file
+ * @return      filename and extension
+ */
+std::string get_parent(const char * path);
 
 /**
  * Joins elements of a path.
@@ -64,7 +73,7 @@ std::string abs_path_from_cwd(const std::string& rel_path);
  * Returns the current working directory.
  * @return      current working directory
  */
-std::string current_working_dir();
+std::string current_path();
 
 } // filesys
 

@@ -32,7 +32,7 @@ const char * PATH_SEPARATOR = "/";
 // PATH TEXT/STRING OPERATIONS
 
 // extracts filenames from path
-std::string extract_filename_from_path(const char * path) {
+std::string get_filename(const char * path) {
     
     // copy of string
     std::string full_path = path;
@@ -63,14 +63,14 @@ std::string compose_path(const std::string& parent, const std::string& child) {
 
 // join rel_path to current working directory
 std::string abs_path_from_cwd(const std::string& rel_path) {
-    return current_working_dir() + PATH_SEPARATOR + rel_path;
+    return current_path() + PATH_SEPARATOR + rel_path;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 // OPERATING/FILE SYSTEM INTERACTIONS
 
 // returns current working directory
-std::string current_working_dir() {
+std::string current_path() {
     char cwd[1024];
     ::getcwd(cwd, 1024);
     return std::string(cwd);

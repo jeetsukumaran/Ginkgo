@@ -230,7 +230,7 @@ void OptionParser::parse(int argc, char * argv[]) {
             
         // help option specified
         if (this->show_help_) {
-            this->write_help(std::cout, filesys::extract_filename_from_path(argv[0]).c_str());
+            this->write_help(std::cout, filesys::get_filename(argv[0]).c_str());
             exit(0);
         }
         
