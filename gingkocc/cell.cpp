@@ -41,12 +41,15 @@ Cell::Cell(CellIndexType index,
            Landscape& landscape, 
            const SpeciesByLabel& species, 
            RandomNumberGenerator& rng)     
-    : index_(index),
-      carrying_capacity_(0),
-      num_fitness_factors_(num_fitness_factors),
-      landscape_(landscape),
-      species_(species),
-      rng_(rng) {   }
+        : index_(index),
+          carrying_capacity_(0),
+          num_fitness_factors_(num_fitness_factors),
+          landscape_(landscape),
+          species_(species),
+          rng_(rng) {   
+    memset(this->environment_, 0, 
+    MAX_FITNESS_FACTORS*sizeof(FitnessFactorType));         
+}
 
 // --- basic biotics ---
 
