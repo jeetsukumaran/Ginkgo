@@ -46,7 +46,7 @@ bool catch_block_parse_exception(const char * message, std::string s) {
     bool is_exception = false;
     std::istringstream in0(s);
     try {
-        ConfigurationBlockParser species_block(in0);
+        ConfigurationBlock species_block(in0);
         is_exception = false;
     } catch (const ConfigurationSyntaxError& e) {
         is_exception = true;
@@ -88,7 +88,7 @@ void test_parse_correct() {
     std::cout << "Testing configuration block parse ..." << std::endl;
     std::string species_block_str(SPECIES_BLOCK_CSTR);
     std::istringstream in0(species_block_str);
-    ConfigurationBlockParser species_block = ConfigurationBlockParser(in0);
+    ConfigurationBlock species_block = ConfigurationBlock(in0);
     assert(species_block.get_entry("selection") == "1 1 1 1");
     assert(species_block.get_entry("genotype") == "0 0 0 0");
     assert(species_block.get_entry("mutation-rate") == "0.01");
