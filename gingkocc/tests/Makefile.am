@@ -11,7 +11,8 @@ dist_gingkotests_SCRIPTS = gingko_tests.py \
                    run_test_cmdopts.py \
                    run_test_tree.py \
                    run_test_conf_parser.py \
-                   run_test_textutils.py
+                   run_test_textutils.py \
+                   run_test_asciigrid.py
 
 gingkotests_PROGRAMS = test_cmdopts \
                test_tree_from_parent_indexes \
