@@ -70,4 +70,4 @@ test_asciigrid_SOURCES = \
 test_parse_conf_file_SOURCES = \
     test_parse_conf_file.cpp \
     ../textutils.cpp \
-    ../worldconf.cpp        
+    ../worldconf.cpp
