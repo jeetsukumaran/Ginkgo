@@ -59,7 +59,7 @@ bool catch_block_parse_exception(const char * message, std::string s) {
 void test_parse_errors() {
     std::cout << "Testing configuration block parse error detection ..." << std::endl;
     std::string species_block_str(SPECIES_BLOCK_CSTR);    
-    catch_block_parse_exception("(testing empty block error)", "");    
+//     catch_block_parse_exception("(testing empty block error)", "");    
     catch_block_parse_exception("(testing missing block open error)", 
         species_block_str.substr(3, species_block_str.size()));        
     catch_block_parse_exception("(testing missing block close error)", 
@@ -97,6 +97,14 @@ void test_parse_correct() {
     assert(species_block.get_entry("movement-capacity") == "10");    
     assert(species_block.get_entry("movement-costs") == "/Users/user/data/grid.asc");   
     assert(species_block.get_keys().size() == 8);
+}
+
+void test_parse_empy() {
+    std::cout << "Testing empty configuration block parse ..." << std::endl;
+    std::string s = "";
+    std::istringstream in0(s);
+    ConfigurationBlock cb(in0);
+    assert(cb.is_block_set() == false);
 }
 
 int main(int, char * []) {
