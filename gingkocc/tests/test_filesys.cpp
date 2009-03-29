@@ -30,20 +30,20 @@
 
 using namespace gingko::filesys;
 
-void test_get_filename() {
+void test_get_path_leaf() {
     char * input[] = {"/home/user/filename", "user/filename", "filename", ""};
     char ** check = input;
-    std::cout << "Testing \"get_filename\" ..." << std::endl;
+    std::cout << "Testing \"get_path_leaf\" ..." << std::endl;
     while (strcmp(*check, "") != 0) {
         std::cout << "\"" << *check << "\" => ";
-        std::string result = get_filename(*check);
+        std::string result = get_path_leaf(*check);
         std::cout << "\"" << result << "\"" << std::endl;
         assert(strcmp(result.c_str(), "filename") == 0);
         ++check;
     }
-    std::cout << "\"get_filename\" tests: PASS" << std::endl;
+    std::cout << "\"get_path_leaf\" tests: PASS" << std::endl;
 }
 
 int main(int, char * []) {
-    test_get_filename();
+    test_get_path_leaf();
 }

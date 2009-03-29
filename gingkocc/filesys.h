@@ -37,7 +37,7 @@ namespace filesys {
  * @param  path path to file
  * @return      filename and extension
  */
-std::string get_filename(const char * path);
+std::string get_path_leaf(const char * path);
 
 /**
  * Returns filename (and extension) from supplied path.
@@ -46,7 +46,7 @@ std::string get_filename(const char * path);
  * @param  path path to file
  * @return      filename and extension
  */
-std::string get_parent(const char * path);
+std::string get_path_parent(const char * path);
 
 /**
  * Joins elements of a path.

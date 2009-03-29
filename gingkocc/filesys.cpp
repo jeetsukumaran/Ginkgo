@@ -32,7 +32,7 @@ const char * PATH_SEPARATOR = "/";
 // PATH TEXT/STRING OPERATIONS
 
 // extracts filenames from path
-std::string get_filename(const char * path) {
+std::string get_path_leaf(const char * path) {
     
     // copy of string
     std::string full_path = path;

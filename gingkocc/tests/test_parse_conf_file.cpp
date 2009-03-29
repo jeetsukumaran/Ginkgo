@@ -27,12 +27,18 @@
 #include <cassert>
 
 #include "../worldconf.h"
+#include "../filesys.h"
 
 using namespace gingko;
 
+void test_parse_dummy1(const char * prog_path) {
+    std::string srcf = filesys::compose_path(prog_path, "data/dummy1/dummy1.conf");
+    ConfigurationFile cf(srcf);
+}
 
 int main(int argc, char * argv[]) {
-    std::cout << argv[0] << std::endl;
+    assert(argc);
+    test_parse_dummy1(argv[0]);
 }
 
 
