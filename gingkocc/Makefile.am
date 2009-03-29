@@ -19,4 +19,5 @@ gingko_SOURCES = \
     textutils.cpp \
     tree.cpp \
     worldconf.cpp \
-    asciigrid.cpp 
+    asciigrid.cpp  \
+    filesys.cpp

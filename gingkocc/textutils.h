@@ -43,15 +43,6 @@ std::string textwrap(const std::string& source,
         unsigned line_width=78,
         unsigned first_line_indent=0, 
         unsigned subsequent_line_indent=0);                         
-     
-/**
- * Returns filename (and extension) from supplied path.
- *
- * Technically, returns the final element of a "/"-separated path.
- * @param  source                   path to file
- * @return                          filename and extension
- */
-std::string extract_filename_from_path(const char * path);
 
 /**
  * Splits a const char source string into tokens as delimited by 

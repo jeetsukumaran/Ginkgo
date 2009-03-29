@@ -30,7 +30,6 @@
 namespace gingko {
 namespace textutils {
 
-
 // Wraps text (preferably at word boundaries).
 std::string textwrap(const std::string& source, 
         unsigned line_width,
@@ -79,33 +78,6 @@ std::string textwrap(const std::string& source,
     return wrapped;
 } 
 
-
-// Extracts filenames from path
-std::string extract_filename_from_path(const char * path) {
-    
-    // copy of string
-    std::string full_path = path;
-    
-    // replace dos/windows slashes with nix ones
-    // if there are insane filepaths being passed here (specifically, a path
-    // with backslash characters), this will give wrong results
-    std::string::size_type p = full_path.find('\\');
-    while (p != std::string::npos) {
-        full_path.replace(p, 1, "/");
-    }
-    std::string::size_type last_path_char = full_path.find_last_of('/');
-    if (last_path_char == std::string::npos) {
-        return full_path;
-    } else {
-        if (last_path_char >= full_path.size()) {
-            return std::string("");
-        } else {
-            return full_path.substr(last_path_char+1);
-        }
-    }    
-} 
-
-
 // Split a string by given separator delimiter
 std::vector<std::string> split(const char * ssrc, 
                                const char * sep, 
@@ -113,7 +85,6 @@ std::vector<std::string> split(const char * ssrc,
                                bool include_empty_tokens) {
     return split(std::string(ssrc), sep, max_splits, include_empty_tokens);
 }
-
 
 // Split a string by given separator delimiter
 std::vector<std::string> split(const std::string& src, 
@@ -140,7 +111,6 @@ std::vector<std::string> split(const std::string& src,
     return v;
 }
 
-
 // Split a string by any character in given list of separators/delimiter
 std::vector<std::string> split_on_any(const char * ssrc, 
                                       const char * sep, 
@@ -148,7 +118,6 @@ std::vector<std::string> split_on_any(const char * ssrc,
                                       bool include_empty_tokens) {
     return split_on_any(std::string(ssrc), sep, max_splits, include_empty_tokens);
 }
-
 
 // Split a string by any character in given list of separators/delimiter
 std::vector<std::string> split_on_any(const std::string& src, 
@@ -174,7 +143,6 @@ std::vector<std::string> split_on_any(const std::string& src,
     } 
     return v;
 }
-
 
 // Strip characters from a string
 std::string strip(const std::string& s, const char * to_strip) {

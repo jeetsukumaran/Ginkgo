@@ -30,20 +30,6 @@
 
 using namespace gingko::textutils;
 
-void test_extract_filename_from_path() {
-    char * input[] = {"/home/user/filename", "user/filename", "filename", ""};
-    char ** check = input;
-    std::cout << "Testing \"extract_filename_from_path\" ..." << std::endl;
-    while (strcmp(*check, "") != 0) {
-        std::cout << "\"" << *check << "\" => ";
-        std::string result = extract_filename_from_path(*check);
-        std::cout << "\"" << result << "\"" << std::endl;
-        assert(strcmp(result.c_str(), "filename") == 0);
-        ++check;
-    }
-    std::cout << "\"extract_filename_from_path\" tests: PASS" << std::endl;
-}
-
 bool check_split(std::vector<std::string> result,
                  char * expected[],
                  unsigned expected_count) {
@@ -160,7 +146,6 @@ void test_casing() {
 }
 
 int main(int, char * []) {
-    test_extract_filename_from_path();
     test_splits();
     test_split_on_any();
     test_strip();
