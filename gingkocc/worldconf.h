@@ -86,59 +86,16 @@ class ConfigurationSyntaxError : public std::runtime_error {
 };
 
 /**
- * Encapsulates parsing of a configuration file, and instantiation of 
- * corresponding World object.
- */
-class ConfigurationFileParser {
-
-    public:
-        
-        /**
-         * Initializes metadata and binds to source stream.
-         *
-         * @param src   data source
-         */
-        ConfigurationFileParser(std::istream& src);
-        
-        /**
-         * Initializes metadata and binds to source file.
-         *
-         * @param fpath filepath of data source
-         */
-        ConfigurationFileParser(const char * fpath);
-        
-        /**
-         * Initializes metadata and binds to source file.
-         *
-         * @param fpath filepath of data source
-         */
-        ConfigurationFileParser(const std::string& fpath);        
-        
-        /**
-         * Default no-op destructor.
-         */
-        ~ConfigurationFileParser();
-        
-    private: 
-    
-        /** Input (file) stream. */
-        std::ifstream       fsrc_;
-        
-        /** Input stream. */
-        std::istream&       src_;     
-};        
-
-/**
  * Generic configuration block with a file.
  */
-class ConfigurationBlockParser {
+class ConfigurationBlock {
 
     public:
     
         /**
          * Default constructor.
          */
-        ConfigurationBlockParser();
+        ConfigurationBlock();
         
         /**
          * Constructor that populates a ConfigurationBlock object by calling
@@ -146,12 +103,17 @@ class ConfigurationBlockParser {
          *
          * @param in    input stream with data
          */
-        ConfigurationBlockParser(std::istream& in);  
+        ConfigurationBlock(std::istream& in);  
         
         /**
          * Default destructor.
          */
-        ~ConfigurationBlockParser();
+        ~ConfigurationBlock();
+        
+        /**
+         * Clears existing data.
+         */
+        void clear();         
         
         /**
          * Returns type label of the block.
@@ -168,9 +130,16 @@ class ConfigurationBlockParser {
         std::string get_name() const;
         
         /**
+         * Returns <code>true</code> if the block was parsed and set.
+         *
+         * @return <code>true</code> if the block was parsed and set
+         */
+        bool is_block_set() const;        
+        
+        /**
          * Returns value for given key.
          *
-         * @param   key key for entry
+         * @param       key key for entry
          * @return      value for entry
          */
         std::string get_entry(const std::string& key) const;   
@@ -204,6 +173,14 @@ class ConfigurationBlockParser {
          * @param in    input stream with data
          */
         void parse(std::istream& in);
+        
+        /**
+         * Allow for easy input semantics.
+         * @param in        input stream         
+         * @param cblock    block to populate
+         * @return          input stream
+         */
+        friend std::istream& operator>> (std::istream& in, ConfigurationBlock& cblock);
 
     private:
         /** The type of block (e.g. "species", "world", "generation") */
@@ -212,7 +189,72 @@ class ConfigurationBlockParser {
         std::string                             name_;
         /** Key-value pairs making up the block body. */
         std::map< std::string, std::string >    entries_;
-}; // ConfigurationBlockParser
+        /** Tracks whether or not the block was actually set. */
+        bool                                    is_block_set_;
+}; // ConfigurationBlock
+
+/**
+ * Encapsulates parsing of a configuration file, and instantiation of 
+ * corresponding World object.
+ */
+class ConfigurationFile {
+
+    public:
+        
+        /**
+         * Initializes metadata and binds to source stream.
+         *
+         * @param src   data source
+         */
+        ConfigurationFile(std::istream& src);
+        
+        /**
+         * Initializes metadata and binds to source file.
+         *
+         * @param fpath filepath of data source
+         */
+        ConfigurationFile(const char * fpath);
+        
+        /**
+         * Initializes metadata and binds to source file.
+         *
+         * @param fpath filepath of data source
+         */
+        ConfigurationFile(const std::string& fpath);        
+        
+        /**
+         * Default no-op destructor.
+         */
+        ~ConfigurationFile();
+        
+        /**
+         * Clears blocks.
+         */
+        void clear();        
+        
+        /**
+         * Parses the configuration file, loading data into blocks.
+         */
+        void parse();
+        
+    private: 
+    
+        /** Input (file) stream. */
+        std::ifstream       fsrc_;
+        
+        /** Input stream. */
+        std::istream&       src_;
+                
+        /** Collection of World blocks. */
+        ConfigurationBlock                world_;
+        
+        /** Collection of Species blocks. */
+        std::vector<ConfigurationBlock>   species_;
+        
+        /** Collection of Generation blocks. */
+        std::vector<ConfigurationBlock>   generations_;
+        
+};  
 
 } // namespace gingko
 

@@ -28,6 +28,7 @@ namespace gingko {
 // Client code should call one of the following to configure World objects.
 
 World& configure_world(World& world, std::istream& conf_src) {
+    ConfigurationFile cf(conf_src);
     return world;
 }
 
@@ -52,70 +53,53 @@ const char * BLOCK_BODY_KEY_VAL_SEP = "=";
 const char * WHITESPACE = " \t\n";
 
 ///////////////////////////////////////////////////////////////////////////////
-// ConfigurationFileParser
-
-ConfigurationFileParser::ConfigurationFileParser(std::istream& src)
-        : src_(src) {
-    if (not this->src_) {
-        throw ConfigurationIOError("invalid source stream");
-    }
-}
-
-ConfigurationFileParser::ConfigurationFileParser(const char * fpath)
-        : fsrc_(fpath),
-          src_(fsrc_) {
-    if (not this->src_) {
-        std::ostringstream msg;
-        msg << "invalid source \"" << fpath << "\"";
-        throw ConfigurationIOError(msg.str());
-    }          
-}
-
-ConfigurationFileParser::ConfigurationFileParser(const std::string& fpath) 
-        : fsrc_(fpath.c_str()),
-          src_(fsrc_) {
-    if (not this->src_) {
-        std::ostringstream msg;
-        msg << "invalid source \"" << fpath << "\"";
-        throw ConfigurationIOError(msg.str());
-    }
-}
-
-ConfigurationFileParser::~ConfigurationFileParser() { }
-
-///////////////////////////////////////////////////////////////////////////////
-// ConfigurationBlockParser
+// ConfigurationBlock
 
 // default constructor
-ConfigurationBlockParser::ConfigurationBlockParser() { }
+ConfigurationBlock::ConfigurationBlock() 
+    : is_block_set_(false) { }
 
 // construct and parse
-ConfigurationBlockParser::ConfigurationBlockParser(std::istream& in) {   
+ConfigurationBlock::ConfigurationBlock(std::istream& in)
+    : is_block_set_(false) {   
     this->parse(in);
 }        
 
 // default do-nothing destructor
-ConfigurationBlockParser::~ConfigurationBlockParser() {}   
+ConfigurationBlock::~ConfigurationBlock() {}   
+
+// clears/inits
+void ConfigurationBlock::clear() {
+    this->type_.clear();
+    this->name_.clear();
+    this->entries_.clear();
+    this->is_block_set_ = false;
+}
 
 // return type
-std::string ConfigurationBlockParser::get_type() const {
+std::string ConfigurationBlock::get_type() const {
     return this->type_;
 }
 
 // return name
-std::string ConfigurationBlockParser::get_name() const {
+std::string ConfigurationBlock::get_name() const {
     return this->name_;
 }
 
+// return name
+bool ConfigurationBlock::is_block_set() const {
+    return this->is_block_set_;
+}
+
 // get entry values by keys
-std::string ConfigurationBlockParser::get_entry(const std::string& key) const {
+std::string ConfigurationBlock::get_entry(const std::string& key) const {
     std::map< std::string, std::string >::const_iterator val = this->entries_.find(key);
     assert(val != this->entries_.end());
     return val->second;
 }
 
 // get keys
-std::vector<std::string> ConfigurationBlockParser::get_keys() const {
+std::vector<std::string> ConfigurationBlock::get_keys() const {
     std::vector<std::string> keys;
     keys.reserve(this->entries_.size());
     for (std::map< std::string, std::string >::const_iterator e = this->entries_.begin();
@@ -127,7 +111,7 @@ std::vector<std::string> ConfigurationBlockParser::get_keys() const {
 }
 
 // wrap up some of the tedium
-std::string ConfigurationBlockParser::compose_error_message(unsigned long pos, const char * desc) {
+std::string ConfigurationBlock::compose_error_message(unsigned long pos, const char * desc) {
     std::ostringstream msg;
     msg << "Block starting at character position " <<  pos+1 << ": ";
     msg << desc;
@@ -135,19 +119,22 @@ std::string ConfigurationBlockParser::compose_error_message(unsigned long pos, c
  }
  
  // using std string object
-std::string ConfigurationBlockParser::compose_error_message(unsigned long pos, const std::string& desc) {
+std::string ConfigurationBlock::compose_error_message(unsigned long pos, const std::string& desc) {
     return this->compose_error_message(pos, desc.c_str());
 }
 
 // workhorse parser
-void ConfigurationBlockParser::parse(std::istream& in) {                
+void ConfigurationBlock::parse(std::istream& in) {
+    
+    this->clear();
+
     std::string raw;
     unsigned long start_pos(in.tellg());
     std::getline(in, raw, BLOCK_BODY_END[0]);
     raw = textutils::strip(raw);
     
     if (raw.size() == 0) {
-        throw ConfigurationSyntaxError(this->compose_error_message(start_pos, "empty block"));                
+        return;
     }
     
     if (raw[0] != BLOCK_START[0]) {
@@ -203,6 +190,65 @@ void ConfigurationBlockParser::parse(std::istream& in) {
             }
             this->entries_[textutils::strip(entry_parts[0], WHITESPACE)] = textutils::strip(entry_parts[1], WHITESPACE) ;
         }
+    }
+    this->is_block_set_ = true;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// ConfigurationBlock input
+
+std::istream& operator>> (std::istream& in, ConfigurationBlock& cblock) {
+    cblock.parse(in);
+    return in;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// ConfigurationFile
+
+ConfigurationFile::ConfigurationFile(std::istream& src)
+        : src_(src) {
+    if (not this->src_) {
+        throw ConfigurationIOError("invalid source stream");
+    }
+}
+
+ConfigurationFile::ConfigurationFile(const char * fpath)
+        : fsrc_(fpath),
+          src_(fsrc_) {
+    if (not this->src_) {
+        std::ostringstream msg;
+        msg << "invalid source \"" << fpath << "\"";
+        throw ConfigurationIOError(msg.str());
+    }          
+}
+
+ConfigurationFile::ConfigurationFile(const std::string& fpath) 
+        : fsrc_(fpath.c_str()),
+          src_(fsrc_) {
+    if (not this->src_) {
+        std::ostringstream msg;
+        msg << "invalid source \"" << fpath << "\"";
+        throw ConfigurationIOError(msg.str());
+    }
+}
+
+ConfigurationFile::~ConfigurationFile() { }
+
+void ConfigurationFile::clear() {
+    this->world_.clear();
+    this->species_.clear();
+    this->generations_.clear();
+}
+
+void ConfigurationFile::parse() {
+    assert(this->src_);
+    this->clear();
+    ConfigurationBlock cb;
+    while (not this->src_.eof()) {
+        this->src_ >> cb;
+        if (cb.is_block_set()) {
+            // process
+        }                    
     }
 }
 
