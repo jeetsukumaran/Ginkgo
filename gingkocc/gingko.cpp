@@ -73,7 +73,7 @@ int main(int argc, char* argv[]) {
     std::cerr << "(setting carrying capacity)\n";
 	world.set_cell_carrying_capacity(cc);
     std::cerr << "(adding species)\n";	
-	gingko::Species& sp1 = world.new_species("Sp1");
+	gingko::Species& sp1 = world.new_species("A");
 	
 	std::vector<int> costs;
 	costs.assign(size_x * size_y, 1);
@@ -109,15 +109,17 @@ int main(int argc, char* argv[]) {
     
     std::cerr << "\n\n#### TREE(S) ####\n";
     gingko::Tree tree;
-    for (unsigned long i = (size_x * size_y); i != 0; --i) {
-        gingko::OrganismVector& ov = world.landscape()[i-1].organisms();
-        for (gingko::OrganismVector::iterator oiter = ov.begin();
-                oiter != ov.end();
-                ++oiter) {
-            std::string label = sp1.get_organism_label(*oiter);
-            tree.process_node(oiter->haploid_marker().node(), &label);
-        }                
-    }    
+    for (unsigned long x = 0; x < size_x; ++x) {
+        for (unsigned long y = 0; y < size_y; ++y) {
+            gingko::OrganismVector& ov = world.landscape()(x,y).organisms();
+            for (gingko::OrganismVector::iterator oiter = ov.begin();
+                    oiter != ov.end();
+                    ++oiter) {
+                std::string label = sp1.get_organism_label(*oiter, x, y);
+                tree.process_node(oiter->haploid_marker().node(), &label);
+            }
+        }            
+    }     
     
 
 //     tree.dump(std::cerr);
