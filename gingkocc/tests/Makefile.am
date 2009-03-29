@@ -18,7 +18,8 @@ gingkotests_PROGRAMS = test_cmdopts \
                test_tree_from_genealogies \
                test_parse_conf_block \
                test_textutils \
-               test_asciigrid
+               test_asciigrid \
+               test_parse_conf_file
                
 test_cmdopts_SOURCES = \
     test_cmdopts.cpp \
@@ -49,3 +50,7 @@ test_asciigrid_SOURCES = \
     ../asciigrid.cpp \
     ../textutils.cpp
         
+test_parse_conf_file_SOURCES = \
+    test_parse_conf_file.cpp \
+    ../textutils.cpp \
+    ../worldconf.cpp        
