@@ -19,6 +19,8 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
+#include <string>
+
 #if !defined(GINGKO_FILESYS_H)
 #define GINGKO_FILESYS_H
 
@@ -29,10 +31,16 @@ namespace filesys {
  * Returns filename (and extension) from supplied path.
  *
  * Technically, returns the final element of a "/"-separated path.
- * @param  path                   path to file
- * @return                          filename and extension
+ * @param  path path to file
+ * @return      filename and extension
  */
 std::string extract_filename_from_path(const char * path);
+
+/**
+ * Returns the current working directory.
+ * @return      current working directory
+ */
+std::string current_working_dir();
 
 } // filesys
 } // gingko

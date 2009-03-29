@@ -19,6 +19,7 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
+#include <cstdlib>
 #include <string>
 
 namespace gingko {
@@ -48,6 +49,13 @@ std::string extract_filename_from_path(const char * path) {
         }
     }    
 } 
+
+// returns current working directory
+std::string current_working_dir() {
+    char cwd[1024];
+    ::getcwd(cwd, 1024);
+    return std::string(cwd);
+}
 
 } // filesys
 } // gingko
