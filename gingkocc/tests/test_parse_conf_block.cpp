@@ -99,7 +99,7 @@ void test_parse_correct() {
     assert(species_block.get_keys().size() == 8);
 }
 
-void test_parse_empy() {
+void test_parse_empty() {
     std::cout << "Testing empty configuration block parse ..." << std::endl;
     std::string s = "";
     std::istringstream in0(s);
@@ -109,6 +109,7 @@ void test_parse_empy() {
 
 int main(int, char * []) {
     test_parse_correct();
+    test_parse_empty();
     test_parse_errors();
     std::cout << "\nPASS\n" << std::endl;
 }
