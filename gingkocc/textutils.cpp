@@ -179,11 +179,11 @@ std::vector<std::string> split_on_any(const std::string& src,
 // Strip characters from a string
 std::string strip(const std::string& s, const char * to_strip) {
     if (!s.empty()) {
-        unsigned start = s.find_first_not_of(to_strip);
+        std::size_t start = s.find_first_not_of(to_strip);
         if (start == std::string::npos) {
             return "";
         }
-        unsigned end = s.find_last_not_of(to_strip);
+        std::size_t end = s.find_last_not_of(to_strip);
         return s.substr(start, end-start+1);
     } else {
         return s;
