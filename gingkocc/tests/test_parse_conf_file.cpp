@@ -35,6 +35,7 @@ void test_parse_dummy1(const char * prog_path) {
     std::string srcf = filesys::compose_path(filesys::get_path_parent(prog_path), 
                                              "data/dummy1/dummy.conf");
     ConfigurationFile cf(srcf);
+    cf.parse();
 }
 
 int main(int argc, char * argv[]) {

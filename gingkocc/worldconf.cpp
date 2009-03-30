@@ -173,7 +173,7 @@ void ConfigurationBlock::parse(std::istream& in) {
         throw ConfigurationSyntaxError(this->compose_error_message(start_pos, "found multiple elements in block header, but expecting only two (type and name)"));
     }
     
-    this->type_ = textutil::strip(head_parts[0]);
+    this->type_ = textutil::strip(head_parts[0].substr(1));
     this->name_ = textutil::strip(head_parts[1]);
     
     unsigned entry_count = 0;
