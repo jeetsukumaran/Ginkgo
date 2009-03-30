@@ -52,7 +52,7 @@ test_tree_from_genealogies_SOURCES = \
 test_parse_conf_block_SOURCES = \
     test_parse_conf_block.cpp \
     ../textutil.cpp \
-    ../worldconf.cpp
+    ../confsys.cpp
     
 test_textutil_SOURCES = \
     test_textutil.cpp \
@@ -70,5 +70,5 @@ test_asciigrid_SOURCES = \
 test_parse_conf_file_SOURCES = \
     test_parse_conf_file.cpp \
     ../textutil.cpp \
-    ../worldconf.cpp \
+    ../confsys.cpp \
     ../filesys.cpp 

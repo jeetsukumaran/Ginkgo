@@ -18,6 +18,6 @@ gingko_SOURCES = \
     cmdopt.cpp \
     textutil.cpp \
     tree.cpp \
-    worldconf.cpp \
+    confsys.cpp \
     asciigrid.cpp  \
     filesys.cpp

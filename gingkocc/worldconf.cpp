@@ -19,7 +19,7 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "worldconf.hpp"
+#include "confsys.hpp"
 #include "textutil.hpp"
 
 namespace gingko {
