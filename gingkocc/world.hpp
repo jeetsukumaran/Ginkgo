@@ -37,7 +37,7 @@ namespace gingko {
  * Changes to world geographical template at the start of a generation, 
  * modelling climate change, changes in landscape etc.
  */
-struct WorldChanges {
+struct WorldSettings {
     
     /** 
      * Environmental regimes that need to be changed/set (expressed as factor
@@ -51,7 +51,7 @@ struct WorldChanges {
      */
     std::map<std::string, std::string>  movement_costs;
 
-}; // WorldChanges
+}; // WorldSettings
 
 /**
  * Meta-framework that binds everything together.
@@ -224,9 +224,9 @@ class World {
          *
          * @param   generation      generation number for this set of events
          *                          to be activated
-         * @param   world_changes   WorldChanges data
+         * @param   world_settings  WorldSettings data
          */
-        void add_world_changes(unsigned long generation, const WorldChanges& world_changes);
+        void add_world_settings(unsigned long generation, const WorldSettings& world_settings);
         
         // --- simulation cycles ---
         
@@ -254,7 +254,7 @@ class World {
         /** Tracks the number of generations that have been run. */
         unsigned long                           current_generation_;
         /** Collection of events (scheduled to occur at specific generations */
-        std::map<unsigned long, WorldChanges>    world_changes_;
+        std::map<unsigned long, WorldSettings>  world_settings_;
 
     private:
         /** Disabled copy constructor. */
