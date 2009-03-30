@@ -20,7 +20,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "../tree.hpp"
-#include "../textutils.hpp"
+#include "../textutil.hpp"
 #include <iostream>
 #include <vector>
 #include <cstdlib>
@@ -35,7 +35,7 @@ int main(int argc, char* argv[]) {
     gingko::Tree tree(true);
     const char * label;
     for (int i = 1; i < argc; ++i) {
-        std::vector< std::string > parts = gingko::textutils::split(argv[i], ":");
+        std::vector< std::string > parts = gingko::textutil::split(argv[i], ":");
         unsigned long idx = atol(parts[0].c_str());            
         if (parts.size() > 1) {
             label = parts[1].c_str();

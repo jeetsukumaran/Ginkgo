@@ -26,9 +26,9 @@
 #include <vector>
 #include <cassert>
 
-#include "../textutils.hpp"
+#include "../textutil.hpp"
 
-using namespace gingko::textutils;
+using namespace gingko::textutil;
 
 bool check_split(std::vector<std::string> result,
                  char * expected[],

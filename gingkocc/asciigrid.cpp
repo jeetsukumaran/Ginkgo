@@ -24,7 +24,7 @@
 #include <sstream>
 #include <cstdlib>
 #include <cassert>
-#include "textutils.hpp"
+#include "textutil.hpp"
 #include "asciigrid.hpp"
 
 namespace gingko {
@@ -124,23 +124,23 @@ void AsciiGrid::parse_metadata_() {
     std::string name;
     
     this->read_metadata_(name, this->ncols_);
-    if (textutils::lower(name) != "ncols") {
+    if (textutil::lower(name) != "ncols") {
         std::ostringstream msg;
         msg << "expecting \"ncols\" but found \"" << name << "\"";
         throw AsciiGridFormatTokenError(msg.str());
     }    
     
     this->read_metadata_(name, this->nrows_);
-    if (textutils::lower(name) != "nrows") {
+    if (textutil::lower(name) != "nrows") {
         std::ostringstream msg;
         msg << "expecting \"nrows\" but found \"" << name << "\"";
         throw AsciiGridFormatTokenError(msg.str());
     }
     
     this->read_metadata_(name, this->xllcorner_);
-    if (textutils::lower(name) == "xllcorner") {
+    if (textutil::lower(name) == "xllcorner") {
         // pass
-    } else if (textutils::lower(name) == "xllcenter") {
+    } else if (textutil::lower(name) == "xllcenter") {
         this->xllcenter_ = this->xllcorner_;
         this->xllcorner_ = 0;
     } else {
@@ -150,9 +150,9 @@ void AsciiGrid::parse_metadata_() {
     }
     
     this->read_metadata_(name, this->yllcorner_);
-    if (textutils::lower(name) == "yllcorner") {
+    if (textutil::lower(name) == "yllcorner") {
         // pass
-    } else if (textutils::lower(name) == "yllcenter") {
+    } else if (textutil::lower(name) == "yllcenter") {
         this->yllcenter_ = this->yllcorner_;
         this->yllcorner_ = 0;
     } else {
@@ -162,7 +162,7 @@ void AsciiGrid::parse_metadata_() {
     }
     
     this->read_metadata_(name, this->cell_size_);
-    if (textutils::lower(name) != "cellsize") {
+    if (textutil::lower(name) != "cellsize") {
         std::ostringstream msg;
         msg << "expecting \"cellsize\" but found \"" << name << "\"";
         throw AsciiGridFormatTokenError(msg.str());
@@ -193,7 +193,7 @@ void AsciiGrid::parse_cell_values_() {
     if (this->src_.eof()) {
         throw AsciiGridFormatEofError("unexpected EOF while reading data");
     }    
-    if (textutils::lower(token) == "nodata_value") {
+    if (textutil::lower(token) == "nodata_value") {
         this->src_ >> this->nodata_value_;
         if (this->src_.eof()) {
             throw AsciiGridFormatEofError("unexpected EOF while reading data");

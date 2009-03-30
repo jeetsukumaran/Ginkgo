@@ -20,7 +20,7 @@ dist_gingkotests_SCRIPTS = gingko_tests.py \
                    run_test_cmdopts.py \
                    run_test_tree.py \
                    run_test_conf_parser.py \
-                   run_test_textutils.py \
+                   run_test_textutil.py \
                    run_test_filesys.py \
                    run_test_asciigrid.py
 
@@ -28,7 +28,7 @@ gingkotests_PROGRAMS = test_cmdopts \
                test_tree_from_parent_indexes \
                test_tree_from_genealogies \
                test_parse_conf_block \
-               test_textutils \
+               test_textutil \
                test_asciigrid \
                test_parse_conf_file \
                test_filesys
@@ -36,12 +36,12 @@ gingkotests_PROGRAMS = test_cmdopts \
 test_cmdopts_SOURCES = \
     test_cmdopts.cpp \
     ../cmdopts.cpp \
-    ../textutils.cpp \
+    ../textutil.cpp \
     ../filesys.cpp
     
 test_tree_from_parent_indexes_SOURCES = \
     test_tree_from_parent_indexes.cpp \
-    ../textutils.cpp \
+    ../textutil.cpp \
     ../tree.cpp
     
 test_tree_from_genealogies_SOURCES = \
@@ -51,12 +51,12 @@ test_tree_from_genealogies_SOURCES = \
     
 test_parse_conf_block_SOURCES = \
     test_parse_conf_block.cpp \
-    ../textutils.cpp \
+    ../textutil.cpp \
     ../worldconf.cpp
     
-test_textutils_SOURCES = \
-    test_textutils.cpp \
-    ../textutils.cpp
+test_textutil_SOURCES = \
+    test_textutil.cpp \
+    ../textutil.cpp
     
 test_filesys_SOURCES = \
     test_filesys.cpp \
@@ -65,10 +65,10 @@ test_filesys_SOURCES = \
 test_asciigrid_SOURCES = \
     test_asciigrid.cpp \
     ../asciigrid.cpp \
-    ../textutils.cpp
+    ../textutil.cpp
         
 test_parse_conf_file_SOURCES = \
     test_parse_conf_file.cpp \
-    ../textutils.cpp \
+    ../textutil.cpp \
     ../worldconf.cpp \
     ../filesys.cpp 

@@ -6,7 +6,7 @@ bindir = ${prefix}/@PACKAGE@/bin
 bin_PROGRAMS = gingko
 
 noinst_HEADERS = \
-	gingko_defs.h
+	gingko_defs.hpp
 
 gingko_SOURCES = \
     gingko.cpp \
@@ -16,7 +16,7 @@ gingko_SOURCES = \
     cell.cpp \
     world.cpp \
     cmdopts.cpp \
-    textutils.cpp \
+    textutil.cpp \
     tree.cpp \
     worldconf.cpp \
     asciigrid.cpp  \

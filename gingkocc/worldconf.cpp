@@ -20,7 +20,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "worldconf.hpp"
-#include "textutils.hpp"
+#include "textutil.hpp"
 
 namespace gingko {
 
@@ -131,7 +131,7 @@ void ConfigurationBlock::parse(std::istream& in) {
     std::string raw;
     unsigned long start_pos(in.tellg());
     std::getline(in, raw, BLOCK_BODY_END[0]);
-    raw = textutils::strip(raw);
+    raw = textutil::strip(raw);
     
     if (raw.size() == 0) {
         return;
@@ -149,7 +149,7 @@ void ConfigurationBlock::parse(std::istream& in) {
         throw ConfigurationSyntaxError(this->compose_error_message(start_pos, msg.str()));                        
     }
     
-    std::vector<std::string> parts = textutils::split(raw, BLOCK_BODY_START, false);
+    std::vector<std::string> parts = textutil::split(raw, BLOCK_BODY_START, false);
     
     if (parts.size() < 2) {
         std::ostringstream msg;
@@ -163,7 +163,7 @@ void ConfigurationBlock::parse(std::istream& in) {
         throw ConfigurationSyntaxError(this->compose_error_message(start_pos, msg.str()));
     }     
     
-    std::vector<std::string> head_parts = textutils::split_on_any(textutils::strip(parts[0]), WHITESPACE, false);
+    std::vector<std::string> head_parts = textutil::split_on_any(textutil::strip(parts[0]), WHITESPACE, false);
     
     if (head_parts.size() < 2) {
         throw ConfigurationSyntaxError(this->compose_error_message(start_pos, "found only one element in block header, but expecting two (type and name)"));
@@ -173,22 +173,22 @@ void ConfigurationBlock::parse(std::istream& in) {
         throw ConfigurationSyntaxError(this->compose_error_message(start_pos, "found multiple elements in block header, but expecting only two (type and name)"));
     }
     
-    this->type_ = textutils::strip(head_parts[0]);
-    this->name_ = textutils::strip(head_parts[1]);
+    this->type_ = textutil::strip(head_parts[0]);
+    this->name_ = textutil::strip(head_parts[1]);
     
     unsigned entry_count = 0;
-    std::vector<std::string> body_parts = textutils::split_on_any(textutils::strip(parts[1]), BLOCK_BODY_LINE_TERM, false);
+    std::vector<std::string> body_parts = textutil::split_on_any(textutil::strip(parts[1]), BLOCK_BODY_LINE_TERM, false);
     for (std::vector<std::string>::const_iterator s = body_parts.begin(); s != body_parts.end(); ++s) {
-        std::string entry = textutils::strip(*s, WHITESPACE);
+        std::string entry = textutil::strip(*s, WHITESPACE);
         entry_count += 1;
         if (entry.size() > 0) {
-            std::vector<std::string> entry_parts = textutils::split(entry, BLOCK_BODY_KEY_VAL_SEP, 1, false);
+            std::vector<std::string> entry_parts = textutil::split(entry, BLOCK_BODY_KEY_VAL_SEP, 1, false);
             if (entry_parts.size() < 2) {
                 std::ostringstream msg;
                 msg << "incomplete key-value specification in entry #" << entry_count << " (missing \"=\")";            
                 throw ConfigurationSyntaxError(this->compose_error_message(start_pos, msg.str()));
             }
-            this->entries_[textutils::strip(entry_parts[0], WHITESPACE)] = textutils::strip(entry_parts[1], WHITESPACE) ;
+            this->entries_[textutil::strip(entry_parts[0], WHITESPACE)] = textutil::strip(entry_parts[1], WHITESPACE) ;
         }
     }
     this->is_block_set_ = true;

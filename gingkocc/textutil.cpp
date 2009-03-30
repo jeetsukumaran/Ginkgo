@@ -25,10 +25,10 @@
 #include <sstream>
 #include <vector>
 #include <cctype>
-#include "textutils.hpp"
+#include "textutil.hpp"
 
 namespace gingko {
-namespace textutils {
+namespace textutil {
 
 // Wraps text (preferably at word boundaries).
 std::string textwrap(const std::string& source, 
@@ -170,5 +170,5 @@ std::string upper(const std::string& s) {
     return result;
 }
 
-} // textutils namespace
+} // textutil namespace
 } // gingko namespace

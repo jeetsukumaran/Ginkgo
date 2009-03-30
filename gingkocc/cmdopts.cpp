@@ -20,7 +20,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "cmdopts.hpp"
-#include "textutils.hpp"
+#include "textutil.hpp"
 #include "filesys.hpp"
 
 namespace gingko {
@@ -86,7 +86,7 @@ std::ostream& OptionArg::write_help(std::ostream& out) const {
             defval = help_msg.find("%default");
         }
         help_str += help_msg;
-        std::string help_desc = textutils::textwrap(help_str, CMDOPTS_LINE_WIDTH, 0, CMDOPTS_OPTION_COL_WIDTH);
+        std::string help_desc = textutil::textwrap(help_str, CMDOPTS_LINE_WIDTH, 0, CMDOPTS_OPTION_COL_WIDTH);
         help_str = help_desc;
     }                            
     out << help_str; 
@@ -147,7 +147,7 @@ std::ostream& OptionParser::write_help(std::ostream& out, const char * progname)
         out << usage << std::endl << std::endl;
     }
     if (this->description_.size() != 0) {
-        out << textutils::textwrap(this->description_, CMDOPTS_LINE_WIDTH) << std::endl << std::endl;
+        out << textutil::textwrap(this->description_, CMDOPTS_LINE_WIDTH) << std::endl << std::endl;
     }
     out << "Options:" << std::endl;
     for (std::vector<OptionArg *>::const_iterator oa = this->option_args_.begin();
