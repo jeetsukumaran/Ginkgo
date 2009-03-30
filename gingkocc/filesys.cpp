@@ -33,17 +33,7 @@ const char * PATH_SEPARATOR = "/";
 
 // extracts filenames from path
 std::string get_path_leaf(const char * path) {
-    
-    // copy of string
     std::string full_path = path;
-    
-    // replace dos/windows slashes with nix ones
-    // if there are insane filepaths being passed here (specifically, a path
-    // with backslash characters), this will give wrong results
-//     std::string::size_type p = full_path.find('\\');
-//     while (p != std::string::npos) {
-//         full_path.replace(p, 1, "/");
-//     }
     std::string::size_type last_path_char = full_path.find_last_of(PATH_SEPARATOR);
     if (last_path_char == std::string::npos) {
         return full_path;
@@ -60,7 +50,6 @@ std::string get_path_leaf(const char * path) {
 
 // extracts directory from path
 std::string get_path_parent(const char * path) {
-    // copy of string
     std::string full_path = path;
     std::string::size_type last_path_char = full_path.find_last_of(PATH_SEPARATOR);
     if (last_path_char == std::string::npos) {
