@@ -22,7 +22,7 @@
 #include <cstdlib>
 #include <cmath>
 #include <ctime>
-#include "randgen.h"
+#include "randgen.hpp"
 
 namespace gingko {
 

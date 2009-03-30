@@ -21,7 +21,7 @@
 
 #include <cstdlib>
 #include <string>
-#include "filesys.h"
+#include "filesys.hpp"
 
 namespace gingko {
 namespace filesys {

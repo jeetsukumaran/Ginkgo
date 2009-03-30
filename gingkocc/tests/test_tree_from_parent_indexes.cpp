@@ -19,8 +19,8 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "../tree.h"
-#include "../textutils.h"
+#include "../tree.hpp"
+#include "../textutils.hpp"
 #include <iostream>
 #include <vector>
 #include <cstdlib>

@@ -26,7 +26,7 @@
 #include <sstream>
 #include <cassert>
 
-#include "../worldconf.h"
+#include "../worldconf.hpp"
 
 using namespace gingko;
 

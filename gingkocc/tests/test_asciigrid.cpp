@@ -26,7 +26,7 @@
 #include <vector>
 #include <cassert>
 
-#include "../asciigrid.h"
+#include "../asciigrid.hpp"
 
 using namespace gingko;
 

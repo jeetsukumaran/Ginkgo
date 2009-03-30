@@ -19,8 +19,8 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "worldconf.h"
-#include "textutils.h"
+#include "worldconf.hpp"
+#include "textutils.hpp"
 
 namespace gingko {
 

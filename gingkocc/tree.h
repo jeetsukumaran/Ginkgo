@@ -22,7 +22,7 @@
 #if !defined(GINGKO_TREE_H)
 #define GINGKO_TREE_H
 
-#include "biosys.h"
+#include "biosys.hpp"
 #include <functional>
 #include <iterator>
 #include <vector>

@@ -26,7 +26,7 @@
 #include <vector>
 #include <cassert>
 
-#include "../filesys.h"
+#include "../filesys.hpp"
 
 using namespace gingko::filesys;
 

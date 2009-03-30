@@ -34,8 +34,8 @@
 #include <map>
 #include <utility>
 
-#include "gingko_defs.h"
-#include "randgen.h"
+#include "gingko_defs.hpp"
+#include "randgen.hpp"
 
 namespace gingko {
 

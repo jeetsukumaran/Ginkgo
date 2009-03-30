@@ -21,8 +21,8 @@
 
 #include <map>
 #include <utility>
-#include "biosys.h"
-#include "tree.h"
+#include "biosys.hpp"
+#include "tree.hpp"
 
 namespace gingko {
 

@@ -26,7 +26,7 @@
 #include <vector>
 #include <cassert>
 
-#include "../textutils.h"
+#include "../textutils.hpp"
 
 using namespace gingko::textutils;
 

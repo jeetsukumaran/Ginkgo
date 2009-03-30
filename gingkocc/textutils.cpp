@@ -25,7 +25,7 @@
 #include <sstream>
 #include <vector>
 #include <cctype>
-#include "textutils.h"
+#include "textutils.hpp"
 
 namespace gingko {
 namespace textutils {

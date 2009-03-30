@@ -22,8 +22,8 @@
 #if !defined(GINGKO_LANDSCAPE_H)
 #define GINGKO_LANDSCAPE_H
 
-#include "biosys.h"
-#include "cell.h"
+#include "biosys.hpp"
+#include "cell.hpp"
 #include <iostream>
 
 namespace gingko {

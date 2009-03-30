@@ -19,9 +19,9 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "cmdopts.h"
-#include "textutils.h"
-#include "filesys.h"
+#include "cmdopts.hpp"
+#include "textutils.hpp"
+#include "filesys.hpp"
 
 namespace gingko {
 

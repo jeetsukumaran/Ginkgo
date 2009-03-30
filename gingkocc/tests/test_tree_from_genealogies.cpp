@@ -19,8 +19,8 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "../biosys.h"
-#include "../tree.h"
+#include "../biosys.hpp"
+#include "../tree.hpp"
 #include <iostream>
 #include <string>
 #include <sstream>

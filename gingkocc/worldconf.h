@@ -30,7 +30,7 @@
 #include <stdexcept>
 #include <vector>
 
-#include "world.h"
+#include "world.hpp"
 
 #if !defined(GINGKO_WORLDCONF_H)
 #define GINGKO_WORLDCONF_H

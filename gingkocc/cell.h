@@ -22,7 +22,7 @@
 #if !defined(GINGKO_CELL_H)
 #define GINGKO_CELL_H
 
-#include "biosys.h"
+#include "biosys.hpp"
 #include <iostream>
 
 namespace gingko {

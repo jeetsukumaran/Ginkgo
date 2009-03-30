@@ -24,8 +24,8 @@
 #include <sstream>
 #include <cstdlib>
 #include <cassert>
-#include "textutils.h"
-#include "asciigrid.h"
+#include "textutils.hpp"
+#include "asciigrid.hpp"
 
 namespace gingko {
 namespace asciigrid {

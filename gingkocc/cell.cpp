@@ -19,8 +19,8 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "cell.h"
-#include "landscape.h"
+#include "cell.hpp"
+#include "landscape.hpp"
 
 #include <iostream>
 #include <iomanip>

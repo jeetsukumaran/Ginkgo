@@ -26,10 +26,10 @@
 #include <utility>
 #include <istream>
 
-#include "gingko_defs.h"
-#include "randgen.h"
-#include "cell.h"
-#include "landscape.h"
+#include "gingko_defs.hpp"
+#include "randgen.hpp"
+#include "cell.hpp"
+#include "landscape.hpp"
 
 namespace gingko {
 

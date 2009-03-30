@@ -19,11 +19,11 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "gingko_defs.h"
-#include "biosys.h"
-#include "world.h"
-#include "tree.h"
-#include "cmdopts.h"
+#include "gingko_defs.hpp"
+#include "biosys.hpp"
+#include "world.hpp"
+#include "tree.hpp"
+#include "cmdopts.hpp"
 #include <iostream>
 #include <cstdlib>
 #include <vector>
