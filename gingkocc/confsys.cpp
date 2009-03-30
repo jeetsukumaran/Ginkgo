@@ -21,6 +21,7 @@
 
 #include "confsys.hpp"
 #include "textutil.hpp"
+#include "convert.hpp"
 
 namespace gingko {
 
@@ -209,11 +210,34 @@ void ConfigurationBlock::parse(std::istream& in) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-// ConfigurationBlock input
+// ConfigurationBlock inserter
 
 std::istream& operator>> (std::istream& in, ConfigurationBlock& cblock) {
     cblock.parse(in);
     return in;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// WorldConf
+
+WorldConf::WorldConf(const ConfigurationBlock& cb, 
+                     unsigned long block_start_pos, 
+                     unsigned long block_end_pos) 
+        : size_x_(0),
+          size_y_(0),
+          num_fitness_factors_(0),
+          rand_seed_(0) {
+    this->parse(cb, block_start_pos, block_end_pos);
+}
+
+void WorldConf::parse(const ConfigurationBlock& cb, 
+                      unsigned long block_start_pos, 
+                      unsigned long block_end_pos)  {
+
+}
+
+void WorldConf::configure(World& world)  {
+
 }
 
 ///////////////////////////////////////////////////////////////////////////////

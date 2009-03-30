@@ -203,21 +203,31 @@ class WorldConf {
     
         /** 
          * Passes argument onto parse(). 
-         * @param cb    a populated ConfigurationBlock object
+         * @param cb                a populated ConfigurationBlock object
+         * @param block_start_pos   start position of this block in the stream 
+         *                          that is the source of the configuration 
+         *                          data (for error reporting)
+         * @param block_end_pos     start position of this block in the stream 
+         *                          that is the source of the configuration 
+         *                          data (for error reporting)         
          */
-        WorldConf(const ConfigurationBlock& cb);
-        
-        /**
-         * Initializes data to default values.
-         */
-        void init();
-        
+        WorldConf(const ConfigurationBlock& cb, 
+                  unsigned long block_start_pos, 
+                  unsigned long block_end_pos);
+
         /** 
          * Takes the string fields of ConfigurationBlock and interprets values
          * as needed for a World object.
-         * @param cb    a populated ConfigurationBlock object
+         * @param block_start_pos   start position of this block in the stream 
+         *                          that is the source of the configuration 
+         *                          data (for error reporting)
+         * @param block_end_pos     start position of this block in the stream 
+         *                          that is the source of the configuration 
+         *                          data (for error reporting)    
          */        
-        void parse(const ConfigurationBlock& cb);
+        void parse(const ConfigurationBlock& cb, 
+                  unsigned long block_start_pos, 
+                  unsigned long block_end_pos);
         
         /**
          * Configures a World object according to settings.
@@ -231,8 +241,12 @@ class WorldConf {
         CellIndexType   size_y_;
         /** Number of fitness factors. */
         unsigned int    num_fitness_factors_;
-        /** Random number seed. */
+        /** Random number seed. */        
         unsigned long   rand_seed_;
+        /** For error messages. */
+        unsigned long   block_start_pos_;
+        /** For error messages. */
+        unsigned long   block_end_pos_;
 
 }; // WorldConf
 

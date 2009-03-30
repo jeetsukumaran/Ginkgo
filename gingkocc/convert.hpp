@@ -70,3 +70,5 @@ std::string to_type<std::string>(const char * from) {
 
 } // convert
 } // gingko
+
+#endif
