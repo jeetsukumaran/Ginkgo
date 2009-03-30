@@ -19,7 +19,7 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "../cmdopts.hpp"
+#include "../cmdopt.hpp"
 #include <iostream>
 #include <string>
 

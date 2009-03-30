@@ -17,14 +17,14 @@ nobase_dist_gingkotests_DATA =  data/dummy1/dummy.conf               \
                                    data/dummy1/grids/spB_continuous.grd
  
 dist_gingkotests_SCRIPTS = gingko_tests.py \
-                   run_test_cmdopts.py \
+                   run_test_cmdopt.py \
                    run_test_tree.py \
                    run_test_conf_parser.py \
                    run_test_textutil.py \
                    run_test_filesys.py \
                    run_test_asciigrid.py
 
-gingkotests_PROGRAMS = test_cmdopts \
+gingkotests_PROGRAMS = test_cmdopt \
                test_tree_from_parent_indexes \
                test_tree_from_genealogies \
                test_parse_conf_block \
@@ -33,9 +33,9 @@ gingkotests_PROGRAMS = test_cmdopts \
                test_parse_conf_file \
                test_filesys
                
-test_cmdopts_SOURCES = \
-    test_cmdopts.cpp \
-    ../cmdopts.cpp \
+test_cmdopt_SOURCES = \
+    test_cmdopt.cpp \
+    ../cmdopt.cpp \
     ../textutil.cpp \
     ../filesys.cpp
     

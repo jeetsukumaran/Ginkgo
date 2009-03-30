@@ -23,7 +23,7 @@
 #include "biosys.hpp"
 #include "world.hpp"
 #include "tree.hpp"
-#include "cmdopts.hpp"
+#include "cmdopt.hpp"
 #include <iostream>
 #include <cstdlib>
 #include <vector>
