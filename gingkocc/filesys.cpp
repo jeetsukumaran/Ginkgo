@@ -40,13 +40,15 @@ std::string get_path_leaf(const char * path) {
     // replace dos/windows slashes with nix ones
     // if there are insane filepaths being passed here (specifically, a path
     // with backslash characters), this will give wrong results
-    std::string::size_type p = full_path.find('\\');
-    while (p != std::string::npos) {
-        full_path.replace(p, 1, "/");
-    }
-    std::string::size_type last_path_char = full_path.find_last_of('/');
+//     std::string::size_type p = full_path.find('\\');
+//     while (p != std::string::npos) {
+//         full_path.replace(p, 1, "/");
+//     }
+    std::string::size_type last_path_char = full_path.find_last_of(PATH_SEPARATOR);
     if (last_path_char == std::string::npos) {
         return full_path;
+    } else if (last_path_char == full_path.size()-1) {
+        return get_path_leaf(full_path.substr(0, full_path.size()-1).c_str());
     } else {
         if (last_path_char >= full_path.size()) {
             return std::string("");

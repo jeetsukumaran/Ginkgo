@@ -247,7 +247,7 @@ void ConfigurationFile::parse() {
     while (not this->src_.eof()) {
         this->src_ >> cb;
         if (cb.is_block_set()) {
-            // process
+            std::cout << cb.get_type() << ": " << cb.get_name() << std::endl;
         }                    
     }
 }

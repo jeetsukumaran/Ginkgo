@@ -31,7 +31,7 @@
 using namespace gingko::filesys;
 
 void test_get_path_leaf() {
-    char * input[] = {"/home/user/filename", "user/filename", "filename", ""};
+    char * input[] = {"/home/user/filename", "user/filename", "filename", "user/filename/", ""};
     char ** check = input;
     std::cout << "Testing \"get_path_leaf\" ..." << std::endl;
     while (strcmp(*check, "") != 0) {
