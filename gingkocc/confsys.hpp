@@ -32,8 +32,8 @@
 
 #include "world.hpp"
 
-#if !defined(GINGKO_WORLDCONF_H)
-#define GINGKO_WORLDCONF_H
+#if !defined(GINGKO_CONFSYS_H)
+#define GINGKO_CONFSYS_H
 
 namespace gingko {
 
