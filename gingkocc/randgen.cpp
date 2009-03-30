@@ -43,7 +43,7 @@ void RandomNumberGenerator::set_seed(unsigned long seed) {
 }
 
 //! returns a uniform random real between 0 and 1
-float RandomNumberGenerator::uniform_real() {
+float RandomNumberGenerator::uniform_01() {
     return static_cast<float>(rand())/static_cast<float>(RAND_MAX);
 }
 
@@ -73,8 +73,8 @@ float RandomNumberGenerator::standard_normal() {
     float s = 1; 
     
     while (s >= 1.0) {
-        u1 = this->uniform_real();
-        u2 = this->uniform_real();
+        u1 = this->uniform_01();
+        u2 = this->uniform_01();
         v1 = 2.0 * u1 - 1.0;
         v2 = 2.0 * u2 - 1.0;
         s = pow(v1, 2) + pow(v2, 2);
@@ -104,7 +104,7 @@ unsigned int RandomNumberGenerator::poisson(float rate) {
     float k = 0.0;    
     while (p >= L) {
         k += 1.0;
-        p *= this->uniform_real();
+        p *= this->uniform_01();
     }
     return static_cast<unsigned int>(k - 1.0);
 }

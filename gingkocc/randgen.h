@@ -47,7 +47,7 @@ class RandomNumberGenerator {
          * Returns a uniform random real variate in [0,1).
          * @return   uniform random real variate in [0,1)
          */
-        float uniform_real();
+        float uniform_01();
         
         /**
          * Returns a uniform random integer in [a, b].
@@ -100,7 +100,7 @@ class RandomNumberGenerator {
          */
         template <typename T>        
         inline T& select(T& a, T& b) {
-            if (this->uniform_real() < 0.5) {
+            if (this->uniform_01() < 0.5) {
                 return a;
             } else {
                 return b;

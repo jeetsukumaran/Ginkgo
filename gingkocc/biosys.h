@@ -564,7 +564,7 @@ class Organism {
             assert(num_fitness_factors <= MAX_FITNESS_FACTORS);                                               
             for (unsigned i = 0; i < num_fitness_factors; ++i) {
                 FitnessFactorType ff_value = rng.select(female.genotypic_fitness_factors_[i], male.genotypic_fitness_factors_[i]);  
-                if (rng.uniform_real() < mutation_rate) {
+                if (rng.uniform_01() < mutation_rate) {
                     ff_value += rng.uniform_int(-max_mutation_size, max_mutation_size);
                 }
                 this->genotypic_fitness_factors_[i] = ff_value;
@@ -940,7 +940,7 @@ class Species {
          * @return      Organism::Male or Organism::Female
          */
         Organism::Sex get_random_sex(float female_threshold=0.5) const {
-            if (this->rng_.uniform_real() < female_threshold) {
+            if (this->rng_.uniform_01() < female_threshold) {
                 return Organism::Male;
             } else {
                 return Organism::Female;

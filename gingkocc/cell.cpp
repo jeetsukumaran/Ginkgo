@@ -124,7 +124,7 @@ void Cell::survival() {
         Species& sp = og->species();
         float fitness = sp.calc_fitness(*og, this->environment_);       
         og->set_fitness(fitness);
-        if (this->rng_.uniform_real() > fitness) {
+        if (this->rng_.uniform_01() > fitness) {
             og->set_expired(true);
         }
     }
