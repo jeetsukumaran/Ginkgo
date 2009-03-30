@@ -24,6 +24,20 @@
 
 namespace gingko {
 
+/* PARSE LOGIC:
+ *
+ * text => structured text [ConfigurationBlock] => structured values [XXXConf]
+ *
+ * (1) Data file parsed into [ConfigurationBlock] objects.
+ * (2) Each [ConfigurationBlock] object = structured string representation of 
+ *     data (e.g., name, type, and dictionary mapping string to strings).
+ * (3) Each [ConfigurationBlock] object then is mapped into a corresponding
+ *     WorldConf, SpeciesConf, etc. objects, which take the strings and convert
+ *     them into values of the appropriate type.
+ * (4) The configure_world() functions then take the structured values and 
+ *     populate/configure the World object correspondingly.
+ */
+
 ///////////////////////////////////////////////////////////////////////////////
 // Client code should call one of the following to configure World objects.
 
@@ -244,10 +258,14 @@ void ConfigurationFile::parse() {
     assert(this->src_);
     this->clear();
     ConfigurationBlock cb;
+    unsigned long block_start_pos = 0;
+    unsigned long block_end_pos = 0;
     while (not this->src_.eof()) {
+        block_start_pos = this->src_.tellg();
         this->src_ >> cb;
+        block_end_pos = this->src_.tellg();
         if (cb.is_block_set()) {
-            std::cout << cb.get_type() << ": " << cb.get_name() << std::endl;
+            std::cout << block_start_pos << "-" << block_end_pos << ": " << cb.get_type() << " (" << cb.get_name() << ")" << std::endl;
         }                    
     }
 }

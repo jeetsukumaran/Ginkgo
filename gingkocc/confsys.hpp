@@ -194,8 +194,8 @@ class ConfigurationBlock {
 }; // ConfigurationBlock
 
 /**
- * Encapsulates parsing of a configuration file, and instantiation of 
- * corresponding World object.
+ * Encapsulates parsing of a configuration file, and populating of WorldConf,
+ * SpeciesConf, GenerationConf, etc. objects.
  */
 class ConfigurationFile {
 
