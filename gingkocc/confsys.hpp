@@ -194,6 +194,67 @@ class ConfigurationBlock {
 }; // ConfigurationBlock
 
 /**
+ * Takes a ConfigurationBlock assumed to be wrapped around World information, 
+ * and parses/translates values appropriately.
+ */
+class WorldConf {
+
+    public:
+    
+        /** 
+         * Passes argument onto parse(). 
+         * @param cb    a populated ConfigurationBlock object
+         */
+        WorldConf(const ConfigurationBlock& cb);
+        
+        /**
+         * Initializes data to default values.
+         */
+        void init();
+        
+        /** 
+         * Takes the string fields of ConfigurationBlock and interprets values
+         * as needed for a World object.
+         * @param cb    a populated ConfigurationBlock object
+         */        
+        void parse(const ConfigurationBlock& cb);
+        
+        /**
+         * Configures a World object according to settings.
+         */
+        void configure(World& world);         
+           
+    private:
+        /** Size in x-dimension (number of columns). */
+        CellIndexType   size_x_;
+        /** Size in y-dimension (number of rows). */
+        CellIndexType   size_y_;
+        /** Number of fitness factors. */
+        unsigned int    num_fitness_factors_;
+        /** Random number seed. */
+        unsigned long   rand_seed_;
+
+}; // WorldConf
+
+/**
+ * Takes a ConfigurationBlock assumed to be wrapped around Species information, 
+ * and parses/translates values appropriately.
+ */
+class SpeciesConf {
+
+
+}; // WorldConf
+
+/**
+ * Takes a ConfigurationBlock assumed to be wrapped around Generation information, 
+ * and parses/translates values appropriately.
+ */
+class GenerationConf {
+
+
+}; // WorldConf
+
+/**
  * Encapsulates parsing of a configuration file, and populating of WorldConf,
  * SpeciesConf, GenerationConf, etc. objects.
  */
