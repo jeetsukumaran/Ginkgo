@@ -135,7 +135,15 @@ class World {
          */      
         void set_num_fitness_factors(unsigned num_fitness_factors) {
             this->num_fitness_factors_ = num_fitness_factors;
-        }        
+        }
+        
+        /**
+         * Sets the total number of generations to run.
+         * @param ngens     number of generations to run
+         */      
+        void set_generations_to_run(unsigned long ngens) {
+            this->generations_to_run_ = ngens;
+        }         
         
         /**
          * Build a landscape of the specified spatial and environmental 
@@ -275,6 +283,8 @@ class World {
         Landscape                               landscape_;
         /** The number of dimensions to the fitness function. */
         unsigned                                num_fitness_factors_;
+        /** Tracks the total number of generations to run. */
+        unsigned long                           generations_to_run_;        
         /** Tracks the number of generations that have been run. */
         unsigned long                           current_generation_;
         /** Collection of events (scheduled to occur at specific generations */

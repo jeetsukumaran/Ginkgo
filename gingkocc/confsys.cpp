@@ -256,12 +256,14 @@ WorldConfigurator::WorldConfigurator(const ConfigurationBlock& cb,
 void WorldConfigurator::parse()  {
     this->size_x_ = this->get_configuration_value<unsigned long>("nrows"); 
     this->size_y_ = this->get_configuration_value<unsigned long>("ncols");
+    this->generations_to_run_ = this->get_configuration_value<unsigned long>("ngens");    
     this->num_fitness_factors_ = this->get_configuration_value<unsigned>("nfitness", MAX_FITNESS_FACTORS);
     this->rand_seed_ = this->get_configuration_value<unsigned>("seed", 0);
 }
 
 void WorldConfigurator::configure(World& world)  {
     world.set_random_seed(this->rand_seed_);
+    world.set_generations_to_run(this->generations_to_run_);
     world.set_num_fitness_factors(this->num_fitness_factors_);
     world.generate_landscape(this->size_x_, this->size_y_);    
 }
@@ -286,7 +288,7 @@ void SpeciesConfigurator::parse()  {
 }
 
 void SpeciesConfigurator::configure(Species& world)  {
-   
+
 }
 
 ///////////////////////////////////////////////////////////////////////////////

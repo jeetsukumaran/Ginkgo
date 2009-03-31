@@ -358,6 +358,8 @@ class WorldConfigurator : public Configurator {
         CellIndexType   size_x_;
         /** Size in y-dimension (number of rows). */
         CellIndexType   size_y_;
+        /** Number of generations to run. */        
+        unsigned long   generations_to_run_;        
         /** Number of fitness factors. */
         unsigned int    num_fitness_factors_;
         /** Random number seed. */        
