@@ -33,7 +33,7 @@ namespace gingko {
  * (2) Each [ConfigurationBlock] object = structured string representation of 
  *     data (e.g., name, type, and dictionary mapping string to strings).
  * (3) Each [ConfigurationBlock] object then is mapped into a corresponding
- *     WorldConf, SpeciesConf, etc. objects, which take the strings and convert
+ *     WorldConfigurator, SpeciesConf, etc. objects, which take the strings and convert
  *     them into values of the appropriate type.
  * (4) The configure_world() functions then take the structured values and 
  *     populate/configure the World object correspondingly.
@@ -107,11 +107,11 @@ bool ConfigurationBlock::is_block_set() const {
 }
 
 // get entry values by keys
-std::string ConfigurationBlock::get_entry(const std::string& key) const {
-    std::map< std::string, std::string >::const_iterator val = this->entries_.find(key);
-    assert(val != this->entries_.end());
-    return val->second;
-}
+// std::string ConfigurationBlock::get_entry(const std::string& key) const {
+//     std::map< std::string, std::string >::const_iterator val = this->entries_.find(key);
+//     assert(val != this->entries_.end());
+//     return val->second;
+// }
 
 // get keys
 std::vector<std::string> ConfigurationBlock::get_keys() const {
@@ -218,25 +218,36 @@ std::istream& operator>> (std::istream& in, ConfigurationBlock& cblock) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-// WorldConf
+// Configurator
 
-WorldConf::WorldConf(const ConfigurationBlock& cb, 
+Configurator::Configurator(const ConfigurationBlock& cb, 
+                           unsigned long block_start_pos, 
+                           unsigned long block_end_pos) 
+        : name_(cb.get_name()),
+          block_start_pos_(block_start_pos),
+          block_end_pos_(block_end_pos) { }
+          
+Configurator::~Configurator() { }          
+
+///////////////////////////////////////////////////////////////////////////////
+// WorldConfigurator
+
+WorldConfigurator::WorldConfigurator(const ConfigurationBlock& cb, 
                      unsigned long block_start_pos, 
                      unsigned long block_end_pos) 
-        : size_x_(0),
+        : Configurator(cb, block_start_pos, block_end_pos),
+          size_x_(0),
           size_y_(0),
           num_fitness_factors_(0),
           rand_seed_(0) {
-    this->parse(cb, block_start_pos, block_end_pos);
+    this->parse(cb);
 }
 
-void WorldConf::parse(const ConfigurationBlock& cb, 
-                      unsigned long block_start_pos, 
-                      unsigned long block_end_pos)  {
-
+void WorldConfigurator::parse(const ConfigurationBlock& cb)  {
+    
 }
 
-void WorldConf::configure(World& world)  {
+void WorldConfigurator::configure(World& world)  {
 
 }
 

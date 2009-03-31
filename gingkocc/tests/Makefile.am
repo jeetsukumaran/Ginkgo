@@ -31,7 +31,8 @@ gingkotests_PROGRAMS = test_cmdopt \
                test_textutil \
                test_asciigrid \
                test_parse_conf_file \
-               test_filesys
+               test_filesys \
+               test_convert
                
 test_cmdopt_SOURCES = \
     test_cmdopt.cpp \
@@ -52,7 +53,8 @@ test_tree_from_genealogies_SOURCES = \
 test_parse_conf_block_SOURCES = \
     test_parse_conf_block.cpp \
     ../textutil.cpp \
-    ../confsys.cpp
+    ../confsys.cpp \
+    ../convert.cpp
     
 test_textutil_SOURCES = \
     test_textutil.cpp \
@@ -71,4 +73,10 @@ test_parse_conf_file_SOURCES = \
     test_parse_conf_file.cpp \
     ../textutil.cpp \
     ../confsys.cpp \
-    ../filesys.cpp 
+    ../filesys.cpp \
+    ../convert.cpp
+    
+test_convert_SOURCES = \
+    test_convert.cpp \
+    ../convert.cpp
+    

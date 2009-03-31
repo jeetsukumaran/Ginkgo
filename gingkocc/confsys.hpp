@@ -31,6 +31,7 @@
 #include <vector>
 
 #include "world.hpp"
+#include "convert.hpp"
 
 #if !defined(GINGKO_CONFSYS_H)
 #define GINGKO_CONFSYS_H
@@ -142,7 +143,12 @@ class ConfigurationBlock {
          * @param       key key for entry
          * @return      value for entry
          */
-        std::string get_entry(const std::string& key) const;   
+        template <typename T>
+        T get_entry(const std::string& key) const {
+            std::map< std::string, std::string >::const_iterator val = this->entries_.find(key);
+            assert(val != this->entries_.end());
+            return convert::to_type<T>(val->second);
+        }
         
         /**
          * Returns vector of keys in entries.
@@ -194,15 +200,14 @@ class ConfigurationBlock {
 }; // ConfigurationBlock
 
 /**
- * Takes a ConfigurationBlock assumed to be wrapped around World information, 
- * and parses/translates values appropriately.
+ * Base class for configurators.
  */
-class WorldConf {
-
+class Configurator {
+    
     public:
     
         /** 
-         * Passes argument onto parse(). 
+         * Stores variables for error reporting. 
          * @param cb                a populated ConfigurationBlock object
          * @param block_start_pos   start position of this block in the stream 
          *                          that is the source of the configuration 
@@ -211,10 +216,12 @@ class WorldConf {
          *                          that is the source of the configuration 
          *                          data (for error reporting)         
          */
-        WorldConf(const ConfigurationBlock& cb, 
-                  unsigned long block_start_pos, 
-                  unsigned long block_end_pos);
-
+        Configurator(const ConfigurationBlock& cb,
+                     unsigned long block_start_pos, 
+                     unsigned long block_end_pos);
+                     
+        virtual ~Configurator();                     
+                     
         /** 
          * Takes the string fields of ConfigurationBlock and interprets values
          * as needed for a World object.
@@ -225,9 +232,56 @@ class WorldConf {
          *                          that is the source of the configuration 
          *                          data (for error reporting)    
          */        
-        void parse(const ConfigurationBlock& cb, 
+        virtual void parse(const ConfigurationBlock& cb, 
+                           unsigned long block_start_pos, 
+                           unsigned long block_end_pos) = 0;
+
+        /**
+         * Returns name of the block.
+         * @return      name of the block
+         */
+        std::string get_name() const {
+            return this->name_;
+        }
+
+    private:
+        /** Name of the block. */        
+        std::string     name_;
+        /** For error messages. */
+        unsigned long   block_start_pos_;
+        /** For error messages. */
+        unsigned long   block_end_pos_;        
+        
+}; // Configurator
+
+/**
+ * Takes a ConfigurationBlock assumed to be wrapped around World information, 
+ * and parses/translates values appropriately.
+ */
+class WorldConfigurator : public Configurator {
+
+    public:
+    
+        /** 
+         * Constructs objects, and then passes ConfigurationBlock onto parse()
+         * for processing. 
+         * @param cb                a populated ConfigurationBlock object
+         * @param block_start_pos   start position of this block in the stream 
+         *                          that is the source of the configuration 
+         *                          data (for error reporting)
+         * @param block_end_pos     start position of this block in the stream 
+         *                          that is the source of the configuration 
+         *                          data (for error reporting)         
+         */
+        WorldConfigurator(const ConfigurationBlock& cb, 
                   unsigned long block_start_pos, 
                   unsigned long block_end_pos);
+
+        /** 
+         * Takes the string fields of ConfigurationBlock and interprets values
+         * as needed for a World object.
+         */        
+        void parse(const ConfigurationBlock& cb);
         
         /**
          * Configures a World object according to settings.
@@ -243,33 +297,12 @@ class WorldConf {
         unsigned int    num_fitness_factors_;
         /** Random number seed. */        
         unsigned long   rand_seed_;
-        /** For error messages. */
-        unsigned long   block_start_pos_;
-        /** For error messages. */
-        unsigned long   block_end_pos_;
 
-}; // WorldConf
+}; // WorldConfigurator
+
 
 /**
- * Takes a ConfigurationBlock assumed to be wrapped around Species information, 
- * and parses/translates values appropriately.
- */
-class SpeciesConf {
-
-
-}; // WorldConf
-
-/**
- * Takes a ConfigurationBlock assumed to be wrapped around Generation information, 
- * and parses/translates values appropriately.
- */
-class GenerationConf {
-
-
-}; // WorldConf
-
-/**
- * Encapsulates parsing of a configuration file, and populating of WorldConf,
+ * Encapsulates parsing of a configuration file, and populating of WorldConfigurator,
  * SpeciesConf, GenerationConf, etc. objects.
  */
 class ConfigurationFile {

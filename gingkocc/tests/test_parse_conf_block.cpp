@@ -89,13 +89,13 @@ void test_parse_correct() {
     std::string species_block_str(SPECIES_BLOCK_CSTR);
     std::istringstream in0(species_block_str);
     ConfigurationBlock species_block = ConfigurationBlock(in0);
-    assert(species_block.get_entry("selection") == "1 1 1 1");
-    assert(species_block.get_entry("genotype") == "0 0 0 0");
-    assert(species_block.get_entry("mutation-rate") == "0.01");
-    assert(species_block.get_entry("max-mutation-size") == "1");
-    assert(species_block.get_entry("fecundity") == "8");
-    assert(species_block.get_entry("movement-capacity") == "10");    
-    assert(species_block.get_entry("movement-costs") == "/Users/user/data/grid.asc");   
+    assert(species_block.get_entry<std::string>("selection") == "1 1 1 1");
+    assert(species_block.get_entry<std::string>("genotype") == "0 0 0 0");
+    assert(species_block.get_entry<float>("mutation-rate") == 0.01);
+    assert(species_block.get_entry<int>("max-mutation-size") == 1);
+    assert(species_block.get_entry<unsigned>("fecundity") == 8);
+    assert(species_block.get_entry<long>("movement-capacity") == 10);    
+    assert(species_block.get_entry<std::string>("movement-costs") == "/Users/user/data/grid.asc");   
     assert(species_block.get_keys().size() == 8);
 }
 

@@ -19,46 +19,21 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#if !defined(GINGKO_CONVERT_H)
-#define GINGKO_CONVERT_H
-
-#include <iostream>
-#include <sstream>
-#include <stdexcept>
 #include <string>
+#include "convert.hpp"
 
-namespace gingko { 
+namespace gingko {
 namespace convert {
 
-/**
- * Exception thrown when conversion fails.
- */
-class ValueError : public std::runtime_error {
-    
-    public:
-        ValueError() : std::runtime_error("value conversion error") {}
-        ValueError(std::string value) : std::runtime_error("value conversion error: " + value) {}
-};
+template <>
+std::string to_type<std::string>(std::string from) {
+    return from;
+}
 
-/**
- * Converts from one simple streamable type to another.
- * @param from  representation of value (e.g. "3.14")
- * @return      value represented in type T
- */
-template <typename T, typename U>
-T to_type(U from) {
-    std::ostringstream o;
-    T target;
-    o << from;
-    std::istringstream i(o.str());
-    i >> target;
-    if (i.fail()) {
-        throw ValueError(o.str());
-    }
-    return target;
+template <>
+std::string to_type<std::string>(const char * from) {
+    return std::string(from);
 }
 
 } // convert
 } // gingko
-
-#endif
