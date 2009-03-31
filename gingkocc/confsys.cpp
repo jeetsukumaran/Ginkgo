@@ -19,6 +19,7 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
+#include "gingko_defs.hpp"
 #include "confsys.hpp"
 #include "textutil.hpp"
 #include "convert.hpp"
@@ -255,10 +256,14 @@ WorldConfigurator::WorldConfigurator(const ConfigurationBlock& cb,
 void WorldConfigurator::parse()  {
     this->size_x_ = this->get_configuration_value<unsigned long>("nrows"); 
     this->size_y_ = this->get_configuration_value<unsigned long>("ncols");
+    this->num_fitness_factors_ = this->get_configuration_value<unsigned>("nfitness", MAX_FITNESS_FACTORS);
+    this->rand_seed_ = this->get_configuration_value<unsigned>("seed", 0);
 }
 
 void WorldConfigurator::configure(World& world)  {
-
+    world.set_random_seed(this->rand_seed_);
+    world.set_num_fitness_factors(this->num_fitness_factors_);
+    world.generate_landscape(this->size_x_, this->size_y_);    
 }
 
 ///////////////////////////////////////////////////////////////////////////////

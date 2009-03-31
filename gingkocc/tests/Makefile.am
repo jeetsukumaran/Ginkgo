@@ -54,7 +54,12 @@ test_parse_conf_block_SOURCES = \
     test_parse_conf_block.cpp \
     ../textutil.cpp \
     ../confsys.cpp \
-    ../convert.cpp
+    ../convert.cpp \
+    ../randgen.cpp \
+    ../world.cpp  \
+    ../cell.cpp \
+    ../landscape.cpp \
+    ../biosys.cpp   
     
 test_textutil_SOURCES = \
     test_textutil.cpp \
@@ -74,7 +79,12 @@ test_parse_conf_file_SOURCES = \
     ../textutil.cpp \
     ../confsys.cpp \
     ../filesys.cpp \
-    ../convert.cpp
+    ../convert.cpp \
+    ../randgen.cpp \
+    ../world.cpp \
+    ../cell.cpp \
+    ../landscape.cpp \
+    ../biosys.cpp
     
 test_convert_SOURCES = \
     test_convert.cpp \

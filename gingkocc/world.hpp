@@ -90,6 +90,14 @@ class World {
         }  
         
         /**
+         * Sets random number seed
+         * @param seed random number seed
+         */      
+        void set_random_seed(unsigned long seed) {
+            this->rng_.set_seed(seed);
+        }         
+        
+        /**
          * Returns reference to this World's Landscape object.
          * @return reference to this World's Landscape object
          */        
@@ -103,7 +111,7 @@ class World {
          */        
         std::string get_name() const {
             return this->name_;
-        }
+        }                
         
         /**
          * Sets name for output and reporting.
@@ -139,9 +147,8 @@ class World {
          * @param size_y                the size of the Landscape from a
          *                              geospatial perspective in the 
          *                              y-dimension
-         * @param num_fitness_factors   the number of fitness factors
          */
-        void generate_landscape(CellIndexType size_x, CellIndexType size_y, unsigned num_fitness_factors);
+        void generate_landscape(CellIndexType size_x, CellIndexType size_y);
         
         /**
          * Globally set individual cell carrying capacity.

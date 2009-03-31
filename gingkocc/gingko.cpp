@@ -68,8 +68,9 @@ int main(int argc, char* argv[]) {
     
     gingko::World world(rand_seed);
 
-    std::cerr << "(generating landscape)\n";    
-	world.generate_landscape(size_x, size_y, num_fitness);	
+    std::cerr << "(generating landscape)\n";
+    world.set_num_fitness_factors(num_fitness);
+	world.generate_landscape(size_x, size_y);	
     std::cerr << "(setting carrying capacity)\n";
 	world.set_cell_carrying_capacity(cc);
     std::cerr << "(adding species)\n";	

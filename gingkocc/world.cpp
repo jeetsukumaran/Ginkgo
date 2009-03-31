@@ -58,9 +58,8 @@ World::~World() {
 // --- initialization and set up ---
 
 // Creates a new landscape.
-void World::generate_landscape(CellIndexType size_x, CellIndexType size_y, unsigned num_fitness_factors) {
-    this->num_fitness_factors_ = num_fitness_factors;
-    this->landscape_.generate(size_x, size_y, num_fitness_factors);
+void World::generate_landscape(CellIndexType size_x, CellIndexType size_y) {
+    this->landscape_.generate(size_x, size_y, this->num_fitness_factors_);
 }
 
 // Adds a new species definition to this world.
