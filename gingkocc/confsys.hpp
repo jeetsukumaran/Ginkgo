@@ -269,12 +269,20 @@ class Configurator {
         virtual void parse() = 0;
         
         /**
+         * Returns name of underlying ConfigurationBlock.
+         * @return  name of block
+         */
+        std::string get_name() const {
+            return this->configuration_block_.get_name();
+        }
+        
+        /**
          * Retrieves value for specified key.
          * @param key   entry in the ConfigurationBlock dictionary
          * @return      value for key
          */
         template <typename T>
-        T get_configuration_value(const std::string& key) {
+        T get_configuration_scalar(const std::string& key) {
             try {
                 return this->configuration_block_.get_entry<T>(key);
             } catch (ConfigurationIncompleteError e) {
@@ -292,11 +300,28 @@ class Configurator {
          * @return              value for key in entries or default value
          */
         template <typename T>
-        T get_configuration_value(const std::string& key, T default_value) {
+        T get_configuration_scalar(const std::string& key, T default_value) {
             try {
                 return this->configuration_block_.get_entry<T>(key, default_value);
             } catch (convert::ValueError e) {
                 throw this->build_exception(std::string(e.what()) + " (specified \"" + key + "\")");
+            }            
+        }
+        
+        /**
+         * Retrieves vector of values for specified key.
+         * @param key   entry in the ConfigurationBlock dictionary
+         * @return      value for key
+         */
+        template <typename T>
+        std::vector<T> get_configuration_vector(const std::string& key) {
+            try {
+                std::string s = this->configuration_block_.get_entry<std::string>(key);
+                return convert::to_vector<T>(s, " ");
+            } catch (ConfigurationIncompleteError e) {
+                throw this->build_exception(e.what());
+            } catch (convert::ValueError e) {
+                throw this->build_exception(std::string(e.what()) + " (specified for \"" + key + "\")");
             }            
         }        
         
@@ -399,7 +424,7 @@ class SpeciesConfigurator : public Configurator {
         /**
          * Configures a Species object according to settings.
          */
-        void configure(Species& world);         
+        void configure(World& world);         
            
     private:
         /** coefficients for the fitness functions */
@@ -417,7 +442,7 @@ class SpeciesConfigurator : public Configurator {
         /** movement potential of each organism at the start of each round */
         int                                 movement_capacity_;
         /** genotype for organisms created de novo */
-        FitnessFactors                      default_genotypic_fitness_factors_;
+        std::vector<FitnessFactorType>      default_genotypic_fitness_factors_;
 
 }; // SpeciesConfigurator
 

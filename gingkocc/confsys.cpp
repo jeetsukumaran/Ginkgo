@@ -254,14 +254,15 @@ WorldConfigurator::WorldConfigurator(const ConfigurationBlock& cb,
 }
 
 void WorldConfigurator::parse()  {
-    this->size_x_ = this->get_configuration_value<unsigned long>("nrows"); 
-    this->size_y_ = this->get_configuration_value<unsigned long>("ncols");
-    this->generations_to_run_ = this->get_configuration_value<unsigned long>("ngens");    
-    this->num_fitness_factors_ = this->get_configuration_value<unsigned>("nfitness", MAX_FITNESS_FACTORS);
-    this->rand_seed_ = this->get_configuration_value<unsigned>("seed", 0);
+    this->size_x_ = this->get_configuration_scalar<unsigned long>("nrows"); 
+    this->size_y_ = this->get_configuration_scalar<unsigned long>("ncols");
+    this->generations_to_run_ = this->get_configuration_scalar<unsigned long>("ngens");    
+    this->num_fitness_factors_ = this->get_configuration_scalar<unsigned>("nfitness", MAX_FITNESS_FACTORS);
+    this->rand_seed_ = this->get_configuration_scalar<unsigned>("seed", 0);
 }
 
 void WorldConfigurator::configure(World& world)  {
+    world.set_name(this->get_name());
     world.set_random_seed(this->rand_seed_);
     world.set_generations_to_run(this->generations_to_run_);
     world.set_num_fitness_factors(this->num_fitness_factors_);
@@ -284,10 +285,26 @@ SpeciesConfigurator::SpeciesConfigurator(const ConfigurationBlock& cb,
 }
 
 void SpeciesConfigurator::parse()  {
-
+    try {
+        this->selection_strengths_ = this->get_configuration_vector<float>("selection-weights");
+    } catch (ConfigurationIncompleteError& e) {
+        this->selection_strengths_.assign(MAX_FITNESS_FACTORS, 1);
+    }
+    
+    try {
+        this->default_genotypic_fitness_factors_ = this->get_configuration_vector<FitnessFactorType>("selection-weights");
+    } catch (ConfigurationIncompleteError& e) {
+        this->default_genotypic_fitness_factors_.assign(MAX_FITNESS_FACTORS, 0);
+    }
+    
+    this->mutation_rate_ = this->get_configuration_scalar<float>("mutation-rate", 0.01);
+    this->max_mutation_size_ = this->get_configuration_scalar<unsigned>("max-mutation-size", 1);
+    this->mean_reproductive_rate_ = this->get_configuration_scalar<unsigned>("fecundity", 8);    
+    this->reproductive_rate_mutation_size_ = this->get_configuration_scalar<unsigned>("fecundity-evolution-size", 1);
+    this->movement_capacity_ = this->get_configuration_scalar<unsigned>("movement-capacity", 1);
 }
 
-void SpeciesConfigurator::configure(Species& world)  {
+void SpeciesConfigurator::configure(World& world)  {
 
 }
 
@@ -341,7 +358,14 @@ void ConfigurationFile::configure(World& world) {
                 WorldConfigurator wcf(cb, block_start_pos, block_end_pos);
                 wcf.configure(world);                
             }
-        }                    
+            if (cb.get_type() == "species") {
+                if (num_worlds == 0) {
+                    throw ConfigurationIOError("world must be described before species are added");
+                }
+                SpeciesConfigurator spcf(cb, block_start_pos, block_end_pos);
+                spcf.configure(world);
+            }
+        }
     }
 }
 
