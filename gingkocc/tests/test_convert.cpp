@@ -52,7 +52,9 @@ int main(int, char *[]) {
 
     check_error<int>("abc");
     check_error<int>("abc1");
-//     check_error<int>("1abc");    // no error thrown
+    check_error<int>("1abc");
+    check_error<int>("a2b");
+    check_error<int>("2 2");
     check_error<unsigned>("-1");
     
 }

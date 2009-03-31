@@ -52,7 +52,7 @@ T to_type(U from) {
     o << from;
     std::istringstream i(o.str());
     i >> target;
-    if (i.fail()) {
+    if (i.fail() or not i.eof()) {
         throw ValueError(o.str());
     }
     return target;
