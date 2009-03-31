@@ -267,6 +267,29 @@ void WorldConfigurator::configure(World& world)  {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+// SpeciesConfigurator
+
+SpeciesConfigurator::SpeciesConfigurator(const ConfigurationBlock& cb, 
+                     unsigned long block_start_pos, 
+                     unsigned long block_end_pos) 
+        : Configurator(cb, block_start_pos, block_end_pos),
+          mutation_rate_(0),
+          max_mutation_size_(0),
+          mean_reproductive_rate_(0),
+          reproductive_rate_mutation_size_(0),
+          movement_capacity_(0) {
+    this->parse();
+}
+
+void SpeciesConfigurator::parse()  {
+
+}
+
+void SpeciesConfigurator::configure(Species& world)  {
+   
+}
+
+///////////////////////////////////////////////////////////////////////////////
 // ConfigurationFile
 
 ConfigurationFile::ConfigurationFile(std::istream& src)
@@ -298,28 +321,23 @@ ConfigurationFile::ConfigurationFile(const std::string& fpath)
 
 ConfigurationFile::~ConfigurationFile() { }
 
-void ConfigurationFile::clear() {
-    this->worlds_.clear();
-    this->species_.clear();
-    this->generations_.clear();
-}
-
-void ConfigurationFile::parse() {
+void ConfigurationFile::configure(World& world) {
     assert(this->src_);
-    this->clear();
     ConfigurationBlock cb;
     unsigned long block_start_pos = 0;
     unsigned long block_end_pos = 0;
+    unsigned num_worlds = 0;
     while (not this->src_.eof()) {
         block_start_pos = this->src_.tellg();
         this->src_ >> cb;
         block_end_pos = this->src_.tellg();
         if (cb.is_block_set()) {
             if (cb.get_type() == "world") {
-                if (this->worlds_.size() > 0) {
+                if (num_worlds != 0) {
                     throw ConfigurationIOError("multiple definitions of world found");
-                }
-                this->worlds_.push_back(WorldConfigurator(cb, block_start_pos, block_end_pos));
+                }                
+                WorldConfigurator wcf(cb, block_start_pos, block_end_pos);
+                wcf.configure(world);                
             }
         }                    
     }

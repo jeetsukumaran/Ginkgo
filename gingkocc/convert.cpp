@@ -26,12 +26,12 @@ namespace gingko {
 namespace convert {
 
 template <>
-std::string to_type<std::string>(std::string from) {
+std::string to_scalar<std::string>(std::string from) {
     return from;
 }
 
 template <>
-std::string to_type<std::string>(const char * from) {
+std::string to_scalar<std::string>(const char * from) {
     return std::string(from);
 }
 

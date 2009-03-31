@@ -26,16 +26,18 @@
 #include <sstream>
 #include <cassert>
 
+#include "../world.hpp"
 #include "../confsys.hpp"
 #include "../filesys.hpp"
 
 using namespace gingko;
 
 void test_parse_dummy1(const char * prog_path) {
+    World   world;
     std::string srcf = filesys::compose_path(filesys::get_path_parent(prog_path), 
                                              "data/dummy1/dummy.conf");
     ConfigurationFile cf(srcf);
-    cf.parse();
+    cf.configure(world);
 }
 
 int main(int argc, char * argv[]) {

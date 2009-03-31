@@ -46,7 +46,27 @@ class ValueError : public std::runtime_error {
  * @return      value represented in type T
  */
 template <typename T, typename U>
-T to_type(U from) {
+T to_scalar(U from) {
+    std::ostringstream o;
+    T target;
+    o << from;
+    std::istringstream i(o.str());
+    i >> target;
+    if (i.fail() or not i.eof()) {
+        throw ValueError(o.str());
+    }
+    return target;
+}
+
+/**
+ * Converts from one simple streamable type to vector of streamable types.
+ * @param from          representation of vector (e.g. "3 32 1 3 4", 
+ *                      "1.2,1.3,3.1", "dda;adf;da" etc.)
+ * @param separator     element delimiter (e.g, ",", " ", etc.)
+ * @return              value represented in type T
+ */
+template <typename T, typename U>
+T to_vector(U from, std::string separator) {
     std::ostringstream o;
     T target;
     o << from;

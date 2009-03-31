@@ -32,7 +32,7 @@ void check_val(T expected, T result) {
 template <typename T>
 void check_error(std::string src) {
     try {
-        T x = gingko::convert::to_type<T>(src);
+        T x = gingko::convert::to_scalar<T>(src);
         std::cout << "failed to throw value conversion error (\"" << src << "\"";
         std::cout << " => " << x << ")" << std::endl;
         assert(false);
@@ -44,11 +44,11 @@ void check_error(std::string src) {
 
 int main(int, char *[]) {
 
-    check_val(gingko::convert::to_type<int>("1"), 1);
-    check_val(gingko::convert::to_type<int>("100"), 100); 
-    check_val(gingko::convert::to_type<int>("-1"), -1);
-    check_val(gingko::convert::to_type<double>("0.5"), 0.5);
-    check_val(gingko::convert::to_type<double>("-0.5"), -0.5);
+    check_val(gingko::convert::to_scalar<int>("1"), 1);
+    check_val(gingko::convert::to_scalar<int>("100"), 100); 
+    check_val(gingko::convert::to_scalar<int>("-1"), -1);
+    check_val(gingko::convert::to_scalar<double>("0.5"), 0.5);
+    check_val(gingko::convert::to_scalar<double>("-0.5"), -0.5);
 
     check_error<int>("abc");
     check_error<int>("abc1");

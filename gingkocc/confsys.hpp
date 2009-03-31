@@ -163,7 +163,7 @@ class ConfigurationBlock {
             if (val == this->entries_.end()) {
                 throw ConfigurationIncompleteError("entry \"" + key + "\" not found");
             }
-            return convert::to_type<T>(val->second);
+            return convert::to_scalar<T>(val->second);
         }
         
         /**
@@ -179,7 +179,7 @@ class ConfigurationBlock {
             if (val == this->entries_.end()) {
                 return default_value;
             }
-            return convert::to_type<T>(val->second);
+            return convert::to_scalar<T>(val->second);
         }
         
         /**
@@ -365,6 +365,59 @@ class WorldConfigurator : public Configurator {
 
 }; // WorldConfigurator
 
+/**
+ * Takes a ConfigurationBlock assumed to be wrapped around Species information, 
+ * and parses/translates values appropriately.
+ */
+class SpeciesConfigurator : public Configurator {
+
+    public:
+    
+        /** 
+         * Constructs objects, and then passes ConfigurationBlock onto parse()
+         * for processing. 
+         * @param cb                a populated ConfigurationBlock object
+         * @param block_start_pos   start position of this block in the stream 
+         *                          that is the source of the configuration 
+         *                          data (for error reporting)
+         * @param block_end_pos     start position of this block in the stream 
+         *                          that is the source of the configuration 
+         *                          data (for error reporting)         
+         */
+        SpeciesConfigurator(const ConfigurationBlock& cb, 
+                  unsigned long block_start_pos, 
+                  unsigned long block_end_pos);
+
+        /** 
+         * Takes the string fields of ConfigurationBlock and interprets values
+         * as needed for a Species object.
+         */        
+        void parse();
+        
+        /**
+         * Configures a Species object according to settings.
+         */
+        void configure(Species& world);         
+           
+    private:
+        /** coefficients for the fitness functions */
+        std::vector<float>                  selection_strengths_;
+        /** rate of mutation for the genotypic fitness factors */
+        float                               mutation_rate_;
+        /** window for perturbations of fitness factor values */
+        FitnessFactorType                   max_mutation_size_;        
+        /** mean number of offspring per female */
+        unsigned                            mean_reproductive_rate_;
+        /** allowing for evolution in fecundity */
+        unsigned                            reproductive_rate_mutation_size_;
+        /** landscape migration potential for this species */
+        std::vector<int>                    movement_costs_;
+        /** movement potential of each organism at the start of each round */
+        int                                 movement_capacity_;
+        /** genotype for organisms created de novo */
+        FitnessFactors                      default_genotypic_fitness_factors_;
+
+}; // SpeciesConfigurator
 
 /**
  * Encapsulates parsing of a configuration file, and populating of WorldConfigurator,
@@ -398,17 +451,12 @@ class ConfigurationFile {
         /**
          * Default no-op destructor.
          */
-        ~ConfigurationFile();
-        
-        /**
-         * Clears blocks.
-         */
-        void clear();        
+        ~ConfigurationFile();    
         
         /**
          * Parses the configuration file, loading data into blocks.
          */
-        void parse();
+        void configure(World& world);
         
     private: 
     
@@ -417,15 +465,6 @@ class ConfigurationFile {
         
         /** Input stream. */
         std::istream&       src_;
-                
-        /** Collection of WorldConfigurator blocks. */
-        std::vector<WorldConfigurator>      worlds_;
-        
-        /** Collection of Species blocks. */
-        std::vector<ConfigurationBlock>   species_;
-        
-        /** Collection of Generation blocks. */
-        std::vector<ConfigurationBlock>   generations_;
         
 };  
 
