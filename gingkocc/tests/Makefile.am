@@ -88,5 +88,6 @@ test_parse_conf_file_SOURCES = \
     
 test_convert_SOURCES = \
     test_convert.cpp \
-    ../convert.cpp
+    ../convert.cpp \
+    ../textutil.cpp 
     

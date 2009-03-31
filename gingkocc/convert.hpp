@@ -27,6 +27,8 @@
 #include <stdexcept>
 #include <string>
 
+#include "textutil.hpp"
+
 namespace gingko { 
 namespace convert {
 
@@ -48,9 +50,9 @@ class ValueError : public std::runtime_error {
 template <typename T, typename U>
 T to_scalar(U from) {
     std::ostringstream o;
-    T target;
     o << from;
     std::istringstream i(o.str());
+    T target;    
     i >> target;
     if (i.fail() or not i.eof()) {
         throw ValueError(o.str());
@@ -66,16 +68,16 @@ T to_scalar(U from) {
  * @return              value represented in type T
  */
 template <typename T, typename U>
-T to_vector(U from, std::string separator) {
+std::vector<T> to_vector(U from, const char * separator = " ") {
     std::ostringstream o;
-    T target;
     o << from;
-    std::istringstream i(o.str());
-    i >> target;
-    if (i.fail() or not i.eof()) {
-        throw ValueError(o.str());
+    std::vector<std::string> elements = textutil::split(o.str(), separator, 0, false);
+    std::vector<T> results;
+    results.reserve(elements.size());
+    for (std::vector<std::string>::iterator i = elements.begin(); i != elements.end(); ++i) {
+        results.push_back( to_scalar<T>(*i) );
     }
-    return target;
+    return results;
 }
 
 } // convert
