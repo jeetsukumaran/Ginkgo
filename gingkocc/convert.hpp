@@ -36,8 +36,8 @@ namespace convert {
 class ValueError : public std::runtime_error {
     
     public:
-        ValueError() : std::runtime_error("value conversion error") {}
-        ValueError(std::string value) : std::runtime_error("value conversion error: " + value) {}
+        ValueError() : std::runtime_error("invalid literal for value type") {}
+        ValueError(std::string value) : std::runtime_error("invalid literal for value type: \"" + value +"\"") {}
 };
 
 /**

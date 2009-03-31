@@ -69,22 +69,41 @@ World& configure_world(World& world, const std::string& conf_fpath);
 // Infrastructure supporting above functions.
 
 /**
+ * General configuration error.
+ */
+class ConfigurationError : public std::runtime_error {
+    public:
+        ConfigurationError(const char * msg) : std::runtime_error(msg) {}
+        ConfigurationError(const std::string& msg) : std::runtime_error(msg.c_str()) {}
+};
+
+/**
  * General i/o error.
  */
-class ConfigurationIOError : public std::runtime_error {
+class ConfigurationIOError : public ConfigurationError {
     public:
-        ConfigurationIOError(const char * msg) : std::runtime_error(msg) {}
-        ConfigurationIOError(const std::string& msg) : std::runtime_error(msg.c_str()) {}
+        ConfigurationIOError(const char * msg) : ConfigurationError(msg) {}
+        ConfigurationIOError(const std::string& msg) : ConfigurationError(msg) {}
 };
 
 /**
  * General configuration format error.
  */
-class ConfigurationSyntaxError : public std::runtime_error {
+class ConfigurationSyntaxError : public ConfigurationError {
     public:
-        ConfigurationSyntaxError(const char * msg) : std::runtime_error(msg) {}
-        ConfigurationSyntaxError(const std::string& msg) : std::runtime_error(msg.c_str()) {}
+        ConfigurationSyntaxError(const char * msg) : ConfigurationError(msg) {}
+        ConfigurationSyntaxError(const std::string& msg) : ConfigurationError(msg) {}
 };
+
+/**
+ * General configuration content error.
+ */
+class ConfigurationIncompleteError : public ConfigurationError {
+    public:
+        ConfigurationIncompleteError(const char * msg) : ConfigurationError(msg) {}
+        ConfigurationIncompleteError(const std::string& msg) : ConfigurationError(msg) {}
+};
+
 
 /**
  * Generic configuration block with a file.
@@ -101,7 +120,6 @@ class ConfigurationBlock {
         /**
          * Constructor that populates a ConfigurationBlock object by calling
          * parse().
-         *
          * @param in    input stream with data
          */
         ConfigurationBlock(std::istream& in);  
@@ -118,36 +136,60 @@ class ConfigurationBlock {
         
         /**
          * Returns type label of the block.
-         *
          * @return type label of block
          */
         std::string get_type() const;
 
         /**
          * Returns type label of the block.
-         *
          * @return type label of block
          */
         std::string get_name() const;
         
         /**
          * Returns <code>true</code> if the block was parsed and set.
-         *
          * @return <code>true</code> if the block was parsed and set
          */
         bool is_block_set() const;        
         
         /**
          * Returns value for given key.
-         *
-         * @param       key key for entry
+         * @param   key key for entry
          * @return      value for entry
          */
         template <typename T>
         T get_entry(const std::string& key) const {
             std::map< std::string, std::string >::const_iterator val = this->entries_.find(key);
-            assert(val != this->entries_.end());
+            if (val == this->entries_.end()) {
+                throw ConfigurationIncompleteError("entry \"" + key + "\" not found");
+            }
             return convert::to_type<T>(val->second);
+        }
+        
+        /**
+         * Returns value for given key (with specification of default value if 
+         * not found.
+         * @param   key             key for entry
+         * @param   default_value   value to return if key not found
+         * @return                  value for entry or default
+         */
+        template <typename T>
+        T get_entry(const std::string& key, T default_value) const {
+            std::map< std::string, std::string >::const_iterator val = this->entries_.find(key);
+            if (val == this->entries_.end()) {
+                return default_value;
+            }
+            return convert::to_type<T>(val->second);
+        }
+        
+        /**
+         * Returns <code>true</code> if has entry with specified key.
+         * @param   key     key for entry
+         * @return          <code>true</code> if has entry with specified key
+         */
+        bool has_key(const std::string key) const {
+            std::map< std::string, std::string >::const_iterator val = this->entries_.find(key);
+            return (val != this->entries_.end());
         }
         
         /**
@@ -158,7 +200,6 @@ class ConfigurationBlock {
         
         /**
          * Composes exception message.
-         *
          * @param pos   position in stream
          * @param desc  description of error 
          */
@@ -166,7 +207,6 @@ class ConfigurationBlock {
          
         /**
          * Composes exception message.
-         *
          * @param pos   position in stream
          * @param desc  description of error 
          */
@@ -175,7 +215,6 @@ class ConfigurationBlock {
         /**
          * Populates this block object by reading from the given input stream
          * up to the next END_BLOCK_BODY character.
-         *
          * @param in    input stream with data
          */
         void parse(std::istream& in);
@@ -208,7 +247,8 @@ class Configurator {
     
         /** 
          * Stores variables for error reporting. 
-         * @param cb                a populated ConfigurationBlock object
+         * @param cb                configuration data parsed into 
+         *                          ConfigurationBlock structure
          * @param block_start_pos   start position of this block in the stream 
          *                          that is the source of the configuration 
          *                          data (for error reporting)
@@ -224,33 +264,58 @@ class Configurator {
                      
         /** 
          * Takes the string fields of ConfigurationBlock and interprets values
-         * as needed for a World object.
-         * @param block_start_pos   start position of this block in the stream 
-         *                          that is the source of the configuration 
-         *                          data (for error reporting)
-         * @param block_end_pos     start position of this block in the stream 
-         *                          that is the source of the configuration 
-         *                          data (for error reporting)    
+         * as needed for a World object.   
          */        
-        virtual void parse(const ConfigurationBlock& cb, 
-                           unsigned long block_start_pos, 
-                           unsigned long block_end_pos) = 0;
-
+        virtual void parse() = 0;
+        
         /**
-         * Returns name of the block.
-         * @return      name of the block
+         * Retrieves value for specified key.
+         * @param key   entry in the ConfigurationBlock dictionary
+         * @return      value for key
          */
-        std::string get_name() const {
-            return this->name_;
+        template <typename T>
+        T get_configuration_value(const std::string& key) {
+            try {
+                return this->configuration_block_.get_entry<T>(key);
+            } catch (ConfigurationIncompleteError e) {
+                throw this->build_exception(e.what());
+            } catch (convert::ValueError e) {
+                throw this->build_exception(std::string(e.what()) + " (specified for \"" + key + "\")");
+            }            
         }
+        
+        /**
+         * Retrieves value for specified key, with default value returned if key
+         * is not found.
+         * @param key           key for entry in the ConfigurationBlock dictionary
+         * @param default_value value if key not found
+         * @return              value for key in entries or default value
+         */
+        template <typename T>
+        T get_configuration_value(const std::string& key, T default_value) {
+            try {
+                return this->configuration_block_.get_entry<T>(key, default_value);
+            } catch (convert::ValueError e) {
+                throw this->build_exception(std::string(e.what()) + " (specified \"" + key + "\")");
+            }            
+        }        
+        
+        /**
+         * Builds and returns an exception, including file position in 
+         * exception message.
+         *
+         * @param message   information regarding error
+         * @return          exception object
+         */
+        ConfigurationError build_exception(const std::string& message) const;       
 
     private:
-        /** Name of the block. */        
-        std::string     name_;
+        /** Underlying configuration block. */        
+        ConfigurationBlock            configuration_block_;
         /** For error messages. */
-        unsigned long   block_start_pos_;
+        unsigned long                 block_start_pos_;
         /** For error messages. */
-        unsigned long   block_end_pos_;        
+        unsigned long                 block_end_pos_;        
         
 }; // Configurator
 
@@ -281,7 +346,7 @@ class WorldConfigurator : public Configurator {
          * Takes the string fields of ConfigurationBlock and interprets values
          * as needed for a World object.
          */        
-        void parse(const ConfigurationBlock& cb);
+        void parse();
         
         /**
          * Configures a World object according to settings.
@@ -353,8 +418,8 @@ class ConfigurationFile {
         /** Input stream. */
         std::istream&       src_;
                 
-        /** Collection of World blocks. */
-        ConfigurationBlock                world_;
+        /** Collection of WorldConfigurator blocks. */
+        std::vector<WorldConfigurator>      worlds_;
         
         /** Collection of Species blocks. */
         std::vector<ConfigurationBlock>   species_;

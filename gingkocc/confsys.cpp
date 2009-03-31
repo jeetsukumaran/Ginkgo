@@ -188,7 +188,7 @@ void ConfigurationBlock::parse(std::istream& in) {
         throw ConfigurationSyntaxError(this->compose_error_message(start_pos, "found multiple elements in block header, but expecting only two (type and name)"));
     }
     
-    this->type_ = textutil::strip(head_parts[0].substr(1));
+    this->type_ = textutil::lower(textutil::strip(head_parts[0].substr(1)));
     this->name_ = textutil::strip(head_parts[1]);
     
     unsigned entry_count = 0;
@@ -223,11 +223,20 @@ std::istream& operator>> (std::istream& in, ConfigurationBlock& cblock) {
 Configurator::Configurator(const ConfigurationBlock& cb, 
                            unsigned long block_start_pos, 
                            unsigned long block_end_pos) 
-        : name_(cb.get_name()),
+        : configuration_block_(cb),
           block_start_pos_(block_start_pos),
           block_end_pos_(block_end_pos) { }
           
-Configurator::~Configurator() { }          
+Configurator::~Configurator() { }
+
+ConfigurationError Configurator::build_exception(const std::string& message) const {
+    std::ostringstream msg;
+    msg << "block \"" << this->configuration_block_.get_name();
+    msg << "\" (file position " << this->block_start_pos_ + 1;
+    msg << " to position " << this->block_end_pos_ + 1 << ")";
+    msg << ": " << message;
+    return ConfigurationError(msg.str());
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 // WorldConfigurator
@@ -240,11 +249,12 @@ WorldConfigurator::WorldConfigurator(const ConfigurationBlock& cb,
           size_y_(0),
           num_fitness_factors_(0),
           rand_seed_(0) {
-    this->parse(cb);
+    this->parse();
 }
 
-void WorldConfigurator::parse(const ConfigurationBlock& cb)  {
-    
+void WorldConfigurator::parse()  {
+    this->size_x_ = this->get_configuration_value<unsigned long>("nrows"); 
+    this->size_y_ = this->get_configuration_value<unsigned long>("ncols");
 }
 
 void WorldConfigurator::configure(World& world)  {
@@ -284,7 +294,7 @@ ConfigurationFile::ConfigurationFile(const std::string& fpath)
 ConfigurationFile::~ConfigurationFile() { }
 
 void ConfigurationFile::clear() {
-    this->world_.clear();
+    this->worlds_.clear();
     this->species_.clear();
     this->generations_.clear();
 }
@@ -300,7 +310,12 @@ void ConfigurationFile::parse() {
         this->src_ >> cb;
         block_end_pos = this->src_.tellg();
         if (cb.is_block_set()) {
-            std::cout << block_start_pos << "-" << block_end_pos << ": " << cb.get_type() << " (" << cb.get_name() << ")" << std::endl;
+            if (cb.get_type() == "world") {
+                if (this->worlds_.size() > 0) {
+                    throw ConfigurationIOError("multiple definitions of world found");
+                }
+                this->worlds_.push_back(WorldConfigurator(cb, block_start_pos, block_end_pos));
+            }
         }                    
     }
 }

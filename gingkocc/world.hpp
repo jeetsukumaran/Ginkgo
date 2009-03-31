@@ -94,8 +94,24 @@ class World {
          * @return reference to this World's Landscape object
          */        
         Landscape& landscape() {
-            return this->landscape_;
+            return this->landscape_;        
         }
+          
+        /**
+         * Returns name for output and reporting.
+         * @return name for output and reporting
+         */        
+        std::string get_name() const {
+            return this->name_;
+        }
+        
+        /**
+         * Sets name for output and reporting.
+         * @param name name for output and reporting
+         */      
+        void set_name(std::string name) {
+            this->name_ = name;
+        } 
         
         /**
          * Returns number of active fitness factors.
@@ -242,7 +258,8 @@ class World {
         void run(unsigned long num_generations);
         
     private:
-    
+        /** Name of this World (used for output files/reports). */
+        std::string                             name_;
         /** Collection of pointers to the Species objects of this World. */
         SpeciesByLabel                          species_;
         /** The RandomNumberGenerator that is used by all objects of this World. */
