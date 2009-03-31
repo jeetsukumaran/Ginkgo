@@ -106,19 +106,19 @@ class World {
         }
           
         /**
-         * Returns name for output and reporting.
-         * @return name for output and reporting
+         * Returns label for output and reporting.
+         * @return label for output and reporting
          */        
-        std::string get_name() const {
-            return this->name_;
+        std::string get_label() const {
+            return this->label_;
         }                
         
         /**
-         * Sets name for output and reporting.
-         * @param name name for output and reporting
+         * Sets label for output and reporting.
+         * @param label label for output and reporting
          */      
-        void set_name(std::string name) {
-            this->name_ = name;
+        void set_label(std::string label) {
+            this->label_ = label;
         } 
         
         /**
@@ -157,6 +157,15 @@ class World {
          *                              y-dimension
          */
         void generate_landscape(CellIndexType size_x, CellIndexType size_y);
+        
+        /**
+         * Returns <code>true</code> if a species of the specified name/label
+         * has been defined.
+         * @return 
+         */
+        bool has_species(const std::string& label) {
+            return (this->species_.find(label) != this->species_.end());
+        }
         
         /**
          * Globally set individual cell carrying capacity.
@@ -209,7 +218,7 @@ class World {
          */        
         void set_species_default_genotype(const std::string& species_label, const FitnessFactors& genotype) {
             assert(this->species_.find(species_label) != this->species_.end());    
-            this->species_[species_label]->set_default_genotype(genotype);
+            this->species_[species_label]->set_default_genotypic_fitness_factors(genotype);
         }        
                                 
         // --- setup, initialization and seeding ---
@@ -274,7 +283,7 @@ class World {
         
     private:
         /** Name of this World (used for output files/reports). */
-        std::string                             name_;
+        std::string                             label_;
         /** Collection of pointers to the Species objects of this World. */
         SpeciesByLabel                          species_;
         /** The RandomNumberGenerator that is used by all objects of this World. */

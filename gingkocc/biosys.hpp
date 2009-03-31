@@ -680,8 +680,8 @@ class Species {
          */             
         void set_num_fitness_factors(unsigned num_fitness_factors) {
             this->num_fitness_factors_ = num_fitness_factors;
-        }       
-           
+        }      
+
         /**
          * Returns the probability of mutation when inheriting an organism 
          * inherits a genotypic fitness factor from its parent.
@@ -809,9 +809,27 @@ class Species {
          * @param  strengths    vector of coefficients to the multivariate 
          *                      fitness function
          */        
-        void set_default_genotype(const FitnessFactors& genotype) {
+        void set_default_genotypic_fitness_factors(const FitnessFactors& genotype) {
             memcpy(this->default_genotypic_fitness_factors_, genotype, MAX_FITNESS_FACTORS*sizeof(FitnessFactorType));
         }         
+        
+        /**
+         * Sets the strengths of individual fitness factors on the fitness as 
+         * calculated for this species.
+         *
+         * Each element in the vector is a coefficient for the fitness function 
+         * calculated using the corresponding elements of the environmental and
+         * genotypic fitness factor vectors.
+         *
+         * @param  strengths    vector of coefficients to the multivariate 
+         *                      fitness function
+         */        
+        void set_default_genotypic_fitness_factors(std::vector<FitnessFactorType> genotype) {
+            assert(genotype.size() < MAX_FITNESS_FACTORS);
+            for (unsigned i = 0; i != genotype.size(); ++i) {
+                this->default_genotypic_fitness_factors_[i] = genotype[i];
+            }
+        }          
         
         /**
          * Returns the fitness for a particular organism in a particular 

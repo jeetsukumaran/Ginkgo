@@ -23,6 +23,8 @@
 #include "confsys.hpp"
 #include "textutil.hpp"
 #include "convert.hpp"
+#include "world.hpp"
+#include "biosys.hpp"
 
 namespace gingko {
 
@@ -262,7 +264,7 @@ void WorldConfigurator::parse()  {
 }
 
 void WorldConfigurator::configure(World& world)  {
-    world.set_name(this->get_name());
+    world.set_label(this->get_name());
     world.set_random_seed(this->rand_seed_);
     world.set_generations_to_run(this->generations_to_run_);
     world.set_num_fitness_factors(this->num_fitness_factors_);
@@ -305,7 +307,22 @@ void SpeciesConfigurator::parse()  {
 }
 
 void SpeciesConfigurator::configure(World& world)  {
-
+    std::string label = this->get_name();
+    if (world.has_species(label)) {
+        throw this->build_exception("species \"" + label + "\" has already been defined");
+    }
+    Species& sp = world.new_species(label);
+    if (sp.get_num_fitness_factors() > this->default_genotypic_fitness_factors_.size()) {
+        std::ostringstream msg;
+        msg << "expecting " << sp.get_num_fitness_factors() << " default genotypic fitness factors, but found " << this->default_genotypic_fitness_factors_.size() ;
+        throw this->build_exception(msg.str());
+    }
+    sp.set_default_genotypic_fitness_factors(this->default_genotypic_fitness_factors_);
+    sp.set_mutation_rate(this->mutation_rate_);
+    sp.set_max_mutation_size(this->max_mutation_size_);
+    sp.set_mean_reproductive_rate(this->mean_reproductive_rate_);
+//     sp.set_reproductive_rate_mutation_size(this->reproductive_rate_mutation_size_);
+    sp.set_movement_capacity(this->movement_capacity_);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

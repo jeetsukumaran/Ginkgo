@@ -188,8 +188,7 @@ class ConfigurationBlock {
          * @return          <code>true</code> if has entry with specified key
          */
         bool has_key(const std::string key) const {
-            std::map< std::string, std::string >::const_iterator val = this->entries_.find(key);
-            return (val != this->entries_.end());
+            return (this->entries_.find(key) != this->entries_.end());
         }
         
         /**
