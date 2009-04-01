@@ -514,9 +514,36 @@ class GenerationConfigurator : public Configurator {
         /**
          * Configures a Generation object according to settings.
          */
-        void configure(World& world);         
+        void configure(World& world);
+        
+    private:
+    
+        /** 
+         * Verifies a grid file, ensuring that it exists, can be loaded
+         * and is the same dimensions as a given World. Throws an exception
+         * if any of these conditions fail.
+         * @param   grid_path   path to grid file
+         * @param   world       world against which to validate
+         */
+        void validate_grid(const std::string& grid_path, const World& world);
+        
+        /** Processes carrying capacity entries. */
+        void process_carrying_capacity();
+        
+        /** Processes environment entries. */
+        void process_environments();
+        
+        /** Processes movement costs. */
+        void process_movement_costs();
+        
+        /** Processes sampling regimes. */
+        void process_sampling_regimes();
            
     private:
+    
+        /** Path to grid defining the carrying capacity. */
+        std::string                         carrying_capacity_;
+        
         /** 
          * Environmental regimes that need to be changed/set (expressed as factor
          * indexes mapped to ESRI ASCII Grid file paths). 
@@ -532,7 +559,7 @@ class GenerationConfigurator : public Configurator {
         /** 
          * Sampling regime.
          */
-        std::map<std::string, SamplingRegime>   samples_;          
+        std::map<std::string, OrganismDistribution>   samples_;          
 
 }; // GenerationConfigurator
 

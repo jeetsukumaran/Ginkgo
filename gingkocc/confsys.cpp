@@ -29,6 +29,7 @@
 #include "convert.hpp"
 #include "world.hpp"
 #include "biosys.hpp"
+#include "asciigrid.hpp"
 
 namespace gingko {
 
@@ -412,12 +413,43 @@ GenerationConfigurator::GenerationConfigurator(const ConfigurationBlock& cb)
     this->parse();
 }
 
-void GenerationConfigurator::parse()  {
+void GenerationConfigurator::validate_grid(const std::string& grid_path, const World& world) {
+    try {
+        asciigrid::AsciiGrid grid(grid_path);
+    } catch (asciigrid::AsciiGridIOError e) {
+        throw this->build_exception("I/O error reading grid \"" + grid_path + "\": " + e.what());
+    } catch (asciigrid::AsciiGridFormatError e) {
+        throw this->build_exception("format error reading grid \"" + grid_path + "\": " + e.what());
+    }
+}
+
+void GenerationConfigurator::process_carrying_capacity() {
+    this->carrying_capacity_ = this->get_configuration_scalar<std::string>("carrying-capacity", "");
+}
+
+void GenerationConfigurator::process_environments() {
 
 }
 
-void GenerationConfigurator::configure(World& world)  {
+void GenerationConfigurator::process_movement_costs() {
 
+}
+
+void GenerationConfigurator::process_sampling_regimes() {
+
+}
+
+void GenerationConfigurator::parse()  {
+    this->process_carrying_capacity();
+    this->process_environments();
+    this->process_movement_costs();
+    this->process_sampling_regimes();
+}
+
+void GenerationConfigurator::configure(World& world)  {
+    if (this->carrying_capacity_.size() > 0) {
+        this->validate_grid(this->carrying_capacity_, world);
+    }
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -457,12 +489,13 @@ void ConfigurationFile::configure(World& world) {
     ConfigurationBlock cb;
     unsigned num_worlds = 0;
     std::set<std::string> species_labels;
+    std::set<unsigned long> generations;
     while (not this->src_.eof()) {
         this->src_ >> cb;
         if (cb.is_block_set()) {
             if (cb.get_type() == "world") {
                 if (num_worlds != 0) {
-                    throw confsys_detail::build_configuration_block_exception(cb, "world must be described before species are added");
+                    throw confsys_detail::build_configuration_block_exception(cb, "world must be defined before species are added");
                 }                
                 WorldConfigurator wcf(cb);
                 wcf.configure(world);
@@ -470,7 +503,7 @@ void ConfigurationFile::configure(World& world) {
             }
             if (cb.get_type() == "species") {
                 if (num_worlds == 0) {
-                    throw confsys_detail::build_configuration_block_exception(cb, "world must be described before species are added");
+                    throw confsys_detail::build_configuration_block_exception(cb, "world must be defined before species are added");
                 }
                 std::string label = cb.get_name();
                 if (species_labels.find(label) != species_labels.end()) {
@@ -480,6 +513,22 @@ void ConfigurationFile::configure(World& world) {
                 spcf.configure(world);
                 species_labels.insert(label);
             }
+            if (cb.get_type() == "generation") {
+                if (num_worlds == 0) {
+                    throw confsys_detail::build_configuration_block_exception(cb, "world must be defined before world setting changes defined");
+                }
+                unsigned long generation = 0;
+                try {
+                    generation = convert::to_scalar<unsigned long>(cb.get_name());
+                } catch (convert::ValueError e) {
+                    throw confsys_detail::build_configuration_block_exception(cb, "\"" + cb.get_name() + "\" is an invalid value for a generation number");
+                }                
+                if (generations.find(generation) != generations.end()) {
+                    throw confsys_detail::build_configuration_block_exception(cb, "generation \"" + cb.get_name() + "\" has already been defined");
+                }
+                GenerationConfigurator gcf(cb);
+                gcf.configure(world);
+            }            
         }
     }
 }
