@@ -19,6 +19,10 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
+#include <set>
+#include <string>
+#include <vector>
+
 #include "gingko_defs.hpp"
 #include "confsys.hpp"
 #include "textutil.hpp"
@@ -210,6 +214,8 @@ void ConfigurationBlock::parse(std::istream& in) {
         }
     }
     this->is_block_set_ = true;
+    this->block_start_pos_ = start_pos;
+    this->block_end_pos_ = in.tellg();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -223,31 +229,20 @@ std::istream& operator>> (std::istream& in, ConfigurationBlock& cblock) {
 ///////////////////////////////////////////////////////////////////////////////
 // Configurator
 
-Configurator::Configurator(const ConfigurationBlock& cb, 
-                           unsigned long block_start_pos, 
-                           unsigned long block_end_pos) 
-        : configuration_block_(cb),
-          block_start_pos_(block_start_pos),
-          block_end_pos_(block_end_pos) { }
+Configurator::Configurator(const ConfigurationBlock& cb) 
+        : configuration_block_(cb) { }
           
 Configurator::~Configurator() { }
 
 ConfigurationError Configurator::build_exception(const std::string& message) const {
-    std::ostringstream msg;
-    msg << "block \"" << this->configuration_block_.get_name();
-    msg << "\" (file position " << this->block_start_pos_ + 1;
-    msg << " to position " << this->block_end_pos_ + 1 << ")";
-    msg << ": " << message;
-    return ConfigurationError(msg.str());
+    return confsys_detail::build_configuration_block_exception(message, this->configuration_block_);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 // WorldConfigurator
 
-WorldConfigurator::WorldConfigurator(const ConfigurationBlock& cb, 
-                     unsigned long block_start_pos, 
-                     unsigned long block_end_pos) 
-        : Configurator(cb, block_start_pos, block_end_pos),
+WorldConfigurator::WorldConfigurator(const ConfigurationBlock& cb) 
+        : Configurator(cb),
           size_x_(0),
           size_y_(0),
           num_fitness_factors_(0),
@@ -274,10 +269,8 @@ void WorldConfigurator::configure(World& world)  {
 ///////////////////////////////////////////////////////////////////////////////
 // SpeciesConfigurator
 
-SpeciesConfigurator::SpeciesConfigurator(const ConfigurationBlock& cb, 
-                     unsigned long block_start_pos, 
-                     unsigned long block_end_pos) 
-        : Configurator(cb, block_start_pos, block_end_pos),
+SpeciesConfigurator::SpeciesConfigurator(const ConfigurationBlock& cb) 
+        : Configurator(cb),
           mutation_rate_(0),
           max_mutation_size_(0),
           mean_reproductive_rate_(0),
@@ -360,30 +353,54 @@ ConfigurationFile::~ConfigurationFile() { }
 void ConfigurationFile::configure(World& world) {
     assert(this->src_);
     ConfigurationBlock cb;
-    unsigned long block_start_pos = 0;
-    unsigned long block_end_pos = 0;
     unsigned num_worlds = 0;
+    std::set<std::string> species_labels;
     while (not this->src_.eof()) {
-        block_start_pos = this->src_.tellg();
         this->src_ >> cb;
-        block_end_pos = this->src_.tellg();
         if (cb.is_block_set()) {
             if (cb.get_type() == "world") {
                 if (num_worlds != 0) {
-                    throw ConfigurationIOError("multiple definitions of world found");
+                    throw confsys_detail::build_configuration_block_exception("world must be described before species are added", cb);
                 }                
-                WorldConfigurator wcf(cb, block_start_pos, block_end_pos);
-                wcf.configure(world);                
+                WorldConfigurator wcf(cb);
+                wcf.configure(world);
+//                 num_worlds += 1;
             }
             if (cb.get_type() == "species") {
                 if (num_worlds == 0) {
-                    throw ConfigurationIOError("world must be described before species are added");
+                    throw confsys_detail::build_configuration_block_exception("world must be described before species are added", cb);
                 }
-                SpeciesConfigurator spcf(cb, block_start_pos, block_end_pos);
+                std::string label = cb.get_name();
+                if (species_labels.find(label) != species_labels.end()) {
+                    throw confsys_detail::build_configuration_block_exception("species \"" + label + "\" has already been defined", cb);
+                }
+                SpeciesConfigurator spcf(cb);
                 spcf.configure(world);
+                species_labels.insert(label);
             }
         }
     }
 }
+
+namespace confsys_detail {
+    
+    /**
+     * Composes and returns and appropriate exception.
+     * @param message           error message
+     * @param cb                ConfigurationBlock that has the error
+     * @return                  ConfiguratonError exception to be thrown
+     */
+    ConfigurationError build_configuration_block_exception(const std::string& message,
+                const ConfigurationBlock& cb) {
+        std::ostringstream msg;
+        msg << cb.get_type() << " block \"" << cb.get_name();
+        msg << "\" (file position " << cb.get_block_start_pos() + 1;
+        msg << " to position " << cb.get_block_end_pos() + 1 << ")";
+        msg << ": " << message;
+        return ConfigurationError(msg.str());    
+    }
+    
+} // confsys_detail
+
 
 } // namespace gingko

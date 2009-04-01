@@ -225,6 +225,24 @@ class ConfigurationBlock {
          * @return          input stream
          */
         friend std::istream& operator>> (std::istream& in, ConfigurationBlock& cblock);
+        
+        /**
+         * Returns the file character position of the beginning of this block 
+         * in the source stream.
+         * @return      file position of the start of the block
+         */
+        unsigned long get_block_start_pos() const {
+            return this->block_start_pos_;
+        }
+        
+        /**
+         * Returns the file character position of the end of this block 
+         * in the source stream.
+         * @return      file position of the end of the block
+         */
+        unsigned long get_block_end_pos() const {
+            return this->block_end_pos_;
+        }        
 
     private:
         /** The type of block (e.g. "species", "world", "generation") */
@@ -235,6 +253,11 @@ class ConfigurationBlock {
         std::map< std::string, std::string >    entries_;
         /** Tracks whether or not the block was actually set. */
         bool                                    is_block_set_;
+        /** Start of block in the source stream. */
+        unsigned long                           block_start_pos_;
+        /** End of block in the source stream. */
+        unsigned long                           block_end_pos_;
+        
 }; // ConfigurationBlock
 
 /**
@@ -247,17 +270,9 @@ class Configurator {
         /** 
          * Stores variables for error reporting. 
          * @param cb                configuration data parsed into 
-         *                          ConfigurationBlock structure
-         * @param block_start_pos   start position of this block in the stream 
-         *                          that is the source of the configuration 
-         *                          data (for error reporting)
-         * @param block_end_pos     start position of this block in the stream 
-         *                          that is the source of the configuration 
-         *                          data (for error reporting)         
+         *                          ConfigurationBlock structure      
          */
-        Configurator(const ConfigurationBlock& cb,
-                     unsigned long block_start_pos, 
-                     unsigned long block_end_pos);
+        Configurator(const ConfigurationBlock& cb);
                      
         virtual ~Configurator();                     
                      
@@ -354,17 +369,9 @@ class WorldConfigurator : public Configurator {
         /** 
          * Constructs objects, and then passes ConfigurationBlock onto parse()
          * for processing. 
-         * @param cb                a populated ConfigurationBlock object
-         * @param block_start_pos   start position of this block in the stream 
-         *                          that is the source of the configuration 
-         *                          data (for error reporting)
-         * @param block_end_pos     start position of this block in the stream 
-         *                          that is the source of the configuration 
-         *                          data (for error reporting)         
+         * @param cb                a populated ConfigurationBlock object       
          */
-        WorldConfigurator(const ConfigurationBlock& cb, 
-                  unsigned long block_start_pos, 
-                  unsigned long block_end_pos);
+        WorldConfigurator(const ConfigurationBlock& cb);
 
         /** 
          * Takes the string fields of ConfigurationBlock and interprets values
@@ -402,17 +409,9 @@ class SpeciesConfigurator : public Configurator {
         /** 
          * Constructs objects, and then passes ConfigurationBlock onto parse()
          * for processing. 
-         * @param cb                a populated ConfigurationBlock object
-         * @param block_start_pos   start position of this block in the stream 
-         *                          that is the source of the configuration 
-         *                          data (for error reporting)
-         * @param block_end_pos     start position of this block in the stream 
-         *                          that is the source of the configuration 
-         *                          data (for error reporting)         
+         * @param cb                a populated ConfigurationBlock object     
          */
-        SpeciesConfigurator(const ConfigurationBlock& cb, 
-                  unsigned long block_start_pos, 
-                  unsigned long block_end_pos);
+        SpeciesConfigurator(const ConfigurationBlock& cb);
 
         /** 
          * Takes the string fields of ConfigurationBlock and interprets values
@@ -493,6 +492,21 @@ class ConfigurationFile {
         std::istream&       src_;
         
 };  
+
+///////////////////////////////////////////////////////////////////////////////
+// helper functions
+namespace confsys_detail {
+    
+    /**
+     * Composes and returns and appropriate exception.
+     * @param message           error message
+     * @param cb                ConfigurationBlock that has the error
+     * @return                  ConfiguratonError exception to be thrown
+     */
+    ConfigurationError build_configuration_block_exception(const std::string& message,
+                const ConfigurationBlock& cb);
+    
+} // confsys_detail
 
 } // namespace gingko
 
