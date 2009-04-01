@@ -30,6 +30,7 @@
 #include "world.hpp"
 #include "biosys.hpp"
 #include "asciigrid.hpp"
+#include "filesys.hpp"
 
 namespace gingko {
 
@@ -87,6 +88,13 @@ ConfigurationBlock::ConfigurationBlock(std::istream& in)
     : is_block_set_(false) {   
     this->parse(in);
 }        
+
+// construct and parse
+ConfigurationBlock::ConfigurationBlock(std::istream& in, const std::string& config_filepath)
+    : is_block_set_(false),
+      config_filepath_(config_filepath) {   
+    this->parse(in);
+}
 
 // default do-nothing destructor
 ConfigurationBlock::~ConfigurationBlock() {}   
@@ -160,6 +168,10 @@ unsigned long ConfigurationBlock::get_block_start_pos() const {
 unsigned long ConfigurationBlock::get_block_end_pos() const {
     return this->block_end_pos_;
 }    
+
+std::string ConfigurationBlock::get_config_filepath() const {
+    return this->config_filepath_;
+}
 
 // workhorse parser
 void ConfigurationBlock::parse(std::istream& in) {
@@ -415,20 +427,22 @@ GenerationConfigurator::GenerationConfigurator(const ConfigurationBlock& cb)
 }
 
 std::vector<long> GenerationConfigurator::get_grid_values(const std::string& grid_path, const World& world) {
+    std::string root_filepath = filesys::get_path_parent(this->get_config_filepath());
+    std::string full_grid_path = filesys::compose_path(root_filepath, grid_path);
     try {
-        asciigrid::AsciiGrid grid(grid_path);
+        asciigrid::AsciiGrid grid(full_grid_path);
         std::vector<long> values = grid.get_cell_values();
         if (values.size() != world.size()) {
             std::ostringstream msg;
             msg << "landscape has " << world.size() << "cells, ";
-            msg << "but grid \"" << grid_path << "\" describes " << values.size() << " cells";
+            msg << "but grid \"" << full_grid_path << "\" describes " << values.size() << " cells";
             throw this->build_exception(msg.str());        
         }
         return values;
     } catch (asciigrid::AsciiGridIOError e) {
-        throw this->build_exception("I/O error reading grid \"" + grid_path + "\": " + e.what());
+        throw this->build_exception("I/O error reading grid \"" + full_grid_path + "\": " + e.what());
     } catch (asciigrid::AsciiGridFormatError e) {
-        throw this->build_exception("format error reading grid \"" + grid_path + "\": " + e.what());
+        throw this->build_exception("format error reading grid \"" + full_grid_path + "\": " + e.what());
     }
 }
 
@@ -561,7 +575,8 @@ ConfigurationFile::ConfigurationFile(std::istream& src)
 }
 
 ConfigurationFile::ConfigurationFile(const char * fpath)
-        : fsrc_(fpath),
+        : config_filepath_(fpath),
+          fsrc_(fpath),
           src_(fsrc_) {
     if (not this->src_) {
         std::ostringstream msg;
@@ -571,7 +586,8 @@ ConfigurationFile::ConfigurationFile(const char * fpath)
 }
 
 ConfigurationFile::ConfigurationFile(const std::string& fpath) 
-        : fsrc_(fpath.c_str()),
+        : config_filepath_(fpath),
+          fsrc_(fpath.c_str()),
           src_(fsrc_) {
     if (not this->src_) {
         std::ostringstream msg;
@@ -584,12 +600,12 @@ ConfigurationFile::~ConfigurationFile() { }
 
 void ConfigurationFile::configure(World& world) {
     assert(this->src_);
-    ConfigurationBlock cb;
     unsigned num_worlds = 0;
     std::set<std::string> species_labels;
     std::set<unsigned long> generations;
-    while (not this->src_.eof()) {
-        this->src_ >> cb;
+    while (not this->src_.eof()) {        
+        ConfigurationBlock cb(this->src_, this->config_filepath_);
+//         this->src_ >> cb;
         if (cb.is_block_set()) {
             if (cb.get_type() == "world") {
                 if (num_worlds != 0) {

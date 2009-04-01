@@ -122,7 +122,15 @@ class ConfigurationBlock {
          * parse().
          * @param in    input stream with data
          */
-        ConfigurationBlock(std::istream& in);  
+        ConfigurationBlock(std::istream& in);
+        
+        /**
+         * Constructor that populates a ConfigurationBlock object by calling
+         * parse(), also storing filepath for path manipulation.
+         * @param in                input stream with data
+         * @param config_filepath   path of configuration file         
+         */
+        ConfigurationBlock(std::istream& in, const std::string& config_filepath);            
         
         /**
          * Default destructor.
@@ -246,7 +254,14 @@ class ConfigurationBlock {
          * in the source stream.
          * @return      file position of the end of the block
          */
-        unsigned long get_block_end_pos() const;        
+        unsigned long get_block_end_pos() const;    
+        
+        /**
+         * Returns path of the source configuration file, or an empty string if
+         * this is not defined.
+         * @return      path of source file (if defined) or empty string
+         */
+        std::string get_config_filepath() const;
 
     private:
         /** The type of block (e.g. "species", "world", "generation") */
@@ -261,6 +276,8 @@ class ConfigurationBlock {
         unsigned long                           block_start_pos_;
         /** End of block in the source stream. */
         unsigned long                           block_end_pos_;
+        /** Filepath source of configuration file. */
+        std::string                             config_filepath_;
         
 }; // ConfigurationBlock
 
@@ -296,7 +313,8 @@ class Configurator {
          *                          ConfigurationBlock structure      
          */
         Configurator(const ConfigurationBlock& cb);
-                     
+    
+        /** No-op destructor. */                     
         virtual ~Configurator();                     
                      
         /** 
@@ -375,6 +393,15 @@ class Configurator {
          * @return              vector of keys in entries
          */
         std::vector<std::string> get_matching_configuration_keys(const std::string& key_start) const;        
+        
+        /**
+         * Returns path of the source configuration file, or an empty string if
+         * this is not defined.
+         * @return      path of source file (if defined) or empty string
+         */
+        std::string get_config_filepath() const {
+            return this->configuration_block_.get_config_filepath();
+        }
         
         /**
          * Builds and returns an exception, including file position in 
@@ -608,6 +635,9 @@ class ConfigurationFile {
         void configure(World& world);
         
     private: 
+        
+        /** Path to configuration file. */
+        std::string         config_filepath_;    
     
         /** Input (file) stream. */
         std::ifstream       fsrc_;

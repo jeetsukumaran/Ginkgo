@@ -60,7 +60,8 @@ test_parse_conf_block_SOURCES = \
     ../cell.cpp \
     ../landscape.cpp \
     ../biosys.cpp   \
-    ../asciigrid.cpp 
+    ../asciigrid.cpp \
+    ../filesys.cpp
     
 test_textutil_SOURCES = \
     test_textutil.cpp \

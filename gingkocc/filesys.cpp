@@ -32,38 +32,45 @@ const char * PATH_SEPARATOR = "/";
 // PATH TEXT/STRING OPERATIONS
 
 // extracts filenames from path
-std::string get_path_leaf(const char * path) {
-    std::string full_path = path;
-    std::string::size_type last_path_char = full_path.find_last_of(PATH_SEPARATOR);
+std::string get_path_leaf(const std::string& path) {
+    std::string::size_type last_path_char = path.find_last_of(PATH_SEPARATOR);
     if (last_path_char == std::string::npos) {
-        return full_path;
-    } else if (last_path_char == full_path.size()-1) {
-        return get_path_leaf(full_path.substr(0, full_path.size()-1).c_str());
+        return path;
+    } else if (last_path_char == path.size()-1) {
+        return get_path_leaf(path.substr(0, path.size()-1).c_str());
     } else {
-        if (last_path_char >= full_path.size()) {
+        if (last_path_char >= path.size()) {
             return std::string("");
         } else {
-            return full_path.substr(last_path_char+1);
+            return path.substr(last_path_char+1);
         }
     }    
 } 
 
 // extracts directory from path
-std::string get_path_parent(const char * path) {
-    std::string full_path = path;
-    std::string::size_type last_path_char = full_path.find_last_of(PATH_SEPARATOR);
+std::string get_path_parent(const std::string& path) {
+    std::string::size_type last_path_char = path.find_last_of(PATH_SEPARATOR);
     if (last_path_char == std::string::npos) {
         return std::string("");
-    } else if (last_path_char == full_path.size()-1) {
-        return get_path_parent(full_path.substr(0, full_path.size()-1).c_str());
+    } else if (last_path_char == path.size()-1) {
+        return get_path_parent(path.substr(0, path.size()-1).c_str());
     } else {
-        if (last_path_char >= full_path.size()) {
+        if (last_path_char >= path.size()) {
             return std::string("");
         } else {
-            return full_path.substr(0, last_path_char);
+            return path.substr(0, last_path_char);
         }
     }     
 }
+
+std::string get_path_leaf(const char * path) {
+    return get_path_leaf(std::string(path));
+}
+
+std::string get_path_parent(const char * path) {
+    return get_path_parent(std::string(path));
+}
+
 
 // put together file path
 std::string compose_path(const std::string& parent, const std::string& child) {
