@@ -104,6 +104,19 @@ class Landscape {
             }
         }
         
+        /**
+         * Individually set the environment of cells.
+         * @param factor_index       fitness factor index being set
+         * @param cell_environments  vector of numbers representing the 
+         *                           environmental value of cells
+         */
+        void set_environment(unsigned index, std::vector<long> cell_environments) {
+            assert(cell_environments.size() >= this->cells_.size());
+            for (unsigned long i = 0; i < this->cells_.size(); ++i) {
+                (*this->cells_[i]).set_environment_factor(index, cell_environments[i]);
+            }        
+        }
+        
         // --- cell access and spatial mapping ---
         
         /**

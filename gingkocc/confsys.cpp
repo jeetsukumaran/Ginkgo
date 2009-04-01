@@ -436,7 +436,21 @@ void GenerationConfigurator::process_carrying_capacity() {
 }
 
 void GenerationConfigurator::process_environments() {
-
+    std::vector<std::string> keys = this->get_matching_configuration_keys("environment");
+    for (std::vector<std::string>::iterator k = keys.begin(); k != keys.end(); ++k) {
+        std::string& key = *k;
+        std::vector<std::string> key_parts = textutil::split(key, ":", 1, false);
+        if (key_parts.size() < 2) {
+            throw this->build_exception("need to specify environment factor index");
+        }
+        unsigned environment_factor = 0;
+        try {
+            environment_factor = convert::to_scalar<unsigned long>(key_parts[1]);
+        } catch (const convert::ValueError& e) {
+            throw this->build_exception("invalid value for environment factor index: \"" + key_parts[1] + "\"");
+        }        
+        this->environments_.insert(std::make_pair(environment_factor, this->get_configuration_scalar<std::string>(key)));
+    }
 }
 
 void GenerationConfigurator::process_movement_costs() {
@@ -457,6 +471,9 @@ void GenerationConfigurator::parse()  {
 void GenerationConfigurator::configure(World& world)  {
     if (this->carrying_capacity_.size() > 0) {
         world.landscape().set_carrying_capacities(this->get_grid_values(this->carrying_capacity_, world));        
+    }
+    for (std::map<unsigned, std::string>::iterator envi = this->environments_.begin(); envi != this->environments_.end(); ++envi) {
+        world.landscape().set_environment(envi->first, this->get_grid_values(envi->second, world));
     }
 }
 
