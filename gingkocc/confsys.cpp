@@ -454,7 +454,15 @@ void GenerationConfigurator::process_environments() {
 }
 
 void GenerationConfigurator::process_movement_costs() {
-
+    std::vector<std::string> keys = this->get_matching_configuration_keys("movement");
+    for (std::vector<std::string>::iterator k = keys.begin(); k != keys.end(); ++k) {
+        std::string& key = *k;
+        std::vector<std::string> key_parts = textutil::split(key, ":", 1, false);
+        if (key_parts.size() < 2) {
+            throw this->build_exception("need to specify species label for movement costs");
+        }
+        this->movement_costs_.insert(std::make_pair(key_parts[1], this->get_configuration_scalar<std::string>(key)));
+    }
 }
 
 void GenerationConfigurator::process_sampling_regimes() {
@@ -478,6 +486,13 @@ void GenerationConfigurator::configure(World& world)  {
     for (std::map<unsigned, std::string>::iterator envi = this->environments_.begin(); envi != this->environments_.end(); ++envi) {
         this->get_grid_values(envi->second, world);
         world_settings.environments.insert(*envi);
+    }
+    for (std::map<std::string, std::string>::iterator mci = this->movement_costs_.begin(); mci != this->movement_costs_.end(); ++mci) {
+        if (not world.has_species(mci->first)) {
+            throw this->build_exception("movement costs: species \"" + mci->first + "\" not defined");
+        }
+        this->get_grid_values(mci->second, world);
+        world_settings.movement_costs.insert(*mci);
     }
 }
 
