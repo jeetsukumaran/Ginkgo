@@ -794,8 +794,8 @@ class Species {
          * @param  strengths    vector of coefficients to the multivariate 
          *                      fitness function
          */        
-        void set_selection_strengths(const std::vector<float>& strengths) {
-            this->selection_strengths_ = strengths;
+        void set_selection_weights(const std::vector<float>& strengths) {
+            this->selection_weights_ = strengths;
         }
         
         /**
@@ -861,7 +861,7 @@ class Species {
             const FitnessFactors& genotype = organism.genotype();        
             const FitnessFactorType * g = genotype;
             const FitnessFactorType * e = environment;
-            std::vector<float>::const_iterator s = this->selection_strengths_.begin();
+            std::vector<float>::const_iterator s = this->selection_weights_.begin();
             float weighted_distance = 0.0;
             for (unsigned i = 0; i < this->num_fitness_factors_; ++i, ++g, ++e, ++s) {
                 weighted_distance += pow((*e - *g), 2) * *s; // each distance weighted by selection strength
@@ -1016,7 +1016,7 @@ class Species {
         /** number of active fitness factors */
         unsigned                            num_fitness_factors_;
         /** coefficients for the fitness functions */
-        std::vector<float>                  selection_strengths_;
+        std::vector<float>                  selection_weights_;
         /** rate of mutation for the genotypic fitness factors */
         float                               mutation_rate_;
         /** window for perturbations of fitness factor values */

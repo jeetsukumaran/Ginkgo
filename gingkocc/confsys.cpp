@@ -327,9 +327,9 @@ SpeciesConfigurator::SpeciesConfigurator(const ConfigurationBlock& cb)
 
 void SpeciesConfigurator::parse()  {
     try {
-        this->selection_strengths_ = this->get_configuration_vector<float>("selection-weights");
+        this->selection_weights_ = this->get_configuration_vector<float>("selection-weights");
     } catch (ConfigurationIncompleteError& e) {
-        this->selection_strengths_.assign(MAX_FITNESS_FACTORS, 1);
+        this->selection_weights_.assign(MAX_FITNESS_FACTORS, 1);
     }
     
     try {

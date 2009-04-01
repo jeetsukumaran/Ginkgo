@@ -46,7 +46,7 @@ Species::Species(const std::string& label,
     this->max_mutation_size_ = 1;
     this->mean_reproductive_rate_ = 6;
     this->reproductive_rate_mutation_size_ = 1;
-    this->selection_strengths_.assign(this->num_fitness_factors_, 1);
+    this->selection_weights_.assign(this->num_fitness_factors_, 1);
     memset(this->default_genotypic_fitness_factors_, 0, 
         MAX_FITNESS_FACTORS*sizeof(FitnessFactorType));    
     this->movement_capacity_ = 1;

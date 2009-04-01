@@ -470,7 +470,7 @@ class SpeciesConfigurator : public Configurator {
            
     private:
         /** coefficients for the fitness functions */
-        std::vector<float>                  selection_strengths_;
+        std::vector<float>                  selection_weights_;
         /** rate of mutation for the genotypic fitness factors */
         float                               mutation_rate_;
         /** window for perturbations of fitness factor values */

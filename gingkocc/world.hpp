@@ -224,10 +224,10 @@ class World {
          * @param strengths     vector coeffecients to the Gaussian distance
          *                      equation used to evaluate fitness
          */
-        void set_species_selection_strengths(const std::string& species_label, const std::vector<float>& strengths) {
+        void set_species_selection_weights(const std::string& species_label, const std::vector<float>& strengths) {
             assert(this->species_.find(species_label) != this->species_.end());    
             assert(strengths.size() == this->num_fitness_factors_);
-            this->species_[species_label]->set_selection_strengths(strengths);
+            this->species_[species_label]->set_selection_weights(strengths);
         }
         
         /**
