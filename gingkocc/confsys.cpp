@@ -295,7 +295,7 @@ void SpeciesConfigurator::parse()  {
     }
     
     try {
-        this->default_genotypic_fitness_factors_ = this->get_configuration_vector<FitnessFactorType>("selection-weights");
+        this->default_genotypic_fitness_factors_ = this->get_configuration_vector<FitnessFactorType>("genotypic-fitness");
     } catch (ConfigurationIncompleteError& e) {
         this->default_genotypic_fitness_factors_.assign(MAX_FITNESS_FACTORS, 0);
     }
