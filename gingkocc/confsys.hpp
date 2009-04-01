@@ -198,6 +198,14 @@ class ConfigurationBlock {
         std::vector<std::string> get_keys() const;
         
         /**
+         * Returns vector of keys in entries that start with a particular 
+         * string.
+         * @param   key_start   string matching beginning of key
+         * @return              vector of keys in entries
+         */
+        std::vector<std::string> get_keys(const std::string& key_start) const;
+        
+        /**
          * Composes exception message.
          * @param pos   position in stream
          * @param desc  description of error 
@@ -255,6 +263,25 @@ class ConfigurationBlock {
         unsigned long                           block_end_pos_;
         
 }; // ConfigurationBlock
+
+/**
+ * Track distribution of organisms, either for seed populations or sampling 
+ * regimes.
+ */
+struct OrganismDistribution {
+    
+    public:
+        OrganismDistribution()
+            : num_organisms(0) { }
+
+    public:
+        std::string     species_label;
+        unsigned long   num_organisms;
+        std::vector<CellIndexType>  x;
+        std::vector<CellIndexType>  y;
+        
+
+}; // OrganismDistribution
 
 /**
  * Base class for configurators.
@@ -333,7 +360,21 @@ class Configurator {
             } catch (convert::ValueError e) {
                 throw this->build_exception(std::string(e.what()) + " (specified for \"" + key + "\")");
             }            
-        }        
+        }
+        
+        /**
+         * Retrieves vector of cell positions from a configuration entry,
+         * parses them, and adds them to the OrganismDistribution object.
+         */
+        void get_configuration_positions(const std::string& key, OrganismDistribution& od);         
+        
+        /**
+         * Returns vector of keys in entries that start with a particular 
+         * string.
+         * @param   key_start   string matching beginning of key
+         * @return              vector of keys in entries
+         */
+        std::vector<std::string> get_matching_configuration_keys(const std::string& key_start) const;        
         
         /**
          * Builds and returns an exception, including file position in 
@@ -419,6 +460,13 @@ class SpeciesConfigurator : public Configurator {
          * Configures a Species object according to settings.
          */
         void configure(World& world);         
+        
+    private:
+        
+        /**
+         * Special-case parsing of seed population statements.
+         */
+        void process_seed_populations();
            
     private:
         /** coefficients for the fitness functions */
@@ -437,6 +485,8 @@ class SpeciesConfigurator : public Configurator {
         int                                 movement_capacity_;
         /** genotype for organisms created de novo */
         std::vector<FitnessFactorType>      default_genotypic_fitness_factors_;
+        /** seed populations */
+        std::vector<OrganismDistribution>   seed_populations_;
 
 }; // SpeciesConfigurator
 

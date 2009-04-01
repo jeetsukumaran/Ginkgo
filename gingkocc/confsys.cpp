@@ -70,7 +70,7 @@ World& configure_world(World& world, const std::string& conf_fpath) {
 const char * BLOCK_START = "@";
 const char * BLOCK_BODY_START = "{";
 const char * BLOCK_BODY_END = "}";
-const char * BLOCK_BODY_LINE_TERM = ";\n";
+const char * BLOCK_BODY_LINE_TERM = ";";
 const char * BLOCK_BODY_KEY_VAL_SEP = "=";
 const char * WHITESPACE = " \t\n";
 
@@ -113,13 +113,6 @@ bool ConfigurationBlock::is_block_set() const {
     return this->is_block_set_;
 }
 
-// get entry values by keys
-// std::string ConfigurationBlock::get_entry(const std::string& key) const {
-//     std::map< std::string, std::string >::const_iterator val = this->entries_.find(key);
-//     assert(val != this->entries_.end());
-//     return val->second;
-// }
-
 // get keys
 std::vector<std::string> ConfigurationBlock::get_keys() const {
     std::vector<std::string> keys;
@@ -127,7 +120,21 @@ std::vector<std::string> ConfigurationBlock::get_keys() const {
     for (std::map< std::string, std::string >::const_iterator e = this->entries_.begin();
             e != this->entries_.end();
             ++e) {
-        keys.push_back(e->second);           
+        keys.push_back(e->first);           
+    }
+    return keys;
+}
+
+// get keys matching pattern
+std::vector<std::string> ConfigurationBlock::get_keys(const std::string& key_start) const {
+    std::vector<std::string> keys;
+    keys.reserve(this->entries_.size());
+    for (std::map< std::string, std::string >::const_iterator e = this->entries_.begin();
+            e != this->entries_.end();
+            ++e) {
+        if (textutil::startswith(e->first, key_start)) {            
+            keys.push_back(e->first);
+        }            
     }
     return keys;
 }
@@ -215,7 +222,8 @@ void ConfigurationBlock::parse(std::istream& in) {
             std::vector<std::string> entry_parts = textutil::split(entry, BLOCK_BODY_KEY_VAL_SEP, 1, false);
             if (entry_parts.size() < 2) {
                 std::ostringstream msg;
-                msg << "incomplete key-value specification in entry #" << entry_count << " (missing \"=\")";            
+                msg << "incomplete key-value specification in entry no. " << entry_count << " (missing \"=\"): ";
+                msg << "\"" << entry << "\"";
                 throw ConfigurationSyntaxError(this->compose_error_message(start_pos, msg.str()));
             }
             this->entries_[textutil::strip(entry_parts[0], WHITESPACE)] = textutil::strip(entry_parts[1], WHITESPACE) ;
@@ -241,6 +249,36 @@ Configurator::Configurator(const ConfigurationBlock& cb)
         : configuration_block_(cb) { }
           
 Configurator::~Configurator() { }
+
+std::vector<std::string> Configurator::get_matching_configuration_keys(const std::string& key_start) const {
+    return this->configuration_block_.get_keys(key_start);
+}
+
+void Configurator::get_configuration_positions(const std::string& key, OrganismDistribution& od) {
+    std::vector<std::string> positions = this->get_configuration_vector<std::string>(key);
+    od.x.reserve(od.x.size() + positions.size());
+    od.y.reserve(od.y.size() + positions.size());
+    for (std::vector<std::string>::const_iterator pos = positions.begin(); pos < positions.end(); ++pos) {
+        std::string pos_clean = textutil::strip(*pos, WHITESPACE);
+        if (pos_clean.size() == 0) {
+            continue;
+        }
+        std::vector<std::string> pos_parts = textutil::split(pos_clean, ",", 1, false);
+        if (pos_parts.size() != 2) {
+            throw this->build_exception("invalid or incomplete position specification: \"" + pos_clean + "\"");
+        }
+        try {
+            od.x.push_back(convert::to_scalar<unsigned long>(pos_parts[0]));
+        } catch (const convert::ValueError& e) {
+            throw this->build_exception("invalid x-coordinate value for position: \"" + pos_parts[0] + "\"");
+        }
+        try {
+            od.y.push_back(convert::to_scalar<unsigned long>(pos_parts[1]));
+        } catch (const convert::ValueError& e) {
+            throw this->build_exception("invalid y-coordinate value for position: \"" + pos_parts[1] + "\"");
+        }         
+    }
+}
 
 ConfigurationError Configurator::build_exception(const std::string& message) const {
     return confsys_detail::build_configuration_block_exception(this->configuration_block_, message);
@@ -305,6 +343,7 @@ void SpeciesConfigurator::parse()  {
     this->mean_reproductive_rate_ = this->get_configuration_scalar<unsigned>("fecundity", 8);    
     this->reproductive_rate_mutation_size_ = this->get_configuration_scalar<unsigned>("fecundity-evolution-size", 1);
     this->movement_capacity_ = this->get_configuration_scalar<unsigned>("movement-capacity", 1);
+    this->process_seed_populations();
 }
 
 void SpeciesConfigurator::configure(World& world)  {
@@ -324,6 +363,45 @@ void SpeciesConfigurator::configure(World& world)  {
     sp.set_mean_reproductive_rate(this->mean_reproductive_rate_);
 //     sp.set_reproductive_rate_mutation_size(this->reproductive_rate_mutation_size_);
     sp.set_movement_capacity(this->movement_capacity_);
+    for (std::vector<OrganismDistribution>::iterator odi = this->seed_populations_.begin(); odi != this->seed_populations_.end(); ++odi) {
+        OrganismDistribution& od = *odi;
+        assert(od.x.size() == od.y.size());
+        for (unsigned i = 0; i < od.x.size(); ++i) {
+            if (od.x[i] > world.landscape().size_x()-1) {
+                std::ostringstream msg;
+                msg << "maximum x-coordinate on landscape is " << world.landscape().size_x();
+                msg << " but position specifies x-coordinate of " << od.x[i];
+                throw this->build_exception(msg.str());
+            }
+            if (od.y[i] > world.landscape().size_y()-1) {
+                std::ostringstream msg;
+                msg << "maximum x-coordinate on landscape is " << world.landscape().size_y();
+                msg << " but position specifies x-coordinate of " << od.y[i];
+                throw this->build_exception(msg.str());
+            }              
+            CellIndexType cell_index = world.landscape().xy_to_index(od.x[i], od.y[i]);
+            world.seed_population(cell_index, label, od.num_organisms);
+        }
+    }
+}
+
+void SpeciesConfigurator::process_seed_populations() {
+    std::vector<std::string> keys = this->get_matching_configuration_keys("init");
+    for (std::vector<std::string>::const_iterator k = keys.begin(); k != keys.end(); ++k) {
+        this->seed_populations_.push_back(OrganismDistribution());
+        OrganismDistribution& od = this->seed_populations_.back();
+        std::string key = *k;
+        std::vector<std::string> key_parts = textutil::split(key, "#", 1, false);
+        if (key_parts.size() < 2) {
+            throw this->build_exception("need to specify number of organisms in starting population using '#' token: \"" + key + "\"");
+        }
+        try {
+            od.num_organisms = convert::to_scalar<unsigned long>(key_parts[1]);
+        } catch (const convert::ValueError& e) {
+            throw this->build_exception("invalid value for population size: \"" + key_parts[1] + "\"");
+        }
+        this->get_configuration_positions(key, od);
+    }
 }
 
 ///////////////////////////////////////////////////////////////////////////////
