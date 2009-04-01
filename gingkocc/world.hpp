@@ -56,6 +56,9 @@ struct SamplingRegime {
  */
 struct WorldSettings {
     
+    /** Path to grid setting carrying capacity. */
+    std::string                             carrying_capacity;
+    
     /** 
      * Environmental regimes that need to be changed/set (expressed as factor
      * indexes mapped to ESRI ASCII Grid file paths). 

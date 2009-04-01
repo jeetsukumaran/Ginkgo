@@ -469,11 +469,15 @@ void GenerationConfigurator::parse()  {
 }
 
 void GenerationConfigurator::configure(World& world)  {
+    WorldSettings world_settings;
+
     if (this->carrying_capacity_.size() > 0) {
-        world.landscape().set_carrying_capacities(this->get_grid_values(this->carrying_capacity_, world));        
+        this->get_grid_values(this->carrying_capacity_, world);        
+        world_settings.carrying_capacity = this->carrying_capacity_;
     }
     for (std::map<unsigned, std::string>::iterator envi = this->environments_.begin(); envi != this->environments_.end(); ++envi) {
-        world.landscape().set_environment(envi->first, this->get_grid_values(envi->second, world));
+        this->get_grid_values(envi->second, world);
+        world_settings.environments.insert(*envi);
     }
 }
 
