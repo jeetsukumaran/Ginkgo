@@ -145,6 +145,14 @@ std::string ConfigurationBlock::compose_error_message(unsigned long pos, const s
     return this->compose_error_message(pos, desc.c_str());
 }
 
+unsigned long ConfigurationBlock::get_block_start_pos() const {
+    return this->block_start_pos_;
+}
+
+unsigned long ConfigurationBlock::get_block_end_pos() const {
+    return this->block_end_pos_;
+}    
+
 // workhorse parser
 void ConfigurationBlock::parse(std::istream& in) {
     
@@ -235,7 +243,7 @@ Configurator::Configurator(const ConfigurationBlock& cb)
 Configurator::~Configurator() { }
 
 ConfigurationError Configurator::build_exception(const std::string& message) const {
-    return confsys_detail::build_configuration_block_exception(message, this->configuration_block_);
+    return confsys_detail::build_configuration_block_exception(this->configuration_block_, message);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -360,19 +368,19 @@ void ConfigurationFile::configure(World& world) {
         if (cb.is_block_set()) {
             if (cb.get_type() == "world") {
                 if (num_worlds != 0) {
-                    throw confsys_detail::build_configuration_block_exception("world must be described before species are added", cb);
+                    throw confsys_detail::build_configuration_block_exception(cb, "world must be described before species are added");
                 }                
                 WorldConfigurator wcf(cb);
                 wcf.configure(world);
-//                 num_worlds += 1;
+                num_worlds += 1;
             }
             if (cb.get_type() == "species") {
                 if (num_worlds == 0) {
-                    throw confsys_detail::build_configuration_block_exception("world must be described before species are added", cb);
+                    throw confsys_detail::build_configuration_block_exception(cb, "world must be described before species are added");
                 }
                 std::string label = cb.get_name();
                 if (species_labels.find(label) != species_labels.end()) {
-                    throw confsys_detail::build_configuration_block_exception("species \"" + label + "\" has already been defined", cb);
+                    throw confsys_detail::build_configuration_block_exception(cb, "species \"" + label + "\" has already been defined");
                 }
                 SpeciesConfigurator spcf(cb);
                 spcf.configure(world);
@@ -382,6 +390,9 @@ void ConfigurationFile::configure(World& world) {
     }
 }
 
+///////////////////////////////////////////////////////////////////////////////
+// Implementation details
+
 namespace confsys_detail {
     
     /**
@@ -390,8 +401,8 @@ namespace confsys_detail {
      * @param cb                ConfigurationBlock that has the error
      * @return                  ConfiguratonError exception to be thrown
      */
-    ConfigurationError build_configuration_block_exception(const std::string& message,
-                const ConfigurationBlock& cb) {
+    ConfigurationError build_configuration_block_exception(const ConfigurationBlock& cb,
+            const std::string& message) {
         std::ostringstream msg;
         msg << cb.get_type() << " block \"" << cb.get_name();
         msg << "\" (file position " << cb.get_block_start_pos() + 1;

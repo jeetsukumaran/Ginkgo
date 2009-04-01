@@ -231,18 +231,14 @@ class ConfigurationBlock {
          * in the source stream.
          * @return      file position of the start of the block
          */
-        unsigned long get_block_start_pos() const {
-            return this->block_start_pos_;
-        }
+        unsigned long get_block_start_pos() const;
         
         /**
          * Returns the file character position of the end of this block 
          * in the source stream.
          * @return      file position of the end of the block
          */
-        unsigned long get_block_end_pos() const {
-            return this->block_end_pos_;
-        }        
+        unsigned long get_block_end_pos() const;        
 
     private:
         /** The type of block (e.g. "species", "world", "generation") */
@@ -499,12 +495,12 @@ namespace confsys_detail {
     
     /**
      * Composes and returns and appropriate exception.
+     * @param cb                ConfigurationBlock that has the error     
      * @param message           error message
-     * @param cb                ConfigurationBlock that has the error
      * @return                  ConfiguratonError exception to be thrown
      */
-    ConfigurationError build_configuration_block_exception(const std::string& message,
-                const ConfigurationBlock& cb);
+    ConfigurationError build_configuration_block_exception(const ConfigurationBlock& cb,
+            const std::string& message);
     
 } // confsys_detail
 
