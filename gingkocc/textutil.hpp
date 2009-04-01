@@ -120,6 +120,17 @@ std::string lower(const std::string& s);
  */
 std::string upper(const std::string& s);
 
+/** 
+ * Returns <code>true</code> if the second string is equal to the first n
+ * characters of the first string, where n = length of the second string.
+ *
+ * @param s1        first string
+ * @param s2        second string
+ * @return          <code>true</code> if the first string begins with the 
+ *                  second
+ */
+bool startswith(const std::string& s1, const std::string& s2);
+
 } // namespace textutil
 } // namespace gingko
 

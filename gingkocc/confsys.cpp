@@ -263,7 +263,7 @@ void WorldConfigurator::parse()  {
     this->size_y_ = this->get_configuration_scalar<unsigned long>("ncols");
     this->generations_to_run_ = this->get_configuration_scalar<unsigned long>("ngens");    
     this->num_fitness_factors_ = this->get_configuration_scalar<unsigned>("nfitness", MAX_FITNESS_FACTORS);
-    this->rand_seed_ = this->get_configuration_scalar<unsigned>("seed", 0);
+    this->rand_seed_ = this->get_configuration_scalar<unsigned>("rseed", 0);
 }
 
 void WorldConfigurator::configure(World& world)  {

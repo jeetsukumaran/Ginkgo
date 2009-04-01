@@ -57,7 +57,7 @@ bool check_split(std::vector<std::string> result,
     for (unsigned i = 0; i < expected_count; ++i) {
         assert(result[i] == expected[i]);
     }
-    
+    std::cout << "PASS" << std::endl;
     return true;
 }
 
@@ -137,7 +137,15 @@ void test_strip() {
     assert_str_equal(strip("!### hello ###", "#"), "!### hello ");
     assert_str_equal(strip("!### hello ###  ", "!"), "### hello ###  ");
     assert_str_equal(strip("!### hello ###  ", "!#"), " hello ###  ");
-    assert_str_equal(strip("!### hello ###  ", "!# "), "hello");    
+    assert_str_equal(strip("!### hello ###  ", "!# "), "hello");
+    std::cout << "String stripping: PASS" << std::endl;
+}
+
+void test_comps() {
+    std::cout << "Testing string comparisons ..." << std::endl;
+    assert( startswith("abcde", "abc"));
+    assert( startswith("abcde", "bc") == false);
+    std::cout << "String comparisons: PASS" << std::endl;
 }
 
 void test_casing() {
@@ -149,6 +157,7 @@ int main(int, char * []) {
     test_splits();
     test_split_on_any();
     test_strip();
+    test_comps();
 }
 
 

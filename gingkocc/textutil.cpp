@@ -158,16 +158,22 @@ std::string strip(const std::string& s, const char * to_strip) {
     }
 }
 
+// convert string to lower case
 std::string lower(const std::string& s) {
     std::string result = s;
     std::transform(s.begin(), s.end(), result.begin(), (int(*)(int))std::tolower);
     return result;
 }
 
+// convert string to upper case
 std::string upper(const std::string& s) {
     std::string result = s;
     std::transform(s.begin(), s.end(), result.begin(), (int(*)(int))std::toupper);
     return result;
+}
+
+bool startswith(const std::string& s1, const std::string& s2) {
+    return s1.compare(0, s2.size(), s2) == 0;
 }
 
 } // textutil namespace
