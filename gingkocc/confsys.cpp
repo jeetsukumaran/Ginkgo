@@ -413,9 +413,17 @@ GenerationConfigurator::GenerationConfigurator(const ConfigurationBlock& cb)
     this->parse();
 }
 
-void GenerationConfigurator::validate_grid(const std::string& grid_path, const World& world) {
+std::vector<long> GenerationConfigurator::get_grid_values(const std::string& grid_path, const World& world) {
     try {
         asciigrid::AsciiGrid grid(grid_path);
+        std::vector<long> values = grid.get_cell_values();
+        if (values.size() != world.size()) {
+            std::ostringstream msg;
+            msg << "landscape has " << world.size() << "cells, ";
+            msg << "but grid \"" << grid_path << "\" describes " << values.size() << " cells";
+            throw this->build_exception(msg.str());        
+        }
+        return values;
     } catch (asciigrid::AsciiGridIOError e) {
         throw this->build_exception("I/O error reading grid \"" + grid_path + "\": " + e.what());
     } catch (asciigrid::AsciiGridFormatError e) {
@@ -448,7 +456,7 @@ void GenerationConfigurator::parse()  {
 
 void GenerationConfigurator::configure(World& world)  {
     if (this->carrying_capacity_.size() > 0) {
-        this->validate_grid(this->carrying_capacity_, world);
+        world.landscape().set_carrying_capacities(this->get_grid_values(this->carrying_capacity_, world));        
     }
 }
 

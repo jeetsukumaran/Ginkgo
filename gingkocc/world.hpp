@@ -181,6 +181,14 @@ class World {
         void generate_landscape(CellIndexType size_x, CellIndexType size_y);
         
         /**
+         * Returns number of cells in the landscape.
+         * @param number of cells in the landscape
+         */
+        unsigned long size() const {
+            return this->landscape_.size();
+        }
+        
+        /**
          * Returns <code>true</code> if a species of the specified name/label
          * has been defined.
          * @return 
@@ -196,7 +204,7 @@ class World {
          *                          occupy each cell at the end of every 
          *                          generation
          */
-        void set_cell_carrying_capacity(unsigned long carrying_capacity) {
+        void set_global_cell_carrying_capacity(unsigned long carrying_capacity) {
             for (CellIndexType i = 0; i < this->landscape_.size(); ++i) {
                 this->landscape_[i].set_carrying_capacity(carrying_capacity);
             }        

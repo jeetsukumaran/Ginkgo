@@ -76,7 +76,33 @@ class Landscape {
          * Iterates through all cells, setting their carrying capacity.
          * @param carrying_capacity        maximum occupancy of each cell
          */
-        void set_cell_carrying_capacity(unsigned long carrying_capacity);
+        void set_global_cell_carrying_capacity(unsigned long carrying_capacity);
+        
+        /**
+         * Individually set the carrying capacity of cells.
+         * @param cell_carrying_capacities   vector of numbers representing
+         *                                   maximum cell occupancy on a per cell
+         *                                   basis.
+         */
+        void set_carrying_capacities(const std::vector<unsigned long>& cell_carrying_capacities) {
+            assert(cell_carrying_capacities.size() >= this->cells_.size());
+            for (unsigned long i = 0; i < this->cells_.size(); ++i) {
+                (*this->cells_[i]).set_carrying_capacity(cell_carrying_capacities[i]);
+            }
+        }
+        
+        /**
+         * Individually set the carrying capacity of cells.
+         * @param cell_carrying_capacities   vector of numbers representing
+         *                                   maximum cell occupancy on a per cell
+         *                                   basis.
+         */
+        void set_carrying_capacities(const std::vector<long>& cell_carrying_capacities) {
+            assert(cell_carrying_capacities.size() >= this->cells_.size());
+            for (unsigned long i = 0; i < this->cells_.size(); ++i) {
+                (*this->cells_[i]).set_carrying_capacity(cell_carrying_capacities[i]);
+            }
+        }
         
         // --- cell access and spatial mapping ---
         

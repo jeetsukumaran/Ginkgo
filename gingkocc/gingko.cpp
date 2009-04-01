@@ -72,7 +72,7 @@ int main(int argc, char* argv[]) {
     world.set_num_fitness_factors(num_fitness);
 	world.generate_landscape(size_x, size_y);	
     std::cerr << "(setting carrying capacity)\n";
-	world.set_cell_carrying_capacity(cc);
+	world.set_global_cell_carrying_capacity(cc);
     std::cerr << "(adding species)\n";	
 	gingko::Species& sp1 = world.new_species("A");
 	
