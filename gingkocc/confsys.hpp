@@ -441,6 +441,52 @@ class SpeciesConfigurator : public Configurator {
 }; // SpeciesConfigurator
 
 /**
+ * Takes a ConfigurationBlock assumed to be wrapped around Generation
+ * information, and parses/translates values appropriately.
+ */
+class GenerationConfigurator : public Configurator {
+
+    public:
+    
+        /** 
+         * Constructs objects, and then passes ConfigurationBlock onto parse()
+         * for processing. 
+         * @param cb                a populated ConfigurationBlock object     
+         */
+        GenerationConfigurator(const ConfigurationBlock& cb);
+
+        /** 
+         * Takes the string fields of ConfigurationBlock and interprets values
+         * as needed for a Generation object.
+         */        
+        void parse();
+        
+        /**
+         * Configures a Generation object according to settings.
+         */
+        void configure(World& world);         
+           
+    private:
+        /** 
+         * Environmental regimes that need to be changed/set (expressed as factor
+         * indexes mapped to ESRI ASCII Grid file paths). 
+         */
+        std::map<unsigned, std::string>     environments_;
+        
+        /** 
+         * Movement costs that need to be changed/set. (expressed as species labels
+         * mapped to ESRI ASCII Grid file paths). 
+         */
+        std::map<std::string, std::string>  movement_costs_;
+        
+        /** 
+         * Sampling regime.
+         */
+        std::map<std::string, SamplingRegime>   samples_;          
+
+}; // GenerationConfigurator
+
+/**
  * Encapsulates parsing of a configuration file, and populating of WorldConfigurator,
  * SpeciesConf, GenerationConf, etc. objects.
  */

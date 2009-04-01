@@ -327,6 +327,22 @@ void SpeciesConfigurator::configure(World& world)  {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+// GenerationConfigurator
+
+GenerationConfigurator::GenerationConfigurator(const ConfigurationBlock& cb) 
+        : Configurator(cb)  {
+    this->parse();
+}
+
+void GenerationConfigurator::parse()  {
+
+}
+
+void GenerationConfigurator::configure(World& world)  {
+
+}
+
+///////////////////////////////////////////////////////////////////////////////
 // ConfigurationFile
 
 ConfigurationFile::ConfigurationFile(std::istream& src)

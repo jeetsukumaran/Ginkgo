@@ -34,6 +34,23 @@
 namespace gingko {
 
 /**
+ * Sampling regime, tracking the number of organisms and list of cells to
+ * be sampled.
+ */
+struct SamplingRegime {
+
+    public:
+        SamplingRegime() 
+            : num_organisms_per_cell(0) { }
+
+    public:
+        /** Number of organisms from each cell to be sampled. */
+        unsigned long               num_organisms_per_cell;
+        /** List of cells to be sampled. */
+        std::vector<CellIndexType>  cells;
+};
+
+/**
  * Changes to world geographical template at the start of a generation, 
  * modelling climate change, changes in landscape etc.
  */
@@ -43,13 +60,18 @@ struct WorldSettings {
      * Environmental regimes that need to be changed/set (expressed as factor
      * indexes mapped to ESRI ASCII Grid file paths). 
      */
-    std::map<unsigned, std::string>     environments;
+    std::map<unsigned, std::string>         environments;
     
     /** 
      * Movement costs that need to be changed/set. (expressed as species labels
      * mapped to ESRI ASCII Grid file paths). 
      */
-    std::map<std::string, std::string>  movement_costs;
+    std::map<std::string, std::string>      movement_costs;
+    
+    /** 
+     * Sampling regime.
+     */
+    std::map<std::string, SamplingRegime>   samples;    
 
 }; // WorldSettings
 
