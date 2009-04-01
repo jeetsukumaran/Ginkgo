@@ -409,7 +409,8 @@ void SpeciesConfigurator::process_seed_populations() {
 // GenerationConfigurator
 
 GenerationConfigurator::GenerationConfigurator(const ConfigurationBlock& cb) 
-        : Configurator(cb)  {
+        : Configurator(cb),
+          generation_(0) {
     this->parse();
 }
 
@@ -466,10 +467,39 @@ void GenerationConfigurator::process_movement_costs() {
 }
 
 void GenerationConfigurator::process_sampling_regimes() {
+    std::vector<std::string> keys = this->get_matching_configuration_keys("sample");
+    for (std::vector<std::string>::const_iterator k = keys.begin(); k != keys.end(); ++k) {
+        OrganismDistribution od = OrganismDistribution();
+        std::string key = *k;
+        std::vector<std::string> key_parts = textutil::split(key, ":", 1, false);
+        if (key_parts.size() < 2) {
+            throw this->build_exception("need to specify species label for sampling");
+        }
 
+        key_parts = textutil::split(key, "#", 1, false);
+        if (key_parts.size() < 2) {
+            od.num_organisms = -1;
+        } else if (key_parts[1] == "*") {
+            od.num_organisms = -1;
+        } else {      
+            try {
+                od.num_organisms = convert::to_scalar<unsigned long>(key_parts[1]);
+            } catch (const convert::ValueError& e) {
+                throw this->build_exception("invalid value for sample number \"" + key_parts[1] + "\"");
+            }
+        }
+        od.species_label = key_parts[0];
+        this->get_configuration_positions(key, od);
+        this->samples_.insert(std::make_pair(od.species_label, od));
+    }
 }
 
 void GenerationConfigurator::parse()  {
+    try {
+        this->generation_ = convert::to_scalar<unsigned long>(this->get_name());
+    } catch (convert::ValueError e) {
+        throw this->build_exception("\"" + this->get_name() + "\" is an invalid value for a generation number");
+    }  
     this->process_carrying_capacity();
     this->process_environments();
     this->process_movement_costs();
@@ -494,6 +524,30 @@ void GenerationConfigurator::configure(World& world)  {
         this->get_grid_values(mci->second, world);
         world_settings.movement_costs.insert(*mci);
     }
+    for (std::map<std::string, OrganismDistribution>::iterator sri = this->samples_.begin(); sri != this->samples_.end(); ++sri) {
+        OrganismDistribution& od = sri->second;
+        assert(od.x.size() == od.y.size());
+        SamplingRegime sampling_regime;
+        sampling_regime.cells.reserve(od.x.size());
+        sampling_regime.num_organisms_per_cell = od.num_organisms;
+        for (unsigned i = 0; i < od.x.size(); ++i) {
+            if (od.x[i] > world.landscape().size_x()-1) {
+                std::ostringstream msg;
+                msg << "maximum x-coordinate on landscape is " << world.landscape().size_x();
+                msg << " but position specifies x-coordinate of " << od.x[i];
+                throw this->build_exception(msg.str());
+            }
+            if (od.y[i] > world.landscape().size_y()-1) {
+                std::ostringstream msg;
+                msg << "maximum x-coordinate on landscape is " << world.landscape().size_y();
+                msg << " but position specifies x-coordinate of " << od.y[i];
+                throw this->build_exception(msg.str());
+            }              
+            sampling_regime.cells.push_back(world.landscape().xy_to_index(od.x[i], od.y[i]));
+        }
+        world_settings.samples.insert(std::make_pair(od.species_label, sampling_regime));
+    }
+    world.add_world_settings(this->generation_, world_settings);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

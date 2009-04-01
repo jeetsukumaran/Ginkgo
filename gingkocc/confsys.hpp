@@ -276,7 +276,7 @@ struct OrganismDistribution {
 
     public:
         std::string     species_label;
-        unsigned long   num_organisms;
+        long            num_organisms;
         std::vector<CellIndexType>  x;
         std::vector<CellIndexType>  y;
         
@@ -542,6 +542,9 @@ class GenerationConfigurator : public Configurator {
         void process_sampling_regimes();
            
     private:
+    
+        /** Generation #. */
+        unsigned long                       generation_;
     
         /** Path to grid defining the carrying capacity. */
         std::string                         carrying_capacity_;

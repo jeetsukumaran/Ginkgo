@@ -44,8 +44,11 @@ struct SamplingRegime {
             : num_organisms_per_cell(0) { }
 
     public:
-        /** Number of organisms from each cell to be sampled. */
-        unsigned long               num_organisms_per_cell;
+        /** 
+         * Number of organisms from each cell to be sampled, with -1
+         * meaning sample all. 
+         */
+        long               num_organisms_per_cell;
         /** List of cells to be sampled. */
         std::vector<CellIndexType>  cells;
 };
@@ -72,7 +75,7 @@ struct WorldSettings {
     std::map<std::string, std::string>      movement_costs;
     
     /** 
-     * Sampling regime.
+     * Sampling regime for tree reporting: species labels to samples.
      */
     std::map<std::string, SamplingRegime>   samples;    
 
@@ -298,8 +301,9 @@ class World {
          * @param   generation      generation number for this set of events
          *                          to be activated
          * @param   world_settings  WorldSettings data
+         * @return                  handle to WorldSettings object just inserted
          */
-        void add_world_settings(unsigned long generation, const WorldSettings& world_settings);
+        WorldSettings& add_world_settings(unsigned long generation, const WorldSettings& world_settings);
         
         // --- simulation cycles ---
         
