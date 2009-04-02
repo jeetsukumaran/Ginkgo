@@ -121,8 +121,20 @@ void World::cycle() {
     }    
 }
 
-void World::run(unsigned long num_generations) {    
-    for (unsigned long g=0; g < num_generations; ++g) {
+void World::run() {    
+    while (this->current_generation_ < this->generations_to_run_) {
+        std::map<unsigned long, WorldSettings>::iterator wi = this->world_settings_.find(this->current_generation_);
+        if (wi != this->world_settings_.end()) {
+            if (wi->second.carrying_capacity.size() != 0) {
+                // process
+            }
+            if (wi->second.movement_costs.size() != 0) {
+                // process
+            }
+            if (wi->second.samples.size() != 0) {
+                // process
+            }
+        }
         this->cycle();        
     }
 }

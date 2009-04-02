@@ -102,7 +102,8 @@ int main(int argc, char* argv[]) {
     }
     
     std::cerr << "(running cycles)\n";
-    world.run(num_gens);
+    world.set_generations_to_run(num_gens);
+    world.run();
 
 
 //     std::cerr << "\n#### FINAL STATUS ####\n"; 

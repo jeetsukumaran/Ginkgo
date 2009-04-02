@@ -171,7 +171,16 @@ class World {
          */      
         void set_generations_to_run(unsigned long ngens) {
             this->generations_to_run_ = ngens;
-        }         
+        }
+        
+        /**
+         * Sets the output directory.
+         * @param dir_path     existing directory path to which output files will
+         *                     be written
+         */      
+        void set_output_dir(const std::string& dir_path) {
+            this->output_dir_ = dir_path;
+        }          
         
         /**
          * Build a landscape of the specified spatial and environmental 
@@ -316,7 +325,7 @@ class World {
         /**
          * Run multiple cycles or generations of the simulation.
          */
-        void run(unsigned long num_generations);
+        void run();
         
     private:
         /** Name of this World (used for output files/reports). */
@@ -333,8 +342,10 @@ class World {
         unsigned long                           generations_to_run_;        
         /** Tracks the number of generations that have been run. */
         unsigned long                           current_generation_;
-        /** Collection of events (scheduled to occur at specific generations */
+        /** Collection of events (scheduled to occur at specific generations. */
         std::map<unsigned long, WorldSettings>  world_settings_;
+        /** Output directory. */
+        std::string                             output_dir_;
 
     private:
         /** Disabled copy constructor. */
