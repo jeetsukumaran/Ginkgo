@@ -32,7 +32,8 @@ gingkotests_PROGRAMS = test_cmdopt \
                test_asciigrid \
                test_parse_conf_file \
                test_filesys \
-               test_convert
+               test_convert \
+               test_world_log
                
 test_cmdopt_SOURCES = \
     test_cmdopt.cpp \
@@ -94,3 +95,16 @@ test_convert_SOURCES = \
     ../convert.cpp \
     ../textutil.cpp 
     
+test_world_log_SOURCES = \
+    test_world_log.cpp \
+    ../world.cpp \
+    ../randgen.cpp \
+    ../biosys.cpp \
+    ../landscape.cpp \
+    ../cell.cpp \
+    ../cmdopt.cpp \
+    ../textutil.cpp \
+    ../tree.cpp \
+    ../confsys.cpp \
+    ../asciigrid.cpp  \
+    ../filesys.cpp    

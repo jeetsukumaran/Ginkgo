@@ -25,6 +25,8 @@
 #include <map>
 #include <utility>
 #include <istream>
+#include <fstream>
+#include <stdexcept>
 
 #include "gingko_defs.hpp"
 #include "randgen.hpp"
@@ -32,6 +34,15 @@
 #include "landscape.hpp"
 
 namespace gingko {
+
+/**
+ * General i/o error.
+ */
+class WorldIOError : public std::runtime_error {
+    public:
+        WorldIOError(const char * msg) : std::runtime_error(msg) {}
+        WorldIOError(const std::string& msg) : std::runtime_error(msg.c_str()) {}
+};
 
 /**
  * Sampling regime, tracking the number of organisms and list of cells to
@@ -327,6 +338,51 @@ class World {
          */
         void run();
         
+        // --- logging and output ---
+        
+        /**
+         * Tries to open file, throwing exception if failed.
+         * @param fpath     file path to open
+         * @param ofstream  output file stream to use
+         */
+        void open_ofstream(std::ofstream& out, const std::string& fpath);
+        
+        /**
+         * Opens standard and error log file streams.
+         */
+        void open_logs();
+        
+        /**
+         * Closes standard and error log file streams.
+         */
+        void close_logs();        
+        
+        /**
+         * Returns error logging file stream, opening it if it is not already 
+         * open.
+         * @return outputstream for logging info
+         */
+        std::ofstream& err_fstream();        
+        
+        /**
+         * Time stamp for log.
+         * @return  formatted time/generation stamp         
+         */
+        std::string get_timestamp();
+        
+        /**
+         * Write message to the general log stream.
+         * @param   message message to write
+         */
+        void log_info(const std::string& message);
+        
+        /**
+         * Write message to the error log stream (with duplicate to general
+         * log stream).
+         * @param   message message to write
+         */
+        void log_error(const std::string& message);
+        
     private:
         /** Name of this World (used for output files/reports). */
         std::string                             label_;
@@ -346,6 +402,12 @@ class World {
         std::map<unsigned long, WorldSettings>  world_settings_;
         /** Output directory. */
         std::string                             output_dir_;
+        /** Info log file stream. */
+        std::ofstream                           infos_;
+        /** Error log stream. */
+        std::ofstream                           errs_;
+        /** Duplicate log output to stdout/stderr? */
+        bool                                    is_log_to_screen_;
 
     private:
         /** Disabled copy constructor. */

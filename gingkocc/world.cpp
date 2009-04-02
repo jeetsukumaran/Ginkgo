@@ -19,11 +19,16 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "world.hpp"
 #include <iostream>
 #include <string>
 #include <map>
 #include <utility>
+#include <ctime>
+#include <fstream>
+#include <iomanip>
+
+#include "world.hpp"
+#include "filesys.hpp"
 
 using namespace gingko;
 
@@ -31,7 +36,8 @@ using namespace gingko;
 World::World() 
     : species_(),
       rng_(),
-      landscape_(species_, rng_) {
+      landscape_(species_, rng_),
+      is_log_to_screen_(true) {
     this->current_generation_ = 0;    
 }
 
@@ -39,7 +45,8 @@ World::World()
 World::World(unsigned long seed) 
     : species_(),
       rng_(seed),
-      landscape_(species_, rng_) {
+      landscape_(species_, rng_),
+      is_log_to_screen_(true) {
     this->current_generation_ = 0;    
 }    
 
@@ -90,8 +97,8 @@ WorldSettings& World::add_world_settings(unsigned long generation, const WorldSe
     return this->world_settings_[generation];
 }
 
-
 // --- simulation cycles ---
+
 void World::cycle() {
 
 // Results in inflated population: the migrants get distributed after the 
@@ -122,6 +129,7 @@ void World::cycle() {
 }
 
 void World::run() {    
+    this->open_logs();
     while (this->current_generation_ < this->generations_to_run_) {
         std::map<unsigned long, WorldSettings>::iterator wi = this->world_settings_.find(this->current_generation_);
         if (wi != this->world_settings_.end()) {
@@ -137,4 +145,75 @@ void World::run() {
         }
         this->cycle();        
     }
+    this->close_logs();
 }
+
+// --- logging and output ---
+
+void World::open_ofstream(std::ofstream& out, const std::string& fpath) {
+    std::string full_fpath = filesys::compose_path(this->output_dir_, fpath);
+    std::cout << "Opening \"" + full_fpath + "\" for logging ..." << std::endl;
+    out.open(full_fpath.c_str());
+    if (not out) {
+        throw WorldIOError("cannot open log file \"" + full_fpath + "\" for output");
+    }
+}
+
+void World::open_logs() {    
+    if (this->label_.size() == 0) {
+        this->label_ = "world";
+    }
+    if (not this->infos_.is_open()) {
+        this->open_ofstream(this->infos_, this->label_ + ".gingko.out.log");
+    }
+    if (not this->errs_.is_open()) {
+        this->open_ofstream(this->errs_, this->label_ + ".gingko.err.log");
+    }    
+}
+
+void World::close_logs() {
+    if (this->infos_.is_open()) {
+        this->infos_.close();
+    }
+    if (this->errs_.is_open()) {
+        this->errs_.close();
+    }    
+}
+
+std::string World::get_timestamp() {    
+    time_t rawtime;    
+    time ( &rawtime );
+    struct tm * timeinfo = localtime ( &rawtime );
+    char buffer[80];
+    strftime (buffer,80,"%Y-%m-%d %H:%M:%S",timeinfo);
+    std::ostringstream outs;
+    outs << "[";
+    outs << buffer;
+    outs << " ";
+    outs << std::setw(8) << std::setfill('0');
+    outs << this->current_generation_;
+    outs << "]";    
+    return outs.str();
+}
+
+void World::log_info(const std::string& message) {
+    assert(this->infos_);
+    std::string ts = this->get_timestamp();
+    if (this->is_log_to_screen_) {
+        std::cout << ts << " " << message << std::endl;
+    }
+    this->infos_ << ts << " " << message << std::endl;
+}
+
+void World::log_error(const std::string& message) {
+    assert(this->errs_);
+    assert(this->infos_);    
+    std::string ts = this->get_timestamp();
+    if (this->is_log_to_screen_) {
+        std::cerr << ts << " ERROR: " << message << std::endl;
+    }
+    this->errs_ << ts << " ERROR: " << message << std::endl;
+    this->infos_ << ts << " ERROR: " << message << std::endl;
+}
+
+
