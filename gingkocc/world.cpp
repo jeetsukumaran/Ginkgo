@@ -208,7 +208,16 @@ void World::write_haploid_tree(Species * sp_ptr,
             ++oi) {
         tree.process_node((*oi)->get_haploid_node(), &sp_ptr->get_organism_label(**oi));
     }
-    tree.write_newick_tree(out);
+    try {
+        tree.write_newick_tree(out);
+    } catch (const TreeStructureMissingRootError& e) {
+        std::ostringstream msg;
+        msg << "tree for sample of organisms of species " << sp_ptr->get_label();
+        msg << " in generation " << this->current_generation_;
+        msg << " could not be built due insufficient nodes";
+        msg << " (organism sample size = " << organisms.size() << ")";
+        this->log_error(msg.str());
+    }
 }                
 
 void World::save_trees(Species * sp_ptr, 
@@ -217,22 +226,24 @@ void World::save_trees(Species * sp_ptr,
     std::vector<const Organism *> organisms;
     this->log_info("Sampling organisms of species " + sp_ptr->get_label() +".");
     this->landscape_.sample_organisms(sp_ptr, num_organisms_per_cell, cell_indexes, organisms);
-    std::ostringstream tree_filename_stem;
-    tree_filename_stem << sp_ptr->get_label() << "_G" << this->current_generation_;
     
-    std::ofstream haploid_trees;
-    this->open_ofstream(haploid_trees, tree_filename_stem.str() + ".haploid.tre");
-    
-    std::ofstream diploid_trees;
-    this->open_ofstream(diploid_trees, tree_filename_stem.str() + ".diploid.tre");
-    
-    std::ofstream combined_trees;            
-    this->open_ofstream(combined_trees, tree_filename_stem.str() + ".combined.tre");
-    
-    this->log_info("Building tree for haploid locus alleles.");
-    for (std::vector<const Organism *>::const_iterator oi = organisms.begin(); oi != organisms.end(); ++oi) {
-        this->write_haploid_tree(sp_ptr, organisms, haploid_trees);
+    if (organisms.size() == 0) {
+        this->log_error("no organisms found in sample: aborting tree building");
+        return;
     }
+    
+    std::ostringstream tree_filename_stem;
+    tree_filename_stem << "G" << std::setw(8) << std::setfill('0') << this->current_generation_ << "_" << sp_ptr->get_label();    
+    this->log_info("Building tree for haploid locus alleles.");    
+    std::ofstream haploid_trees;
+    this->open_ofstream(haploid_trees, tree_filename_stem.str() + ".haploid.tre");    
+    this->write_haploid_tree(sp_ptr, organisms, haploid_trees);    
+    
+//     std::ofstream diploid_trees;
+//     this->open_ofstream(diploid_trees, tree_filename_stem.str() + ".diploid.tre");
+//     
+//     std::ofstream combined_trees;            
+//     this->open_ofstream(combined_trees, tree_filename_stem.str() + ".combined.tre");
 }                
 
 void World::save_trees(Species * sp_ptr, 

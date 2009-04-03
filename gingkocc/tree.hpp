@@ -54,6 +54,24 @@ class TreeStructureError : public std::runtime_error {
 };
 
 /**
+ * No root on tree.
+ */
+class TreeStructureMissingRootError : public TreeStructureError {
+    public:
+        TreeStructureMissingRootError(const char * msg) : TreeStructureError(msg) {}
+        TreeStructureMissingRootError(const std::string& msg) : TreeStructureError(msg.c_str()) {}
+};
+
+/**
+ * No root on tree.
+ */
+class TreeStructureMultipleRootError : public TreeStructureError {
+    public:
+        TreeStructureMultipleRootError(const char * msg) : TreeStructureError(msg) {}
+        TreeStructureMultipleRootError(const std::string& msg) : TreeStructureError(msg.c_str()) {}
+};
+
+/**
  * Encapsulates the building of trees from a collection of GenealogyNode 
  * objects.
  */

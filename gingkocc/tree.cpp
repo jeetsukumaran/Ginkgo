@@ -126,7 +126,7 @@ const std::string& Tree::get_label_for_node(long node_idx) {
 void Tree::write_newick_tree(std::ostream& out) {
     int num_roots = std::count(this->tree_nodes_.begin(), this->tree_nodes_.end(), -1);         
     if (num_roots == 0) {
-        throw TreeStructureError("no root nodes found (possibly because node list was empty)");
+        throw TreeStructureMissingRootError("no root nodes found (possibly because node list was empty)");
     }
     if (this->coalesce_multiple_roots_ and num_roots > 1) {
         ParentIndexVector::iterator root = std::find(this->tree_nodes_.begin(), this->tree_nodes_.end(), -1);
@@ -142,12 +142,12 @@ void Tree::write_newick_tree(std::ostream& out) {
         out << ");"; // add infinite branch length?                
     } else {
         if (num_roots >= 2)  {
-            throw TreeStructureError("multiple roots found");
+            throw TreeStructureMultipleRootError("multiple roots found");
         }
         ParentIndexVector::iterator root = std::find(this->tree_nodes_.begin(),
                 this->tree_nodes_.end(), -1);
         if (root == this->tree_nodes_.end())  {
-            throw TreeStructureError("no root nodes found (possibly because node list was empty)");
+            throw TreeStructureMissingRootError("no root nodes found (possibly because node list was empty)");
         }
         this->write_newick_node(root-this->tree_nodes_.begin(), out);
         out << ";";
