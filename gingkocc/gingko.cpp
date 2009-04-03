@@ -60,6 +60,7 @@ int main(int argc, char* argv[]) {
     
     gingko::World world;
     world.set_output_dir(output_dir);
-    gingko::configure_world(world, args[0]);
+    
+    gingko::confsys::configure_world(world, args[0]);
 
 }

@@ -85,6 +85,14 @@ std::string compose_path(const std::string& parent, const std::string& child);
  */
 std::string abs_path_from_cwd(const std::string& rel_path); 
 
+/**
+ * Returns <code>true</code> if path is absolute.
+ *
+ * @param path      file path
+ * @return          <code>true</code> if path is absolute
+ */
+bool is_abs_path(const std::string& path); 
+
 ///////////////////////////////////////////////////////////////////////////////
 // OPERATING/FILE SYSTEM INTERACTIONS
 

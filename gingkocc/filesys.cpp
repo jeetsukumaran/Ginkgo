@@ -26,6 +26,7 @@
 namespace gingko {
 namespace filesys {
 
+// TODO: make this universal by wrapping #if defined MSDOS or some such
 const char * PATH_SEPARATOR = "/";
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -71,7 +72,6 @@ std::string get_path_parent(const char * path) {
     return get_path_parent(std::string(path));
 }
 
-
 // put together file path
 std::string compose_path(const std::string& parent, const std::string& child) {
     return parent + PATH_SEPARATOR + child;
@@ -80,6 +80,15 @@ std::string compose_path(const std::string& parent, const std::string& child) {
 // join rel_path to current working directory
 std::string abs_path_from_cwd(const std::string& rel_path) {
     return current_path() + PATH_SEPARATOR + rel_path;
+}
+
+// check if path is absolute
+bool is_abs_path(const std::string& path) {
+    if (path.size() > 0) {
+        return PATH_SEPARATOR[0] == path[0];
+    } else {
+        return false;
+    }
 }
 
 ///////////////////////////////////////////////////////////////////////////////

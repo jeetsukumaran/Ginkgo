@@ -37,17 +37,10 @@
 #define GINGKO_CONFSYS_H
 
 namespace gingko {
+namespace confsys {
 
 ///////////////////////////////////////////////////////////////////////////////
 // Client code should call one of the following to configure World objects.
-
-/**
- * Build/populate a World object according to a given configuration source.
- * @param   world       World object to configure
- * @param   conf_src    input stream source of configuration file
- * @return              World object
- */
-World& configure_world(World& world, std::istream& conf_src);
 
 /**
  * Build/populate a World object according to a given configuration source file.
@@ -663,6 +656,7 @@ namespace confsys_detail {
     
 } // confsys_detail
 
+} // namespace confsys
 } // namespace gingko
 
 #endif

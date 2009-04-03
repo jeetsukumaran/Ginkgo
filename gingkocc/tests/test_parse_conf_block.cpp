@@ -28,7 +28,7 @@
 
 #include "../confsys.hpp"
 
-using namespace gingko;
+using namespace gingko::confsys;
 
 const char * SPECIES_BLOCK_CSTR = "\n\n@species Sp1 { \n"
                                     "   selection = 1 1 1 1 ; \n"

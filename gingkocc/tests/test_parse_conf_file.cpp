@@ -36,7 +36,7 @@ void test_parse_dummy1(const char * prog_path) {
     World   world;
     std::string srcf = filesys::compose_path(filesys::get_path_parent(prog_path), 
                                              "data/dummy1/dummy.conf");
-    ConfigurationFile cf(srcf);
+    confsys::ConfigurationFile cf(srcf);
     cf.configure(world);
 }
 

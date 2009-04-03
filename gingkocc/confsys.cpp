@@ -33,6 +33,7 @@
 #include "filesys.hpp"
 
 namespace gingko {
+namespace confsys {
 
 /* PARSE LOGIC:
  *
@@ -58,10 +59,8 @@ World& configure_world(World& world, std::istream& conf_src) {
 }
 
 World& configure_world(World& world, const char * conf_fpath) {
-    std::ifstream f(conf_fpath);
-    configure_world(world, f);
-    world.log_info("Configured World from \"" + std::string(conf_fpath) + "\".");
-    return world;
+    std::string s(conf_fpath);
+    return configure_world(world, s);
 }
 
 World& configure_world(World& world, const std::string& conf_fpath) {
@@ -439,9 +438,14 @@ GenerationConfigurator::GenerationConfigurator(const ConfigurationBlock& cb)
     this->parse();
 }
 
-std::vector<long> GenerationConfigurator::get_grid_values(const std::string& grid_path, const World& world) {
+std::vector<long> GenerationConfigurator::get_grid_values(const std::string& grid_path, const World& world) {   
     std::string root_filepath = filesys::get_path_parent(this->get_config_filepath());
-    std::string full_grid_path = filesys::compose_path(root_filepath, grid_path);
+    std::string full_grid_path;    
+    if (filesys::is_abs_path(grid_path) or root_filepath.size() == 0) {
+        full_grid_path = grid_path;      
+    } else {        
+        full_grid_path = filesys::compose_path(root_filepath, grid_path);      
+    } 
     try {
         asciigrid::AsciiGrid grid(full_grid_path);
         std::vector<long> values = grid.get_cell_values();
@@ -683,5 +687,6 @@ namespace confsys_detail {
     
 } // confsys_detail
 
+} // namespace confsys
 
 } // namespace gingko
