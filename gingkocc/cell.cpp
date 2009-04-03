@@ -161,6 +161,7 @@ void Cell::sample_organisms(Species * sp_ptr,
         if (&og->species() == sp_ptr) {
             sp_ptr->get_organism_label(*og, this->x_, this->y_);
             samples.push_back(&(*og));
+            ++num_organisms_added;
         }
     }  
 }

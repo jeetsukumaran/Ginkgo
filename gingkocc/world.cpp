@@ -182,9 +182,6 @@ void World::run() {
                 for (std::map<std::string, SamplingRegime>::iterator si = wi->second.samples.begin();
                      si != wi->second.samples.end();
                      ++si) {
-                    std::ostringstream msg;
-                    msg << "Building tree for species " <<  si->first;
-                    this->log_info(msg.str());
                     SpeciesByLabel::iterator sp_ptr = this->species_.find(si->first);
                     assert(sp_ptr != this->species_.end());
                     if (si->second.cell_indexes.size() == 0) {
@@ -220,7 +217,6 @@ void World::save_trees(Species * sp_ptr,
     std::vector<const Organism *> organisms;
     this->log_info("Sampling organisms of species " + sp_ptr->get_label() +".");
     this->landscape_.sample_organisms(sp_ptr, num_organisms_per_cell, cell_indexes, organisms);
-    
     std::ostringstream tree_filename_stem;
     tree_filename_stem << sp_ptr->get_label() << "_G" << this->current_generation_;
     
