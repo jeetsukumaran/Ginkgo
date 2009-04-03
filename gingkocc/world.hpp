@@ -343,10 +343,12 @@ class World {
         /**
          * Given a list of pointers to organisms, builds and saves a tree
          * of the haploid locus allele to the given outputstream.
+         * @param sp_ptr                    pointer to species         
          * @param   organisms   sample of organisms
          * @param   out         output stream
          */
-        void write_haploid_tree(const std::vector<const Organism *>& organisms,
+        void write_haploid_tree(Species * sp_ptr,
+                const std::vector<const Organism *>& organisms,
                 std::ostream& out);
         
         /**

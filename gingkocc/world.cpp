@@ -184,6 +184,18 @@ void World::run() {
 
 // --- logging and output ---
 
+void World::write_haploid_tree(Species * sp_ptr,
+                const std::vector<const Organism *>& organisms,
+                std::ostream& out) {
+    Tree tree;
+    for (std::vector<const Organism *>::const_iterator oi = organisms.begin();
+            oi != organisms.end();
+            ++oi) {
+        tree.process_node((*oi)->get_haploid_node(), &sp_ptr->get_organism_label(**oi));
+    }
+    tree.write_newick_tree(out);
+}                
+
 void World::save_trees(Species * sp_ptr, 
                 unsigned long num_organisms_per_cell, 
                 const std::vector<CellIndexType>& cell_indexes) {
@@ -203,7 +215,7 @@ void World::save_trees(Species * sp_ptr,
     this->open_ofstream(combined_trees, tree_filename_stem.str() + ".combined.tre");
         
     for (std::vector<const Organism *>::const_iterator oi = organisms.begin(); oi != organisms.end(); ++oi) {
-    
+        this->write_haploid_tree(sp_ptr, organisms, haploid_trees);
     }
 }                
 
@@ -221,7 +233,7 @@ void World::open_ofstream(std::ofstream& out, const std::string& fpath) {
     std::string full_fpath = filesys::compose_path(this->output_dir_, fpath);
     out.open(full_fpath.c_str());
     if (not out) {
-        throw WorldIOError("cannot open log file \"" + full_fpath + "\" for output");
+        throw WorldIOError("cannot open file \"" + full_fpath + "\" for output");
     }
 }
 

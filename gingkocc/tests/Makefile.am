@@ -62,7 +62,8 @@ test_parse_conf_block_SOURCES = \
     ../landscape.cpp \
     ../biosys.cpp   \
     ../asciigrid.cpp \
-    ../filesys.cpp
+    ../filesys.cpp\
+    ../tree.cpp 
     
 test_textutil_SOURCES = \
     test_textutil.cpp \
@@ -88,7 +89,8 @@ test_parse_conf_file_SOURCES = \
     ../cell.cpp \
     ../landscape.cpp \
     ../biosys.cpp \
-    ../asciigrid.cpp
+    ../asciigrid.cpp\
+    ../tree.cpp 
     
 test_convert_SOURCES = \
     test_convert.cpp \
@@ -107,4 +109,4 @@ test_world_log_SOURCES = \
     ../tree.cpp \
     ../confsys.cpp \
     ../asciigrid.cpp  \
-    ../filesys.cpp    
+    ../filesys.cpp 

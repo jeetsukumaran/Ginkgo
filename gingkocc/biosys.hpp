@@ -332,6 +332,31 @@ class DiploidMarker {
             this->allele2_->link(rng.select(male.allele1_, male.allele2_));
         }
         
+        /**
+         * Returns pointer to GenealogyNode representing allele 1 at this locus.
+         * @return GenealogyNode representing allele 1 at this locus
+         */
+        GenealogyNode * node1() const {
+            return this->allele1_;
+        }     
+        
+        /**
+         * Returns pointer to GenealogyNode representing allele 2 at this locus.
+         * @return GenealogyNode representing allele 2 at this locus
+         */
+        GenealogyNode * node2() const {
+            return this->allele2_;
+        }
+        
+        /**
+         * Returns random allele of the diploid complement.
+         * @param rng   RandomNumberGenerator object
+         * @return      random allele from pair in locus
+         */
+        GenealogyNode * random_node(RandomNumberGenerator rng) const {
+            return rng.select(this->allele1_, this->allele2_);
+        }             
+        
     private:
     
         /** 
@@ -463,7 +488,30 @@ class Organism {
         const DiploidMarker& diploid_marker(unsigned idx) const {
             assert(idx < NUM_NEUTRAL_DIPLOID_LOCII);
             return this->neutral_diploid_markers_[idx];
-        }                
+        }
+        
+        /** Returns a reference to the haploid marker of this organism. */
+        GenealogyNode * get_haploid_node() const {
+            return this->neutral_haploid_marker_.node();
+        }
+        
+        /** Returns a reference to allele 1 of the diploid marker of this organism. */
+        GenealogyNode * get_diploid_node1(unsigned idx) const {
+            assert(idx < NUM_NEUTRAL_DIPLOID_LOCII);
+            return this->neutral_diploid_markers_[idx].node1();
+        }
+        
+        /** Returns a reference to allele 1 of the diploid marker of this organism. */
+        GenealogyNode * get_diploid_node2(unsigned idx) const {
+            assert(idx < NUM_NEUTRAL_DIPLOID_LOCII);
+            return this->neutral_diploid_markers_[idx].node1();
+        }
+        
+        /** Returns a reference to random allele of the diploid marker of this organism. */
+        GenealogyNode * get_diploid_random_node(unsigned idx, RandomNumberGenerator& rng) const {
+            assert(idx < NUM_NEUTRAL_DIPLOID_LOCII);
+            return this->neutral_diploid_markers_[idx].random_node(rng);
+        }        
         
         // --- fitness & survival ---
         
