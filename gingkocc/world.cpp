@@ -151,12 +151,11 @@ void World::run() {
                      ei != wi->second.environments.end();
                      ++ei) {
                     std::ostringstream msg;
-                    msg << "Setting environmental variable " <<  ei->first <<  ": \"" <<  ei->second <<  "\"";
+                    msg << "Setting environmental variable " <<  ei->first+1 <<  ": \"" <<  ei->second <<  "\"";
                     this->log_info(msg.str());
                     asciigrid::AsciiGrid grid(ei->second);
                     this->landscape_.set_environment(ei->first, grid.get_cell_values());                    
-                }                     
-
+                }
             }            
             if (wi->second.movement_costs.size() != 0) {
 
