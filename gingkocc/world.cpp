@@ -75,6 +75,8 @@ Species& World::new_species(const std::string& label) {
                               this->num_fitness_factors_, 
                               this->rng_);
     this->species_.insert(std::make_pair(std::string(label), sp));
+    std::vector<int> default_movement_costs(this->landscape_.size(), 1);
+    sp->set_movement_costs(default_movement_costs);
     return *sp;
 }
 
@@ -113,22 +115,28 @@ void World::cycle() {
 //         this->landscape_[i].competition();
 //     }
 //     this->landscape_.process_migrants();
-
+    std::ostringstream gen;
+    gen << "Generation " << this->current_generation_ << " begun.";
+    this->log_info(gen.str());
+    this->log_info("Reproduction/migration phase.");
     for (CellIndexType i = this->landscape_.size()-1; i >= 0; --i) {
         this->landscape_[i].reproduction(); 
         this->landscape_[i].migration();
     }
-    this->landscape_.process_migrants();    
+    this->log_info("Processing migrants.");
+    this->landscape_.process_migrants();
+    this->log_info("Survival/competition phase.");
     for (CellIndexType i = this->landscape_.size()-1; i >= 0; --i) {    
         this->landscape_[i].survival();
         this->landscape_[i].competition();        
     }    
-    ++this->current_generation_;    
+    this->log_info("Generation ended.");
+    ++this->current_generation_;
 }
 
 void World::run() {    
     this->open_logs();
-    this->log_info("Starting generation.");
+    this->log_extrasim_info("Starting simulation.");
     while (this->current_generation_ < this->generations_to_run_) {
         std::map<unsigned long, WorldSettings>::iterator wi = this->world_settings_.find(this->current_generation_);
         if (wi != this->world_settings_.end()) {
@@ -144,6 +152,7 @@ void World::run() {
         }
         this->cycle();        
     }
+    this->log_extrasim_info("Ending simulation.");
 }
 
 // --- logging and output ---

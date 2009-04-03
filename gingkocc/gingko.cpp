@@ -64,11 +64,8 @@ int main(int argc, char* argv[]) {
     gingko::confsys::configure_world(world, args[0]);
     if (not dry_run) {
         world.open_logs();
-        world.log_extrasim_info("World configured using: \"" + args[0] + "\"");
-        world.log_extrasim_info("Starting simulation.");
+        world.log_extrasim_info("World configured using: \"" + args[0] + "\"");        
         world.run();
-        world.log_extrasim_info("Ending simulation.");
-        world.log_extrasim_info("Exiting simulation.");
         world.close_logs();
     }
     
