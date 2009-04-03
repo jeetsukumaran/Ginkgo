@@ -38,7 +38,7 @@ int main(int argc, char* argv[]) {
 
     std::string config_filepath;
     std::string output_dir = ".";
-    bool dry_run;
+    bool validate_config_only = false;
 
     gingko::OptionParser parser = gingko::OptionParser("Gingko 0.01",
             "Gingko Biogeographical Evolution Simulator",
@@ -46,8 +46,8 @@ int main(int argc, char* argv[]) {
     
     parser.add_option<std::string>(&output_dir, "-o", "--output-dir", 
                                    "directory to which to save output files (default = current)");
-    parser.add_switch(&dry_run, "-n", "--dry-run",
-                      "load configuration file, but do not actually produce output (can be used to validate configuration file)");                               
+    parser.add_switch(&validate_config_only, "-v", "--validate",
+                      "load and process configuration file to check for errors, but do not actually execute run");
                                      
     parser.parse(argc, argv);       
     
@@ -62,7 +62,10 @@ int main(int argc, char* argv[]) {
     world.set_output_dir(output_dir);
        
     gingko::confsys::configure_world(world, args[0]);
-    if (not dry_run) {
+    if (validate_config_only) {
+        std::cout << "World configured using: \"" + args[0] + "\"" << std::endl; 
+        std::cout << "Configuration file validates." << std:: endl;
+    } else {
         world.open_logs();
         world.log_extrasim_info("World configured using: \"" + args[0] + "\"");        
         world.run();
