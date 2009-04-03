@@ -68,14 +68,20 @@ T to_scalar(U from) {
  * @return              value represented in type T
  */
 template <typename T, typename U>
-std::vector<T> to_vector(U from, const char * separator = " ") {
+std::vector<T> to_vector(U from, const char * separator = " ", bool strip_whitespace=false) {
     std::ostringstream o;
     o << from;
     std::vector<std::string> elements = textutil::split(o.str(), separator, 0, false);
     std::vector<T> results;
     results.reserve(elements.size());
     for (std::vector<std::string>::iterator i = elements.begin(); i != elements.end(); ++i) {
-        results.push_back( to_scalar<T>(*i) );
+        std::string s = *i;
+        if (strip_whitespace) {
+            s = textutil::strip(s, "\n\t ");
+        }
+        if (s.size() > 0) {
+            results.push_back( to_scalar<T>(s) );
+        }                        
     }
     return results;
 }

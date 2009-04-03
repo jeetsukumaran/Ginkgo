@@ -133,22 +133,35 @@ OptionParser::~OptionParser() {
     }                    
 }
 
-std::ostream& OptionParser::write_help(std::ostream& out, const char * progname) const {
+std::ostream& OptionParser::write_usage(std::ostream& out) const {
     if (this->usage_.size() != 0) {
-        if (progname == NULL) {
-            progname = "PROGRAM";
-        }
         std::string usage = "Usage: " + this->usage_;
         std::string::size_type pos = usage.find("%prog");
         while (pos != std::string::npos) {
-            usage.replace(pos, 5, progname); 
+            usage.replace(pos, 5, this->prog_filename_); 
             pos = usage.find("%prog");
         }
-        out << usage << std::endl << std::endl;
+        out << usage << std::endl;
     }
+    return out;
+}
+
+std::ostream& OptionParser::write_description(std::ostream& out) const {
     if (this->description_.size() != 0) {
         out << textutil::textwrap(this->description_, CMDOPTS_LINE_WIDTH) << std::endl << std::endl;
     }
+    return out;
+}
+
+std::ostream& OptionParser::write_version(std::ostream& out) const {
+    out << this->version_ << std::endl;
+    return out;
+}
+
+std::ostream& OptionParser::write_help(std::ostream& out) const {
+    this->write_usage(out);
+    out << std::endl;
+    this->write_description(out);
     out << "Options:" << std::endl;
     for (std::vector<OptionArg *>::const_iterator oa = this->option_args_.begin();
             oa != this->option_args_.end();
@@ -161,6 +174,7 @@ std::ostream& OptionParser::write_help(std::ostream& out, const char * progname)
 
 void OptionParser::parse(int argc, char * argv[]) {
 
+    this->prog_filename_ = filesys::get_path_leaf(argv[0]).c_str();
     for (int i = 1; i < argc; ++i) { 
         if (argv[i][0] == '-') {
             std::string arg_name;
@@ -230,13 +244,13 @@ void OptionParser::parse(int argc, char * argv[]) {
             
         // help option specified
         if (this->show_help_) {
-            this->write_help(std::cout, filesys::get_path_leaf(argv[0]).c_str());
+            this->write_help(std::cout);
             exit(0);
         }
         
         // show version
         if (this->show_version_) {
-            std::cout << this->version_ << std::endl;
+            this->write_version(std::cout);
             exit(0);
         }          
     }

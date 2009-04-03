@@ -20,113 +20,46 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "gingko_defs.hpp"
+#include "confsys.hpp"
 #include "biosys.hpp"
 #include "world.hpp"
 #include "tree.hpp"
 #include "cmdopt.hpp"
+#include "filesys.hpp"
 #include <iostream>
 #include <cstdlib>
 #include <vector>
 #include <set>
 #include <ctime>
+#include <string>
+
 
 int main(int argc, char* argv[]) {
-    unsigned long size_x = 1000;
-    unsigned long size_y = 1000;
-    unsigned long cc = 100;
-    unsigned long num_gens = 100000;
-    unsigned int num_fitness = 10;
-    unsigned long rand_seed = time(0);
-    unsigned int num_cells_init = 1;
+
+    std::string config_filepath;
+    std::string output_dir = ".";
+    bool dry_run;
 
     gingko::OptionParser parser = gingko::OptionParser("Gingko 0.01",
             "Gingko Biogeographical Evolution Simulator",
-            "%prog [options]");
+            "%prog [options] <CONFIGURATION-FILEPATH>");
     
-    parser.add_option<unsigned long>(&size_x, "-x", "--dim-x", 
-                                     "size of landscape in the x-dimension (default = %default)", "DIM-X");
-    parser.add_option<unsigned long>(&size_y, "-y", "--dim-y", 
-                                     "size of landscape in the y-dimension (default = %default)", "DIM-Y");
-    parser.add_option<unsigned long>(&cc, "-c", "--carrying-capacity", 
-                                     "maximum carrying capacity of each cell (default = %default)", "K");
-    parser.add_option<unsigned long>(&num_cells_init, "-i", "--init-cells", 
-                                     "number of cells to seed with initial population (default = %default)", "#");
-    parser.add_option<unsigned long>(&num_gens, "-g", "--num-gens",                                     
-                                     "number of generations to run (default = %default)", "#GENERATIONS");  
-    parser.add_option<unsigned int>(&num_fitness, "-f", "--num-fitness", 
-                                    "number of fitness factors (default = %default)", "#FACTORS");
-    parser.add_option<unsigned long>(&rand_seed, "-z", "--random-seed", 
-                                     "random number seed (default = %default)", "SEED");                                
+    parser.add_option<std::string>(&output_dir, "-o", "--output-dir", 
+                                   "directory to which to save output files (default = current)");
+    parser.add_switch(&dry_run, "-n", "--dry-run",
+                      "load configuration file, but do not actually produce output (can be used to validate configuration file)");                               
                                      
     parser.parse(argc, argv);       
     
-    std::cerr << "           Landscape size: (" << size_x << ", " << size_y << ")\n";
-    std::cerr << "   Cell carrying capacity: " << cc << '\n';
-    std::cerr << "    Number of generations: " << num_gens << '\n';
-    std::cerr << "Number of fitness factors: " << num_fitness << '\n';
-    std::cerr << "       Random number seed: " << rand_seed << std::endl;
+    std::vector<std::string> args = parser.get_args();
     
-    gingko::World world(rand_seed);
-
-    std::cerr << "(generating landscape)\n";
-    world.set_num_fitness_factors(num_fitness);
-	world.generate_landscape(size_x, size_y);	
-    std::cerr << "(setting carrying capacity)\n";
-	world.set_global_cell_carrying_capacity(cc);
-    std::cerr << "(adding species)\n";	
-	gingko::Species& sp1 = world.new_species("A");
-	
-	std::vector<int> costs;
-	costs.assign(size_x * size_y, 1);
-	sp1.set_movement_costs(costs);
-	sp1.set_movement_capacity(1);
-	
-	std::vector< gingko::FitnessFactorType > genotype;
-	genotype.reserve(num_fitness);
-	for (unsigned i = 0; i < num_fitness; ++i) {
-	    genotype.push_back(static_cast< gingko::FitnessFactorType >(world.rng().uniform_int(-10, 10)));
-	}
-    
-    unsigned long max_index = (size_x * size_y)-1;
-    gingko::CellIndexType cell_index = 0;
-    for (std::set< gingko::CellIndexType > seeded; num_cells_init > 0; --num_cells_init) {
-        do {
-            cell_index = world.rng().uniform_int(0, max_index);
-        } while ((seeded.find(cell_index) != seeded.end()) and seeded.size() < max_index+1);
-        if (seeded.size() >= max_index+1) {
-            break;
-        }
-        std::cerr << "(seeding cell " << cell_index << " with " << cc << " individuals" << ")" << std::endl;
-        seeded.insert(cell_index);
-        world.seed_population(cell_index, sp1.get_label(), cc);
+    if (args.size() == 0) {
+        parser.write_usage(std::cout);
+        exit(1);
     }
     
-    std::cerr << "(running cycles)\n";
-    world.set_generations_to_run(num_gens);
-    world.run();
+    gingko::World world;
+    world.set_output_dir(output_dir);
+    gingko::configure_world(world, args[0]);
 
-
-//     std::cerr << "\n#### FINAL STATUS ####\n"; 
-//     world.landscape().dump(std::cerr);
-    
-    std::cerr << "\n\n#### TREE(S) ####\n";
-    gingko::Tree tree;
-    for (unsigned long x = 0; x < size_x; ++x) {
-        for (unsigned long y = 0; y < size_y; ++y) {
-            gingko::OrganismVector& ov = world.landscape()(x,y).organisms();
-            for (gingko::OrganismVector::iterator oiter = ov.begin();
-                    oiter != ov.end();
-                    ++oiter) {
-                std::string label = sp1.get_organism_label(*oiter, x, y);
-                tree.process_node(oiter->haploid_marker().node(), &label);
-            }
-        }            
-    }     
-    
-
-//     tree.dump(std::cerr);
-    std::cerr << "\n---\n\n";
-    tree.write_newick_tree(std::cout);
-    std::cout << std::endl;
-    
 }

@@ -31,6 +31,11 @@ std::string to_scalar<std::string>(std::string from) {
 }
 
 template <>
+std::string to_scalar<std::string>(const std::string& from) {
+    return from;
+}
+
+template <>
 std::string to_scalar<std::string>(const char * from) {
     return std::string(from);
 }

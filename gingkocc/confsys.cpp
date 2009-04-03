@@ -53,17 +53,22 @@ namespace gingko {
 
 World& configure_world(World& world, std::istream& conf_src) {
     ConfigurationFile cf(conf_src);
+    cf.configure(world);
     return world;
 }
 
 World& configure_world(World& world, const char * conf_fpath) {
     std::ifstream f(conf_fpath);
-    return configure_world(world, f);
+    configure_world(world, f);
+    world.log_info("Configured World from \"" + std::string(conf_fpath) + "\".");
+    return world;
 }
 
 World& configure_world(World& world, const std::string& conf_fpath) {
     std::ifstream f(conf_fpath.c_str());
-    return configure_world(world, f);
+    configure_world(world, f);
+    world.log_info("Configured World from \"" + conf_fpath + "\".");
+    return world;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -247,6 +252,15 @@ void ConfigurationBlock::parse(std::istream& in) {
     this->block_end_pos_ = in.tellg();
 }
 
+template <>
+std::string ConfigurationBlock::get_entry<std::string>(const std::string& key) const {
+    std::map< std::string, std::string >::const_iterator val = this->entries_.find(key);
+    if (val == this->entries_.end()) {
+        throw ConfigurationIncompleteError("entry \"" + key + "\" not found");
+    }
+    return val->second;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // ConfigurationBlock inserter
 
@@ -312,7 +326,7 @@ WorldConfigurator::WorldConfigurator(const ConfigurationBlock& cb)
 void WorldConfigurator::parse()  {
     this->size_x_ = this->get_configuration_scalar<unsigned long>("nrows"); 
     this->size_y_ = this->get_configuration_scalar<unsigned long>("ncols");
-    this->generations_to_run_ = this->get_configuration_scalar<unsigned long>("ngens");    
+    this->generations_to_run_ = this->get_configuration_scalar<unsigned long>("ngens");
     this->num_fitness_factors_ = this->get_configuration_scalar<unsigned>("nfitness", MAX_FITNESS_FACTORS);
     this->rand_seed_ = this->get_configuration_scalar<unsigned>("rseed", 0);
 }
@@ -344,7 +358,6 @@ void SpeciesConfigurator::parse()  {
     } catch (ConfigurationIncompleteError& e) {
         this->selection_weights_.assign(MAX_FITNESS_FACTORS, 1);
     }
-    
     try {
         this->default_genotypic_fitness_factors_ = this->get_configuration_vector<FitnessFactorType>("genotypic-fitness");
     } catch (ConfigurationIncompleteError& e) {

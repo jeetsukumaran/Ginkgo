@@ -337,7 +337,7 @@ class Configurator {
          * @return      value for key
          */
         template <typename T>
-        T get_configuration_scalar(const std::string& key) {
+        T get_configuration_scalar(const std::string& key) const {
             try {
                 return this->configuration_block_.get_entry<T>(key);
             } catch (ConfigurationIncompleteError e) {
@@ -345,7 +345,7 @@ class Configurator {
             } catch (convert::ValueError e) {
                 throw this->build_exception(std::string(e.what()) + " (specified for \"" + key + "\")");
             }            
-        }
+        }       
         
         /**
          * Retrieves value for specified key, with default value returned if key
@@ -355,7 +355,7 @@ class Configurator {
          * @return              value for key in entries or default value
          */
         template <typename T>
-        T get_configuration_scalar(const std::string& key, T default_value) {
+        T get_configuration_scalar(const std::string& key, T default_value) const {
             try {
                 return this->configuration_block_.get_entry<T>(key, default_value);
             } catch (convert::ValueError e) {
@@ -369,10 +369,11 @@ class Configurator {
          * @return      value for key
          */
         template <typename T>
-        std::vector<T> get_configuration_vector(const std::string& key) {
+        std::vector<T> get_configuration_vector(const std::string& key) const {
             try {
                 std::string s = this->configuration_block_.get_entry<std::string>(key);
-                return convert::to_vector<T>(s, " ");
+                std::vector<T> x = convert::to_vector<T>(s, " ", true);
+                return x;
             } catch (ConfigurationIncompleteError e) {
                 throw this->build_exception(e.what());
             } catch (convert::ValueError e) {

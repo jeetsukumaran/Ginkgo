@@ -438,7 +438,28 @@ class OptionParser {
          * @param out   output stream to which to write help message
          * @return      same output stream
          */
-        std::ostream& write_help(std::ostream& out, const char * progname=NULL) const;         
+        std::ostream& write_help(std::ostream& out) const;
+        
+        /**
+         * Writes usage info to the given output stream.
+         * @param out   output stream to which to write usage info
+         * @return      same output stream
+         */        
+        std::ostream& write_usage(std::ostream& out) const;
+        
+        /**
+         * Writes description to the given output stream.
+         * @param out   output stream to which to write description
+         * @return      same output stream
+         */        
+        std::ostream& write_description(std::ostream& out) const;
+        
+        /**
+         * Writes version to the given output stream.
+         * @param out   output stream to which to write version
+         * @return      same output stream
+         */        
+        std::ostream& write_version(std::ostream& out) const;         
 
     private:
         /**
@@ -475,6 +496,8 @@ class OptionParser {
         PosArgs                                     pos_args_;
         /** map of flag strings to option arguments */
         std::map< std::string, OptionArg * >        key_opt_map_;
+        /** the program file name */
+        std::string                                 prog_filename_;
 };
 
 } // namespace gingko
