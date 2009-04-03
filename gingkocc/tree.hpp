@@ -31,8 +31,27 @@
 #include <iomanip>
 #include <iostream>
 #include <algorithm>
+#include <stdexcept>
 
 namespace gingko {
+
+/**
+ * General i/o error.
+ */
+class TreeIOError : public std::runtime_error {
+    public:
+        TreeIOError(const char * msg) : std::runtime_error(msg) {}
+        TreeIOError(const std::string& msg) : std::runtime_error(msg.c_str()) {}
+};
+
+/**
+ * General format error.
+ */
+class TreeStructureError : public std::runtime_error {
+    public:
+        TreeStructureError(const char * msg) : std::runtime_error(msg) {}
+        TreeStructureError(const std::string& msg) : std::runtime_error(msg.c_str()) {}
+};
 
 /**
  * Encapsulates the building of trees from a collection of GenealogyNode 

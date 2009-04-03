@@ -117,6 +117,24 @@ class Landscape {
             }        
         }
         
+        // --- sampling and tree-building ---
+        
+        /** 
+         * Loads vector of pointers to organisms of a particular species from
+         * the given vector of cells. If num_organisms is 0 all organisms of 
+         * that species are added, otherwise limited to num_organisms, sampled 
+         * at random. If num_organisms exceeds the number of organisms of 
+         * given species in the cell, then all the organisms are returned.
+         * Organisms will be assigned labels based on their position.
+         * @param sp                     pointer to Species object
+         * @param num_organisms_per_cell number of organisms (0=all)
+         * @param cell_indexes           indexes of cells from which to sample
+         */
+       void sample_organisms(Species * sp_ptr, 
+                    unsigned long num_organisms_per_cell, 
+                    const std::vector<CellIndexType>& cell_indexes,
+                    std::vector<const Organism *>& samples);          
+        
         // --- cell access and spatial mapping ---
         
         /**
@@ -232,20 +250,20 @@ class Landscape {
          *              the geospatial framework
          */             
         CellIndexType random_neighbor(CellIndexType i) {
-            static CellIndexType x = 0;
-            static CellIndexType y = 0;
+            static long x = 0;
+            static long y = 0;
             
             x = this->index_to_x(i) + this->rng_.uniform_int(-1, 1); // to reflect: % this->size_x_; 
             y = this->index_to_y(i) + this->rng_.uniform_int(-1, 1); // to reflect: % this->size_y_; 
-            if (x >= this->size_x_) {
-                x = this->size_x_ - 1;
-            } else if (x < 0) {
+            if (x < 0) {
                 x = 0;
+            } else if (static_cast<unsigned long>(x) >= this->size_x_) {
+                x = this->size_x_ - 1;
             }
-            if (y >= this->size_y_) {
-                y = this->size_y_ - 1;
-            } else if (y < 0) {
+            if (y < 0) {
                 y = 0;
+            } else if (static_cast<unsigned long>(y) >= this->size_y_) {
+                y = this->size_y_ - 1;
             }
             return this->xy_to_index(x, y);
         }

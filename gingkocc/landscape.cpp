@@ -64,6 +64,7 @@ void Landscape::generate(CellIndexType size_x, CellIndexType size_y, unsigned nu
 }
         
 // --- migration and movement ---
+
 void Landscape::clear_migrants() {
     this->migrants_.clear();
 }
@@ -79,7 +80,27 @@ void Landscape::process_migrants() {
     this->migrants_.clear();
 }
 
+// --- sampling for tree building ---
+
+void Landscape::sample_organisms(Species * sp_ptr, 
+        unsigned long num_organisms_per_cell,
+        const std::vector<CellIndexType>& cell_indexes,
+        std::vector<const Organism *>& samples) {
+    if (num_organisms_per_cell > 0) {        
+        samples.reserve(samples.size() + (num_organisms_per_cell * cell_indexes.size()));
+    } else {
+        samples.reserve(samples.size() + cell_indexes.size());
+    }
+    for (std::vector<CellIndexType>::const_iterator ci = cell_indexes.begin();
+            ci != cell_indexes.end();
+            ++ci) {
+        assert(static_cast<unsigned long>(*ci) < this->cells_.size());
+        this->cells_[*ci]->sample_organisms(sp_ptr, samples, num_organisms_per_cell);
+    }
+}        
+
 // --- debugging ---
+
 unsigned long Landscape::dump(std::ostream& output) {
     unsigned long num = 0;
     unsigned long total = 0;

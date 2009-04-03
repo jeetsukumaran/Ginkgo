@@ -779,7 +779,7 @@ class Species {
          * @return      value to be deducted from organism's movement capacity
          */
         int movement_cost(CellIndexType i) {
-            assert( (i >= 0 ) and (static_cast<unsigned>(i) < this->movement_costs_.size()) );
+            assert( i < this->movement_costs_.size() );
             return this->movement_costs_[i];
         }
         

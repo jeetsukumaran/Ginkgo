@@ -338,7 +338,51 @@ class World {
          */
         void run();
         
-        // --- logging ---
+        // --- logging and output ---
+        
+        /**
+         * Given a list of pointers to organisms, builds and saves a tree
+         * of the haploid locus allele to the given outputstream.
+         * @param   organisms   sample of organisms
+         * @param   out         output stream
+         */
+        void write_haploid_tree(const std::vector<const Organism *>& organisms,
+                std::ostream& out);
+        
+        /**
+         * Samples organisms of specified species and specified cells of the
+         * the landscape, and write out the corresponding trees.
+         * Three tree files will be produced: 
+         *   (1) one for the haploid locus
+         *   (2) one for all the diploid locii, with both alleles from each
+         *       individual included
+         *   (3) one for the haploid locus and all the diploid locii, with one
+         *       allele sampled at random from each individual's diploid locus
+         * @param sp_ptr                    pointer to species
+         * @param num_organisms_per_cell    number of organisms of the given 
+         *                                  species per cell to sample 
+         *                                  (0 = sample all)
+         * @param cell_indexes              list of cell indexes to sample
+         */
+        void save_trees(Species * sp_ptr, 
+                        unsigned long num_organisms_per_cell, 
+                        const std::vector<CellIndexType>& cell_indexes);
+                        
+        /**
+         * Samples organisms of specified species from all the cells of the
+         * the landscape, and write out the corresponding trees.
+         * Three tree files will be produced: 
+         *   (1) one for the haploid locus
+         *   (2) one for all the diploid locii, with both alleles from each
+         *       individual included
+         *   (3) one for the haploid locus and all the diploid locii, with one
+         *       allele sampled at random from each individual's diploid locus
+         * @param sp_ptr                    pointer to species
+         * @param num_organisms_per_cell    number of organisms of the given 
+         *                                  species per cell to sample 
+         *                                  (0 = sample all)
+         */
+        void save_trees(Species * sp_ptr, unsigned long num_organisms_per_cell);                        
         
         /**
          * Tries to open file, throwing exception if failed.

@@ -30,6 +30,7 @@
 #include "asciigrid.hpp"
 #include "world.hpp"
 #include "filesys.hpp"
+#include "tree.hpp"
 
 using namespace gingko;
 
@@ -120,14 +121,14 @@ void World::cycle() {
     gen << "Generation " << this->current_generation_ << " life-cycle beginning.";
     this->log_info(gen.str());
     this->log_info("Reproduction/migration phase.");
-    for (CellIndexType i = this->landscape_.size()-1; i >= 0; --i) {
+    for (CellIndexType i = 0; i < this->landscape_.size(); ++i) {
         this->landscape_[i].reproduction(); 
         this->landscape_[i].migration();
     }
     this->log_info("Processing migrants.");
     this->landscape_.process_migrants();
     this->log_info("Survival/competition phase.");
-    for (CellIndexType i = this->landscape_.size()-1; i >= 0; --i) {    
+    for (CellIndexType i = 0; i < this->landscape_.size(); ++i) {    
         this->landscape_[i].survival();
         this->landscape_[i].competition();        
     }    
@@ -182,6 +183,39 @@ void World::run() {
 }
 
 // --- logging and output ---
+
+void World::save_trees(Species * sp_ptr, 
+                unsigned long num_organisms_per_cell, 
+                const std::vector<CellIndexType>& cell_indexes) {
+    std::vector<const Organism *> organisms;
+    this->landscape_.sample_organisms(sp_ptr, num_organisms_per_cell, cell_indexes, organisms);
+    
+    std::ostringstream tree_filename_stem;
+    tree_filename_stem << sp_ptr->get_label() << "_G" << this->current_generation_;
+    
+    std::ofstream haploid_trees;
+    this->open_ofstream(haploid_trees, tree_filename_stem.str() + ".haploid.tre");
+    
+    std::ofstream diploid_trees;
+    this->open_ofstream(diploid_trees, tree_filename_stem.str() + ".diploid.tre");
+    
+    std::ofstream combined_trees;            
+    this->open_ofstream(combined_trees, tree_filename_stem.str() + ".combined.tre");
+        
+    for (std::vector<const Organism *>::const_iterator oi = organisms.begin(); oi != organisms.end(); ++oi) {
+    
+    }
+}                
+
+void World::save_trees(Species * sp_ptr, 
+                unsigned long num_organisms_per_cell) {
+    std::vector<CellIndexType> cell_indexes;
+    cell_indexes.reserve(this->landscape_.size());
+    for (unsigned long i = 0; i < this->landscape_.size(); ++i) {
+        cell_indexes.push_back(i);
+    }
+    this->save_trees(sp_ptr, num_organisms_per_cell, cell_indexes);
+} 
 
 void World::open_ofstream(std::ofstream& out, const std::string& fpath) {
     std::string full_fpath = filesys::compose_path(this->output_dir_, fpath);

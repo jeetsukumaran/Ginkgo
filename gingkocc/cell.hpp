@@ -221,9 +221,9 @@ class Cell {
         void sample_organisms(Species * sp_ptr,
             std::vector<const Organism *>& samples, unsigned long num_organisms);            
         
-        // --- supporting methods ---
-        
     private:        
+        
+        // --- supporting methods ---    
         
         /** 
          * Given a species index, extracts pointers to male and female 
