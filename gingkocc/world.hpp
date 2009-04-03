@@ -61,7 +61,7 @@ struct SamplingRegime {
          */
         unsigned long               num_organisms_per_cell;
         /** List of cells to be sampled. */
-        std::vector<CellIndexType>  cells;
+        std::vector<CellIndexType>  cell_indexes;
 };
 
 /**

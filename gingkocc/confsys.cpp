@@ -506,23 +506,24 @@ void GenerationConfigurator::process_sampling_regimes() {
         OrganismDistribution od = OrganismDistribution();
         std::string key = *k;
         std::vector<std::string> key_parts = textutil::split(key, ":", 1, false);
+        
         if (key_parts.size() < 2) {
             throw this->build_exception("need to specify species label for sampling");
         }
-
-        key_parts = textutil::split(key, "#", 1, false);
-        if (key_parts.size() < 2) {
+        
+        std::vector<std::string> species_number_parts = textutil::split(key_parts[1], "#", 1, false);
+        if (species_number_parts.size() < 2) {
             od.num_organisms = 0;
-        } else if (key_parts[1] == "*") {
+        } else if (species_number_parts[1] == "*") {
             od.num_organisms = 0;
         } else {      
             try {
-                od.num_organisms = convert::to_scalar<unsigned long>(key_parts[1]);
+                od.num_organisms = convert::to_scalar<unsigned long>(species_number_parts[1]);
             } catch (const convert::ValueError& e) {
-                throw this->build_exception("invalid value for sample number \"" + key_parts[1] + "\"");
+                throw this->build_exception("invalid value for sample number \"" + species_number_parts[1] + "\"");
             }
-        }
-        od.species_label = key_parts[0];
+        } 
+        od.species_label = species_number_parts[0];
         this->get_configuration_positions(key, od);
         this->samples_.insert(std::make_pair(od.species_label, od));
     }
@@ -566,7 +567,7 @@ void GenerationConfigurator::configure(World& world)  {
         OrganismDistribution& od = sri->second;
         assert(od.x.size() == od.y.size());
         SamplingRegime sampling_regime;
-        sampling_regime.cells.reserve(od.x.size());
+        sampling_regime.cell_indexes.reserve(od.x.size());
         sampling_regime.num_organisms_per_cell = od.num_organisms;
         for (unsigned i = 0; i < od.x.size(); ++i) {
             if (od.x[i] > world.landscape().size_x()-1) {
@@ -581,7 +582,7 @@ void GenerationConfigurator::configure(World& world)  {
                 msg << " but position specifies x-coordinate of " << od.y[i];
                 throw this->build_exception(msg.str());
             }              
-            sampling_regime.cells.push_back(world.landscape().xy_to_index(od.x[i], od.y[i]));
+            sampling_regime.cell_indexes.push_back(world.landscape().xy_to_index(od.x[i], od.y[i]));
         }
         world_settings.samples.insert(std::make_pair(od.species_label, sampling_regime));
     }

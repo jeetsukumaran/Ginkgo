@@ -179,7 +179,20 @@ void World::run() {
                 }
             }
             if (wi->second.samples.size() != 0) {
-                // process
+                for (std::map<std::string, SamplingRegime>::iterator si = wi->second.samples.begin();
+                     si != wi->second.samples.end();
+                     ++si) {
+                    std::ostringstream msg;
+                    msg << "Building tree for species " <<  si->first;
+                    this->log_info(msg.str());
+                    SpeciesByLabel::iterator sp_ptr = this->species_.find(si->first);
+                    assert(sp_ptr != this->species_.end());
+                    if (si->second.cell_indexes.size() == 0) {
+                        this->save_trees(sp_ptr->second, si->second.num_organisms_per_cell);
+                    } else {
+                        this->save_trees(sp_ptr->second, si->second.num_organisms_per_cell, si->second.cell_indexes);                    
+                    }
+                }                
             }
         }
         this->cycle();        
@@ -205,6 +218,7 @@ void World::save_trees(Species * sp_ptr,
                 unsigned long num_organisms_per_cell, 
                 const std::vector<CellIndexType>& cell_indexes) {
     std::vector<const Organism *> organisms;
+    this->log_info("Sampling organisms of species " + sp_ptr->get_label() +".");
     this->landscape_.sample_organisms(sp_ptr, num_organisms_per_cell, cell_indexes, organisms);
     
     std::ostringstream tree_filename_stem;
@@ -218,7 +232,8 @@ void World::save_trees(Species * sp_ptr,
     
     std::ofstream combined_trees;            
     this->open_ofstream(combined_trees, tree_filename_stem.str() + ".combined.tre");
-        
+    
+    this->log_info("Building tree for haploid locus alleles.");
     for (std::vector<const Organism *>::const_iterator oi = organisms.begin(); oi != organisms.end(); ++oi) {
         this->write_haploid_tree(sp_ptr, organisms, haploid_trees);
     }
