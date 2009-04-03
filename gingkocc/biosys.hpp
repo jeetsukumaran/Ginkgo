@@ -874,8 +874,9 @@ class Species {
         /**
          * Resets the count of the number of labels produced.
          */                 
-        void reset_organism_label_index() {
-            this->organism_label_index_ = 0;
+        void clear_organism_labels() {
+            this->organism_labels_.clear();
+            this->organism_label_index_ = 0;            
         }
         
         /**
@@ -916,8 +917,8 @@ class Species {
          * @param   tag         optional extra information to insert into label    
          * @return              unique label for organism
          */
-         const std::string& get_organism_label(Organism& organism, const char * tag = NULL) {
-            std::map<Organism *, std::string>::const_iterator ol = this->organism_labels_.find(&organism);
+         const std::string& get_organism_label(const Organism& organism, const char * tag = NULL) {
+            std::map<const Organism *, std::string>::const_iterator ol = this->organism_labels_.find(&organism);
             if (ol == this->organism_labels_.end()) {
                 return this->organism_labels_.insert(std::make_pair(&organism, this->new_organism_label(tag))).first->second;
             } else {
@@ -934,8 +935,8 @@ class Species {
          * @param   y           y-coordiante of organism's location
          * @return              unique label for organism
          */
-         const std::string& get_organism_label(Organism& organism, CellIndexType x, CellIndexType y) {
-            std::map<Organism *, std::string>::const_iterator ol = this->organism_labels_.find(&organism);
+         const std::string& get_organism_label(const Organism& organism, CellIndexType x, CellIndexType y) {
+            std::map<const Organism *, std::string>::const_iterator ol = this->organism_labels_.find(&organism);
             if (ol == this->organism_labels_.end()) {
                 return this->organism_labels_.insert(std::make_pair(&organism, this->new_organism_label(x, y))).first->second;
             } else {
@@ -948,7 +949,7 @@ class Species {
          *
          * @param       organism label mapping to be erased
          */
-         void erase_organism_label(Organism& organism) {
+         void erase_organism_label(const Organism& organism) {
             this->organism_labels_.erase(&organism);
          }         
         
@@ -1036,7 +1037,7 @@ class Species {
         /** tracks the number of labels assigned to organisms of this species */
         unsigned long                       organism_label_index_;
         /** tracks the organism to label assignment */
-        std::map<Organism *, std::string>   organism_labels_;
+        std::map<const Organism *, std::string>   organism_labels_;
 
 };
 // Species

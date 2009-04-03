@@ -36,12 +36,16 @@ OrganismVector Cell::previous_gen;                       // scratch space to hol
 
 // --- lifecycle and assignment ---
 
-Cell::Cell(CellIndexType index, 
+Cell::Cell(CellIndexType index,
+           CellIndexType x,
+           CellIndexType y,
            unsigned num_fitness_factors,
            Landscape& landscape, 
            const SpeciesByLabel& species, 
            RandomNumberGenerator& rng)     
         : index_(index),
+          x_(x),
+          y_(y),
           carrying_capacity_(0),
           num_fitness_factors_(num_fitness_factors),
           landscape_(landscape),
@@ -146,6 +150,20 @@ void Cell::competition() {
 //     std::cout << " / " << this->organisms_.size() << ", " << this->carrying_capacity_ << std::endl;
 }
 
+// --- for trees etc ---
+void Cell::sample_organisms(Species * sp_ptr,
+    std::vector<const Organism *>& samples, unsigned long num_organisms) {
+    unsigned long num_organisms_added = 0;
+    for (OrganismVector::const_iterator og = this->organisms_.begin(); og != this->organisms_.end(); ++og) {
+        if (num_organisms > 0 && num_organisms_added > num_organisms) {
+            break;
+        }
+        if (&og->species() == sp_ptr) {
+            sp_ptr->get_organism_label(*og, this->x_, this->y_);
+            samples.push_back(&(*og));
+        }
+    }  
+}
 
 // --- supporting methods ---
 

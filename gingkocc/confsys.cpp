@@ -512,9 +512,9 @@ void GenerationConfigurator::process_sampling_regimes() {
 
         key_parts = textutil::split(key, "#", 1, false);
         if (key_parts.size() < 2) {
-            od.num_organisms = -1;
+            od.num_organisms = 0;
         } else if (key_parts[1] == "*") {
-            od.num_organisms = -1;
+            od.num_organisms = 0;
         } else {      
             try {
                 od.num_organisms = convert::to_scalar<unsigned long>(key_parts[1]);

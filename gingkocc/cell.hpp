@@ -44,12 +44,16 @@ class Cell {
          * environmental fitness factors.
          *
          * @param index     the index of this cell on the Landscape
+         * @param index     the x geographic coordinate of this cell
+         * @param index     the y geographic coordinate of this cell
          * @param num_fitness_factors 
          *                  the number of factors to be considered for fitness
          * @species         reference to the World species pool
          * @rng             reference to the World random number generator
          */
         Cell(CellIndexType index,
+             CellIndexType x,
+             CellIndexType y,
              unsigned num_fitness_factors,
              Landscape& landscape, 
              const SpeciesByLabel& species, 
@@ -140,7 +144,7 @@ class Cell {
          */          
         unsigned long num_organisms() const {
             return this->organisms_.size();
-        }
+        }                
         
         /**
          * Creates the specified number of organisms of the specified species 
@@ -201,8 +205,25 @@ class Cell {
          * cell.
          */        
         void competition();        
+                        
+        // --- sampling for tree-building ---
+
+        /** 
+         * Adds pointers to organisms of a particular species to the given 
+         * vector. If num_organisms is 0 all organisms of that species are 
+         * added, otherwise limited to num_organisms, sampled at random. If 
+         * num_organisms exceeds the number of organisms of 
+         * given species in the cell, then all the organisms are returned.
+         * @param sp            pointer to Species object
+         * @param samples       vector of pointers to organisms to add to         
+         * @param num_organisms number of organisms (0=all)
+         */
+        void sample_organisms(Species * sp_ptr,
+            std::vector<const Organism *>& samples, unsigned long num_organisms);            
         
         // --- supporting methods ---
+        
+    private:        
         
         /** 
          * Given a species index, extracts pointers to male and female 
@@ -229,6 +250,10 @@ class Cell {
     private:
         /** index of this cell in the landscape */
         CellIndexType                           index_;
+        /** x-coordinate of this cell in the landscape */
+        CellIndexType                           x_;             
+        /** y-coordinate of this cell in the landscape */ 
+        CellIndexType                           y_;   
         /** maximum number of individual organisms that can occupy this cell */
         unsigned long                           carrying_capacity_;
         /** number of active fitness factors */

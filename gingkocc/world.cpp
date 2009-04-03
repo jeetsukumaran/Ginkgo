@@ -139,6 +139,10 @@ void World::run() {
     this->open_logs();
     this->log_extrasim_info("Starting simulation.");
     while (this->current_generation_ < this->generations_to_run_) {
+    
+        // TODO: for each species, reset organism index: clear_organism_labels()
+        
+        // process world changes
         std::map<unsigned long, WorldSettings>::iterator wi = this->world_settings_.find(this->current_generation_);
         if (wi != this->world_settings_.end()) {
             if (wi->second.carrying_capacity.size() != 0) {

@@ -286,7 +286,7 @@ struct OrganismDistribution {
 
     public:
         std::string     species_label;
-        long            num_organisms;
+        unsigned long   num_organisms;
         std::vector<CellIndexType>  x;
         std::vector<CellIndexType>  y;
         

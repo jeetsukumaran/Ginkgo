@@ -56,10 +56,10 @@ struct SamplingRegime {
 
     public:
         /** 
-         * Number of organisms from each cell to be sampled, with -1
+         * Number of organisms from each cell to be sampled, with 0
          * meaning sample all. 
          */
-        long               num_organisms_per_cell;
+        unsigned long               num_organisms_per_cell;
         /** List of cells to be sampled. */
         std::vector<CellIndexType>  cells;
 };
@@ -338,7 +338,7 @@ class World {
          */
         void run();
         
-        // --- logging and output ---
+        // --- logging ---
         
         /**
          * Tries to open file, throwing exception if failed.
