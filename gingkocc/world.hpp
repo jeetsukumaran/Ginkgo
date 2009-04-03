@@ -457,7 +457,9 @@ class World {
         /** Tracks the number of generations that have been run. */
         unsigned long                           current_generation_;
         /** Collection of events (scheduled to occur at specific generations. */
-        std::map<unsigned long, WorldSettings>  world_settings_;
+        std::map<unsigned long, WorldSettings>  world_settings_;    
+        /** Whether or not we force coalescence if multiple roots are found. */
+        bool                                    coalesce_multiple_roots_;
         /** Output directory. */
         std::string                             output_dir_;
         /** Info log file stream. */

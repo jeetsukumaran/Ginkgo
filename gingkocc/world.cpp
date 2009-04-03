@@ -39,6 +39,7 @@ World::World()
     : species_(),
       rng_(),
       landscape_(species_, rng_),
+      coalesce_multiple_roots_(true),
       is_log_to_screen_(true) {
     this->current_generation_ = 0;    
 }
@@ -48,6 +49,7 @@ World::World(unsigned long seed)
     : species_(),
       rng_(seed),
       landscape_(species_, rng_),
+      coalesce_multiple_roots_(true),
       is_log_to_screen_(true) {
     this->current_generation_ = 0;    
 }    
@@ -202,7 +204,7 @@ void World::run() {
 void World::write_haploid_tree(Species * sp_ptr,
                 const std::vector<const Organism *>& organisms,
                 std::ostream& out) {
-    Tree tree;
+    Tree tree(this->coalesce_multiple_roots_);
     for (std::vector<const Organism *>::const_iterator oi = organisms.begin();
             oi != organisms.end();
             ++oi) {
@@ -214,9 +216,16 @@ void World::write_haploid_tree(Species * sp_ptr,
         std::ostringstream msg;
         msg << "tree for sample of organisms of species " << sp_ptr->get_label();
         msg << " in generation " << this->current_generation_;
-        msg << " could not be built due insufficient nodes";
+        msg << " could not be built due to missing root node";
         msg << " (organism sample size = " << organisms.size() << ")";
         this->log_error(msg.str());
+    } catch (const TreeStructureMultipleRootError& e) {
+        std::ostringstream msg;
+        msg << "tree for sample of organisms of species " << sp_ptr->get_label();
+        msg << " in generation " << this->current_generation_;
+        msg << " could not be built due to multiple root nodes";
+        msg << " (organism sample size = " << organisms.size() << ")";
+        this->log_error(msg.str());    
     }
 }                
 
