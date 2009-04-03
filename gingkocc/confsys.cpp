@@ -438,7 +438,7 @@ GenerationConfigurator::GenerationConfigurator(const ConfigurationBlock& cb)
     this->parse();
 }
 
-std::vector<long> GenerationConfigurator::get_grid_values(const std::string& grid_path, const World& world) {   
+std::string GenerationConfigurator::get_validated_grid_path(const std::string& grid_path, const World& world) {   
     std::string root_filepath = filesys::get_path_parent(this->get_config_filepath());
     std::string full_grid_path;    
     if (filesys::is_abs_path(grid_path) or root_filepath.size() == 0) {
@@ -455,7 +455,7 @@ std::vector<long> GenerationConfigurator::get_grid_values(const std::string& gri
             msg << "but grid \"" << full_grid_path << "\" describes " << values.size() << " cells";
             throw this->build_exception(msg.str());        
         }
-        return values;
+        return full_grid_path;
     } catch (asciigrid::AsciiGridIOError e) {
         throw this->build_exception("I/O error reading grid \"" + full_grid_path + "\": " + e.what());
     } catch (asciigrid::AsciiGridFormatError e) {
@@ -541,19 +541,16 @@ void GenerationConfigurator::configure(World& world)  {
     WorldSettings world_settings;
 
     if (this->carrying_capacity_.size() > 0) {
-        this->get_grid_values(this->carrying_capacity_, world);        
-        world_settings.carrying_capacity = this->carrying_capacity_;
+        world_settings.carrying_capacity = this->get_validated_grid_path(this->carrying_capacity_, world);
     }
     for (std::map<unsigned, std::string>::iterator envi = this->environments_.begin(); envi != this->environments_.end(); ++envi) {
-        this->get_grid_values(envi->second, world);
-        world_settings.environments.insert(*envi);
+        world_settings.environments.insert(std::make_pair(envi->first, this->get_validated_grid_path(envi->second, world)));
     }
     for (std::map<std::string, std::string>::iterator mci = this->movement_costs_.begin(); mci != this->movement_costs_.end(); ++mci) {
         if (not world.has_species(mci->first)) {
             throw this->build_exception("movement costs: species \"" + mci->first + "\" not defined");
         }
-        this->get_grid_values(mci->second, world);
-        world_settings.movement_costs.insert(*mci);
+        world_settings.movement_costs.insert(std::make_pair(mci->first, this->get_validated_grid_path(mci->second, world)));
     }
     for (std::map<std::string, OrganismDistribution>::iterator sri = this->samples_.begin(); sri != this->samples_.end(); ++sri) {
         OrganismDistribution& od = sri->second;

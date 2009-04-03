@@ -27,6 +27,7 @@
 #include <fstream>
 #include <iomanip>
 
+#include "asciigrid.hpp"
 #include "world.hpp"
 #include "filesys.hpp"
 
@@ -141,7 +142,9 @@ void World::run() {
         std::map<unsigned long, WorldSettings>::iterator wi = this->world_settings_.find(this->current_generation_);
         if (wi != this->world_settings_.end()) {
             if (wi->second.carrying_capacity.size() != 0) {
-                // process
+                this->log_info("Setting carrying capacity: \"" + wi->second.carrying_capacity + "\".");
+                asciigrid::AsciiGrid grid(wi->second.carrying_capacity);
+                this->landscape_.set_carrying_capacities(grid.get_cell_values());
             }
             if (wi->second.movement_costs.size() != 0) {
                 // process

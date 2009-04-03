@@ -541,14 +541,14 @@ class GenerationConfigurator : public Configurator {
     
         /** 
          * Verifies a grid file, ensuring that it exists, can be loaded
-         * and is the same dimensions as a given World, and, if successfull
-         * returns the cell values. Throws an exception if any of these 
+         * and is the same dimensions as a given World, and, if successful
+         * returns the validated filepath. Throws an exception if any of these 
          * conditions fail.
          * @param   grid_path   path to grid file
          * @param   world       world against which to validate
-         * @return              cell values
+         * @return              validated file path
          */
-        std::vector<long> get_grid_values(const std::string& grid_path, const World& world);        
+        std::string get_validated_grid_path(const std::string& grid_path, const World& world);        
         
         /** Processes carrying capacity entries. */
         void process_carrying_capacity();
