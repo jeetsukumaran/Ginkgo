@@ -60,16 +60,16 @@ int main(int argc, char* argv[]) {
     
     gingko::World world;
     world.set_output_dir(output_dir);
-    if (not dry_run) {
-        world.open_logs();
-        world.log_info("Processing configuration file: \"" + args[0] + "\"."); 
-    }        
+       
     gingko::confsys::configure_world(world, args[0]);
     if (not dry_run) {
-        world.log_info("World configured.");
-        world.log_info("Starting simulation.");
-        
-        world.log_info("Ending simulation.");
+        world.open_logs();
+        world.log_extrasim_info("World configured using: \"" + args[0] + "\"");
+        world.log_extrasim_info("Starting simulation.");
+        world.run();
+        world.log_extrasim_info("Ending simulation.");
+        world.log_extrasim_info("Exiting simulation.");
+        world.close_logs();
     }
-    world.log_info("Exiting simulation.");
+    
 }

@@ -366,9 +366,21 @@ class World {
         
         /**
          * Time stamp for log.
-         * @return  formatted time/generation stamp         
+         * @return  formatted time stamp         
          */
         std::string get_timestamp();
+        
+        /**
+         * Time and generation stamp for log.
+         * @return  formatted time/generation stamp         
+         */
+        std::string get_time_gen_stamp();        
+        
+        /**
+         * Write message to the general log stream without a generation #.
+         * @param   message message to write
+         */
+        void log_extrasim_info(const std::string& message);
         
         /**
          * Write message to the general log stream.

@@ -113,9 +113,6 @@ void World::cycle() {
 //         this->landscape_[i].competition();
 //     }
 //     this->landscape_.process_migrants();
-    ++this->current_generation_;
-
-    std::cerr << "GENERATION " << this->current_generation_ << std::endl;
 
     for (CellIndexType i = this->landscape_.size()-1; i >= 0; --i) {
         this->landscape_[i].reproduction(); 
@@ -126,10 +123,12 @@ void World::cycle() {
         this->landscape_[i].survival();
         this->landscape_[i].competition();        
     }    
+    ++this->current_generation_;    
 }
 
 void World::run() {    
     this->open_logs();
+    this->log_info("Starting generation.");
     while (this->current_generation_ < this->generations_to_run_) {
         std::map<unsigned long, WorldSettings>::iterator wi = this->world_settings_.find(this->current_generation_);
         if (wi != this->world_settings_.end()) {
@@ -145,14 +144,12 @@ void World::run() {
         }
         this->cycle();        
     }
-    this->close_logs();
 }
 
 // --- logging and output ---
 
 void World::open_ofstream(std::ofstream& out, const std::string& fpath) {
     std::string full_fpath = filesys::compose_path(this->output_dir_, fpath);
-    std::cout << "Opening \"" + full_fpath + "\" for logging ..." << std::endl;
     out.open(full_fpath.c_str());
     if (not out) {
         throw WorldIOError("cannot open log file \"" + full_fpath + "\" for output");
@@ -186,19 +183,36 @@ std::string World::get_timestamp() {
     struct tm * timeinfo = localtime ( &rawtime );
     char buffer[80];
     strftime (buffer,80,"%Y-%m-%d %H:%M:%S",timeinfo);
+    return std::string(buffer);
+}
+
+std::string World::get_time_gen_stamp() {    
     std::ostringstream outs;
     outs << "[";
-    outs << buffer;
+    outs << this->get_timestamp();
+    outs << "]";    
     outs << " ";
     outs << std::setw(8) << std::setfill('0');
-    outs << this->current_generation_;
-    outs << "]";    
+    outs << this->current_generation_;   
     return outs.str();
+}
+
+void World::log_extrasim_info(const std::string& message) {
+    assert(this->infos_);
+    std::ostringstream outs;
+    outs << "[";
+    outs << this->get_timestamp();
+    outs << "]";
+    outs << "         ";    
+    if (this->is_log_to_screen_) {
+        std::cout << outs.str() << " " << message << std::endl;
+    }
+    this->infos_ << outs.str() << " " << message << std::endl;
 }
 
 void World::log_info(const std::string& message) {
     assert(this->infos_);
-    std::string ts = this->get_timestamp();
+    std::string ts = this->get_time_gen_stamp();
     if (this->is_log_to_screen_) {
         std::cout << ts << " " << message << std::endl;
     }
@@ -208,7 +222,7 @@ void World::log_info(const std::string& message) {
 void World::log_error(const std::string& message) {
     assert(this->errs_);
     assert(this->infos_);    
-    std::string ts = this->get_timestamp();
+    std::string ts = this->get_time_gen_stamp();
     if (this->is_log_to_screen_) {
         std::cerr << ts << " ERROR: " << message << std::endl;
     }
