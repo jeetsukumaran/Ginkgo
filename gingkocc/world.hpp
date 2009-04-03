@@ -245,7 +245,7 @@ class World {
          *                      cost for cell \f$i\f$ in the landscape given
          *                      by element \f$i\f$ in the costs vector
          */
-        void set_species_movement_costs(const std::string& species_label, const std::vector<int>& costs) {
+        void set_species_movement_costs(const std::string& species_label, const std::vector<long>& costs) {
             assert(this->species_.find(species_label) != this->species_.end());
             assert(costs.size() == static_cast<unsigned long>(this->landscape_.size()));
             this->species_[species_label]->set_movement_costs(costs);

@@ -76,7 +76,7 @@ Species& World::new_species(const std::string& label) {
                               this->num_fitness_factors_, 
                               this->rng_);
     this->species_.insert(std::make_pair(std::string(label), sp));
-    std::vector<int> default_movement_costs(this->landscape_.size(), 1);
+    std::vector<long> default_movement_costs(this->landscape_.size(), 1);
     sp->set_movement_costs(default_movement_costs);
     return *sp;
 }
@@ -117,7 +117,7 @@ void World::cycle() {
 //     }
 //     this->landscape_.process_migrants();
     std::ostringstream gen;
-    gen << "Generation " << this->current_generation_ << " begun.";
+    gen << "Generation " << this->current_generation_ << " life-cycle beginning.";
     this->log_info(gen.str());
     this->log_info("Reproduction/migration phase.");
     for (CellIndexType i = this->landscape_.size()-1; i >= 0; --i) {
@@ -131,7 +131,7 @@ void World::cycle() {
         this->landscape_[i].survival();
         this->landscape_[i].competition();        
     }    
-    this->log_info("Generation ended.");
+    this->log_info("Generation life-cycle complete.");
     ++this->current_generation_;
 }
 
@@ -158,7 +158,15 @@ void World::run() {
                 }
             }            
             if (wi->second.movement_costs.size() != 0) {
-
+                for (std::map<std::string, std::string>::iterator mi = wi->second.movement_costs.begin();
+                     mi != wi->second.movement_costs.end();
+                     ++mi) {
+                    std::ostringstream msg;
+                    msg << "Setting movement costs for species " <<  mi->first <<  ": \"" <<  mi->second <<  "\"";
+                    this->log_info(msg.str());
+                    asciigrid::AsciiGrid grid(mi->second);
+                    this->set_species_movement_costs(mi->first, grid.get_cell_values());                    
+                }
             }
             if (wi->second.samples.size() != 0) {
                 // process

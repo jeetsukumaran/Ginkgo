@@ -768,7 +768,7 @@ class Species {
          *
          * @param costs vector of movement costs
          */
-        void set_movement_costs(const std::vector<int>& costs) {
+        void set_movement_costs(const std::vector<long>& costs) {
             this->movement_costs_ = costs;
         }
         
@@ -1026,7 +1026,7 @@ class Species {
         /** allowing for evolution in fecundity */
         unsigned                            reproductive_rate_mutation_size_;
         /** landscape migration potential for this species */
-        std::vector<int>                    movement_costs_;
+        std::vector<long>                    movement_costs_;
         /** movement potential of each organism at the start of each round */
         int                                 movement_capacity_;
         /** genotype for organisms created de novo */
