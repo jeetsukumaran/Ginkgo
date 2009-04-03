@@ -65,8 +65,8 @@ World& configure_world(World& world, const char * conf_fpath) {
 
 World& configure_world(World& world, const std::string& conf_fpath) {
     std::ifstream f(conf_fpath.c_str());
-    configure_world(world, f);
-    world.log_info("Configured World from \"" + conf_fpath + "\".");
+    ConfigurationFile cf(conf_fpath);   
+    cf.configure(world); 
     return world;
 }
 
