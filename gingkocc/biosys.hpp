@@ -873,7 +873,7 @@ class Species {
          *                      fitness function
          */        
         void set_default_genotypic_fitness_factors(std::vector<FitnessFactorType> genotype) {
-            assert(genotype.size() < MAX_FITNESS_FACTORS);
+            assert(genotype.size() <= MAX_FITNESS_FACTORS);
             for (unsigned i = 0; i != genotype.size(); ++i) {
                 this->default_genotypic_fitness_factors_[i] = genotype[i];
             }

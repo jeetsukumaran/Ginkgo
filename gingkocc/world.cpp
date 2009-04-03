@@ -117,6 +117,7 @@ void World::cycle() {
 //         this->landscape_[i].competition();
 //     }
 //     this->landscape_.process_migrants();
+
     std::ostringstream gen;
     gen << "Generation " << this->current_generation_ << " life-cycle beginning.";
     this->log_info(gen.str());
@@ -139,9 +140,13 @@ void World::cycle() {
 void World::run() {    
     this->open_logs();
     this->log_extrasim_info("Starting simulation.");
-    while (this->current_generation_ < this->generations_to_run_) {
     
-        // TODO: for each species, reset organism index: clear_organism_labels()
+    while (this->current_generation_ < this->generations_to_run_) {
+        
+        // clear organism labels
+        for (std::map<std::string, Species *>::iterator spi = this->species_.begin(); spi != this->species_.end(); ++spi) {
+            (spi->second)->clear_organism_labels();
+        }
         
         // process world changes
         std::map<unsigned long, WorldSettings>::iterator wi = this->world_settings_.find(this->current_generation_);
