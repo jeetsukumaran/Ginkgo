@@ -480,7 +480,10 @@ void GenerationConfigurator::process_environments() {
             environment_factor = convert::to_scalar<unsigned long>(key_parts[1]);
         } catch (const convert::ValueError& e) {
             throw this->build_exception("invalid value for environment factor index: \"" + key_parts[1] + "\"");
-        }        
+        }
+//         if (environment_factor == 0) {
+//             throw this->build_exception("invalid value for environment factor index: 0 (environment factor indexes start at 1)"); 
+//         }
         this->environments_.insert(std::make_pair(environment_factor, this->get_configuration_scalar<std::string>(key)));
     }
 }
@@ -544,6 +547,13 @@ void GenerationConfigurator::configure(World& world)  {
         world_settings.carrying_capacity = this->get_validated_grid_path(this->carrying_capacity_, world);
     }
     for (std::map<unsigned, std::string>::iterator envi = this->environments_.begin(); envi != this->environments_.end(); ++envi) {
+        if (envi->first >= world.get_num_fitness_factors()) {
+            std::ostringstream msg;
+            msg << "invalid environment factor index: " << envi->first;
+            msg << " (maximum valid index is " << world.get_num_fitness_factors() - 1;
+            msg << ", given 0-based indexing and " << world.get_num_fitness_factors() << " factors defined)";
+            throw this->build_exception(msg.str());           
+        }
         world_settings.environments.insert(std::make_pair(envi->first, this->get_validated_grid_path(envi->second, world)));
     }
     for (std::map<std::string, std::string>::iterator mci = this->movement_costs_.begin(); mci != this->movement_costs_.end(); ++mci) {

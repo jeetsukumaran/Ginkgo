@@ -146,8 +146,20 @@ void World::run() {
                 asciigrid::AsciiGrid grid(wi->second.carrying_capacity);
                 this->landscape_.set_carrying_capacities(grid.get_cell_values());
             }
+            if (wi->second.environments.size() != 0) {
+                for (std::map<unsigned, std::string>::iterator ei = wi->second.environments.begin();
+                     ei != wi->second.environments.end();
+                     ++ei) {
+                    std::ostringstream msg;
+                    msg << "Setting environmental variable " <<  ei->first <<  ": \"" <<  ei->second <<  "\"";
+                    this->log_info(msg.str());
+                    asciigrid::AsciiGrid grid(ei->second);
+                    this->landscape_.set_environment(ei->first, grid.get_cell_values());                    
+                }                     
+
+            }            
             if (wi->second.movement_costs.size() != 0) {
-                // process
+
             }
             if (wi->second.samples.size() != 0) {
                 // process
