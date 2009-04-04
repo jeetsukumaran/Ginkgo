@@ -377,7 +377,12 @@ void SpeciesConfigurator::configure(World& world)  {
         throw this->build_exception("species \"" + label + "\" has already been defined");
     }
     Species& sp = world.new_species(label);
-    if (sp.get_num_fitness_factors() > this->default_genotypic_fitness_factors_.size()) {
+    if (sp.get_num_fitness_factors() != this->selection_weights_.size()) {
+        std::ostringstream msg;
+        msg << "expecting " << sp.get_num_fitness_factors() << " default selection weights factors, but found " << this->selection_weights_.size() ;
+        throw this->build_exception(msg.str());
+    }    
+    if (sp.get_num_fitness_factors() != this->default_genotypic_fitness_factors_.size()) {
         std::ostringstream msg;
         msg << "expecting " << sp.get_num_fitness_factors() << " default genotypic fitness factors, but found " << this->default_genotypic_fitness_factors_.size() ;
         throw this->build_exception(msg.str());
