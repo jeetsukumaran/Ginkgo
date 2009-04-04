@@ -953,7 +953,7 @@ class Species {
          */
         std::string new_organism_label(CellIndexType x, CellIndexType y) {
             std::ostringstream label_ostr;
-            label_ostr << this->label_ << "_x" << x << "y" << y << "_" << this->organism_label_index_++;
+            label_ostr << this->label_ << "_x" << x << "_y" << y << "_" << this->organism_label_index_++;
             return label_ostr.str();
         }        
         
