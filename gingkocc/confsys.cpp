@@ -415,7 +415,7 @@ void SpeciesConfigurator::configure(World& world)  {
                 throw this->build_exception(msg.str());
             }              
             CellIndexType cell_index = world.landscape().xy_to_index(od.x[i], od.y[i]);
-            world.seed_population(cell_index, label, od.num_organisms);
+            world.seed_population(cell_index, label, od.num_organisms_per_cell);
         }
     }
 }
@@ -431,7 +431,7 @@ void SpeciesConfigurator::process_seed_populations() {
             throw this->build_exception("need to specify number of organisms in starting population using '#' token: \"" + key + "\"");
         }
         try {
-            od.num_organisms = convert::to_scalar<unsigned long>(key_parts[1]);
+            od.num_organisms_per_cell = convert::to_scalar<unsigned long>(key_parts[1]);
         } catch (const convert::ValueError& e) {
             throw this->build_exception("invalid value for population size: \"" + key_parts[1] + "\"");
         }
@@ -510,7 +510,7 @@ void GenerationConfigurator::process_movement_costs() {
     }
 }
 
-void GenerationConfigurator::process_sampling_regimes() {
+// void GenerationConfigurator::process_sampling_regimes() {
 //     std::vector<std::string> keys = this->get_matching_configuration_keys("sample");
 //     for (std::vector<std::string>::const_iterator k = keys.begin(); k != keys.end(); ++k) {
 //         OrganismDistribution od = OrganismDistribution();
@@ -523,12 +523,12 @@ void GenerationConfigurator::process_sampling_regimes() {
 //         
 //         std::vector<std::string> species_number_parts = textutil::split(key_parts[1], "#", 1, false);
 //         if (species_number_parts.size() < 2) {
-//             od.num_organisms = 0;
+//             od.num_organisms_per_cell = 0;
 //         } else if (species_number_parts[1] == "*") {
-//             od.num_organisms = 0;
+//             od.num_organisms_per_cell = 0;
 //         } else {      
 //             try {
-//                 od.num_organisms = convert::to_scalar<unsigned long>(species_number_parts[1]);
+//                 od.num_organisms_per_cell = convert::to_scalar<unsigned long>(species_number_parts[1]);
 //             } catch (const convert::ValueError& e) {
 //                 throw this->build_exception("invalid value for sample number \"" + species_number_parts[1] + "\"");
 //             }
@@ -537,7 +537,7 @@ void GenerationConfigurator::process_sampling_regimes() {
 //         this->get_configuration_positions(key, od, true);
 //         this->samples_.insert(std::make_pair(od.species_label, od));
 //     }
-}
+// }
 
 void GenerationConfigurator::parse()  {
     try {
@@ -548,7 +548,6 @@ void GenerationConfigurator::parse()  {
     this->process_carrying_capacity();
     this->process_environments();
     this->process_movement_costs();
-    this->process_sampling_regimes();
 }
 
 void GenerationConfigurator::configure(World& world)  {
@@ -573,35 +572,70 @@ void GenerationConfigurator::configure(World& world)  {
         }
         world_settings.movement_costs.insert(std::make_pair(mci->first, this->get_validated_grid_path(mci->second, world)));
     }
-//     world_settings.samples.reserve(this->samples_.size());
-//     for (std::map<std::string, OrganismDistribution>::iterator sri = this->samples_.begin(); sri != this->samples_.end(); ++sri) {
-//         OrganismDistribution& od = sri->second;
-//         assert(od.x.size() == od.y.size());
-//         SamplingRegime sampling_regime;
-//         sampling_regime.num_organisms_per_cell = od.num_organisms;
-//         for (unsigned i = 0; i < od.x.size(); ++i) {
-//             if (od.x[i] > world.landscape().size_x()-1) {
-//                 std::ostringstream msg;
-//                 msg << "maximum x-coordinate on landscape is " << world.landscape().size_x();
-//                 msg << " but position specifies x-coordinate of " << od.x[i];
-//                 throw this->build_exception(msg.str());
-//             }
-//             if (od.y[i] > world.landscape().size_y()-1) {
-//                 std::ostringstream msg;
-//                 msg << "maximum x-coordinate on landscape is " << world.landscape().size_y();
-//                 msg << " but position specifies x-coordinate of " << od.y[i];
-//                 throw this->build_exception(msg.str());
-//             }              
-//             sampling_regime.cell_indexes.insert(world.landscape().xy_to_index(od.x[i], od.y[i]));
-//         }
-//         if (world.has_species(od.species_label)) {
-//             sampling_regime.species_ptr = world.get_species_ptr(od.species_label);
-//         } else {
-//             throw this->build_exception("Species \"" + od.species_label + "\" not defined");
-//         }
-//         world_settings.samples.push_back(sampling_regime);
-//     }
     world.add_world_settings(this->generation_, world_settings);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// SampleConfigurator
+
+SampleConfigurator::SampleConfigurator(const ConfigurationBlock& cb) 
+        : Configurator(cb),
+          random_sample_size_(0) {
+    this->parse();
+}
+
+void SampleConfigurator::parse() {
+    this->generation_ = this->get_configuration_scalar<unsigned long>("gen");
+    this->organism_sampling_.species_label = this->get_configuration_scalar<std::string>("species");
+    if (this->get_type() != "@occurs") {
+        this->organism_sampling_.num_organisms_per_cell = this->get_configuration_scalar<unsigned long>("limit-per-cell", 0);
+    }        
+    if (this->has_configuration_entry("cells")) {
+        this->get_configuration_positions("cells", this->organism_sampling_);
+    } else if (this->has_configuration_entry("random")) {
+        // not yet implemented
+    }
+}
+
+void SampleConfigurator::configure(World& world) {
+    SamplingRegime world_sampling_regime;
+    
+    if (world.has_species(this->organism_sampling_.species_label)) {
+        world_sampling_regime.species_ptr = world.get_species_ptr(this->organism_sampling_.species_label);
+    } else {
+        throw this->build_exception("Species \"" + this->organism_sampling_.species_label + "\" not defined");
+    } 
+    
+    world_sampling_regime.num_organisms_per_cell = this->organism_sampling_.num_organisms_per_cell;
+    
+    assert(this->organism_sampling_.x.size() == this->organism_sampling_.y.size());
+    if (this->organism_sampling_.x.size() > 0) {
+//         world_sampling_regime.cell_indexes.reserve(this->organism_sampling_.x.size());
+        for (unsigned i = 0; i < this->organism_sampling_.x.size(); ++i) {
+            if (this->organism_sampling_.x[i] > world.landscape().size_x()-1) {
+                std::ostringstream msg;
+                msg << "maximum x-coordinate on landscape is " << world.landscape().size_x();
+                msg << " but position specifies x-coordinate of " << this->organism_sampling_.x[i];
+                throw this->build_exception(msg.str());
+            }
+            if (this->organism_sampling_.y[i] > world.landscape().size_y()-1) {
+                std::ostringstream msg;
+                msg << "maximum x-coordinate on landscape is " << world.landscape().size_y();
+                msg << " but position specifies x-coordinate of " << this->organism_sampling_.y[i];
+                throw this->build_exception(msg.str());
+            }              
+            world_sampling_regime.cell_indexes.insert(world.landscape().xy_to_index(this->organism_sampling_.x[i], this->organism_sampling_.y[i]));
+        }
+        
+    } else if (this->random_sample_size_ > 0) {
+        // not implemented
+    } else {
+//         world_sampling_regime.cell_indexes.reserve(world.landscape().size());
+        for (CellIndexType i; i < world.landscape().size(); ++i) {
+            world_sampling_regime.cell_indexes.insert(i);
+        }
+    }
+
 }
 
 ///////////////////////////////////////////////////////////////////////////////
