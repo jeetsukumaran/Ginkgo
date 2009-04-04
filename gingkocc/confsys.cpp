@@ -575,6 +575,7 @@ void GenerationConfigurator::configure(World& world)  {
         }
         world_settings.movement_costs.insert(std::make_pair(mci->first, this->get_validated_grid_path(mci->second, world)));
     }
+    world_settings.samples.reserve(this->samples_.size());
     for (std::map<std::string, OrganismDistribution>::iterator sri = this->samples_.begin(); sri != this->samples_.end(); ++sri) {
         OrganismDistribution& od = sri->second;
         assert(od.x.size() == od.y.size());
@@ -595,7 +596,12 @@ void GenerationConfigurator::configure(World& world)  {
             }              
             sampling_regime.cell_indexes.insert(world.landscape().xy_to_index(od.x[i], od.y[i]));
         }
-        world_settings.samples.insert(std::make_pair(od.species_label, sampling_regime));
+        if (world.has_species(od.species_label)) {
+            sampling_regime.species_ptr = world.get_species_ptr(od.species_label);
+        } else {
+            throw this->build_exception("Species \"" + od.species_label + "\" not defined");
+        }
+        world_settings.samples.push_back(sampling_regime);
     }
     world.add_world_settings(this->generation_, world_settings);
 }

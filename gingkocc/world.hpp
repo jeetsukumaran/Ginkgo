@@ -63,6 +63,8 @@ struct SamplingRegime {
          * meaning sample all. 
          */
         unsigned long               num_organisms_per_cell;
+        /** Pointer to species. */ 
+        Species *                   species_ptr;
         /** List of cells to be sampled. */
         std::set<CellIndexType>     cell_indexes;
 };
@@ -91,7 +93,7 @@ struct WorldSettings {
     /** 
      * Sampling regime for tree reporting: species labels to samples.
      */
-    std::map<std::string, SamplingRegime>   samples;    
+    std::vector<SamplingRegime>   samples;    
 
 }; // WorldSettings
 
@@ -221,9 +223,19 @@ class World {
         }
         
         /**
+         * Returns pointer to species if it exists.
+         */
+        Species * get_species_ptr(const std::string& label) {
+            SpeciesByLabel::iterator sp = this->species_.find(label);
+            assert(sp != this->species_.end());
+            return (*sp).second;
+        }        
+        
+        /**
          * Returns <code>true</code> if a species of the specified name/label
          * has been defined.
-         * @return 
+         * @return <code>true</code> if a species of the specified name/label
+         * has been defined
          */
         bool has_species(const std::string& label) {
             return (this->species_.find(label) != this->species_.end());

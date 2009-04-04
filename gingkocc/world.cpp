@@ -182,16 +182,14 @@ void World::run() {
             }
             if (wi->second.samples.size() != 0) {
                 this->current_sampling_index_ = 0;
-                for (std::map<std::string, SamplingRegime>::iterator si = wi->second.samples.begin();
+                for (std::vector<SamplingRegime>::iterator si = wi->second.samples.begin();
                      si != wi->second.samples.end();
                      ++si) {
-                    SpeciesByLabel::iterator sp_ptr = this->species_.find(si->first);
-                    assert(sp_ptr != this->species_.end());
                     ++this->current_sampling_index_;
-                    if (si->second.cell_indexes.size() == 0) {
-                        this->save_trees(sp_ptr->second, si->second.num_organisms_per_cell);
+                    if (si->cell_indexes.size() == 0) {
+                        this->save_trees(si->species_ptr, si->num_organisms_per_cell);
                     } else {
-                        this->save_trees(sp_ptr->second, si->second.num_organisms_per_cell, si->second.cell_indexes);                    
+                        this->save_trees(si->species_ptr, si->num_organisms_per_cell, si->cell_indexes);                    
                     }
                 }                
             }
