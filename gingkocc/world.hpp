@@ -429,24 +429,9 @@ class World {
          */
         void save_trees(Species * sp_ptr, 
                         unsigned long num_organisms_per_cell, 
-                        const std::set<CellIndexType>& cell_indexes);
+                        const std::set<CellIndexType>& cell_indexes,
+                        const std::string& label);
                         
-        /**
-         * Samples organisms of specified species from all the cells of the
-         * the landscape, and write out the corresponding trees.
-         * Three tree files will be produced: 
-         *   (1) one for the haploid locus
-         *   (2) one for all the diploid locii, with both alleles from each
-         *       individual included
-         *   (3) one for the haploid locus and all the diploid locii, with one
-         *       allele sampled at random from each individual's diploid locus
-         * @param sp_ptr                    pointer to species
-         * @param num_organisms_per_cell    number of organisms of the given 
-         *                                  species per cell to sample 
-         *                                  (0 = sample all)
-         */
-        void save_trees(Species * sp_ptr, unsigned long num_organisms_per_cell);                        
-        
         /**
          * Tries to open file, throwing exception if failed.
          * @param fpath     file path to open

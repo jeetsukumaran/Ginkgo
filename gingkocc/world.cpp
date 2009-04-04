@@ -292,7 +292,8 @@ void World::write_diploid_trees(Species * sp_ptr,
 
 void World::save_trees(Species * sp_ptr, 
                 unsigned long num_organisms_per_cell, 
-                const std::set<CellIndexType>& cell_indexes) {
+                const std::set<CellIndexType>& cell_indexes,
+                const std::string& label) {
                 
     this->log_info("Sampling organisms of species " + sp_ptr->get_label() +".");
     std::vector<const Organism *> organisms;        
@@ -310,12 +311,12 @@ void World::save_trees(Species * sp_ptr,
     tree_filename_stem << "_N" << num_organisms_per_cell;
     tree_filename_stem << "_S" << this->current_sampling_index_;
 
-    this->log_info("Building tree for haploid locus alleles.");    
+    this->log_info("Building tree for haploid locus alleles for sample of organisms of species " + sp_ptr->get_label() +".");    
     std::ofstream haploid_trees;
     this->open_ofstream(haploid_trees, tree_filename_stem.str() + ".haploid.tre");    
     this->write_haploid_tree(sp_ptr, organisms, haploid_trees);    
     
-    this->log_info("Building tree for diploid locus alleles."); 
+    this->log_info("Building tree for diploid locus alleles for sample of organisms of species " + sp_ptr->get_label() +"."); 
     std::ofstream diploid_trees;
     this->open_ofstream(diploid_trees, tree_filename_stem.str() + ".diploid.tre");
     this->write_diploid_trees(sp_ptr, organisms, diploid_trees);
@@ -323,15 +324,6 @@ void World::save_trees(Species * sp_ptr,
 //     std::ofstream combined_trees;            
 //     this->open_ofstream(combined_trees, tree_filename_stem.str() + ".combined.tre");
 }                
-
-void World::save_trees(Species * sp_ptr, 
-                unsigned long num_organisms_per_cell) {
-    std::set<CellIndexType> cell_indexes;
-    for (unsigned long i = 0; i < this->landscape_.size(); ++i) {
-        cell_indexes.insert(i);
-    }
-    this->save_trees(sp_ptr, num_organisms_per_cell, cell_indexes);
-} 
 
 void World::open_ofstream(std::ofstream& out, const std::string& fpath) {
     std::string full_fpath = filesys::compose_path(this->output_dir_, fpath);
