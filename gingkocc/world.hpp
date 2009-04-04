@@ -33,6 +33,7 @@
 #include "randgen.hpp"
 #include "cell.hpp"
 #include "landscape.hpp"
+#include "tree.hpp"
 
 namespace gingko {
 
@@ -342,6 +343,14 @@ class World {
         // --- logging and output ---
         
         /**
+         * Builds a newick tree from a Tree object already loaded with nodes, 
+         * trapping any exceptions. Main purpose is to wrap call to 
+         * Tree.write_newick_tree() so that exceptions can be caught, reported,
+         * and program can proceed.
+         */
+        void write_tree(Tree& tree, const std::string& species_label, unsigned long num_taxa, std::ostream& out);      
+        
+        /**
          * Given a list of pointers to organisms, builds and saves a tree
          * of the haploid locus allele to the given outputstream.
          * @param sp_ptr                    pointer to species         
@@ -351,6 +360,17 @@ class World {
         void write_haploid_tree(Species * sp_ptr,
                 const std::vector<const Organism *>& organisms,
                 std::ostream& out);
+                
+        /**
+         * Given a list of pointers to organisms, builds and saves trees
+         * of the diploid locus allele to the given outputstream.
+         * @param   sp_ptr      pointer to species         
+         * @param   organisms   sample of organisms
+         * @param   out         output stream
+         */
+        void write_diploid_trees(Species * sp_ptr,
+                const std::vector<const Organism *>& organisms,
+                std::ostream& out);                
         
         /**
          * Samples organisms of specified species and specified cells of the

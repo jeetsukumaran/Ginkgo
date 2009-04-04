@@ -200,6 +200,25 @@ void World::run() {
 }
 
 // --- logging and output ---
+void World::write_tree(Tree& tree, const std::string& species_label, unsigned long num_taxa, std::ostream& out) {
+    try {
+        tree.write_newick_tree(out);
+    } catch (const TreeStructureMissingRootError& e) {
+        std::ostringstream msg;
+        msg << "tree for sample of organisms of species " << species_label;
+        msg << " in generation " << this->current_generation_;
+        msg << " could not be built due to missing root node";
+        msg << " (organism sample size = " << num_taxa << ")";
+        this->log_error(msg.str());
+    } catch (const TreeStructureMultipleRootError& e) {
+        std::ostringstream msg;
+        msg << "tree for sample of organisms of species " << species_label;
+        msg << " in generation " << this->current_generation_;
+        msg << " could not be built due to multiple root nodes";
+        msg << " (organism sample size = " << num_taxa << ")";
+        this->log_error(msg.str());    
+    }
+}
 
 void World::write_haploid_tree(Species * sp_ptr,
                 const std::vector<const Organism *>& organisms,
@@ -210,23 +229,7 @@ void World::write_haploid_tree(Species * sp_ptr,
             ++oi) {
         tree.process_node((*oi)->get_haploid_node(), &sp_ptr->get_organism_label(**oi));
     }
-    try {
-        tree.write_newick_tree(out);
-    } catch (const TreeStructureMissingRootError& e) {
-        std::ostringstream msg;
-        msg << "tree for sample of organisms of species " << sp_ptr->get_label();
-        msg << " in generation " << this->current_generation_;
-        msg << " could not be built due to missing root node";
-        msg << " (organism sample size = " << organisms.size() << ")";
-        this->log_error(msg.str());
-    } catch (const TreeStructureMultipleRootError& e) {
-        std::ostringstream msg;
-        msg << "tree for sample of organisms of species " << sp_ptr->get_label();
-        msg << " in generation " << this->current_generation_;
-        msg << " could not be built due to multiple root nodes";
-        msg << " (organism sample size = " << organisms.size() << ")";
-        this->log_error(msg.str());    
-    }
+    this->write_tree(tree, sp_ptr->get_label(), organisms.size(), out);
 }                
 
 void World::save_trees(Species * sp_ptr, 
