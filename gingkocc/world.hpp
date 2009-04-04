@@ -426,11 +426,12 @@ class World {
          *                                  species per cell to sample 
          *                                  (0 = sample all)
          * @param cell_indexes              list of cell indexes to sample
+         * @param tree_filename             filename for trees
          */
         void save_trees(Species * sp_ptr, 
                         unsigned long num_organisms_per_cell, 
                         const std::set<CellIndexType>& cell_indexes,
-                        const std::string& label);
+                        const std::string& tree_filename_stem);
                         
         /**
          * Tries to open file, throwing exception if failed.
@@ -450,11 +451,15 @@ class World {
         void close_logs();        
         
         /**
-         * Returns error logging file stream, opening it if it is not already 
-         * open.
-         * @return outputstream for logging info
+         * Composes and returns a name for a sampling (occurrence/tree) output
+         * file.
+         * @param   species_label   label for the species
+         * @param   additional      any additional label info
+         * @param   extension       file extension
          */
-        std::ofstream& err_fstream();        
+        std::string compose_output_filename(const std::string& species_label,
+                const std::string& additional,
+                const std::string& extension);           
         
         /**
          * Time stamp for log.
@@ -512,8 +517,8 @@ class World {
         std::multimap<unsigned long, SamplingRegime> tree_samples_;
         /** Collection of tree building directives (key = generation #). */
         std::multimap<unsigned long, SamplingRegime> occurrence_samples_;        
-        /** Current tree being generated (for labeling). */
-        unsigned long                           current_sampling_index_;
+        /** Track output filenames, so as to prevent clashes. */
+        std::set<std::string>                   output_filenames_;
 
     private:
         /** Disabled copy constructor. */

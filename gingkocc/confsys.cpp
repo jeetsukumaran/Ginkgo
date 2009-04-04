@@ -611,6 +611,10 @@ void SampleConfigurator::configure(World& world) {
         throw this->build_exception("Species \"" + this->organism_sampling_.species_label + "\" not defined");
     } 
     
+    if (this->has_name()) {
+        world_sampling_regime.label = this->get_name();
+    }    
+    
     world_sampling_regime.num_organisms_per_cell = this->organism_sampling_.num_organisms_per_cell;
     
     assert(this->organism_sampling_.x.size() == this->organism_sampling_.y.size());

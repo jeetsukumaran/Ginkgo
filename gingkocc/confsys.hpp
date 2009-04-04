@@ -108,7 +108,6 @@ struct OrganismDistribution {
             : num_organisms_per_cell(0) { }
 
     public:
-        std::string     result_label;
         std::string     species_label;
         unsigned long   num_organisms_per_cell;
         std::vector<CellIndexType>  x;
@@ -360,7 +359,14 @@ class Configurator {
             } else {
                 return name;
             }
-        }        
+        }
+        
+        /**
+         * Returns <code>true</code> if name is set.
+         */
+        bool has_name() const {
+            return this->configuration_block_.has_name();
+        }            
         
         /**
          * Retrieves value for specified key.

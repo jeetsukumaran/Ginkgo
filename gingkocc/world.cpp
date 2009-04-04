@@ -31,6 +31,7 @@
 #include "world.hpp"
 #include "filesys.hpp"
 #include "tree.hpp"
+#include "convert.hpp"
 
 using namespace gingko;
 
@@ -153,9 +154,14 @@ void World::run() {
     while (this->current_generation_ < this->generations_to_run_) {
         
         // clear organism labels
-        for (std::map<std::string, Species *>::iterator spi = this->species_.begin(); spi != this->species_.end(); ++spi) {
+        for (std::map<std::string, Species *>::iterator spi = this->species_.begin(); 
+                spi != this->species_.end(); 
+                ++spi) {
             (spi->second)->clear_organism_labels();
         }
+        
+        // clear output filename stems
+        this->output_filenames_.clear();
         
         // build trees requested in this generation
         this->process_tree_samplings();
@@ -208,30 +214,11 @@ void World::process_world_settings() {
 
 void World::process_tree_samplings() {
     typedef std::multimap<unsigned long, SamplingRegime> gen_sample_t;
-    typedef std::pair<gen_sample_t::iterator, gen_sample_t::iterator> gen_sample_iter_pair_t;
-    
-    this->current_sampling_index_ = 0;
+    typedef std::pair<gen_sample_t::iterator, gen_sample_t::iterator> gen_sample_iter_pair_t;    
     gen_sample_iter_pair_t this_gen_samples = this->tree_samples_.equal_range(this->current_generation_);
     for (gen_sample_t::iterator i = this_gen_samples.first; i != this_gen_samples.second; ++i) {
-        ++this->current_sampling_index_;
-        this->save_trees(i->second.species_ptr, i->second.num_organisms_per_cell, i->second.cell_indexes);
+        this->save_trees(i->second.species_ptr, i->second.num_organisms_per_cell, i->second.cell_indexes, i->second.label);
     }
-
-
-    
-//     if (wi->second.samples.size() != 0) {
-//         this->current_sampling_index_ = 0;
-//         for (std::vector<SamplingRegime>::iterator si = wi->second.samples.begin();
-//              si != wi->second.samples.end();
-//              ++si) {
-//             ++this->current_sampling_index_;
-//             if (si->cell_indexes.size() == 0) {
-//                 this->save_trees(si->species_ptr, si->num_organisms_per_cell);
-//             } else {
-//                 this->save_trees(si->species_ptr, si->num_organisms_per_cell, si->cell_indexes);                    
-//             }
-//         }                
-//     }
 }
 
 void World::process_occurrence_samplings() {
@@ -303,22 +290,18 @@ void World::save_trees(Species * sp_ptr,
         this->log_error("no organisms found in sample: aborting tree building");
         return;
     }
-    
-    std::ostringstream tree_filename_stem;
-    tree_filename_stem << this->get_label();
-    tree_filename_stem << "_G" << std::setw(8) << std::setfill('0') << this->current_generation_;
-    tree_filename_stem << "_sp" << sp_ptr->get_label();
-    tree_filename_stem << "_N" << num_organisms_per_cell;
-    tree_filename_stem << "_S" << this->current_sampling_index_;
 
     this->log_info("Building tree for haploid locus alleles for sample of organisms of species " + sp_ptr->get_label() +".");    
     std::ofstream haploid_trees;
-    this->open_ofstream(haploid_trees, tree_filename_stem.str() + ".haploid.tre");    
+        
+    this->open_ofstream(haploid_trees, 
+        this->compose_output_filename(sp_ptr->get_label(), label, "haploid.tre"));    
     this->write_haploid_tree(sp_ptr, organisms, haploid_trees);    
     
     this->log_info("Building tree for diploid locus alleles for sample of organisms of species " + sp_ptr->get_label() +"."); 
     std::ofstream diploid_trees;
-    this->open_ofstream(diploid_trees, tree_filename_stem.str() + ".diploid.tre");
+    this->open_ofstream(diploid_trees,
+        this->compose_output_filename(sp_ptr->get_label(), label, "diploid.tre"));  
     this->write_diploid_trees(sp_ptr, organisms, diploid_trees);
 //     
 //     std::ofstream combined_trees;            
@@ -332,6 +315,27 @@ void World::open_ofstream(std::ofstream& out, const std::string& fpath) {
         throw WorldIOError("cannot open file \"" + full_fpath + "\" for output");
     }
 }
+
+std::string World::compose_output_filename(const std::string& species_label,
+        const std::string& additional,
+        const std::string& extension) {
+    std::ostringstream f;
+    f << this->get_label();
+    f << "_G" << this->current_generation_;
+    f << "_" << species_label;
+    if (additional.size() > 0) {
+        f << "_" << additional;
+    }
+    unsigned index = 0;
+    std::string candidate_name = f.str() + "." + extension;
+    std::set<std::string>::iterator fname = this->output_filenames_.find(candidate_name);
+    while (fname != this->output_filenames_.end()) {
+        ++index;
+        candidate_name = f.str() + "-" + convert::to_scalar<std::string>(index) + "." + extension;
+    }
+    this->output_filenames_.insert(candidate_name);
+    return candidate_name;
+}        
 
 void World::open_logs() {    
     if (not this->infos_.is_open()) {
