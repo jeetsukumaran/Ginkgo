@@ -262,7 +262,7 @@ class ConfigurationBlock {
         /** The name of the block (e.g. "Sp1"). */
         std::string                             name_;
         /** Key-value pairs making up the block body. */
-        std::map< std::string, std::string >    entries_;
+        std::multimap< std::string, std::string >    entries_;
         /** Tracks whether or not the block was actually set. */
         bool                                    is_block_set_;
         /** Start of block in the source stream. */

@@ -243,7 +243,8 @@ void ConfigurationBlock::parse(std::istream& in) {
                 msg << "\"" << entry << "\"";
                 throw ConfigurationSyntaxError(this->compose_error_message(start_pos, msg.str()));
             }
-            this->entries_[textutil::strip(entry_parts[0], WHITESPACE)] = textutil::strip(entry_parts[1], WHITESPACE) ;
+            this->entries_.insert(std::make_pair(textutil::strip(entry_parts[0], WHITESPACE),
+                                                 textutil::strip(entry_parts[1], WHITESPACE) ));
         }
     }
     this->is_block_set_ = true;
