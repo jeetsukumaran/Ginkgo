@@ -97,6 +97,25 @@ class ConfigurationIncompleteError : public ConfigurationError {
         ConfigurationIncompleteError(const std::string& msg) : ConfigurationError(msg) {}
 };
 
+/**
+ * Track distribution of organisms, either for seed populations or sampling 
+ * regimes.
+ */
+struct OrganismDistribution {
+    
+    public:
+        OrganismDistribution()
+            : num_organisms_per_cell(0) { }
+
+    public:
+        std::string     result_label;
+        std::string     species_label;
+        unsigned long   num_organisms_per_cell;
+        std::vector<CellIndexType>  x;
+        std::vector<CellIndexType>  y;
+        
+
+}; // OrganismDistribution
 
 /**
  * Generic configuration block with a file.
@@ -197,6 +216,13 @@ class ConfigurationBlock {
         bool has_key(const std::string key) const {
             return (this->entries_.find(key) != this->entries_.end());
         }
+                
+        /**
+         * Returns <code>true</code> if name is set.
+         */
+        bool has_name() const {
+            return (this->name_.size() > 0);
+        }            
         
         /**
          * Returns vector of keys in entries.
@@ -281,25 +307,6 @@ class ConfigurationBlock {
 }; // ConfigurationBlock
 
 /**
- * Track distribution of organisms, either for seed populations or sampling 
- * regimes.
- */
-struct OrganismDistribution {
-    
-    public:
-        OrganismDistribution()
-            : num_organisms(0) { }
-
-    public:
-        std::string     species_label;
-        unsigned long   num_organisms;
-        std::vector<CellIndexType>  x;
-        std::vector<CellIndexType>  y;
-        
-
-}; // OrganismDistribution
-
-/**
  * Base class for configurators.
  */
 class Configurator {
@@ -323,12 +330,37 @@ class Configurator {
         virtual void parse() = 0;
         
         /**
+         * Returns type of underlying ConfigurationBlock.
+         * @return  type of block
+         */
+        std::string get_type() {
+            return this->configuration_block_.get_type();
+        }        
+        
+        /**
          * Returns name of underlying ConfigurationBlock.
          * @return  name of block
          */
-        std::string get_name() const {
-            return this->configuration_block_.get_name();
+        std::string get_name() {
+            std::string name = this->configuration_block_.get_name();
+            if (name.size() == 0) {
+                throw this->build_exception("name required for block but not specified");
+            }
+            return name;
         }
+        
+        /**
+         * Returns name of underlying ConfigurationBlock.
+         * @return  name of block
+         */
+        std::string get_name(const std::string& default_name) {
+            std::string name = this->configuration_block_.get_name();
+            if (name.size() == 0) {
+                return default_name;
+            } else {
+                return name;
+            }
+        }        
         
         /**
          * Retrieves value for specified key.
@@ -378,6 +410,13 @@ class Configurator {
             } catch (convert::ValueError e) {
                 throw this->build_exception(std::string(e.what()) + " (specified for \"" + key + "\")");
             }            
+        }
+        
+        /**
+         * Returns <code>true</code> if entry exists.
+         */
+        bool has_configuration_entry(const std::string& key) const {
+            return this->configuration_block_.has_key(key);
         }
         
         /**
@@ -537,12 +576,12 @@ class GenerationConfigurator : public Configurator {
 
         /** 
          * Takes the string fields of ConfigurationBlock and interprets values
-         * as needed for a Generation object.
+         * as needed for a WorldSettings object.
          */        
         void parse();
         
         /**
-         * Configures a Generation object according to settings.
+         * Configures a WorldSettings according to specs.
          */
         void configure(World& world);
         
@@ -567,9 +606,6 @@ class GenerationConfigurator : public Configurator {
         
         /** Processes movement costs. */
         void process_movement_costs();
-        
-        /** Processes sampling regimes. */
-        void process_sampling_regimes();
            
     private:
     
@@ -597,6 +633,41 @@ class GenerationConfigurator : public Configurator {
         std::map<std::string, OrganismDistribution>   samples_;          
 
 }; // GenerationConfigurator
+
+/**
+ * Takes a ConfigurationBlock assumed to be wrapped around a Tree or Occurrence
+ * block information, and parses/translates values appropriately.
+ */
+class SampleConfigurator : public Configurator {
+
+    public:
+    
+        /** 
+         * Constructs objects, and then passes ConfigurationBlock onto parse()
+         * for processing. 
+         * @param cb                a populated ConfigurationBlock object     
+         */
+        SampleConfigurator(const ConfigurationBlock& cb);
+
+        /** 
+         * Takes the string fields of ConfigurationBlock and interprets values
+         * as needed for a Tree/Occurrence samples.
+         */        
+        void parse();
+        
+        /**
+         * Configures a the sampling regime.
+         */
+        void configure(World& world);
+        
+    private:
+        /** Generation to sample. */
+        unsigned long           generation_;
+        /** Sampling regime if custom positions are set. */
+        OrganismDistribution    organism_sampling_;
+        /** Random sampling regime. */
+        unsigned long           random_sample_size_;
+};
 
 /**
  * Encapsulates parsing of a configuration file, and populating of WorldConfigurator,

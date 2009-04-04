@@ -58,15 +58,14 @@ struct SamplingRegime {
             : num_organisms_per_cell(0) { }
 
     public:
-        /** 
-         * Number of organisms from each cell to be sampled, with 0
-         * meaning sample all. 
-         */
-        unsigned long               num_organisms_per_cell;
         /** Pointer to species. */ 
-        Species *                   species_ptr;
-        /** List of cells to be sampled. */
+        Species *                   species_ptr;       
+        /**  Number of organisms from each cell to be sampled (0 = all). */
+        unsigned long               num_organisms_per_cell;
+        /** List of cell indexes to be sampled. */
         std::set<CellIndexType>     cell_indexes;
+        /** Label prefix for tree(s) / tree file(s). */
+        std::string                 label;
 };
 
 /**
@@ -88,12 +87,7 @@ struct WorldSettings {
      * Movement costs that need to be changed/set. (expressed as species labels
      * mapped to ESRI ASCII Grid file paths). 
      */
-    std::map<std::string, std::string>      movement_costs;
-    
-    /** 
-     * Sampling regime for tree reporting: species labels to samples.
-     */
-    std::vector<SamplingRegime>   samples;    
+    std::map<std::string, std::string>      movement_costs;   
 
 }; // WorldSettings
 
@@ -339,9 +333,24 @@ class World {
          * @param   generation      generation number for this set of events
          *                          to be activated
          * @param   world_settings  WorldSettings data
-         * @return                  handle to WorldSettings object just inserted
          */
-        WorldSettings& add_world_settings(unsigned long generation, const WorldSettings& world_settings);
+        void add_world_settings(unsigned long generation, const WorldSettings& world_settings);
+        
+        /**
+         * Add a directive to sample organisms and save a tree.
+         *
+         * @param   generation       generation number for this tree to be built
+         * @param   sampling_regime  the leaves to add to the tree
+         */
+        void add_tree_sampling(unsigned long generation, const SamplingRegime& sampling_regime);        
+
+        /**
+         * Add a directive to sample organisms and save their occurrence distribution.
+         *
+         * @param   generation       generation number for this tree to be built
+         * @param   sampling_regime  the leaves to add to the tree
+         */
+        void add_occurrence_sampling(unsigned long generation, const SamplingRegime& sampling_regime);         
         
         // --- simulation cycles ---
         
@@ -355,6 +364,21 @@ class World {
          * Run multiple cycles or generations of the simulation.
          */
         void run();
+        
+        /**
+         * Process world settings for the current generation.
+         */
+        void process_world_settings();     
+        
+        /**
+         * Process tree building directives for the current generation.
+         */
+        void process_tree_samplings();
+        
+        /**
+         * Process occurrence sampling directives for the current generation.
+         */
+        void process_occurrence_samplings();          
         
         // --- logging and output ---
         
@@ -454,19 +478,13 @@ class World {
         std::string get_timestamp();
         
         /**
-         * Time and generation stamp for log.
-         * @return  formatted time/generation stamp         
-         */
-        std::string get_time_gen_stamp();        
-        
-        /**
-         * Write message to the general log stream without a generation #.
+         * Write message to the general log stream (file only).
          * @param   message message to write
          */
-        void log_extrasim_info(const std::string& message);
+        void log_detail(const std::string& message);        
         
         /**
-         * Write message to the general log stream.
+         * Write message to the general log stream (file and stdout).
          * @param   message message to write
          */
         void log_info(const std::string& message);
@@ -493,8 +511,6 @@ class World {
         unsigned long                           generations_to_run_;        
         /** Tracks the number of generations that have been run. */
         unsigned long                           current_generation_;
-        /** Collection of events (scheduled to occur at specific generations. */
-        std::map<unsigned long, WorldSettings>  world_settings_;    
         /** Whether or not we force coalescence if multiple roots are found. */
         bool                                    coalesce_multiple_roots_;
         /** Output directory. */
@@ -505,6 +521,12 @@ class World {
         std::ofstream                           errs_;
         /** Duplicate log output to stdout/stderr? */
         bool                                    is_log_to_screen_;
+        /** Collection of events (key = generation #). */
+        std::map<unsigned long, WorldSettings>  world_settings_;    
+        /** Collection of tree building directives (key = generation #). */
+        std::multimap<unsigned long, SamplingRegime> tree_samples_;
+        /** Collection of tree building directives (key = generation #). */
+        std::multimap<unsigned long, SamplingRegime> occurrence_samples_;        
         /** Current tree being generated (for labeling). */
         unsigned long                           current_sampling_index_;
 

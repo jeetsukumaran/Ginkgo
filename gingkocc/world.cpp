@@ -98,10 +98,18 @@ void World::seed_population(CellIndexType cell_index, const std::string& species
 
 // --- event handlers ---
 
-WorldSettings& World::add_world_settings(unsigned long generation, const WorldSettings& world_settings) {
+void World::add_world_settings(unsigned long generation, const WorldSettings& world_settings) {
     this->world_settings_[generation] = world_settings;
-    return this->world_settings_[generation];
 }
+
+void World::add_tree_sampling(unsigned long generation, const SamplingRegime& sampling_regime) {
+    this->tree_samples_.insert(std::make_pair(generation, sampling_regime));
+}
+
+void World::add_occurrence_sampling(unsigned long generation, const SamplingRegime& sampling_regime) {
+    this->occurrence_samples_.insert(std::make_pair(generation, sampling_regime));
+}
+
 
 // --- simulation cycles ---
 
@@ -121,27 +129,27 @@ void World::cycle() {
 //     this->landscape_.process_migrants();
 
     std::ostringstream gen;
-    gen << "Generation " << this->current_generation_ << " life-cycle beginning.";
+    gen << "Generation " << this->current_generation_ << " life-cycle running.";
     this->log_info(gen.str());
-    this->log_info("Reproduction/migration phase.");
+    this->log_detail("Reproduction/migration phase.");
     for (CellIndexType i = 0; i < this->landscape_.size(); ++i) {
         this->landscape_[i].reproduction(); 
         this->landscape_[i].migration();
     }
-    this->log_info("Processing migrants.");
+    this->log_detail("Processing migrants.");
     this->landscape_.process_migrants();
-    this->log_info("Survival/competition phase.");
+    this->log_detail("Survival/competition phase.");
     for (CellIndexType i = 0; i < this->landscape_.size(); ++i) {    
         this->landscape_[i].survival();
         this->landscape_[i].competition();        
     }    
-    this->log_info("Generation life-cycle complete.");
+    this->log_detail("Generation life-cycle completed.");
     ++this->current_generation_;
 }
 
 void World::run() {    
     this->open_logs();
-    this->log_extrasim_info("Starting simulation.");
+    this->log_info("Starting simulation.");
     
     while (this->current_generation_ < this->generations_to_run_) {
         
@@ -150,56 +158,88 @@ void World::run() {
             (spi->second)->clear_organism_labels();
         }
         
+        // build trees requested in this generation
+        this->process_tree_samplings();
+                
+        // save occurrence data requested in this generation
+        this->process_occurrence_samplings();
+        
         // process world changes
-        std::map<unsigned long, WorldSettings>::iterator wi = this->world_settings_.find(this->current_generation_);
-        if (wi != this->world_settings_.end()) {
-            if (wi->second.carrying_capacity.size() != 0) {
-                this->log_info("Setting carrying capacity: \"" + wi->second.carrying_capacity + "\".");
-                asciigrid::AsciiGrid grid(wi->second.carrying_capacity);
-                this->landscape_.set_carrying_capacities(grid.get_cell_values());
-            }
-            if (wi->second.environments.size() != 0) {
-                for (std::map<unsigned, std::string>::iterator ei = wi->second.environments.begin();
-                     ei != wi->second.environments.end();
-                     ++ei) {
-                    std::ostringstream msg;
-                    msg << "Setting environmental variable " <<  ei->first+1 <<  ": \"" <<  ei->second <<  "\"";
-                    this->log_info(msg.str());
-                    asciigrid::AsciiGrid grid(ei->second);
-                    this->landscape_.set_environment(ei->first, grid.get_cell_values());                    
-                }
-            }            
-            if (wi->second.movement_costs.size() != 0) {
-                for (std::map<std::string, std::string>::iterator mi = wi->second.movement_costs.begin();
-                     mi != wi->second.movement_costs.end();
-                     ++mi) {
-                    std::ostringstream msg;
-                    msg << "Setting movement costs for species " <<  mi->first <<  ": \"" <<  mi->second <<  "\"";
-                    this->log_info(msg.str());
-                    asciigrid::AsciiGrid grid(mi->second);
-                    this->set_species_movement_costs(mi->first, grid.get_cell_values());                    
-                }
-            }
-            if (wi->second.samples.size() != 0) {
-                this->current_sampling_index_ = 0;
-                for (std::vector<SamplingRegime>::iterator si = wi->second.samples.begin();
-                     si != wi->second.samples.end();
-                     ++si) {
-                    ++this->current_sampling_index_;
-                    if (si->cell_indexes.size() == 0) {
-                        this->save_trees(si->species_ptr, si->num_organisms_per_cell);
-                    } else {
-                        this->save_trees(si->species_ptr, si->num_organisms_per_cell, si->cell_indexes);                    
-                    }
-                }                
-            }
-        }
+        this->process_world_settings();
+        
+        // run the life cycle
         this->cycle();        
     }
-    this->log_extrasim_info("Ending simulation.");
+    this->log_info("Ending simulation.");
+}
+
+void World::process_world_settings() {
+    std::map<unsigned long, WorldSettings>::iterator wi = this->world_settings_.find(this->current_generation_);    
+    if (wi == this->world_settings_.end()) {
+        return;
+    }    
+    if (wi->second.carrying_capacity.size() != 0) {
+        this->log_info("Setting carrying capacity: \"" + wi->second.carrying_capacity + "\".");
+        asciigrid::AsciiGrid grid(wi->second.carrying_capacity);
+        this->landscape_.set_carrying_capacities(grid.get_cell_values());
+    }
+    if (wi->second.environments.size() != 0) {
+        for (std::map<unsigned, std::string>::iterator ei = wi->second.environments.begin();
+             ei != wi->second.environments.end();
+             ++ei) {
+            std::ostringstream msg;
+            msg << "Setting environmental variable " <<  ei->first+1 <<  ": \"" <<  ei->second <<  "\"";
+            this->log_info(msg.str());
+            asciigrid::AsciiGrid grid(ei->second);
+            this->landscape_.set_environment(ei->first, grid.get_cell_values());                    
+        }
+    }            
+    if (wi->second.movement_costs.size() != 0) {
+        for (std::map<std::string, std::string>::iterator mi = wi->second.movement_costs.begin();
+             mi != wi->second.movement_costs.end();
+             ++mi) {
+            std::ostringstream msg;
+            msg << "Setting movement costs for species " <<  mi->first <<  ": \"" <<  mi->second <<  "\"";
+            this->log_info(msg.str());
+            asciigrid::AsciiGrid grid(mi->second);
+            this->set_species_movement_costs(mi->first, grid.get_cell_values());                    
+        }
+    }
+}
+
+void World::process_tree_samplings() {
+    typedef std::multimap<unsigned long, SamplingRegime> gen_sample_t;
+    typedef std::pair<gen_sample_t::iterator, gen_sample_t::iterator> gen_sample_iter_pair_t;
+    
+    this->current_sampling_index_ = 0;
+    gen_sample_iter_pair_t this_gen_samples = this->tree_samples_.equal_range(this->current_generation_);
+    for (gen_sample_t::iterator i = this_gen_samples.first; i != this_gen_samples.second; ++i) {
+        ++this->current_sampling_index_;
+        this->save_trees(i->second.species_ptr, i->second.num_organisms_per_cell, i->second.cell_indexes);
+    }
+
+
+    
+//     if (wi->second.samples.size() != 0) {
+//         this->current_sampling_index_ = 0;
+//         for (std::vector<SamplingRegime>::iterator si = wi->second.samples.begin();
+//              si != wi->second.samples.end();
+//              ++si) {
+//             ++this->current_sampling_index_;
+//             if (si->cell_indexes.size() == 0) {
+//                 this->save_trees(si->species_ptr, si->num_organisms_per_cell);
+//             } else {
+//                 this->save_trees(si->species_ptr, si->num_organisms_per_cell, si->cell_indexes);                    
+//             }
+//         }                
+//     }
+}
+
+void World::process_occurrence_samplings() {
 }
 
 // --- logging and output ---
+
 void World::write_tree(Tree& tree, const std::string& species_label, unsigned long num_taxa, std::ostream& out) {
     try {
         tree.write_newick_tree(out);
@@ -325,36 +365,21 @@ std::string World::get_timestamp() {
     struct tm * timeinfo = localtime ( &rawtime );
     char buffer[80];
     strftime (buffer,80,"%Y-%m-%d %H:%M:%S",timeinfo);
-    return std::string(buffer);
+    return "[" + std::string(buffer) + "]";
 }
 
-std::string World::get_time_gen_stamp() {    
-    std::ostringstream outs;
-    outs << "[";
-    outs << this->get_timestamp();
-    outs << "]";    
-    outs << " ";
-    outs << std::setw(8) << std::setfill('0');
-    outs << this->current_generation_;   
-    return outs.str();
-}
-
-void World::log_extrasim_info(const std::string& message) {
+void World::log_detail(const std::string& message) {
     assert(this->infos_);
-    std::ostringstream outs;
-    outs << "[";
-    outs << this->get_timestamp();
-    outs << "]";
-    outs << "         ";    
-    if (this->is_log_to_screen_) {
-        std::cout << outs.str() << " " << message << std::endl;
-    }
-    this->infos_ << outs.str() << " " << message << std::endl;
+    this->infos_ << this->get_timestamp();
+    this->infos_ << " [Generation ";
+    this->infos_ << this->current_generation_;
+    this->infos_ << "] ";
+    this->infos_ << message << std::endl;
 }
 
 void World::log_info(const std::string& message) {
     assert(this->infos_);
-    std::string ts = this->get_time_gen_stamp();
+    std::string ts = this->get_timestamp();
     if (this->is_log_to_screen_) {
         std::cout << ts << " " << message << std::endl;
     }
@@ -364,7 +389,7 @@ void World::log_info(const std::string& message) {
 void World::log_error(const std::string& message) {
     assert(this->errs_);
     assert(this->infos_);    
-    std::string ts = this->get_time_gen_stamp();
+    std::string ts = this->get_timestamp();
     if (this->is_log_to_screen_) {
         std::cerr << ts << " ERROR: " << message << std::endl;
     }
