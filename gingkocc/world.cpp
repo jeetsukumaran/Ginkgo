@@ -242,7 +242,7 @@ void World::save_trees(Species * sp_ptr,
     }
     
     std::ostringstream tree_filename_stem;
-    tree_filename_stem << "G" << std::setw(8) << std::setfill('0') << this->current_generation_ << "_" << sp_ptr->get_label();    
+    tree_filename_stem << "G" << std::setw(8) << std::setfill('0') << this->current_generation_ << "_" << sp_ptr->get_label();
     this->log_info("Building tree for haploid locus alleles.");    
     std::ofstream haploid_trees;
     this->open_ofstream(haploid_trees, tree_filename_stem.str() + ".haploid.tre");    
@@ -258,9 +258,6 @@ void World::save_trees(Species * sp_ptr,
 void World::save_trees(Species * sp_ptr, 
                 unsigned long num_organisms_per_cell) {
     std::set<CellIndexType> cell_indexes;
-    
-    std::cout << "\n\n\n************************************ HERE! \n\n\n\n";
-    
     for (unsigned long i = 0; i < this->landscape_.size(); ++i) {
         cell_indexes.insert(i);
     }
