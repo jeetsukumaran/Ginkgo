@@ -635,7 +635,8 @@ void SampleConfigurator::configure(World& world) {
             world_sampling_regime.cell_indexes.insert(i);
         }
     }
-
+    
+    world.add_tree_sampling(this->generation_, world_sampling_regime);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

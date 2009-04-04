@@ -342,7 +342,7 @@ class World {
          * @param   generation       generation number for this tree to be built
          * @param   sampling_regime  the leaves to add to the tree
          */
-        void add_tree_sample(unsigned long generation, const SamplingRegime& sampling_regime);        
+        void add_tree_sampling(unsigned long generation, const SamplingRegime& sampling_regime);        
 
         /**
          * Add a directive to sample organisms and save their occurrence distribution.
@@ -350,7 +350,7 @@ class World {
          * @param   generation       generation number for this tree to be built
          * @param   sampling_regime  the leaves to add to the tree
          */
-        void add_occurrence_sample(unsigned long generation, const SamplingRegime& sampling_regime);         
+        void add_occurrence_sampling(unsigned long generation, const SamplingRegime& sampling_regime);         
         
         // --- simulation cycles ---
         
@@ -364,6 +364,21 @@ class World {
          * Run multiple cycles or generations of the simulation.
          */
         void run();
+        
+        /**
+         * Process world settings for the current generation.
+         */
+        void process_world_settings();     
+        
+        /**
+         * Process tree building directives for the current generation.
+         */
+        void process_tree_samplings();
+        
+        /**
+         * Process occurrence sampling directives for the current generation.
+         */
+        void process_occurrence_samplings();          
         
         // --- logging and output ---
         

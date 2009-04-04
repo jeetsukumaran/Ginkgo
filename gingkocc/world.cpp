@@ -102,11 +102,11 @@ void World::add_world_settings(unsigned long generation, const WorldSettings& wo
     this->world_settings_[generation] = world_settings;
 }
 
-void World::add_tree_sample(unsigned long generation, const SamplingRegime& sampling_regime) {
+void World::add_tree_sampling(unsigned long generation, const SamplingRegime& sampling_regime) {
     this->tree_samples_.insert(std::make_pair(generation, sampling_regime));
 }
 
-void World::add_occurrence_sample(unsigned long generation, const SamplingRegime& sampling_regime) {
+void World::add_occurrence_sampling(unsigned long generation, const SamplingRegime& sampling_regime) {
     this->occurrence_samples_.insert(std::make_pair(generation, sampling_regime));
 }
 
@@ -158,56 +158,88 @@ void World::run() {
             (spi->second)->clear_organism_labels();
         }
         
+        // build trees requested in this generation
+        this->process_tree_samplings();
+                
+        // save occurrence data requested in this generation
+        this->process_occurrence_samplings();
+        
         // process world changes
-        std::map<unsigned long, WorldSettings>::iterator wi = this->world_settings_.find(this->current_generation_);
-        if (wi != this->world_settings_.end()) {
-            if (wi->second.carrying_capacity.size() != 0) {
-                this->log_info("Setting carrying capacity: \"" + wi->second.carrying_capacity + "\".");
-                asciigrid::AsciiGrid grid(wi->second.carrying_capacity);
-                this->landscape_.set_carrying_capacities(grid.get_cell_values());
-            }
-            if (wi->second.environments.size() != 0) {
-                for (std::map<unsigned, std::string>::iterator ei = wi->second.environments.begin();
-                     ei != wi->second.environments.end();
-                     ++ei) {
-                    std::ostringstream msg;
-                    msg << "Setting environmental variable " <<  ei->first+1 <<  ": \"" <<  ei->second <<  "\"";
-                    this->log_info(msg.str());
-                    asciigrid::AsciiGrid grid(ei->second);
-                    this->landscape_.set_environment(ei->first, grid.get_cell_values());                    
-                }
-            }            
-            if (wi->second.movement_costs.size() != 0) {
-                for (std::map<std::string, std::string>::iterator mi = wi->second.movement_costs.begin();
-                     mi != wi->second.movement_costs.end();
-                     ++mi) {
-                    std::ostringstream msg;
-                    msg << "Setting movement costs for species " <<  mi->first <<  ": \"" <<  mi->second <<  "\"";
-                    this->log_info(msg.str());
-                    asciigrid::AsciiGrid grid(mi->second);
-                    this->set_species_movement_costs(mi->first, grid.get_cell_values());                    
-                }
-            }
-//             if (wi->second.samples.size() != 0) {
-//                 this->current_sampling_index_ = 0;
-//                 for (std::vector<SamplingRegime>::iterator si = wi->second.samples.begin();
-//                      si != wi->second.samples.end();
-//                      ++si) {
-//                     ++this->current_sampling_index_;
-//                     if (si->cell_indexes.size() == 0) {
-//                         this->save_trees(si->species_ptr, si->num_organisms_per_cell);
-//                     } else {
-//                         this->save_trees(si->species_ptr, si->num_organisms_per_cell, si->cell_indexes);                    
-//                     }
-//                 }                
-//             }
-        }
+        this->process_world_settings();
+        
+        // run the life cycle
         this->cycle();        
     }
     this->log_info("Ending simulation.");
 }
 
+void World::process_world_settings() {
+    std::map<unsigned long, WorldSettings>::iterator wi = this->world_settings_.find(this->current_generation_);    
+    if (wi == this->world_settings_.end()) {
+        return;
+    }    
+    if (wi->second.carrying_capacity.size() != 0) {
+        this->log_info("Setting carrying capacity: \"" + wi->second.carrying_capacity + "\".");
+        asciigrid::AsciiGrid grid(wi->second.carrying_capacity);
+        this->landscape_.set_carrying_capacities(grid.get_cell_values());
+    }
+    if (wi->second.environments.size() != 0) {
+        for (std::map<unsigned, std::string>::iterator ei = wi->second.environments.begin();
+             ei != wi->second.environments.end();
+             ++ei) {
+            std::ostringstream msg;
+            msg << "Setting environmental variable " <<  ei->first+1 <<  ": \"" <<  ei->second <<  "\"";
+            this->log_info(msg.str());
+            asciigrid::AsciiGrid grid(ei->second);
+            this->landscape_.set_environment(ei->first, grid.get_cell_values());                    
+        }
+    }            
+    if (wi->second.movement_costs.size() != 0) {
+        for (std::map<std::string, std::string>::iterator mi = wi->second.movement_costs.begin();
+             mi != wi->second.movement_costs.end();
+             ++mi) {
+            std::ostringstream msg;
+            msg << "Setting movement costs for species " <<  mi->first <<  ": \"" <<  mi->second <<  "\"";
+            this->log_info(msg.str());
+            asciigrid::AsciiGrid grid(mi->second);
+            this->set_species_movement_costs(mi->first, grid.get_cell_values());                    
+        }
+    }
+}
+
+void World::process_tree_samplings() {
+    typedef std::multimap<unsigned long, SamplingRegime> gen_sample_t;
+    typedef std::pair<gen_sample_t::iterator, gen_sample_t::iterator> gen_sample_iter_pair_t;
+    
+    this->current_sampling_index_ = 0;
+    gen_sample_iter_pair_t this_gen_samples = this->tree_samples_.equal_range(this->current_generation_);
+    for (gen_sample_t::iterator i = this_gen_samples.first; i != this_gen_samples.second; ++i) {
+        ++this->current_sampling_index_;
+        this->save_trees(i->second.species_ptr, i->second.num_organisms_per_cell, i->second.cell_indexes);
+    }
+
+
+    
+//     if (wi->second.samples.size() != 0) {
+//         this->current_sampling_index_ = 0;
+//         for (std::vector<SamplingRegime>::iterator si = wi->second.samples.begin();
+//              si != wi->second.samples.end();
+//              ++si) {
+//             ++this->current_sampling_index_;
+//             if (si->cell_indexes.size() == 0) {
+//                 this->save_trees(si->species_ptr, si->num_organisms_per_cell);
+//             } else {
+//                 this->save_trees(si->species_ptr, si->num_organisms_per_cell, si->cell_indexes);                    
+//             }
+//         }                
+//     }
+}
+
+void World::process_occurrence_samplings() {
+}
+
 // --- logging and output ---
+
 void World::write_tree(Tree& tree, const std::string& species_label, unsigned long num_taxa, std::ostream& out) {
     try {
         tree.write_newick_tree(out);
