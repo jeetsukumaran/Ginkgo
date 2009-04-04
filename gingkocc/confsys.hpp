@@ -151,7 +151,13 @@ class ConfigurationBlock {
          * Returns <code>true</code> if the block was parsed and set.
          * @return <code>true</code> if the block was parsed and set
          */
-        bool is_block_set() const;        
+        bool is_block_set() const;       
+        
+        /**
+         * Returns exactly as with multimap.equal_range.
+         */
+        typedef std::pair<std::multimap<std::string, std::string>::iterator, std::multimap<std::string, std::string>::iterator> MultiEntryIterator;
+        MultiEntryIterator equal_range(const std::string& key);
         
         /**
          * Returns value for given key.

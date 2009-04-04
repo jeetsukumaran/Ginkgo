@@ -261,6 +261,10 @@ std::string ConfigurationBlock::get_entry<std::string>(const std::string& key) c
     return val->second;
 }
 
+ConfigurationBlock::MultiEntryIterator ConfigurationBlock::equal_range(const std::string& key) {
+    return this->entries_.equal_range(key);
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // ConfigurationBlock inserter
 
