@@ -456,7 +456,7 @@ std::string GenerationConfigurator::get_validated_grid_path(const std::string& g
         std::vector<long> values = grid.get_cell_values();
         if (values.size() != world.size()) {
             std::ostringstream msg;
-            msg << "landscape has " << world.size() << "cells, ";
+            msg << "landscape has " << world.size() << " cells, ";
             msg << "but grid \"" << full_grid_path << "\" describes " << values.size() << " cells";
             throw this->build_exception(msg.str());        
         }
