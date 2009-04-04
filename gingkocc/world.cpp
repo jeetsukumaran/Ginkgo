@@ -231,7 +231,7 @@ void World::write_haploid_tree(Species * sp_ptr,
 
 void World::save_trees(Species * sp_ptr, 
                 unsigned long num_organisms_per_cell, 
-                const std::vector<CellIndexType>& cell_indexes) {
+                const std::set<CellIndexType>& cell_indexes) {
     std::vector<const Organism *> organisms;
     this->log_info("Sampling organisms of species " + sp_ptr->get_label() +".");
     this->landscape_.sample_organisms(sp_ptr, num_organisms_per_cell, cell_indexes, organisms);
@@ -257,10 +257,12 @@ void World::save_trees(Species * sp_ptr,
 
 void World::save_trees(Species * sp_ptr, 
                 unsigned long num_organisms_per_cell) {
-    std::vector<CellIndexType> cell_indexes;
-    cell_indexes.reserve(this->landscape_.size());
+    std::set<CellIndexType> cell_indexes;
+    
+    std::cout << "\n\n\n************************************ HERE! \n\n\n\n";
+    
     for (unsigned long i = 0; i < this->landscape_.size(); ++i) {
-        cell_indexes.push_back(i);
+        cell_indexes.insert(i);
     }
     this->save_trees(sp_ptr, num_organisms_per_cell, cell_indexes);
 } 

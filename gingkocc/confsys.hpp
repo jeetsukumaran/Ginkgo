@@ -376,9 +376,12 @@ class Configurator {
         
         /**
          * Retrieves vector of cell positions from a configuration entry,
-         * parses them, and adds them to the OrganismDistribution object.
+         * parses them, and adds them to the OrganismDistribution object.         
+         * @param key               entry key
+         * @param od                OrganismDistribution object to populate
+         * @param allow_wildcards   allow '*' to stand in for all positions
          */
-        void get_configuration_positions(const std::string& key, OrganismDistribution& od);         
+        void get_configuration_positions(const std::string& key, OrganismDistribution& od, bool allow_wildcard=false);         
         
         /**
          * Returns vector of keys in entries that start with a particular 

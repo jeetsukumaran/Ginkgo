@@ -84,14 +84,14 @@ void Landscape::process_migrants() {
 
 void Landscape::sample_organisms(Species * sp_ptr, 
         unsigned long num_organisms_per_cell,
-        const std::vector<CellIndexType>& cell_indexes,
+        const std::set<CellIndexType>& cell_indexes,
         std::vector<const Organism *>& samples) {
 //     if (num_organisms_per_cell > 0) {        
 //         samples.reserve(samples.size() + (num_organisms_per_cell * cell_indexes.size()));
 //     } else {
 //         samples.reserve(samples.size() + cell_indexes.size());
 //     }
-    for (std::vector<CellIndexType>::const_iterator ci = cell_indexes.begin();
+    for (std::set<CellIndexType>::const_iterator ci = cell_indexes.begin();
             ci != cell_indexes.end();
             ++ci) {
         assert(static_cast<unsigned long>(*ci) < this->cells_.size());

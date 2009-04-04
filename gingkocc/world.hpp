@@ -27,6 +27,7 @@
 #include <istream>
 #include <fstream>
 #include <stdexcept>
+#include <set>
 
 #include "gingko_defs.hpp"
 #include "randgen.hpp"
@@ -61,7 +62,7 @@ struct SamplingRegime {
          */
         unsigned long               num_organisms_per_cell;
         /** List of cells to be sampled. */
-        std::vector<CellIndexType>  cell_indexes;
+        std::set<CellIndexType>     cell_indexes;
 };
 
 /**
@@ -368,7 +369,7 @@ class World {
          */
         void save_trees(Species * sp_ptr, 
                         unsigned long num_organisms_per_cell, 
-                        const std::vector<CellIndexType>& cell_indexes);
+                        const std::set<CellIndexType>& cell_indexes);
                         
         /**
          * Samples organisms of specified species from all the cells of the

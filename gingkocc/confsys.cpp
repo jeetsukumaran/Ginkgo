@@ -280,8 +280,15 @@ std::vector<std::string> Configurator::get_matching_configuration_keys(const std
     return this->configuration_block_.get_keys(key_start);
 }
 
-void Configurator::get_configuration_positions(const std::string& key, OrganismDistribution& od) {
+void Configurator::get_configuration_positions(const std::string& key, OrganismDistribution& od, bool allow_wildcard) {
     std::vector<std::string> positions = this->get_configuration_vector<std::string>(key);
+    
+    // "*" = sample all cells
+    // which is indicated by returning an empty list
+    if (allow_wildcard and positions.size() == 1 and positions[0] == "*") {
+        return;
+    }
+    
     od.x.reserve(od.x.size() + positions.size());
     od.y.reserve(od.y.size() + positions.size());
     for (std::vector<std::string>::const_iterator pos = positions.begin(); pos < positions.end(); ++pos) {
@@ -529,7 +536,7 @@ void GenerationConfigurator::process_sampling_regimes() {
             }
         } 
         od.species_label = species_number_parts[0];
-        this->get_configuration_positions(key, od);
+        this->get_configuration_positions(key, od, true);
         this->samples_.insert(std::make_pair(od.species_label, od));
     }
 }
@@ -572,7 +579,6 @@ void GenerationConfigurator::configure(World& world)  {
         OrganismDistribution& od = sri->second;
         assert(od.x.size() == od.y.size());
         SamplingRegime sampling_regime;
-        sampling_regime.cell_indexes.reserve(od.x.size());
         sampling_regime.num_organisms_per_cell = od.num_organisms;
         for (unsigned i = 0; i < od.x.size(); ++i) {
             if (od.x[i] > world.landscape().size_x()-1) {
@@ -587,7 +593,7 @@ void GenerationConfigurator::configure(World& world)  {
                 msg << " but position specifies x-coordinate of " << od.y[i];
                 throw this->build_exception(msg.str());
             }              
-            sampling_regime.cell_indexes.push_back(world.landscape().xy_to_index(od.x[i], od.y[i]));
+            sampling_regime.cell_indexes.insert(world.landscape().xy_to_index(od.x[i], od.y[i]));
         }
         world_settings.samples.insert(std::make_pair(od.species_label, sampling_regime));
     }

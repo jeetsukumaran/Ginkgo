@@ -25,6 +25,7 @@
 #include "biosys.hpp"
 #include "cell.hpp"
 #include <iostream>
+#include <set>
 
 namespace gingko {
 
@@ -132,7 +133,7 @@ class Landscape {
          */
        void sample_organisms(Species * sp_ptr, 
                     unsigned long num_organisms_per_cell, 
-                    const std::vector<CellIndexType>& cell_indexes,
+                    const std::set<CellIndexType>& cell_indexes,
                     std::vector<const Organism *>& samples);          
         
         // --- cell access and spatial mapping ---
