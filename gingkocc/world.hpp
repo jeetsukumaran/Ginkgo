@@ -28,6 +28,7 @@
 #include <fstream>
 #include <stdexcept>
 #include <set>
+#include <string>
 
 #include "gingko_defs.hpp"
 #include "randgen.hpp"
@@ -150,8 +151,11 @@ class World {
          * Returns label for output and reporting.
          * @return label for output and reporting
          */        
-        std::string get_label() const {
-            return this->label_;
+        std::string get_label() {
+            if (this->label_.size() == 0) {
+                this->label_ = "world";
+            }
+            return this->label_;           
         }                
         
         /**
@@ -489,6 +493,8 @@ class World {
         std::ofstream                           errs_;
         /** Duplicate log output to stdout/stderr? */
         bool                                    is_log_to_screen_;
+        /** Current tree being generated (for labeling). */
+        unsigned long                           current_sampling_index_;
 
     private:
         /** Disabled copy constructor. */

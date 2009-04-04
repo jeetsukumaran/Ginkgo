@@ -181,11 +181,13 @@ void World::run() {
                 }
             }
             if (wi->second.samples.size() != 0) {
+                this->current_sampling_index_ = 0;
                 for (std::map<std::string, SamplingRegime>::iterator si = wi->second.samples.begin();
                      si != wi->second.samples.end();
                      ++si) {
                     SpeciesByLabel::iterator sp_ptr = this->species_.find(si->first);
                     assert(sp_ptr != this->species_.end());
+                    ++this->current_sampling_index_;
                     if (si->second.cell_indexes.size() == 0) {
                         this->save_trees(sp_ptr->second, si->second.num_organisms_per_cell);
                     } else {
@@ -230,6 +232,25 @@ void World::write_haploid_tree(Species * sp_ptr,
         tree.process_node((*oi)->get_haploid_node(), &sp_ptr->get_organism_label(**oi));
     }
     this->write_tree(tree, sp_ptr->get_label(), organisms.size(), out);
+}
+
+void World::write_diploid_trees(Species * sp_ptr,
+                const std::vector<const Organism *>& organisms,
+                std::ostream& out) {    
+    for (unsigned i = 0; i < NUM_NEUTRAL_DIPLOID_LOCII; ++i) {
+        Tree tree(this->coalesce_multiple_roots_);
+        std::string allele1;
+        std::string allele2;
+        for (std::vector<const Organism *>::const_iterator oi = organisms.begin();
+                oi != organisms.end();
+                ++oi) {
+            allele1 = sp_ptr->get_organism_label(**oi) + "__a1";
+            allele1 = sp_ptr->get_organism_label(**oi) + "__a2";
+            tree.process_node((*oi)->get_diploid_node1(i), &allele1);
+            tree.process_node((*oi)->get_diploid_node2(i), &allele2);            
+        }
+        this->write_tree(tree, sp_ptr->get_label(), organisms.size(), out);
+    }        
 }                
 
 void World::save_trees(Species * sp_ptr, 
@@ -245,14 +266,21 @@ void World::save_trees(Species * sp_ptr,
     }
     
     std::ostringstream tree_filename_stem;
-    tree_filename_stem << "G" << std::setw(8) << std::setfill('0') << this->current_generation_ << "_" << sp_ptr->get_label();
+    tree_filename_stem << this->get_label();
+    tree_filename_stem << "_G" << std::setw(8) << std::setfill('0') << this->current_generation_;
+    tree_filename_stem << "_sp" << sp_ptr->get_label();
+    tree_filename_stem << "_N" << num_organisms_per_cell;
+    tree_filename_stem << "_S" << this->current_sampling_index_;
+
     this->log_info("Building tree for haploid locus alleles.");    
     std::ofstream haploid_trees;
     this->open_ofstream(haploid_trees, tree_filename_stem.str() + ".haploid.tre");    
     this->write_haploid_tree(sp_ptr, organisms, haploid_trees);    
     
-//     std::ofstream diploid_trees;
-//     this->open_ofstream(diploid_trees, tree_filename_stem.str() + ".diploid.tre");
+    this->log_info("Building tree for diploid locus alleles."); 
+    std::ofstream diploid_trees;
+    this->open_ofstream(diploid_trees, tree_filename_stem.str() + ".diploid.tre");
+    this->write_diploid_trees(sp_ptr, organisms, diploid_trees);
 //     
 //     std::ofstream combined_trees;            
 //     this->open_ofstream(combined_trees, tree_filename_stem.str() + ".combined.tre");
@@ -276,14 +304,11 @@ void World::open_ofstream(std::ofstream& out, const std::string& fpath) {
 }
 
 void World::open_logs() {    
-    if (this->label_.size() == 0) {
-        this->label_ = "world";
-    }
     if (not this->infos_.is_open()) {
-        this->open_ofstream(this->infos_, this->label_ + ".gingko.out.log");
+        this->open_ofstream(this->infos_, this->get_label() + ".gingko.out.log");
     }
     if (not this->errs_.is_open()) {
-        this->open_ofstream(this->errs_, this->label_ + ".gingko.err.log");
+        this->open_ofstream(this->errs_, this->get_label() + ".gingko.err.log");
     }    
 }
 
