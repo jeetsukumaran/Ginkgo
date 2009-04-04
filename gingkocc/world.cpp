@@ -129,27 +129,27 @@ void World::cycle() {
 //     this->landscape_.process_migrants();
 
     std::ostringstream gen;
-    gen << "Generation " << this->current_generation_ << " life-cycle beginning.";
+    gen << "Generation " << this->current_generation_ << " life-cycle running.";
     this->log_info(gen.str());
-    this->log_info("Reproduction/migration phase.");
+    this->log_detail("Reproduction/migration phase.");
     for (CellIndexType i = 0; i < this->landscape_.size(); ++i) {
         this->landscape_[i].reproduction(); 
         this->landscape_[i].migration();
     }
-    this->log_info("Processing migrants.");
+    this->log_detail("Processing migrants.");
     this->landscape_.process_migrants();
-    this->log_info("Survival/competition phase.");
+    this->log_detail("Survival/competition phase.");
     for (CellIndexType i = 0; i < this->landscape_.size(); ++i) {    
         this->landscape_[i].survival();
         this->landscape_[i].competition();        
     }    
-    this->log_info("Generation life-cycle complete.");
+    this->log_detail("Generation life-cycle completed.");
     ++this->current_generation_;
 }
 
 void World::run() {    
     this->open_logs();
-    this->log_extrasim_info("Starting simulation.");
+    this->log_info("Starting simulation.");
     
     while (this->current_generation_ < this->generations_to_run_) {
         
@@ -204,7 +204,7 @@ void World::run() {
         }
         this->cycle();        
     }
-    this->log_extrasim_info("Ending simulation.");
+    this->log_info("Ending simulation.");
 }
 
 // --- logging and output ---
@@ -333,36 +333,21 @@ std::string World::get_timestamp() {
     struct tm * timeinfo = localtime ( &rawtime );
     char buffer[80];
     strftime (buffer,80,"%Y-%m-%d %H:%M:%S",timeinfo);
-    return std::string(buffer);
+    return "[" + std::string(buffer) + "]";
 }
 
-std::string World::get_time_gen_stamp() {    
-    std::ostringstream outs;
-    outs << "[";
-    outs << this->get_timestamp();
-    outs << "]";    
-    outs << " ";
-    outs << std::setw(8) << std::setfill('0');
-    outs << this->current_generation_;   
-    return outs.str();
-}
-
-void World::log_extrasim_info(const std::string& message) {
+void World::log_detail(const std::string& message) {
     assert(this->infos_);
-    std::ostringstream outs;
-    outs << "[";
-    outs << this->get_timestamp();
-    outs << "]";
-    outs << "         ";    
-    if (this->is_log_to_screen_) {
-        std::cout << outs.str() << " " << message << std::endl;
-    }
-    this->infos_ << outs.str() << " " << message << std::endl;
+    this->infos_ << this->get_timestamp();
+    this->infos_ << " [Generation ";
+    this->infos_ << this->current_generation_;
+    this->infos_ << "] ";
+    this->infos_ << message << std::endl;
 }
 
 void World::log_info(const std::string& message) {
     assert(this->infos_);
-    std::string ts = this->get_time_gen_stamp();
+    std::string ts = this->get_timestamp();
     if (this->is_log_to_screen_) {
         std::cout << ts << " " << message << std::endl;
     }
@@ -372,7 +357,7 @@ void World::log_info(const std::string& message) {
 void World::log_error(const std::string& message) {
     assert(this->errs_);
     assert(this->infos_);    
-    std::string ts = this->get_time_gen_stamp();
+    std::string ts = this->get_timestamp();
     if (this->is_log_to_screen_) {
         std::cerr << ts << " ERROR: " << message << std::endl;
     }

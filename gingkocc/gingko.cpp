@@ -67,7 +67,7 @@ int main(int argc, char* argv[]) {
         std::cout << "Configuration file validates." << std:: endl;
     } else {
         world.open_logs();
-        world.log_extrasim_info("World configured using: \"" + args[0] + "\"");        
+        world.log_info("World configured using: \"" + args[0] + "\"");        
         world.run();
         world.close_logs();
     }
