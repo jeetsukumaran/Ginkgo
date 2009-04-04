@@ -219,17 +219,15 @@ void ConfigurationBlock::parse(std::istream& in) {
     
     std::vector<std::string> head_parts = textutil::split_on_any(textutil::strip(parts[0]), WHITESPACE, false);
     
-    if (head_parts.size() < 2) {
-        throw ConfigurationSyntaxError(this->compose_error_message(start_pos, "found only one element in block header, but expecting two (type and name)"));
-    }
-    
     if (head_parts.size() > 2) {
         throw ConfigurationSyntaxError(this->compose_error_message(start_pos, "found multiple elements in block header, but expecting only two (type and name)"));
     }
-    
+
     this->type_ = textutil::lower(textutil::strip(head_parts[0].substr(1)));
-    this->name_ = textutil::strip(head_parts[1]);
-    
+    if (head_parts.size() < 2) {
+        this->name_ = textutil::strip(head_parts[1]);
+    }    
+                
     unsigned entry_count = 0;
     std::vector<std::string> body_parts = textutil::split_on_any(textutil::strip(parts[1]), BLOCK_BODY_LINE_TERM, false);
     for (std::vector<std::string>::const_iterator s = body_parts.begin(); s != body_parts.end(); ++s) {
@@ -338,7 +336,7 @@ void WorldConfigurator::parse()  {
 }
 
 void WorldConfigurator::configure(World& world)  {
-    world.set_label(this->get_name());
+    world.set_label(this->get_name("GingkoWorld"));        
     world.set_random_seed(this->rand_seed_);
     world.set_generations_to_run(this->generations_to_run_);
     world.set_num_fitness_factors(this->num_fitness_factors_);
@@ -513,32 +511,32 @@ void GenerationConfigurator::process_movement_costs() {
 }
 
 void GenerationConfigurator::process_sampling_regimes() {
-    std::vector<std::string> keys = this->get_matching_configuration_keys("sample");
-    for (std::vector<std::string>::const_iterator k = keys.begin(); k != keys.end(); ++k) {
-        OrganismDistribution od = OrganismDistribution();
-        std::string key = *k;
-        std::vector<std::string> key_parts = textutil::split(key, ":", 1, false);
-        
-        if (key_parts.size() < 2) {
-            throw this->build_exception("need to specify species label for sampling");
-        }
-        
-        std::vector<std::string> species_number_parts = textutil::split(key_parts[1], "#", 1, false);
-        if (species_number_parts.size() < 2) {
-            od.num_organisms = 0;
-        } else if (species_number_parts[1] == "*") {
-            od.num_organisms = 0;
-        } else {      
-            try {
-                od.num_organisms = convert::to_scalar<unsigned long>(species_number_parts[1]);
-            } catch (const convert::ValueError& e) {
-                throw this->build_exception("invalid value for sample number \"" + species_number_parts[1] + "\"");
-            }
-        } 
-        od.species_label = species_number_parts[0];
-        this->get_configuration_positions(key, od, true);
-        this->samples_.insert(std::make_pair(od.species_label, od));
-    }
+//     std::vector<std::string> keys = this->get_matching_configuration_keys("sample");
+//     for (std::vector<std::string>::const_iterator k = keys.begin(); k != keys.end(); ++k) {
+//         OrganismDistribution od = OrganismDistribution();
+//         std::string key = *k;
+//         std::vector<std::string> key_parts = textutil::split(key, ":", 1, false);
+//         
+//         if (key_parts.size() < 2) {
+//             throw this->build_exception("need to specify species label for sampling");
+//         }
+//         
+//         std::vector<std::string> species_number_parts = textutil::split(key_parts[1], "#", 1, false);
+//         if (species_number_parts.size() < 2) {
+//             od.num_organisms = 0;
+//         } else if (species_number_parts[1] == "*") {
+//             od.num_organisms = 0;
+//         } else {      
+//             try {
+//                 od.num_organisms = convert::to_scalar<unsigned long>(species_number_parts[1]);
+//             } catch (const convert::ValueError& e) {
+//                 throw this->build_exception("invalid value for sample number \"" + species_number_parts[1] + "\"");
+//             }
+//         } 
+//         od.species_label = species_number_parts[0];
+//         this->get_configuration_positions(key, od, true);
+//         this->samples_.insert(std::make_pair(od.species_label, od));
+//     }
 }
 
 void GenerationConfigurator::parse()  {
@@ -575,34 +573,34 @@ void GenerationConfigurator::configure(World& world)  {
         }
         world_settings.movement_costs.insert(std::make_pair(mci->first, this->get_validated_grid_path(mci->second, world)));
     }
-    world_settings.samples.reserve(this->samples_.size());
-    for (std::map<std::string, OrganismDistribution>::iterator sri = this->samples_.begin(); sri != this->samples_.end(); ++sri) {
-        OrganismDistribution& od = sri->second;
-        assert(od.x.size() == od.y.size());
-        SamplingRegime sampling_regime;
-        sampling_regime.num_organisms_per_cell = od.num_organisms;
-        for (unsigned i = 0; i < od.x.size(); ++i) {
-            if (od.x[i] > world.landscape().size_x()-1) {
-                std::ostringstream msg;
-                msg << "maximum x-coordinate on landscape is " << world.landscape().size_x();
-                msg << " but position specifies x-coordinate of " << od.x[i];
-                throw this->build_exception(msg.str());
-            }
-            if (od.y[i] > world.landscape().size_y()-1) {
-                std::ostringstream msg;
-                msg << "maximum x-coordinate on landscape is " << world.landscape().size_y();
-                msg << " but position specifies x-coordinate of " << od.y[i];
-                throw this->build_exception(msg.str());
-            }              
-            sampling_regime.cell_indexes.insert(world.landscape().xy_to_index(od.x[i], od.y[i]));
-        }
-        if (world.has_species(od.species_label)) {
-            sampling_regime.species_ptr = world.get_species_ptr(od.species_label);
-        } else {
-            throw this->build_exception("Species \"" + od.species_label + "\" not defined");
-        }
-        world_settings.samples.push_back(sampling_regime);
-    }
+//     world_settings.samples.reserve(this->samples_.size());
+//     for (std::map<std::string, OrganismDistribution>::iterator sri = this->samples_.begin(); sri != this->samples_.end(); ++sri) {
+//         OrganismDistribution& od = sri->second;
+//         assert(od.x.size() == od.y.size());
+//         SamplingRegime sampling_regime;
+//         sampling_regime.num_organisms_per_cell = od.num_organisms;
+//         for (unsigned i = 0; i < od.x.size(); ++i) {
+//             if (od.x[i] > world.landscape().size_x()-1) {
+//                 std::ostringstream msg;
+//                 msg << "maximum x-coordinate on landscape is " << world.landscape().size_x();
+//                 msg << " but position specifies x-coordinate of " << od.x[i];
+//                 throw this->build_exception(msg.str());
+//             }
+//             if (od.y[i] > world.landscape().size_y()-1) {
+//                 std::ostringstream msg;
+//                 msg << "maximum x-coordinate on landscape is " << world.landscape().size_y();
+//                 msg << " but position specifies x-coordinate of " << od.y[i];
+//                 throw this->build_exception(msg.str());
+//             }              
+//             sampling_regime.cell_indexes.insert(world.landscape().xy_to_index(od.x[i], od.y[i]));
+//         }
+//         if (world.has_species(od.species_label)) {
+//             sampling_regime.species_ptr = world.get_species_ptr(od.species_label);
+//         } else {
+//             throw this->build_exception("Species \"" + od.species_label + "\" not defined");
+//         }
+//         world_settings.samples.push_back(sampling_regime);
+//     }
     world.add_world_settings(this->generation_, world_settings);
 }
 
@@ -703,8 +701,11 @@ namespace confsys_detail {
     ConfigurationError build_configuration_block_exception(const ConfigurationBlock& cb,
             const std::string& message) {
         std::ostringstream msg;
-        msg << cb.get_type() << " block \"" << cb.get_name();
-        msg << "\" (file position " << cb.get_block_start_pos() + 1;
+        msg << cb.get_type() << " block ";
+        if (cb.has_name()) {        
+            msg << "\"" << cb.get_name() << "\" ";
+        }            
+        msg << "(file position " << cb.get_block_start_pos() + 1;
         msg << " to position " << cb.get_block_end_pos() + 1 << ")";
         msg << ": " << message;
         return ConfigurationError(msg.str());    

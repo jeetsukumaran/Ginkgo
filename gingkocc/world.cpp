@@ -98,10 +98,18 @@ void World::seed_population(CellIndexType cell_index, const std::string& species
 
 // --- event handlers ---
 
-WorldSettings& World::add_world_settings(unsigned long generation, const WorldSettings& world_settings) {
+void World::add_world_settings(unsigned long generation, const WorldSettings& world_settings) {
     this->world_settings_[generation] = world_settings;
-    return this->world_settings_[generation];
 }
+
+void World::add_tree_sample(unsigned long generation, const SamplingRegime& sampling_regime) {
+    this->tree_samples_.insert(std::make_pair(generation, sampling_regime));
+}
+
+void World::add_occurrence_sample(unsigned long generation, const SamplingRegime& sampling_regime) {
+    this->occurrence_samples_.insert(std::make_pair(generation, sampling_regime));
+}
+
 
 // --- simulation cycles ---
 
@@ -180,19 +188,19 @@ void World::run() {
                     this->set_species_movement_costs(mi->first, grid.get_cell_values());                    
                 }
             }
-            if (wi->second.samples.size() != 0) {
-                this->current_sampling_index_ = 0;
-                for (std::vector<SamplingRegime>::iterator si = wi->second.samples.begin();
-                     si != wi->second.samples.end();
-                     ++si) {
-                    ++this->current_sampling_index_;
-                    if (si->cell_indexes.size() == 0) {
-                        this->save_trees(si->species_ptr, si->num_organisms_per_cell);
-                    } else {
-                        this->save_trees(si->species_ptr, si->num_organisms_per_cell, si->cell_indexes);                    
-                    }
-                }                
-            }
+//             if (wi->second.samples.size() != 0) {
+//                 this->current_sampling_index_ = 0;
+//                 for (std::vector<SamplingRegime>::iterator si = wi->second.samples.begin();
+//                      si != wi->second.samples.end();
+//                      ++si) {
+//                     ++this->current_sampling_index_;
+//                     if (si->cell_indexes.size() == 0) {
+//                         this->save_trees(si->species_ptr, si->num_organisms_per_cell);
+//                     } else {
+//                         this->save_trees(si->species_ptr, si->num_organisms_per_cell, si->cell_indexes);                    
+//                     }
+//                 }                
+//             }
         }
         this->cycle();        
     }

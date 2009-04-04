@@ -97,6 +97,25 @@ class ConfigurationIncompleteError : public ConfigurationError {
         ConfigurationIncompleteError(const std::string& msg) : ConfigurationError(msg) {}
 };
 
+/**
+ * Track distribution of organisms, either for seed populations or sampling 
+ * regimes.
+ */
+struct OrganismDistribution {
+    
+    public:
+        OrganismDistribution()
+            : num_organisms(0) { }
+
+    public:
+        std::string     result_label;
+        std::string     species_label;
+        unsigned long   num_organisms;
+        std::vector<CellIndexType>  x;
+        std::vector<CellIndexType>  y;
+        
+
+}; // OrganismDistribution
 
 /**
  * Generic configuration block with a file.
@@ -191,6 +210,13 @@ class ConfigurationBlock {
         bool has_key(const std::string key) const {
             return (this->entries_.find(key) != this->entries_.end());
         }
+                
+        /**
+         * Returns <code>true</code> if name is set.
+         */
+        bool has_name() const {
+            return (this->name_.size() > 0);
+        }            
         
         /**
          * Returns vector of keys in entries.
@@ -275,25 +301,6 @@ class ConfigurationBlock {
 }; // ConfigurationBlock
 
 /**
- * Track distribution of organisms, either for seed populations or sampling 
- * regimes.
- */
-struct OrganismDistribution {
-    
-    public:
-        OrganismDistribution()
-            : num_organisms(0) { }
-
-    public:
-        std::string     species_label;
-        unsigned long   num_organisms;
-        std::vector<CellIndexType>  x;
-        std::vector<CellIndexType>  y;
-        
-
-}; // OrganismDistribution
-
-/**
  * Base class for configurators.
  */
 class Configurator {
@@ -320,9 +327,26 @@ class Configurator {
          * Returns name of underlying ConfigurationBlock.
          * @return  name of block
          */
-        std::string get_name() const {
-            return this->configuration_block_.get_name();
+        std::string get_name() {
+            std::string name = this->configuration_block_.get_name();
+            if (name.size() == 0) {
+                throw this->build_exception("name required for block but not specified");
+            }
+            return name;
         }
+        
+        /**
+         * Returns name of underlying ConfigurationBlock.
+         * @return  name of block
+         */
+        std::string get_name(const std::string& default_name) {
+            std::string name = this->configuration_block_.get_name();
+            if (name.size() == 0) {
+                return default_name;
+            } else {
+                return name;
+            }
+        }        
         
         /**
          * Retrieves value for specified key.
