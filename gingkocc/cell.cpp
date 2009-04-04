@@ -166,9 +166,6 @@ void Cell::sample_organisms(Species * sp_ptr,
     if (num_organisms == 0 or num_organisms >= species_organisms.size()) {
         samples.reserve(samples.size() + species_organisms.size());
         std::copy(species_organisms.begin(), species_organisms.end(), std::back_inserter(samples));
-//         for (std::vector<const Organism *>::const_iterator op = species_organisms.begin(); op != species_organisms.end(); ++op) {
-//             samples.push_back(*op);
-//         }
     } else {
         samples.reserve(samples.size() + num_organisms);
         RandomPointer rp(this->rng_);
