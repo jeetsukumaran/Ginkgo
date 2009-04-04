@@ -224,7 +224,7 @@ void ConfigurationBlock::parse(std::istream& in) {
     }
 
     this->type_ = textutil::lower(textutil::strip(head_parts[0].substr(1)));
-    if (head_parts.size() < 2) {
+    if (head_parts.size() == 2) {
         this->name_ = textutil::strip(head_parts[1]);
     }    
                 
@@ -716,7 +716,14 @@ void ConfigurationFile::configure(World& world) {
                 }
                 GenerationConfigurator gcf(cb);
                 gcf.configure(world);
-            }            
+            }
+            if (cb.get_type() == "tree") {
+                if (num_worlds == 0) {
+                    throw confsys_detail::build_configuration_block_exception(cb, "world must be defined before world setting changes defined");
+                }
+                SampleConfigurator scf(cb);
+                scf.configure(world);
+            }              
         }
     }
 }
