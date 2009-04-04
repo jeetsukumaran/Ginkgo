@@ -21,6 +21,7 @@
 
 #include "cell.hpp"
 #include "landscape.hpp"
+#include "randgen.hpp"
 
 #include <iostream>
 #include <iomanip>
@@ -170,7 +171,8 @@ void Cell::sample_organisms(Species * sp_ptr,
 //         }
     } else {
         samples.reserve(samples.size() + num_organisms);
-        std::random_shuffle(species_organisms.begin(), species_organisms.end());
+        RandomPointer rp(this->rng_);
+        std::random_shuffle(species_organisms.begin(), species_organisms.end(), rp);
         std::copy(species_organisms.begin(), species_organisms.begin() + num_organisms, std::back_inserter(samples));   
     }
 }

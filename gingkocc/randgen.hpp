@@ -112,6 +112,17 @@ class RandomNumberGenerator {
         unsigned long seed_;                    //! seed for the underlying rng
 };
 
+/**
+ * Random function used as function object by STL algorithm.
+ */
+class RandomPointer {     
+    public:     
+        RandomPointer(RandomNumberGenerator& rng);            
+        std::ptrdiff_t operator() (std::ptrdiff_t max);
+    private:
+        RandomNumberGenerator&  rng_;
+};
+
 } // gingko namespace
 
 #endif

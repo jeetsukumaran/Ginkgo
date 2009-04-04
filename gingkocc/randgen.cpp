@@ -26,6 +26,9 @@
 
 namespace gingko {
 
+///////////////////////////////////////////////////////////////////////////////
+// RandomNumberGenerator
+
 //! seeds using time
 RandomNumberGenerator::RandomNumberGenerator() {
     this->set_seed(time(0));
@@ -107,6 +110,16 @@ unsigned int RandomNumberGenerator::poisson(float rate) {
         p *= this->uniform_01();
     }
     return static_cast<unsigned int>(k - 1.0);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// RandomPointer
+
+RandomPointer::RandomPointer(RandomNumberGenerator& rng)
+    : rng_(rng) { }
+
+std::ptrdiff_t RandomPointer::operator() (std::ptrdiff_t max) { 
+    return static_cast<std::ptrdiff_t>(this->rng_.uniform_int(0, max-1)); 
 }
 
 
