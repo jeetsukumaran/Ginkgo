@@ -24,6 +24,7 @@
 
 #include <iostream>
 #include <iomanip>
+#include <algorithm>
 
 using namespace gingko;
 
@@ -153,17 +154,25 @@ void Cell::competition() {
 // --- for trees etc ---
 void Cell::sample_organisms(Species * sp_ptr,
     std::vector<const Organism *>& samples, unsigned long num_organisms) {
-    unsigned long num_organisms_added = 0;
+    std::vector<const Organism *> species_organisms;
+    species_organisms.reserve(this->organisms_.size());
     for (OrganismVector::const_iterator og = this->organisms_.begin(); og != this->organisms_.end(); ++og) {
-        if (num_organisms > 0 && num_organisms_added > num_organisms) {
-            break;
-        }
         if (&og->species() == sp_ptr) {
             sp_ptr->get_organism_label(*og, this->x_, this->y_);
-            samples.push_back(&(*og));
-            ++num_organisms_added;
+            species_organisms.push_back(&(*og));
         }
-    }  
+    }
+    if (num_organisms == 0 or num_organisms >= species_organisms.size()) {
+        samples.reserve(samples.size() + species_organisms.size());
+        std::copy(species_organisms.begin(), species_organisms.end(), std::back_inserter(samples));
+//         for (std::vector<const Organism *>::const_iterator op = species_organisms.begin(); op != species_organisms.end(); ++op) {
+//             samples.push_back(*op);
+//         }
+    } else {
+        samples.reserve(samples.size() + num_organisms);
+        std::random_shuffle(species_organisms.begin(), species_organisms.end());
+        std::copy(species_organisms.begin(), species_organisms.begin() + num_organisms, std::back_inserter(samples));   
+    }
 }
 
 // --- supporting methods ---
