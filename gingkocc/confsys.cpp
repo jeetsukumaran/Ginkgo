@@ -615,7 +615,6 @@ void SampleConfigurator::configure(World& world) {
     
     assert(this->organism_sampling_.x.size() == this->organism_sampling_.y.size());
     if (this->organism_sampling_.x.size() > 0) {
-//         world_sampling_regime.cell_indexes.reserve(this->organism_sampling_.x.size());
         for (unsigned i = 0; i < this->organism_sampling_.x.size(); ++i) {
             if (this->organism_sampling_.x[i] > world.landscape().size_x()-1) {
                 std::ostringstream msg;
@@ -631,16 +630,14 @@ void SampleConfigurator::configure(World& world) {
             }              
             world_sampling_regime.cell_indexes.insert(world.landscape().xy_to_index(this->organism_sampling_.x[i], this->organism_sampling_.y[i]));
         }
-        
+            
     } else if (this->random_sample_size_ > 0) {
         // not implemented
     } else {
-//         world_sampling_regime.cell_indexes.reserve(world.landscape().size());
-        for (CellIndexType i; i < world.landscape().size(); ++i) {
+        for (CellIndexType i = 0; i < world.landscape().size(); ++i) {
             world_sampling_regime.cell_indexes.insert(i);
         }
     }
-    
     world.add_tree_sampling(this->generation_, world_sampling_regime);
 }
 

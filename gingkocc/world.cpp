@@ -110,7 +110,6 @@ void World::add_occurrence_sampling(unsigned long generation, const SamplingRegi
     this->occurrence_samples_.insert(std::make_pair(generation, sampling_regime));
 }
 
-
 // --- simulation cycles ---
 
 void World::cycle() {
@@ -294,8 +293,9 @@ void World::write_diploid_trees(Species * sp_ptr,
 void World::save_trees(Species * sp_ptr, 
                 unsigned long num_organisms_per_cell, 
                 const std::set<CellIndexType>& cell_indexes) {
-    std::vector<const Organism *> organisms;
+                
     this->log_info("Sampling organisms of species " + sp_ptr->get_label() +".");
+    std::vector<const Organism *> organisms;        
     this->landscape_.sample_organisms(sp_ptr, num_organisms_per_cell, cell_indexes, organisms);
     
     if (organisms.size() == 0) {
