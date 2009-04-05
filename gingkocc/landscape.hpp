@@ -131,11 +131,18 @@ class Landscape {
          * @param num_organisms_per_cell number of organisms (0=all)
          * @param cell_indexes           indexes of cells from which to sample
          */
-       void sample_organisms(Species * sp_ptr, 
+        void sample_organisms(Species * sp_ptr, 
                     unsigned long num_organisms_per_cell, 
                     const std::set<CellIndexType>& cell_indexes,
-                    std::vector<const Organism *>& samples);          
-        
+                    std::vector<const Organism *>& samples);
+         
+        /**
+         * Count numbers of individuals of specified species in each cell.
+         * @param sp_ptr    pointer to species
+         * @param counts    vector of counts to populate
+         */
+        void count_organisms(Species * sp_ptr, std::vector<long>& counts) const;
+           
         // --- cell access and spatial mapping ---
         
         /**

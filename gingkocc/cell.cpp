@@ -153,6 +153,7 @@ void Cell::competition() {
 }
 
 // --- for trees etc ---
+
 void Cell::sample_organisms(Species * sp_ptr,
     std::vector<const Organism *>& samples, unsigned long num_organisms) {
     std::vector<const Organism *> species_organisms;
@@ -173,6 +174,16 @@ void Cell::sample_organisms(Species * sp_ptr,
         std::copy(species_organisms.begin(), species_organisms.begin() + num_organisms, std::back_inserter(samples)); 
     }
 }
+
+unsigned long Cell::num_organisms(Species * sp_ptr) const {
+    unsigned long count = 0;
+    for (OrganismVector::const_iterator og = this->organisms_.begin(); og != this->organisms_.end(); ++og) {
+        if (&og->species() == sp_ptr) {
+            ++count;
+        }
+    }
+    return count;
+}   
 
 // --- supporting methods ---
 

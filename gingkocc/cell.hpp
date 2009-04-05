@@ -140,11 +140,21 @@ class Cell {
         /** 
          * Returns the number of organisms that occupy this cell. 
          *
-         * @return  number of organisms tha occupy this cell.
+         * @return  number of organisms that occupy this cell.
          */          
         unsigned long num_organisms() const {
             return this->organisms_.size();
-        }                
+        }
+        
+        /** 
+         * Returns the number of organisms of a particular species that occupy 
+         * this cell. 
+         *
+         * @param   species_ptr pointer to species
+         * @return              number of invidiuals of a particular species 
+         *                      that occupy this cell
+         */          
+        unsigned long num_organisms(Species * sp_ptr) const;       
         
         /**
          * Creates the specified number of organisms of the specified species 

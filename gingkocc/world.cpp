@@ -227,7 +227,13 @@ void World::process_occurrence_samplings() {
         return;
     }
     Species * species_ptr = oci->second;
-    this->log_info("Saving occurrence data for species \"" + species_ptr->get_label() + "\".");
+    this->log_info("Saving occurrence data for species " + species_ptr->get_label() + ".");
+    std::vector<long> counts;
+    this->landscape_.count_organisms(species_ptr, counts);    
+    std::ofstream occs;
+    this->open_ofstream(occs,
+        this->compose_output_filename(species_ptr->get_label(), "occurrences", "grd"));  
+    asciigrid::write_grid(counts, this->landscape_.size_x(), this->landscape_.size_y(), occs);
 }
 
 // --- logging and output ---

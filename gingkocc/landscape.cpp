@@ -97,7 +97,14 @@ void Landscape::sample_organisms(Species * sp_ptr,
         assert(static_cast<unsigned long>(*ci) < this->cells_.size());
         this->cells_[*ci]->sample_organisms(sp_ptr, samples, num_organisms_per_cell);
     }
-}        
+}
+
+void Landscape::count_organisms(Species * sp_ptr, std::vector<long>& counts) const {
+    counts.reserve(this->cells_.size());
+    for (std::vector<Cell *>::const_iterator ci = this->cells_.begin(); ci != this->cells_.end(); ++ci) {
+        counts.push_back((*ci)->num_organisms(sp_ptr));
+    }
+}
 
 // --- debugging ---
 
