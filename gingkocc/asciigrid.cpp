@@ -33,17 +33,18 @@ namespace asciigrid {
 void write_grid(const std::vector<long>& vals, 
         unsigned long ncols,
         unsigned long nrows, 
-        std::ostream out) {
+        std::ostream& out) {
     assert(vals.size() == ncols * nrows);        
     out << "ncols           " << ncols << std::endl;
     out << "nrows           " << nrows << std::endl;
     out << "xllcorner       0.0" << std::endl;
     out << "yllcorner       0.0" << std::endl;    
     out << "cellsize        1.0" << std::endl;
-    out << "NODATA_value    -9999" << std::endl;   
+    out << "NODATA_value    -9999" << std::endl;
+    unsigned long index = 0;
     for (unsigned long row = 0; row < nrows; ++row) {
-        for (unsigned long col = 0; col < ncols; ++col) {
-            out << vals[row * col] << " ";
+        for (unsigned long col = 0; col < ncols; ++col, ++index) {
+            out << vals[index] << " ";
         }
         out << std::endl;
     }

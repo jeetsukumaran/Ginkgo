@@ -40,7 +40,7 @@ namespace asciigrid {
 void write_grid(const std::vector<long>& vals, 
         unsigned long ncols,
         unsigned long nrows, 
-        std::ostream out);
+        std::ostream& out);
 
 /**
  * General i/o error.

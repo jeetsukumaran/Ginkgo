@@ -106,11 +106,31 @@ void run_internal_tests() {
     assert(check_against_expected_grid1(ag1));
     std::cout << "Grid 1 (from string): PASS" << std::endl;
     
+    std::cout << "Testing Grid 1 (round-trip)" << std::endl;
+    std::vector<long> vals1 = ag1.get_cell_values();
+    std::ostringstream sa1;
+    asciigrid::write_grid(vals1, ag1.get_ncols(), ag1.get_nrows(), std::cout);
+    asciigrid::write_grid(vals1, ag1.get_ncols(), ag1.get_nrows(), sa1);
+    std::istringstream sa1i(sa1.str());
+    asciigrid::AsciiGrid ag1b(sa1i);
+    assert(check_against_expected_grid1(ag1b));
+    std::cout << "Grid 1 (round-trip): PASS" << std::endl;
+    
     std::cout << "Testing Grid 2 (from string)" << std::endl;    
     std::istringstream g2(TEST_GRID2);
     asciigrid::AsciiGrid ag2(g2);
     assert(check_against_expected_grid2(ag2));
     std::cout << "Grid 2 (from string): PASS" << std::endl;
+    
+    std::cout << "Testing Grid 2 (round-trip)" << std::endl;
+    std::vector<long> vals2 = ag2.get_cell_values();
+    std::ostringstream sa2;
+    asciigrid::write_grid(vals2, ag2.get_ncols(), ag2.get_nrows(), std::cout);
+    asciigrid::write_grid(vals2, ag2.get_ncols(), ag2.get_nrows(), sa2);
+    std::istringstream sa2i(sa2.str());
+    asciigrid::AsciiGrid ag2b(sa2i);
+    assert(check_against_expected_grid2(ag2b));
+    std::cout << "Grid 2 (round-trip): PASS" << std::endl;
 }
 
 int main(int argc, char * argv[]) {
