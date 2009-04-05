@@ -383,8 +383,16 @@ class World {
         // --- logging and output ---
         
         /**
-         * Builds a newick tree from a Tree object already loaded with nodes, 
-         * trapping any exceptions. Main purpose is to wrap call to 
+         * Composes and writes a NEXUS file header.
+         */
+        void write_nexus_header(Species * sp_ptr,
+                const std::vector<const Organism *>& organisms,
+                std::ostream& out,
+                bool add_diploid_allele_extensions=false);
+        
+        /**
+         * Writes a newick tree string from a Tree object already loaded with 
+         * nodes, trapping any exceptions. Main purpose is to wrap call to 
          * Tree.write_newick_tree() so that exceptions can be caught, reported,
          * and program can proceed.
          */
@@ -448,7 +456,7 @@ class World {
         /**
          * Closes standard and error log file streams.
          */
-        void close_logs();        
+        void close_logs();   
         
         /**
          * Composes and returns a name for a sampling (occurrence/tree) output

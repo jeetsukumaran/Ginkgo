@@ -226,6 +226,32 @@ void World::process_occurrence_samplings() {
 
 // --- logging and output ---
 
+void World::write_nexus_header(Species * sp_ptr,
+        const std::vector<const Organism *>& organisms,
+        std::ostream& out,
+        bool add_diploid_allele_extensions) {
+    out << "#NEXUS\n\n";
+    out << "BEGIN TAXA;\n";
+    if (add_diploid_allele_extensions) {
+        out << "    DIMENSIONS NTAX=" << organisms.size()*2 << ";\n";
+    } else {
+        out << "    DIMENSIONS NTAX=" << organisms.size() << ";\n";
+    }        
+    out << "    TAXLABELS\n";
+    for (std::vector<const Organism *>::const_iterator oi = organisms.begin();
+            oi != organisms.end();
+            ++oi) {
+        if (add_diploid_allele_extensions) {
+            out << "        " << sp_ptr->get_organism_label(**oi) << "_a1" << "\n";
+            out << "        " << sp_ptr->get_organism_label(**oi) << "_a2" << "\n";
+        } else {
+            out << "        " << sp_ptr->get_organism_label(**oi) << "\n";
+        }            
+    }
+    out << "    ;\n";
+    out << "END;\n\n";
+}        
+
 void World::write_tree(Tree& tree, const std::string& species_label, unsigned long num_taxa, std::ostream& out) {
     try {
         tree.write_newick_tree(out);
@@ -250,17 +276,29 @@ void World::write_haploid_tree(Species * sp_ptr,
                 const std::vector<const Organism *>& organisms,
                 std::ostream& out) {
     Tree tree(this->coalesce_multiple_roots_);
+    
+    // build tree
     for (std::vector<const Organism *>::const_iterator oi = organisms.begin();
             oi != organisms.end();
             ++oi) {
         tree.process_node((*oi)->get_haploid_node(), &sp_ptr->get_organism_label(**oi));
     }
+    
+    // write tree
+    this->write_nexus_header(sp_ptr, organisms, out);
+    out << "BEGIN TREES;\n";
+    out << "    TREE HaploidLocus = ";
     this->write_tree(tree, sp_ptr->get_label(), organisms.size(), out);
+    out << ";\n";
+    out << "END;\n\n";
 }
 
 void World::write_diploid_trees(Species * sp_ptr,
                 const std::vector<const Organism *>& organisms,
-                std::ostream& out) {    
+                std::ostream& out) {
+                
+    this->write_nexus_header(sp_ptr, organisms, out, true); 
+    out << "BEGIN TREES;\n";
     for (unsigned i = 0; i < NUM_NEUTRAL_DIPLOID_LOCII; ++i) {
         Tree tree(this->coalesce_multiple_roots_);
         std::string allele1;
@@ -268,13 +306,16 @@ void World::write_diploid_trees(Species * sp_ptr,
         for (std::vector<const Organism *>::const_iterator oi = organisms.begin();
                 oi != organisms.end();
                 ++oi) {
-            allele1 = sp_ptr->get_organism_label(**oi) + "__a1";
-            allele1 = sp_ptr->get_organism_label(**oi) + "__a2";
+            allele1 = sp_ptr->get_organism_label(**oi) + "_a1";
+            allele1 = sp_ptr->get_organism_label(**oi) + "_a2";
             tree.process_node((*oi)->get_diploid_node1(i), &allele1);
             tree.process_node((*oi)->get_diploid_node2(i), &allele2);            
         }
+        out << "    TREE DiploidLocus" << std::setw(2) << std::setfill('0') << i+1 << " = "; 
         this->write_tree(tree, sp_ptr->get_label(), organisms.size(), out);
-    }        
+        out << ";\n";
+    }
+    out << "END;\n\n";
 }                
 
 void World::save_trees(Species * sp_ptr, 
@@ -328,10 +369,11 @@ std::string World::compose_output_filename(const std::string& species_label,
     }
     unsigned index = 0;
     std::string candidate_name = f.str() + "." + extension;
-    std::set<std::string>::iterator fname = this->output_filenames_.find(candidate_name);
-    while (fname != this->output_filenames_.end()) {
+    std::set<std::string>::iterator fname_found = this->output_filenames_.find(candidate_name);
+    while (fname_found != this->output_filenames_.end()) {
         ++index;
         candidate_name = f.str() + "-" + convert::to_scalar<std::string>(index) + "." + extension;
+        fname_found = this->output_filenames_.find(candidate_name);
     }
     this->output_filenames_.insert(candidate_name);
     return candidate_name;
