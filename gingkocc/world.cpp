@@ -373,28 +373,30 @@ void World::save_trees(Species * sp_ptr,
         msg << " from " << cell_indexes.size() << " cells).";
     }
     this->log_info(msg.str());
-    std::vector<const Organism *> organisms;        
+    
+    std::vector<const Organism *> organisms;
     this->landscape_.sample_organisms(sp_ptr, num_organisms_per_cell, cell_indexes, organisms);
+    std::string num_samples = convert::to_scalar<std::string>(organisms.size());
     
     if (organisms.size() == 0) {
         this->log_error("no organisms found in sample: aborting tree building");
         return;
     }
 
-    this->log_info("Building tree of haploid locus alleles for sample of organisms of species " + sp_ptr->get_label() +".");    
+    this->log_info("Building tree of haploid locus alleles for " + num_samples + " organisms (" + num_samples + " leaves per tree).");    
     std::ofstream haploid_trees;
         
     this->open_ofstream(haploid_trees, 
         this->compose_output_filename(sp_ptr->get_label(), label, "haploid.tre"));    
-    this->write_haploid_tree(sp_ptr, organisms, haploid_trees);    
+    this->write_haploid_tree(sp_ptr, organisms, haploid_trees);
     
-    this->log_info("Building set of trees for diploid locii alleles for sample of organisms of species " + sp_ptr->get_label() +"."); 
+    this->log_info("Building trees for diploid locii alleles for " + num_samples + " organisms (" + convert::to_scalar<std::string>(organisms.size()*2) + " leaves per tree).");  
     std::ofstream diploid_trees;
     this->open_ofstream(diploid_trees,
         this->compose_output_filename(sp_ptr->get_label(), label, "diploid.tre"));  
     this->write_diploid_trees(sp_ptr, organisms, diploid_trees);
 
-    this->log_info("Building set of trees for haploid and diploid locii alleles for sample of organisms of species " + sp_ptr->get_label() +"."); 
+    this->log_info("Building trees for haploid and sampled diploid locii alleles for " + num_samples + " organisms (" + num_samples + " leaves per tree).");  
     std::ofstream combined_trees;            
     this->open_ofstream(combined_trees,
         this->compose_output_filename(sp_ptr->get_label(), label, "combined.tre"));
