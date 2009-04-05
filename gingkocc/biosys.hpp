@@ -677,7 +677,7 @@ class CompareOrganismFitness {
         bool operator()(Organism * o1, Organism * o2) {
             assert(o1->get_fitness() >= 0);
             assert(o2->get_fitness() >= 0);
-            return o1->get_fitness() < o2->get_fitness();
+            return (o1->get_fitness() < o2->get_fitness());
         }
 };
 // CompareOrganismFitness

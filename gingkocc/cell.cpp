@@ -26,6 +26,7 @@
 #include <iostream>
 #include <iomanip>
 #include <algorithm>
+#include <set>
 
 using namespace gingko;
 
@@ -141,12 +142,25 @@ void Cell::competition() {
     // NOTE: ASSUMES THAT FITNESS HAS BEEN CALCULATED FOR THE ORGANISM IN THIS CELL!
     // This would have been done during the survival phase.
     if (this->organisms_.size() > this->carrying_capacity_) {
-        // defaults to using Organism::operator<(), which also checks that 
-        // fitness has been set (i.e., >= 0)
-        std::sort(this->organisms_.begin(), this->organisms_.end());
-        this->organisms_.erase(this->organisms_.begin()+this->carrying_capacity_, 
-            this->organisms_.end());
-        assert(this->organisms_.size() == this->carrying_capacity_);
+    
+        // build sorted set
+        std::multiset<Organism *, CompareOrganismFitness> optrs;
+        for (OrganismVector::iterator oi = this->organisms_.begin();
+                oi != this->organisms_.end();
+                ++oi) {
+            optrs.insert( &(*oi) );
+        }
+        assert(optrs.size() == this->organisms_.size());
+        OrganismVector winners;
+        winners.reserve(this->carrying_capacity_);
+        unsigned long count = 0;
+        for (std::multiset<Organism *, CompareOrganismFitness>::iterator opi = optrs.begin();
+                count < this->carrying_capacity_;
+                ++opi, ++count) {
+            winners.push_back(**opi);                
+        }
+        
+        this->organisms_.swap(winners);
     }
     assert(this->organisms_.size() <= this->carrying_capacity_);
 //     std::cout << " / " << this->organisms_.size() << ", " << this->carrying_capacity_ << std::endl;
