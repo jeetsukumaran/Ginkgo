@@ -32,7 +32,7 @@ _LOG = get_logger("test_cmdopts")
 
 class CmdOptsTest(unittest.TestCase):
     def setUp(self):
-        self.prog_path = get_gingko_program_path("test_cmdopts")
+        self.prog_path = get_gingko_program_path("test_cmdopt")
         
     def check_opts_parsing(self, cmd, expected_strings):  
         _LOG.info('Testing arguments parsing: "%s"' % cmd)

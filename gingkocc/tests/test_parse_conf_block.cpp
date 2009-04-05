@@ -34,7 +34,7 @@ const char * SPECIES_BLOCK_CSTR = "\n\n@species Sp1 { \n"
                                     "   selection = 1 1 1 1 ; \n"
                                     "   genotype =  0 0 0 0 ;  \n" 
                                     "   mutation-rate = 0.01 ;\n"
-                                    "   max-mutation-size = 1 \n"
+                                    "   max-mutation-size = 1; \n"
                                     "   fecundity =    8 ; \n"
                                     "   fecundity-evolution-size = 2;\n"
                                     "   movement-capacity = 10;\n"
@@ -69,11 +69,7 @@ void test_parse_errors() {
     s1[s1_pos] = 'X';
     catch_block_parse_exception("(testing missing block open error)", s1);      
     s1.insert(s1_pos, "{{");    
-    catch_block_parse_exception("(testing multiple block open error)", s1);    
-    s1 = species_block_str;
-    s1_pos = s1.find(" Sp1");
-    s1[s1_pos] = '_';
-    catch_block_parse_exception("(testing single elemnt in head lack of label/name separation)", s1);    
+    catch_block_parse_exception("(testing multiple block open error)", s1);       
     s1 = species_block_str;
     s1_pos = s1.find(" Sp1");
     s1.insert(s1_pos, " extra");
@@ -91,7 +87,7 @@ void test_parse_correct() {
     ConfigurationBlock species_block = ConfigurationBlock(in0);
     assert(species_block.get_entry<std::string>("selection") == "1 1 1 1");
     assert(species_block.get_entry<std::string>("genotype") == "0 0 0 0");
-    assert(species_block.get_entry<float>("mutation-rate") == 0.01);
+    assert(species_block.get_entry<float>("mutation-rate") - 0.01 < 0.00001);
     assert(species_block.get_entry<int>("max-mutation-size") == 1);
     assert(species_block.get_entry<unsigned>("fecundity") == 8);
     assert(species_block.get_entry<long>("movement-capacity") == 10);    

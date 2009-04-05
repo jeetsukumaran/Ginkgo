@@ -32,7 +32,7 @@ _LOG = get_logger("test_textutils")
 class TextUtilsTest(unittest.TestCase):
 
     def setUp(self):
-        self.prog_path = get_gingko_program_path("test_textutils")
+        self.prog_path = get_gingko_program_path("test_textutil")
 
     def testTextUtils(self):
         run_external_tests(self.prog_path, _LOG, "textutils tests")       

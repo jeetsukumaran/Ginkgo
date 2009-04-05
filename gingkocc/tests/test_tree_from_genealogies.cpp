@@ -216,7 +216,7 @@ std::string build_tree3() {
 
 int main(int, char *) {
 
-    std::string expected = "((((a:1,b:1):1,(c:1,d:1):1):1,e:3):1,f:4):1;";
+    std::string expected = "((((a:1, b:1):1, (c:1, d:1):1):1, e:3):1, f:4):1";
 
     std::string tree1 = build_tree1();
     if (expected.compare(tree1) != 0) {
