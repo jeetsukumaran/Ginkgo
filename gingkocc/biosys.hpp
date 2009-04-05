@@ -504,7 +504,7 @@ class Organism {
         /** Returns a reference to allele 1 of the diploid marker of this organism. */
         GenealogyNode * get_diploid_node2(unsigned idx) const {
             assert(idx < NUM_NEUTRAL_DIPLOID_LOCII);
-            return this->neutral_diploid_markers_[idx].node1();
+            return this->neutral_diploid_markers_[idx].node2();
         }
         
         /** Returns a reference to random allele of the diploid marker of this organism. */

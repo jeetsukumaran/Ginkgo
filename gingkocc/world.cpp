@@ -307,7 +307,7 @@ void World::write_diploid_trees(Species * sp_ptr,
                 oi != organisms.end();
                 ++oi) {
             allele1 = sp_ptr->get_organism_label(**oi) + "_a1";
-            allele1 = sp_ptr->get_organism_label(**oi) + "_a2";
+            allele2 = sp_ptr->get_organism_label(**oi) + "_a2";
             tree.process_node((*oi)->get_diploid_node1(i), &allele1);
             tree.process_node((*oi)->get_diploid_node2(i), &allele2);            
         }
