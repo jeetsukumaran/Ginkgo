@@ -114,7 +114,7 @@ void Tree::write_newick_tree(std::ostream& out) {
                 this->write_newick_node(root-this->tree_nodes_.begin(), out);
             }                        
         }
-        out << ")"; // add infinite branch length?                
+        out << "):9999"; // add infinite branch length?                
     } else {
         if (num_roots >= 2)  {
             throw TreeStructureMultipleRootError("multiple roots found");
