@@ -24,6 +24,7 @@
 
 /** @file biosys.h */
 
+#include <algorithm>
 #include <cassert>
 #include <vector>
 #include <string>
@@ -239,7 +240,16 @@ class HaploidMarker {
          */
         GenealogyNode* node() const {
             return this->allele_;
-        }    
+        }
+        
+        /**
+         * Swap allele pointers for rapid assignment.
+         */
+        void swap(HaploidMarker& h) {
+            GenealogyNode * t = this->allele_;
+            this->allele_ = h.allele_;
+            h.allele_ = t;
+        }        
         
     private:   
     
@@ -355,7 +365,19 @@ class DiploidMarker {
          */
         GenealogyNode * random_node(RandomNumberGenerator rng) const {
             return rng.select(this->allele1_, this->allele2_);
-        }             
+        }
+        
+        /**
+         * Swap diploid allele pointers for rapid assignment.
+         */
+        void swap(DiploidMarker& d) {
+            GenealogyNode * t1 = this->allele1_;
+            GenealogyNode * t2 = this->allele2_;
+            this->allele1_ = d.allele1_;
+            this->allele2_ = d.allele2_;
+            d.allele1_ = t1;
+            d.allele2_ = t2;
+        }
         
     private:
     
@@ -458,6 +480,45 @@ class Organism {
                 this->neutral_diploid_markers_[i] = ind.neutral_diploid_markers_[i];
             }             
             return *this;
+        }
+        
+        /**
+         * Swap one Organism's "contents" with another.
+         */
+        void swap(Organism& o2) {            
+            // species
+            Species * t_species = this->species_;
+            this->species_ = o2.species_;
+            o2.species_ = t_species;            
+            
+            // genotypic_fitness_factors            
+            FitnessFactors t_genotypic_fitness_factors;
+            memcpy(t_genotypic_fitness_factors, this->genotypic_fitness_factors_, MAX_FITNESS_FACTORS*sizeof(FitnessFactorType));
+            memcpy(this->genotypic_fitness_factors_, o2.genotypic_fitness_factors_, MAX_FITNESS_FACTORS*sizeof(FitnessFactorType));
+            memcpy(o2.genotypic_fitness_factors_, t_genotypic_fitness_factors, MAX_FITNESS_FACTORS*sizeof(FitnessFactorType));            
+
+            // sex
+            Organism::Sex t_sex = this->sex_;
+            this->sex_ = o2.sex_;
+            o2.sex_ = t_sex;            
+            
+            // fitness
+            float t_fitness = this->fitness_;
+            this->fitness_ = o2.fitness_;
+            o2.fitness_ = t_fitness;
+            
+            // expired
+            bool t_expired = this->expired_;
+            this->expired_ = o2.expired_;
+            o2.expired_ = t_expired;            
+            
+            // neutral haploid markers
+            this->neutral_haploid_marker_.swap(o2.neutral_haploid_marker_);
+            
+            // neutral diploid markers
+            for (unsigned i = 0; i < NUM_NEUTRAL_DIPLOID_LOCII; ++i) {
+                this->neutral_diploid_markers_[i].swap(o2.neutral_diploid_markers_[i]);
+            }                                                  
         }
         
         /**
@@ -1110,5 +1171,20 @@ class Species {
 ///////////////////////////////////////////////////////////////////////////////
 
 } // gingko namespace
+
+///////////////////////////////////////////////////////////////////////////////
+// Specialization of std::swap when dealing with Organisms (for efficiency)
+
+namespace std
+{
+    /**
+     * Template specialization of std::swap() for Organism objects.
+     */
+    template<>
+    void swap(gingko::Organism& o1, gingko::Organism& o2);
+}
+
+// Specialization of std::swap
+///////////////////////////////////////////////////////////////////////////////
 
 #endif

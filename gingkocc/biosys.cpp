@@ -51,3 +51,41 @@ Species::Species(const std::string& label,
         MAX_FITNESS_FACTORS*sizeof(FitnessFactorType));    
     this->movement_capacity_ = 1;
 }
+
+//         /** 
+//          * pointer to Species object in the World species pool of the
+//          * species of this organism
+//          */
+//         Species *               species_;
+//         
+//         /** values of inheritable component of fitness */
+//         FitnessFactors          genotypic_fitness_factors_;
+//         
+//         /** genealogy inherited through female alone */
+//         HaploidMarker           neutral_haploid_marker_;
+//         
+//         /** diploid genealogies */
+//         DiploidMarker           neutral_diploid_markers_[NUM_NEUTRAL_DIPLOID_LOCII];
+//         
+//         /** for reproduction */
+//         Organism::Sex           sex_;
+//         
+//         /** to cache pre-calculated fitness values */       
+//         float                   fitness_;
+//         
+//         /** flag organism to be removed */        
+//         bool                    expired_;
+
+///////////////////////////////////////////////////////////////////////////////
+// Specialization of std::swap when dealing with Organisms (for efficiency)
+
+namespace std
+{
+    /**
+     * Template specialization of std::swap() for Organism objects.
+     */
+    template<>
+    void swap(gingko::Organism& o1, gingko::Organism& o2) {
+        o1.swap(o2);        
+    }
+}
