@@ -143,7 +143,12 @@ void Cell::competition() {
     // This would have been done during the survival phase.
     if (this->organisms_.size() > this->carrying_capacity_) {
     
-        // build sorted set
+        // shuffle vector, so that if no selection is operating, random 
+        // selection will determine competition winners
+//         RandomPointer rp(this->rng_);
+//         std::random_shuffle(this->organisms_.begin(), this->organisms_.end(), rp);        
+        
+        // build set of organisms sorted by fitness
         std::multiset<Organism *, CompareOrganismFitness> optrs;
         for (OrganismVector::iterator oi = this->organisms_.begin();
                 oi != this->organisms_.end();
@@ -151,6 +156,8 @@ void Cell::competition() {
             optrs.insert( &(*oi) );
         }
         assert(optrs.size() == this->organisms_.size());
+        
+        // find winners
         OrganismVector winners;
         winners.reserve(this->carrying_capacity_);
         unsigned long count = 0;
