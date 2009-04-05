@@ -139,7 +139,7 @@ void Cell::survival() {
 
 void Cell::competition() {
     // NOTE: ASSUMES THAT FITNESS HAS BEEN CALCULATED FOR THE ORGANISM IN THIS CELL!
-//     std::cout << this->organisms_.size() << ", " << this->carrying_capacity_;
+    // This would have been done during the survival phase.
     if (this->organisms_.size() > this->carrying_capacity_) {
         // defaults to using Organism::operator<(), which also checks that 
         // fitness has been set (i.e., >= 0)

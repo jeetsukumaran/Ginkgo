@@ -666,6 +666,24 @@ class Organism {
 ///////////////////////////////////////////////////////////////////////////////
 
 ///////////////////////////////////////////////////////////////////////////////
+// CompareOrganismFitness
+/**
+ * Serves as function object in Organism sorting / set insertion etc.
+ */
+class CompareOrganismFitness {
+
+    public:
+        CompareOrganismFitness() {}
+        bool operator()(Organism * o1, Organism * o2) {
+            assert(o1->get_fitness() >= 0);
+            assert(o2->get_fitness() >= 0);
+            return o1->get_fitness() < o2->get_fitness();
+        }
+};
+// CompareOrganismFitness
+///////////////////////////////////////////////////////////////////////////////
+
+///////////////////////////////////////////////////////////////////////////////
 // Species
 /**
  * Processes and properties that determine the ecologies, reproduction 
