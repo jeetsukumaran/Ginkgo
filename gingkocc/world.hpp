@@ -347,10 +347,10 @@ class World {
         /**
          * Add a directive to sample organisms and save their occurrence distribution.
          *
-         * @param   generation       generation number for this tree to be built
-         * @param   sampling_regime  the leaves to add to the tree
+         * @param   generation       generation number for this occurrence be built
+         * @param   species_ptr      pointer to species 
          */
-        void add_occurrence_sampling(unsigned long generation, const SamplingRegime& sampling_regime);         
+        void add_occurrence_sampling(unsigned long generation, Species * species_ptr);         
         
         // --- simulation cycles ---
         
@@ -411,14 +411,27 @@ class World {
                 
         /**
          * Given a list of pointers to organisms, builds and saves trees
-         * of the diploid locus allele to the given outputstream.
+         * of the diploid locus alleles to the given outputstream.
          * @param   sp_ptr      pointer to species         
          * @param   organisms   sample of organisms
          * @param   out         output stream
          */
         void write_diploid_trees(Species * sp_ptr,
                 const std::vector<const Organism *>& organisms,
-                std::ostream& out);                
+                std::ostream& out);  
+                
+        /**
+         * Given a list of pointers to organisms, builds and saves trees
+         * of the haploid and diploid locus alleles to the given outputstream,
+         * with a single allele of each diploid complement chosen at random for
+         * the diploid trees.
+         * @param   sp_ptr      pointer to species         
+         * @param   organisms   sample of organisms
+         * @param   out         output stream
+         */
+        void write_combined_trees(Species * sp_ptr,
+                const std::vector<const Organism *>& organisms,
+                std::ostream& out);                  
         
         /**
          * Samples organisms of specified species and specified cells of the
@@ -523,8 +536,8 @@ class World {
         std::map<unsigned long, WorldSettings>  world_settings_;    
         /** Collection of tree building directives (key = generation #). */
         std::multimap<unsigned long, SamplingRegime> tree_samples_;
-        /** Collection of tree building directives (key = generation #). */
-        std::multimap<unsigned long, SamplingRegime> occurrence_samples_;        
+        /** Collection of occurrence description directives (key = generation #). */
+        std::map<unsigned long, Species *> occurrence_samples_;        
         /** Track output filenames, so as to prevent clashes. */
         std::set<std::string>                   output_filenames_;
 

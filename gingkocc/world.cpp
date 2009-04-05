@@ -107,8 +107,8 @@ void World::add_tree_sampling(unsigned long generation, const SamplingRegime& sa
     this->tree_samples_.insert(std::make_pair(generation, sampling_regime));
 }
 
-void World::add_occurrence_sampling(unsigned long generation, const SamplingRegime& sampling_regime) {
-    this->occurrence_samples_.insert(std::make_pair(generation, sampling_regime));
+void World::add_occurrence_sampling(unsigned long generation, Species * species_ptr) {
+    this->occurrence_samples_.insert(std::make_pair(generation, species_ptr));
 }
 
 // --- simulation cycles ---
@@ -289,7 +289,7 @@ void World::write_haploid_tree(Species * sp_ptr,
     out << "BEGIN TREES;\n";
     out << "    TREE HaploidLocus = ";
     this->write_tree(tree, sp_ptr->get_label(), organisms.size(), out);
-    out << "\n";
+    out << ";\n";
     out << "END;\n\n";
 }
 
@@ -316,7 +316,44 @@ void World::write_diploid_trees(Species * sp_ptr,
         out << ";\n";
     }
     out << "END;\n\n";
-}                
+}
+
+void World::write_combined_trees(Species * sp_ptr,
+        const std::vector<const Organism *>& organisms,
+        std::ostream& out) {
+
+    this->write_nexus_header(sp_ptr, organisms, out);
+    
+    out << "BEGIN TREES;\n";
+    
+    // dummy scoping to allow tree to be freed when it goes out of scope
+    {
+        Tree tree(this->coalesce_multiple_roots_);        
+        for (std::vector<const Organism *>::const_iterator oi = organisms.begin();
+                oi != organisms.end();
+                ++oi) {
+            tree.process_node((*oi)->get_haploid_node(), &sp_ptr->get_organism_label(**oi));
+        }
+        out << "    TREE HaploidLocus = ";
+        this->write_tree(tree, sp_ptr->get_label(), organisms.size(), out);
+        out << ";\n";  
+    
+    }
+    
+    for (unsigned i = 0; i < NUM_NEUTRAL_DIPLOID_LOCII; ++i) {
+        Tree tree(this->coalesce_multiple_roots_);
+        for (std::vector<const Organism *>::const_iterator oi = organisms.begin();
+                oi != organisms.end();
+                ++oi) {
+            tree.process_node((*oi)->get_diploid_random_node(i, this->rng_), &sp_ptr->get_organism_label(**oi));          
+        }
+        out << "    TREE DiploidLocus" << std::setw(2) << std::setfill('0') << i+1 << " = "; 
+        this->write_tree(tree, sp_ptr->get_label(), organisms.size(), out);
+        out << ";\n";
+    }
+    out << "END;\n\n";        
+        
+}        
 
 void World::save_trees(Species * sp_ptr, 
                 unsigned long num_organisms_per_cell, 
@@ -344,21 +381,24 @@ void World::save_trees(Species * sp_ptr,
         return;
     }
 
-    this->log_info("Building tree for haploid locus alleles for sample of organisms of species " + sp_ptr->get_label() +".");    
+    this->log_info("Building tree of haploid locus alleles for sample of organisms of species " + sp_ptr->get_label() +".");    
     std::ofstream haploid_trees;
         
     this->open_ofstream(haploid_trees, 
         this->compose_output_filename(sp_ptr->get_label(), label, "haploid.tre"));    
     this->write_haploid_tree(sp_ptr, organisms, haploid_trees);    
     
-    this->log_info("Building tree for diploid locus alleles for sample of organisms of species " + sp_ptr->get_label() +"."); 
+    this->log_info("Building set of trees for diploid locii alleles for sample of organisms of species " + sp_ptr->get_label() +"."); 
     std::ofstream diploid_trees;
     this->open_ofstream(diploid_trees,
         this->compose_output_filename(sp_ptr->get_label(), label, "diploid.tre"));  
     this->write_diploid_trees(sp_ptr, organisms, diploid_trees);
-//     
-//     std::ofstream combined_trees;            
-//     this->open_ofstream(combined_trees, tree_filename_stem.str() + ".combined.tre");
+
+    this->log_info("Building set of trees for haploid and diploid locii alleles for sample of organisms of species " + sp_ptr->get_label() +"."); 
+    std::ofstream combined_trees;            
+    this->open_ofstream(combined_trees,
+        this->compose_output_filename(sp_ptr->get_label(), label, "combined.tre"));
+    this->write_combined_trees(sp_ptr, organisms, combined_trees);       
 }                
 
 void World::open_ofstream(std::ofstream& out, const std::string& fpath) {
