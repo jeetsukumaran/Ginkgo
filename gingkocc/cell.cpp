@@ -170,7 +170,7 @@ void Cell::sample_organisms(Species * sp_ptr,
         samples.reserve(samples.size() + num_organisms);
         RandomPointer rp(this->rng_);
         std::random_shuffle(species_organisms.begin(), species_organisms.end(), rp);
-        std::copy(species_organisms.begin(), species_organisms.begin() + num_organisms, std::back_inserter(samples));   
+        std::copy(species_organisms.begin(), species_organisms.begin() + num_organisms, std::back_inserter(samples)); 
     }
 }
 
