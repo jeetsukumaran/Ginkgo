@@ -581,20 +581,18 @@ void GenerationConfigurator::configure(World& world)  {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-// SampleConfigurator
+// TreeSamplingConfigurator
 
-SampleConfigurator::SampleConfigurator(const ConfigurationBlock& cb) 
+TreeSamplingConfigurator::TreeSamplingConfigurator(const ConfigurationBlock& cb) 
         : Configurator(cb),
           random_sample_size_(0) {
     this->parse();
 }
 
-void SampleConfigurator::parse() {
+void TreeSamplingConfigurator::parse() {
     this->generation_ = this->get_configuration_scalar<unsigned long>("gen");
     this->organism_sampling_.species_label = this->get_configuration_scalar<std::string>("species");
-    if (this->get_type() != "@occurs") {
-        this->organism_sampling_.num_organisms_per_cell = this->get_configuration_scalar<unsigned long>("limit-per-cell", 0);
-    }        
+    this->organism_sampling_.num_organisms_per_cell = this->get_configuration_scalar<unsigned long>("limit-per-cell", 0);    
     if (this->has_configuration_entry("cells")) {
         this->get_configuration_positions("cells", this->organism_sampling_);
     } else if (this->has_configuration_entry("random")) {
@@ -602,7 +600,7 @@ void SampleConfigurator::parse() {
     }
 }
 
-void SampleConfigurator::configure(World& world) {
+void TreeSamplingConfigurator::configure(World& world) {
     SamplingRegime world_sampling_regime;
     
     if (world.has_species(this->organism_sampling_.species_label)) {
@@ -643,6 +641,29 @@ void SampleConfigurator::configure(World& world) {
         }
     }
     world.add_tree_sampling(this->generation_, world_sampling_regime);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// OccurrenceSamplingConfigurator
+
+OccurrenceSamplingConfigurator::OccurrenceSamplingConfigurator(const ConfigurationBlock& cb) 
+        : Configurator(cb) {
+    this->parse();
+}
+
+void OccurrenceSamplingConfigurator::parse() {
+    this->generation_ = this->get_configuration_scalar<unsigned long>("gen");
+    this->species_label_ = this->get_configuration_scalar<std::string>("species");
+}
+
+void OccurrenceSamplingConfigurator::configure(World& world) {
+    Species * species_ptr;
+    if (world.has_species(this->species_label_)) {
+        species_ptr = world.get_species_ptr(this->species_label_);
+    } else {
+        throw this->build_exception("Species \"" + this->species_label_ + "\" not defined");
+    }     
+    world.add_occurrence_sampling(this->generation_, species_ptr);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -726,10 +747,17 @@ void ConfigurationFile::configure(World& world) {
             }
             if (cb.get_type() == "tree") {
                 if (num_worlds == 0) {
-                    throw confsys_detail::build_configuration_block_exception(cb, "world must be defined before world setting changes defined");
+                    throw confsys_detail::build_configuration_block_exception(cb, "world must be defined before tree building directives defined");
                 }
-                SampleConfigurator scf(cb);
+                TreeSamplingConfigurator scf(cb);
                 scf.configure(world);
+            }
+            if (cb.get_type() == "occurs") {
+                if (num_worlds == 0) {
+                    throw confsys_detail::build_configuration_block_exception(cb, "world must be defined before occurrence sampling directives defined");
+                }
+                OccurrenceSamplingConfigurator ocf(cb);
+                ocf.configure(world);
             }              
         }
     }
