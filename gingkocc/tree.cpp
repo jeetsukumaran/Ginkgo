@@ -98,31 +98,6 @@ const std::string& Tree::get_label_for_node(long node_idx) {
     return node_label->second;
 }
 
-// std::vector<std::string> Tree::compose_newick_tree() {
-//     std::vector<std::string> trees_as_newick;
-//     std::map<long, std::string> nodes_as_newick;
-//     for (long node_idx = this->tree_nodes_.size()-1; node_idx >= 0; --node_idx) {
-//         long parent_idx = this->tree_nodes_[node_idx];
-//         if (parent_idx == -1) {
-//             trees_as_newick.push_back("(" + nodes_as_newick[node_idx] + ")");
-//         } else {
-//             std::string& parent_newick_string = nodes_as_newick[parent_idx];
-//             if (parent_newick_string.size() > 0) {
-//                 parent_newick_string += ",";
-//             }        
-//             if (nodes_as_newick[node_idx].size() == 0) {
-//                 // leaf node: add label to parent
-//                 parent_newick_string += this->get_label_for_node(node_idx);
-//             } else {
-//                 // internal node: wrap in parentheses and then write to parent
-//                 // PROBLEM: Nodes of outdegree 1!
-//                 parent_newick_string += "(" + nodes_as_newick[node_idx] +")";
-//             }        
-//         }
-//         nodes_as_newick.erase(node_idx);
-//     }
-// }
-
 void Tree::write_newick_tree(std::ostream& out) {
     int num_roots = std::count(this->tree_nodes_.begin(), this->tree_nodes_.end(), -1);         
     if (num_roots == 0) {
@@ -139,7 +114,7 @@ void Tree::write_newick_tree(std::ostream& out) {
                 this->write_newick_node(root-this->tree_nodes_.begin(), out);
             }                        
         }
-        out << ");"; // add infinite branch length?                
+        out << ")"; // add infinite branch length?                
     } else {
         if (num_roots >= 2)  {
             throw TreeStructureMultipleRootError("multiple roots found");
@@ -150,7 +125,6 @@ void Tree::write_newick_tree(std::ostream& out) {
             throw TreeStructureMissingRootError("no root nodes found (possibly because node list was empty)");
         }
         this->write_newick_node(root-this->tree_nodes_.begin(), out);
-        out << ";";
     }                
 }
 
@@ -174,7 +148,7 @@ void Tree::write_newick_node(long node_idx, std::ostream& out) {
              child_iter != children.end();
              ++child_iter) {
              if (child_iter != children.begin()) {
-                out << ",";
+                out << ", ";
              }
             this->write_newick_node(*child_iter, out);    
         }

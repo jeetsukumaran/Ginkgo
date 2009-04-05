@@ -289,7 +289,7 @@ void World::write_haploid_tree(Species * sp_ptr,
     out << "BEGIN TREES;\n";
     out << "    TREE HaploidLocus = ";
     this->write_tree(tree, sp_ptr->get_label(), organisms.size(), out);
-    out << ";\n";
+    out << "\n";
     out << "END;\n\n";
 }
 
