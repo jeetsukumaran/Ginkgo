@@ -98,7 +98,13 @@ void Cell::reproduction() {
                 } // for each offspring     
             } // for each female
         } // if females > 0 and males > 0
-    }  // for each species  
+    }  // for each species
+
+    // post reproduction shuffle, to destroy correlation between adjacent
+    // organisms
+    RandomPointer rp(this->rng_);
+    std::random_shuffle(this->organisms_.begin(), this->organisms_.end(), rp);    
+    
 }
 
 void Cell::migration() {
