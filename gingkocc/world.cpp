@@ -323,7 +323,19 @@ void World::save_trees(Species * sp_ptr,
                 const std::set<CellIndexType>& cell_indexes,
                 const std::string& label) {
                 
-    this->log_info("Sampling organisms of species " + sp_ptr->get_label() +".");
+    std::ostringstream msg;
+    msg << "Sampling organisms of species " << sp_ptr->get_label() << " (";
+    if (num_organisms_per_cell == 0) {
+        msg << "all individuals per cell,";
+    } else {
+        msg << num_organisms_per_cell << " individuals per cell,";
+    }
+    if (cell_indexes.size() == 0) {
+        msg << " all cells).";
+    } else {
+        msg << " from " << cell_indexes.size() << " cells).";
+    }
+    this->log_info(msg.str());
     std::vector<const Organism *> organisms;        
     this->landscape_.sample_organisms(sp_ptr, num_organisms_per_cell, cell_indexes, organisms);
     
