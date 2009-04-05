@@ -151,7 +151,7 @@ void World::run() {
     this->open_logs();
     this->log_info("Starting simulation.");
     
-    while (this->current_generation_ < this->generations_to_run_) {
+    while (this->current_generation_ <= this->generations_to_run_) {
         
         // clear organism labels
         for (std::map<std::string, Species *>::iterator spi = this->species_.begin(); 
