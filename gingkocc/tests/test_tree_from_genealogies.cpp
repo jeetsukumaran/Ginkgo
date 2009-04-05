@@ -94,7 +94,7 @@ std::string build_tree1() {
 }
 
 std::string build_tree2() {
-    gingko::GenealogyNode * n0;
+    gingko::GenealogyNode * n0 = NULL;
     gingko::GenealogyNode * n1 = new gingko::GenealogyNode();
     gingko::GenealogyNode * n2 = new gingko::GenealogyNode();   
     n1->link(n0);
@@ -216,33 +216,34 @@ std::string build_tree3() {
 
 int main(int, char *) {
 
-    std::string expected = "((((a:1, b:1):1, (c:1, d:1):1):1, e:3):1, f:4):1";
+    std::string expected1 = "((((a:1, b:1):1, (c:1, d:1):1):1, e:3):1, f:4):1";
+    std::string expected2 = "((((a:1, b:1):1, (c:1, d:1):1):1, e:3):1, f:4):9999";
 
     std::string tree1 = build_tree1();
-    if (expected.compare(tree1) != 0) {
+    if (tree1 != expected1) {
         std::cout << "FAIL" << std::endl;
         std::cerr << "Expecting:" << std::endl;
-        std::cerr << expected << std::endl;
+        std::cerr << expected1 << std::endl;
         std::cerr << "Observed:" << std::endl;
         std::cerr << tree1 << std::endl;
         exit(1);
     }
     
-    std::string tree2 = build_tree1();
-    if (expected.compare(tree2) != 0) {
+    std::string tree2 = build_tree2();
+    if (tree2 != expected2) {
         std::cout << "FAIL" << std::endl;
         std::cerr << "Expecting:" << std::endl;
-        std::cerr << expected << std::endl;
+        std::cerr << expected2 << std::endl;
         std::cerr << "Observed:" << std::endl;
         std::cerr << tree2 << std::endl;
         exit(1);
     }    
    
-    std::string tree3 = build_tree1();
-    if (expected.compare(tree3) != 0) {
+    std::string tree3 = build_tree3();
+    if (tree3 != expected2) {
         std::cout << "FAIL" << std::endl;
         std::cerr << "Expecting:" << std::endl;
-        std::cerr << expected << std::endl;
+        std::cerr << expected2 << std::endl;
         std::cerr << "Observed:" << std::endl;
         std::cerr << tree3 << std::endl;
         exit(1);
