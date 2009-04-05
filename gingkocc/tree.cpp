@@ -110,7 +110,7 @@ void Tree::write_newick_tree(std::ostream& out) {
         while (root != this->tree_nodes_.end()) {
             root = std::find(root+1, this->tree_nodes_.end(), -1);
             if (root != this->tree_nodes_.end()) {
-                out << ",";
+                out << ", ";
                 this->write_newick_node(root-this->tree_nodes_.begin(), out);
             }                        
         }
