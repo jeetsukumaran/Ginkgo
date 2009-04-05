@@ -33,13 +33,13 @@ namespace asciigrid {
 /**
  * Writes out a vector of longs as an ASCII Grid file.
  * @param   vals    cell values
+ * @param   ncols   number of cols 
  * @param   nrows   number of rows
- * @param   ncols   number of cols
  * @param   out     destination
  */
 void write_grid(const std::vector<long>& vals, 
-        unsigned long nrows, 
         unsigned long ncols,
+        unsigned long nrows, 
         std::ostream out);
 
 /**

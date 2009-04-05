@@ -31,10 +31,22 @@ namespace gingko {
 namespace asciigrid {
 
 void write_grid(const std::vector<long>& vals, 
-        unsigned long nrows, 
         unsigned long ncols,
+        unsigned long nrows, 
         std::ostream out) {
-        
+    assert(vals.size() == ncols * nrows);        
+    out << "ncols           " << ncols << std::endl;
+    out << "nrows           " << nrows << std::endl;
+    out << "xllcorner       0.0" << std::endl;
+    out << "yllcorner       0.0" << std::endl;    
+    out << "cellsize        1.0" << std::endl;
+    out << "NODATA_value    -9999" << std::endl;   
+    for (unsigned long row = 0; row < nrows; ++row) {
+        for (unsigned long col = 0; col < ncols; ++col) {
+            out << vals[row * col] << " ";
+        }
+        out << std::endl;
+    }
 }        
 
 AsciiGrid::AsciiGrid(std::istream& src)
