@@ -222,6 +222,12 @@ void World::process_tree_samplings() {
 }
 
 void World::process_occurrence_samplings() {
+    std::map<unsigned long, Species *>::iterator oci = this->occurrence_samples_.find(this->current_generation_);    
+    if (oci == this->occurrence_samples_.end()) {
+        return;
+    }
+    Species * species_ptr = oci->second;
+    this->log_info("Saving occurrence data for species \"" + species_ptr->get_label() + "\".");
 }
 
 // --- logging and output ---
