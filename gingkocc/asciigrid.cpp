@@ -30,6 +30,13 @@
 namespace gingko {
 namespace asciigrid {
 
+void write_grid(const std::vector<long>& vals, 
+        unsigned long nrows, 
+        unsigned long ncols,
+        std::ostream out) {
+        
+}        
+
 AsciiGrid::AsciiGrid(std::istream& src)
         : src_(src) {
     if (not this->src_) {

@@ -31,6 +31,18 @@ namespace gingko {
 namespace asciigrid {
 
 /**
+ * Writes out a vector of longs as an ASCII Grid file.
+ * @param   vals    cell values
+ * @param   nrows   number of rows
+ * @param   ncols   number of cols
+ * @param   out     destination
+ */
+void write_grid(const std::vector<long>& vals, 
+        unsigned long nrows, 
+        unsigned long ncols,
+        std::ostream out);
+
+/**
  * General i/o error.
  */
 class AsciiGridIOError : public std::runtime_error {
@@ -174,7 +186,7 @@ class AsciiGrid {
             }
             return this->ncols_;
         }
-            
+        
         /**
          * Returns number of rows in grid.
          * @return number of rows in grid
@@ -184,7 +196,7 @@ class AsciiGrid {
                 this->parse_metadata_();
             }        
             return this->nrows_;
-        }
+        }   
         
         /**
          * Returns values of cells loaded from grid.
