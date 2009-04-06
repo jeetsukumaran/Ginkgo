@@ -175,6 +175,19 @@ void World::run() {
         // run the life cycle
         this->cycle();        
     }
+    
+    this->log_info("Saving final set of occurrences and trees for all species.");
+    std::set<CellIndexType> cell_indexes;
+    for (CellIndexType i = 0; i < this->landscape_.size(); ++i) {
+        cell_indexes.insert(i);        
+    }
+    for (std::map<std::string, Species *>::iterator spi = this->species_.begin(); 
+            spi != this->species_.end(); 
+            ++spi) {
+        this->save_occurrences(spi->second);
+        this->save_trees(spi->second, 0, cell_indexes, "COMPLETE");
+    }    
+    
     this->log_info("Ending simulation.");
 }
 
@@ -226,7 +239,12 @@ void World::process_occurrence_samplings() {
     if (oci == this->occurrence_samples_.end()) {
         return;
     }
-    Species * species_ptr = oci->second;
+    this->save_occurrences(oci->second);
+}    
+
+// --- logging and output ---
+
+void World::save_occurrences(Species * species_ptr ) {
     this->log_info("Saving occurrence data for species " + species_ptr->get_label() + ".");
     std::vector<long> counts;
     this->landscape_.count_organisms(species_ptr, counts);    
@@ -235,8 +253,6 @@ void World::process_occurrence_samplings() {
         this->compose_output_filename(species_ptr->get_label(), "occurrences", "grd"));  
     asciigrid::write_grid(counts, this->landscape_.size_x(), this->landscape_.size_y(), occs);
 }
-
-// --- logging and output ---
 
 void World::write_nexus_header(Species * sp_ptr,
         const std::vector<const Organism *>& organisms,

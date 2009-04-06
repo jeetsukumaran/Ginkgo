@@ -383,6 +383,12 @@ class World {
         // --- logging and output ---
         
         /**
+         * Save occurrence info for the current generation.
+         * @param species_ptr   Pointer to species for which to save info.
+         */
+        void save_occurrences(Species * species_ptr);
+        
+        /**
          * Composes and writes a NEXUS file header.
          */
         void write_nexus_header(Species * sp_ptr,
