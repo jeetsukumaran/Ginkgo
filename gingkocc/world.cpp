@@ -410,6 +410,12 @@ void World::save_trees(Species * sp_ptr,
         this->log_error("no organisms found in sample: aborting tree building");
         return;
     }
+    
+    this->log_info("Building trees for haploid and sampled diploid locii alleles for " + num_samples + " organisms (" + num_samples + " leaves per tree).");  
+    std::ofstream combined_trees;            
+    this->open_ofstream(combined_trees,
+        this->compose_output_filename(sp_ptr->get_label(), label, "combined.tre"));
+    this->write_combined_trees(sp_ptr, organisms, combined_trees);          
 
     this->log_info("Building tree of haploid locus alleles for " + num_samples + " organisms (" + num_samples + " leaves per tree).");    
     std::ofstream haploid_trees;
@@ -423,12 +429,7 @@ void World::save_trees(Species * sp_ptr,
     this->open_ofstream(diploid_trees,
         this->compose_output_filename(sp_ptr->get_label(), label, "diploid.tre"));  
     this->write_diploid_trees(sp_ptr, organisms, diploid_trees);
-
-    this->log_info("Building trees for haploid and sampled diploid locii alleles for " + num_samples + " organisms (" + num_samples + " leaves per tree).");  
-    std::ofstream combined_trees;            
-    this->open_ofstream(combined_trees,
-        this->compose_output_filename(sp_ptr->get_label(), label, "combined.tre"));
-    this->write_combined_trees(sp_ptr, organisms, combined_trees);       
+ 
 }                
 
 void World::open_ofstream(std::ofstream& out, const std::string& fpath) {
