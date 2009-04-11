@@ -40,8 +40,11 @@ class RandomNumberGenerator {
         /** Constructs a RNG seeded with given seed. */
         RandomNumberGenerator(unsigned long seed);
         
+        /** Returns current seed. */
+        unsigned long get_seed() const;        
+        
         /** Explicitly sets the RNG seed. */
-        void set_seed(unsigned long seed);
+        void set_seed(unsigned long seed);                
  
         /**
          * Returns a uniform random real variate in [0,1).

@@ -128,6 +128,15 @@ class World {
         }  
         
         /**
+         * Returns the current random number seed
+         * return random number seed
+         */      
+        unsigned long get_random_seed() const {
+            return this->rng_.get_seed();
+        }         
+                
+        
+        /**
          * Sets random number seed
          * @param seed random number seed
          */      

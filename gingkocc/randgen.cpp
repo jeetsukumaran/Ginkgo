@@ -39,6 +39,11 @@ RandomNumberGenerator::RandomNumberGenerator(unsigned long seed) {
     this->set_seed(seed);
 }
 
+//! returns current seed
+unsigned long RandomNumberGenerator::get_seed() const {
+    return this->seed_;
+}
+
 //! seeds using given seed
 void RandomNumberGenerator::set_seed(unsigned long seed) {
     this->seed_ = seed;

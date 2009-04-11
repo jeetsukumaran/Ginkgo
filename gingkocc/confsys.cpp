@@ -22,6 +22,7 @@
 #include <set>
 #include <string>
 #include <vector>
+#include <ctime>
 
 #include "gingko_defs.hpp"
 #include "confsys.hpp"
@@ -338,8 +339,13 @@ void WorldConfigurator::parse()  {
     this->size_y_ = this->get_configuration_scalar<unsigned long>("ncols");
     this->generations_to_run_ = this->get_configuration_scalar<unsigned long>("ngens");
     this->num_fitness_factors_ = this->get_configuration_scalar<unsigned>("nfitness", MAX_FITNESS_FACTORS);
-    this->rand_seed_ = this->get_configuration_scalar<unsigned>("rseed", 0);
-    this->rand_seed_ = this->get_configuration_scalar<unsigned>("rseed", 0);
+    try {
+        this->rand_seed_ = this->get_configuration_scalar<unsigned>("rseed");
+    } catch (const ConfigurationIncompleteError& e) {
+        // rely on rng constructor to take care of this
+        // this->rand_seed_ = ctime();
+        this->rand_seed_ = time(0);
+    }
     this->produce_final_output_ = not this->get_configuration_scalar<bool>("suppress-final-output", 0);
 }
 

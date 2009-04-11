@@ -32,6 +32,7 @@
 #include <set>
 #include <ctime>
 #include <string>
+#include <sstream>
 
 
 int main(int argc, char* argv[]) {
@@ -40,6 +41,7 @@ int main(int argc, char* argv[]) {
     std::string output_dir = ".";
     std::string replicate_id;
     bool validate_config_only = false;
+    unsigned long rand_seed = 0;
 
     gingko::OptionParser parser = gingko::OptionParser("Gingko 0.01",
             "Gingko Biogeographical Evolution Simulator",
@@ -51,7 +53,9 @@ int main(int argc, char* argv[]) {
                                    "directory to which to save output files (default = current)");
     parser.add_switch(&validate_config_only, "-v", "--validate",
                       "load and process configuration file to check for errors, but do not actually execute run");
-                                     
+    parser.add_option<unsigned long>(&rand_seed, "-z", "--random-seed", 
+                               "random seed for this run (overrides seed set in configuration file)");
+
     parser.parse(argc, argv);       
     
     std::vector<std::string> args = parser.get_args();
@@ -71,7 +75,16 @@ int main(int argc, char* argv[]) {
         std::cout << "Configuration file validates." << std:: endl;
     } else {
         world.open_logs();
-        world.log_info("World configured using: \"" + args[0] + "\"");        
+        world.log_info("World configured using: \"" + args[0] + "\"");
+        
+        std::ostringstream seed_info;
+        if (parser.is_set("--random-seed")) {
+            seed_info << "Setting random seed from command line: " << rand_seed << ".";
+            world.set_random_seed(rand_seed);
+        } else {
+            seed_info << "Using random seed: " << world.get_random_seed() << "."; 
+        }
+        world.log_info(seed_info.str());
         world.run();
         world.close_logs();
     }
