@@ -35,7 +35,7 @@ int main(int argc, char* argv[]) {
     bool          g = false;
     
 
-    gingko::OptionParser parser = gingko::OptionParser();
+    gingko::OptionParser parser = gingko::OptionParser();                                    
     parser.add_option<long>(&a, "-a", "--seta", 
                                      "set value of a", "#");
     parser.add_option<unsigned long>(&b, "-b", "--setb", 
@@ -49,6 +49,20 @@ int main(int argc, char* argv[]) {
     parser.add_option<std::string>(&f, "-f", "--setf", 
                                      "set value of a", "#");
     parser.add_switch(&g, "-g", "--setg", "set value of e", "#");
+
+    parser.add_option<long>(&a, "-u", "--aaa1", 
+                                     "set value of a", "#");
+    parser.add_option<long>(&a, "-v", "--bbb1", 
+                                     "set value of a", "#");
+    parser.add_option<long>(&a, "-w", "--ccc1", 
+                                     "set value of a", "#");
+    parser.add_option<long>(&a, "-x", "--abb1", 
+                                     "set value of a", "#");                                     
+    parser.add_option<long>(&a, "-y", "--abc1", 
+                                     "set value of a", "#");
+    parser.add_option<long>(&a, "-z", "--abd2", 
+                                     "set value of a", "#");     
+    
     parser.parse(argc, argv);
     
     std::cerr << "--Flagged options:" << std::endl;

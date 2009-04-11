@@ -207,13 +207,34 @@ void OptionParser::parse(int argc, char * argv[]) {
                 }
             }
             
-            std::map< std::string, OptionArg * >::iterator oai = this->key_opt_map_.find(arg_name);
-            if ( oai == this->key_opt_map_.end() ) {
-                std::cerr << "unrecognized option \"" << arg_name << "\"" << std::endl;
-                exit(1);
-            }          
+//             std::map< std::string, OptionArg * >::iterator oai = this->key_opt_map_.find(arg_name);
+//             if ( oai == this->key_opt_map_.end() ) {
+//                 std::cerr << "unrecognized option \"" << arg_name << "\"" << std::endl;
+//                 exit(1);
+//             }
             
-            OptionArg& oa = *(oai->second);
+            std::vector< std::string > matches;
+            for (std::map< std::string, OptionArg * >::iterator oai = this->key_opt_map_.begin();
+                 oai != this->key_opt_map_.end();
+                 ++oai) {
+                const std::string& a = oai->first;
+                if (a.compare(0, arg_name.size(), arg_name) == 0 ) {
+                    matches.push_back(a);
+                }                    
+            }                 
+            
+            if (matches.size() == 0) {
+                std::cerr << "unrecognized command option \"" << arg_name << "\":" << std::endl;
+                exit(1);
+            } else if (matches.size() > 1) {
+                std::cerr << "multiple matches found for option \"" << arg_name << "\":" << std::endl;
+                for (std::vector<std::string>::iterator mi = matches.begin(); mi != matches.end(); ++mi) {
+                    std::cerr << *mi << std::endl; 
+                }
+                exit(1);
+            }
+            
+            OptionArg& oa = *(this->key_opt_map_[matches[0]]);
             
             if (not oa.is_switch()) {
                 if (arg_value.size() == 0) {
