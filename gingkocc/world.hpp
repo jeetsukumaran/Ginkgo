@@ -147,12 +147,7 @@ class World {
          * Returns label for output and reporting.
          * @return label for output and reporting
          */        
-        std::string get_label() {
-            if (this->label_.size() == 0) {
-                this->label_ = "world";
-            }
-            return this->label_;           
-        }                
+        std::string get_output_filename_stem();                
         
         /**
          * Sets label for output and reporting.
@@ -193,6 +188,14 @@ class World {
          */      
         void set_output_dir(const std::string& dir_path) {
             this->output_dir_ = dir_path;
+        }
+        
+        /**
+         * Sets the replicate id for a run (used to decorate output filenames).
+         * @param rep_id     replicate indentification
+         */      
+        void set_replicate_id(const std::string& rep_id) {
+            this->replicate_id_ = rep_id;
         }          
         
         /**
@@ -532,6 +535,10 @@ class World {
         bool                                    coalesce_multiple_roots_;
         /** Output directory. */
         std::string                             output_dir_;
+        /** Replicate id. */
+        std::string                             replicate_id_;
+        /** Output filename prefix. */
+        std::string                             output_filename_stem_;
         /** Info log file stream. */
         std::ofstream                           infos_;
         /** Error log stream. */

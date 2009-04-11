@@ -38,12 +38,15 @@ int main(int argc, char* argv[]) {
 
     std::string config_filepath;
     std::string output_dir = ".";
+    std::string replicate_id;
     bool validate_config_only = false;
 
     gingko::OptionParser parser = gingko::OptionParser("Gingko 0.01",
             "Gingko Biogeographical Evolution Simulator",
             "%prog [options] <CONFIGURATION-FILEPATH>");
     
+    parser.add_option<std::string>(&replicate_id, "-i", "--replicate-id", 
+                               "optional identifier to add to names of output files produced during this run");
     parser.add_option<std::string>(&output_dir, "-o", "--output-dir", 
                                    "directory to which to save output files (default = current)");
     parser.add_switch(&validate_config_only, "-v", "--validate",
@@ -59,6 +62,7 @@ int main(int argc, char* argv[]) {
     }
     
     gingko::World world;
+    world.set_replicate_id(replicate_id);
     world.set_output_dir(output_dir);
        
     gingko::confsys::configure_world(world, args[0]);

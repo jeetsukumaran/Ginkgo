@@ -440,11 +440,25 @@ void World::open_ofstream(std::ofstream& out, const std::string& fpath) {
     }
 }
 
+std::string World::get_output_filename_stem() {
+    if (this->output_filename_stem_.size() == 0) {
+        if (this->label_.size() == 0) {
+            this->output_filename_stem_ += "gingkorun";
+        } else {
+            this->output_filename_stem_ += this->label_;        
+        }
+        if (this->replicate_id_.size() > 0) {
+            this->output_filename_stem_ += this->replicate_id_;
+        }
+    }
+    return this->output_filename_stem_;           
+}
+
 std::string World::compose_output_filename(const std::string& species_label,
         const std::string& additional,
         const std::string& extension) {
     std::ostringstream f;
-    f << this->get_label();
+    f << this->get_output_filename_stem();
     f << "_G" << this->current_generation_;
     f << "_" << species_label;
     if (additional.size() > 0) {
@@ -464,10 +478,10 @@ std::string World::compose_output_filename(const std::string& species_label,
 
 void World::open_logs() {    
     if (not this->infos_.is_open()) {
-        this->open_ofstream(this->infos_, this->get_label() + ".gingko.out.log");
+        this->open_ofstream(this->infos_, this->get_output_filename_stem() + ".out.log");
     }
     if (not this->errs_.is_open()) {
-        this->open_ofstream(this->errs_, this->get_label() + ".gingko.err.log");
+        this->open_ofstream(this->errs_, this->get_output_filename_stem() + ".err.log");
     }    
 }
 
