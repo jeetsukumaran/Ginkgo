@@ -224,10 +224,10 @@ void OptionParser::parse(int argc, char * argv[]) {
             }                 
             
             if (matches.size() == 0) {
-                std::cerr << "unrecognized command option \"" << arg_name << "\":" << std::endl;
+                std::cerr << "unrecognized option \"" << arg_name << "\"" << std::endl;
                 exit(1);
             } else if (matches.size() > 1) {
-                std::cerr << "multiple matches found for option \"" << arg_name << "\":" << std::endl;
+                std::cerr << "multiple matches found for option beginning with \"" << arg_name << "\":" << std::endl;
                 for (std::vector<std::string>::iterator mi = matches.begin(); mi != matches.end(); ++mi) {
                     std::cerr << *mi << std::endl; 
                 }
