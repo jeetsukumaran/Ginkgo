@@ -35,7 +35,7 @@ OptionArg::OptionArg(const char * help, const char * meta_var)
         this->help_ = help;
     }
     if (meta_var != NULL) {
-        this->meta_var_ = meta_var;
+        this->set_meta_var(meta_var);
     }
 }
   

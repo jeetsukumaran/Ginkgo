@@ -29,6 +29,7 @@
 #include <utility>
 #include <stdexcept>
 #include <iomanip>
+#include "textutil.hpp"
 
 
 #if !defined(GINGKO_CMDOPTS_H)
@@ -89,7 +90,7 @@ class OptionArg {
         }
         
         void set_meta_var(const char*  s) {
-            this->meta_var_ = s;
+            this->meta_var_ = textutil::upper(s);
         }
         
         /**
@@ -307,14 +308,6 @@ class OptionParser {
             oa = new TypedOptionArg<T>(store, short_flag, long_flag, help, meta_var);
             assert ( oa );
    
-            if (meta_var != NULL) {
-                oa->set_meta_var(meta_var);
-            } else if (long_flag != NULL) {
-                oa->set_meta_var(long_flag);
-            } else if (short_flag != NULL) {
-                oa->set_meta_var(short_flag);
-            }
-
             this->option_args_.push_back(oa);
             if (short_flag) {
                 assert(short_flag[0] == '-' and short_flag[1] != 0 and short_flag[1] != '-');
@@ -325,7 +318,16 @@ class OptionParser {
                 assert(long_flag[0] == '-' and long_flag[1] =='-' and long_flag[2] != '-');
                 assert(this->key_opt_map_.find(long_flag) == this->key_opt_map_.end());
                 this->key_opt_map_.insert(std::make_pair(long_flag, oa));
-            }        
+            }
+            
+            if (meta_var != NULL) {
+                oa->set_meta_var(meta_var);
+            } else if (long_flag != NULL) {
+                oa->set_meta_var(long_flag + 2);
+            } else if (short_flag != NULL) {
+                oa->set_meta_var(short_flag + 1);
+            }
+            
             return oa;
         }
         
