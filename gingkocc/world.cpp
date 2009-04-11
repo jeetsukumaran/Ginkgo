@@ -41,7 +41,8 @@ World::World()
       rng_(),
       landscape_(species_, rng_),
       coalesce_multiple_roots_(true),
-      is_log_to_screen_(true) {
+      is_log_to_screen_(true),
+      is_produce_final_output_(true) {
     this->current_generation_ = 0;    
 }
 
@@ -51,7 +52,8 @@ World::World(unsigned long seed)
       rng_(seed),
       landscape_(species_, rng_),
       coalesce_multiple_roots_(true),
-      is_log_to_screen_(true) {
+      is_log_to_screen_(true),
+      is_produce_final_output_(true) {
     this->current_generation_ = 0;    
 }    
 
@@ -176,17 +178,19 @@ void World::run() {
         this->cycle();        
     }
     
-    this->log_info("Saving final set of occurrences and trees for all species.");
-    std::set<CellIndexType> cell_indexes;
-    for (CellIndexType i = 0; i < this->landscape_.size(); ++i) {
-        cell_indexes.insert(i);        
-    }
-    for (std::map<std::string, Species *>::iterator spi = this->species_.begin(); 
-            spi != this->species_.end(); 
-            ++spi) {
-        this->save_occurrences(spi->second);
-        this->save_trees(spi->second, 0, cell_indexes, "COMPLETE");
-    }    
+    if (this->is_produce_final_output_) {
+        this->log_info("Saving final set of occurrences and trees for all species.");
+        std::set<CellIndexType> cell_indexes;
+        for (CellIndexType i = 0; i < this->landscape_.size(); ++i) {
+            cell_indexes.insert(i);        
+        }
+        for (std::map<std::string, Species *>::iterator spi = this->species_.begin(); 
+                spi != this->species_.end(); 
+                ++spi) {
+            this->save_occurrences(spi->second);
+            this->save_trees(spi->second, 0, cell_indexes, "COMPLETE");
+        }
+    }        
     
     this->log_info("Ending simulation.");
 }

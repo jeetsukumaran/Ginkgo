@@ -328,7 +328,8 @@ WorldConfigurator::WorldConfigurator(const ConfigurationBlock& cb)
           size_x_(0),
           size_y_(0),
           num_fitness_factors_(0),
-          rand_seed_(0) {
+          rand_seed_(0),
+          produce_final_output_(true) {
     this->parse();
 }
 
@@ -338,6 +339,8 @@ void WorldConfigurator::parse()  {
     this->generations_to_run_ = this->get_configuration_scalar<unsigned long>("ngens");
     this->num_fitness_factors_ = this->get_configuration_scalar<unsigned>("nfitness", MAX_FITNESS_FACTORS);
     this->rand_seed_ = this->get_configuration_scalar<unsigned>("rseed", 0);
+    this->rand_seed_ = this->get_configuration_scalar<unsigned>("rseed", 0);
+    this->produce_final_output_ = not this->get_configuration_scalar<bool>("suppress-final-output", 0);
 }
 
 void WorldConfigurator::configure(World& world)  {
@@ -345,7 +348,8 @@ void WorldConfigurator::configure(World& world)  {
     world.set_random_seed(this->rand_seed_);
     world.set_generations_to_run(this->generations_to_run_);
     world.set_num_fitness_factors(this->num_fitness_factors_);
-    world.generate_landscape(this->size_x_, this->size_y_);    
+    world.generate_landscape(this->size_x_, this->size_y_);
+    world.set_produce_final_output(this->produce_final_output_);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

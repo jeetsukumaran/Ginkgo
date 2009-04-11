@@ -158,6 +158,14 @@ class World {
         } 
         
         /**
+         * Switch on/off final output generation.
+         * @param val   <code>true</code> to produce final output.
+         */
+        void set_produce_final_output(bool val) {
+            this->is_produce_final_output_ = val;
+        }
+        
+        /**
          * Returns number of active fitness factors.
          * @return number of active fitness factors
          */        
@@ -545,6 +553,8 @@ class World {
         std::ofstream                           errs_;
         /** Duplicate log output to stdout/stderr? */
         bool                                    is_log_to_screen_;
+        /** Produce final set of trees/occurrences, even if not requested? */
+        bool                                    is_produce_final_output_;
         /** Collection of events (key = generation #). */
         std::map<unsigned long, WorldSettings>  world_settings_;    
         /** Collection of tree building directives (key = generation #). */

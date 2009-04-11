@@ -507,6 +507,8 @@ class WorldConfigurator : public Configurator {
         unsigned int    num_fitness_factors_;
         /** Random number seed. */        
         unsigned long   rand_seed_;
+        /** Produce final output? */
+        bool            produce_final_output_;
 
 }; // WorldConfigurator
 
