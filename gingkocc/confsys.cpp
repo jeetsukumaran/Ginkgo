@@ -343,7 +343,7 @@ void WorldConfigurator::parse()  {
     this->num_fitness_factors_ = this->get_configuration_scalar<unsigned>("nfitness", MAX_FITNESS_FACTORS);
     try {
         this->rand_seed_ = this->get_configuration_scalar<unsigned>("rseed");
-    } catch (const ConfigurationIncompleteError& e) {
+    } catch (const ConfigurationError& e) {
         // rely on rng constructor to take care of this
         // this->rand_seed_ = ctime();
         this->rand_seed_ = time(0);
