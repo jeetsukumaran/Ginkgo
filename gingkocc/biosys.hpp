@@ -121,8 +121,9 @@ class GenealogyNode {
         void decrement_count() {
             if (this->reference_count_ == 1) {
                 delete this;
-            }
-            this->reference_count_ -= 1;
+            } else {
+                this->reference_count_ -= 1;
+            }                
         }
 
         /**

@@ -64,8 +64,8 @@ World::~World() {
             ++sp) {
         assert (sp->second != NULL);            
         delete sp->second;
-        sp->second = NULL;
-        this->species_.erase(sp);
+//         sp->second = NULL;
+//         this->species_.erase(sp);
     }            
 }
 
