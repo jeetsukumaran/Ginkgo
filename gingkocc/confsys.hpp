@@ -778,6 +778,16 @@ class ConfigurationFile {
  */
 ConfigurationError build_configuration_block_exception(const ConfigurationBlock& cb,
         const std::string& message);
+
+/**
+ * Returns the next chunk of characters from the current file position to the 
+ * first occurrence of the block terminator, skipping over characters commented
+ * out.
+ * @param   in                  input stream
+ * @param   block_terminator    token signifying end of block
+ * @return                      block
+ */
+std::string read_block_from_file(std::istream& is, char block_terminator);
     
 } // confsys_detail
 } // namespace confsys

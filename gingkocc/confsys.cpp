@@ -81,7 +81,9 @@ const char * BLOCK_BODY_START = "{";
 const char * BLOCK_BODY_END = "}";
 const char * BLOCK_BODY_LINE_TERM = ";";
 const char * BLOCK_BODY_KEY_VAL_SEP = "=";
-const char * WHITESPACE = " \t\n";
+const char * WHITESPACE = " \t\n\r";
+const char * COMMENT_START = "/*";
+const char * COMMENT_END = "*/";
 
 ///////////////////////////////////////////////////////////////////////////////
 // ConfigurationBlock
@@ -185,10 +187,8 @@ void ConfigurationBlock::parse(std::istream& in) {
     
     this->clear();
 
-    std::string raw;
     unsigned long start_pos(in.tellg());
-    std::getline(in, raw, BLOCK_BODY_END[0]);
-    raw = textutil::strip(raw);
+    std::string raw = read_block_from_file(in, BLOCK_BODY_END[0]);
     
     if (raw.size() == 0) {
         return;
@@ -443,9 +443,9 @@ void SpeciesConfigurator::process_seed_populations() {
         this->seed_populations_.push_back(OrganismDistribution());
         OrganismDistribution& od = this->seed_populations_.back();
         std::string key = *k;
-        std::vector<std::string> key_parts = textutil::split(key, "#", 1, false);
+        std::vector<std::string> key_parts = textutil::split(key, "*", 1, false);
         if (key_parts.size() < 2) {
-            throw this->build_exception("need to specify number of organisms in starting population using '#' token: \"" + key + "\"");
+            throw this->build_exception("need to specify number of organisms in starting population using '*' token: \"" + key + "\"");
         }
         try {
             od.num_organisms_per_cell = convert::to_scalar<unsigned long>(key_parts[1]);
@@ -795,6 +795,35 @@ ConfigurationError build_configuration_block_exception(const ConfigurationBlock&
     msg << " to position " << cb.get_block_end_pos() + 1 << ")";
     msg << ": " << message;
     return ConfigurationError(msg.str());    
+}
+
+std::string read_block_from_file(std::istream& is, char block_terminator) {
+    std::ostringstream block;
+    unsigned int comment_level = 0;
+    char c = is.get();
+    while (is.good() and (comment_level > 0 or c != block_terminator)) {
+        if (comment_level == 0) {
+            if ( c == COMMENT_START[0] ) {
+                char c2 = is.get();
+                if (is.good() and c2 == COMMENT_START[1]) {
+                    comment_level = 1;
+                } else {
+                    block << c << c2;
+                }
+            } else {        
+                block << c;
+            }                
+        } else {
+            if ( c == COMMENT_END[0] ) {
+                c = is.get();
+                if (is.good() and c == COMMENT_END[1]) {
+                    comment_level = 0;
+                }
+            }
+        }
+        c = is.get();
+    }
+    return textutil::strip(block.str());
 }
     
 } // confsys_detail
