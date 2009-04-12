@@ -54,7 +54,7 @@ namespace confsys {
 // Client code should call one of the following to configure World objects.
 
 World& configure_world(World& world, std::istream& conf_src) {
-    ConfigurationFile cf(conf_src);
+    confsys_detail::ConfigurationFile cf(conf_src);
     cf.configure(world);
     return world;
 }
@@ -66,13 +66,15 @@ World& configure_world(World& world, const char * conf_fpath) {
 
 World& configure_world(World& world, const std::string& conf_fpath) {
     std::ifstream f(conf_fpath.c_str());
-    ConfigurationFile cf(conf_fpath);   
+    confsys_detail::ConfigurationFile cf(conf_fpath);   
     cf.configure(world); 
     return world;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 // Supporting Classes and Constructs
+
+namespace confsys_detail {
 
 const char * BLOCK_START = "@";
 const char * BLOCK_BODY_START = "{";
@@ -318,7 +320,7 @@ void Configurator::get_configuration_positions(const std::string& key, OrganismD
 }
 
 ConfigurationError Configurator::build_exception(const std::string& message) const {
-    return confsys_detail::build_configuration_block_exception(this->configuration_block_, message);
+    return build_configuration_block_exception(this->configuration_block_, message);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -721,7 +723,7 @@ void ConfigurationFile::configure(World& world) {
         if (cb.is_block_set()) {
             if (cb.get_type() == "world") {
                 if (num_worlds != 0) {
-                    throw confsys_detail::build_configuration_block_exception(cb, "world must be defined before species are added");
+                    throw build_configuration_block_exception(cb, "world must be defined before species are added");
                 }                
                 WorldConfigurator wcf(cb);
                 wcf.configure(world);
@@ -729,11 +731,11 @@ void ConfigurationFile::configure(World& world) {
             }
             if (cb.get_type() == "species") {
                 if (num_worlds == 0) {
-                    throw confsys_detail::build_configuration_block_exception(cb, "world must be defined before species are added");
+                    throw build_configuration_block_exception(cb, "world must be defined before species are added");
                 }
                 std::string label = cb.get_name();
                 if (species_labels.find(label) != species_labels.end()) {
-                    throw confsys_detail::build_configuration_block_exception(cb, "species \"" + label + "\" has already been defined");
+                    throw build_configuration_block_exception(cb, "species \"" + label + "\" has already been defined");
                 }
                 SpeciesConfigurator spcf(cb);
                 spcf.configure(world);
@@ -741,30 +743,30 @@ void ConfigurationFile::configure(World& world) {
             }
             if (cb.get_type() == "generation") {
                 if (num_worlds == 0) {
-                    throw confsys_detail::build_configuration_block_exception(cb, "world must be defined before world setting changes defined");
+                    throw build_configuration_block_exception(cb, "world must be defined before world setting changes defined");
                 }
                 unsigned long generation = 0;
                 try {
                     generation = convert::to_scalar<unsigned long>(cb.get_name());
                 } catch (convert::ValueError e) {
-                    throw confsys_detail::build_configuration_block_exception(cb, "\"" + cb.get_name() + "\" is an invalid value for a generation number");
+                    throw build_configuration_block_exception(cb, "\"" + cb.get_name() + "\" is an invalid value for a generation number");
                 }                
                 if (generations.find(generation) != generations.end()) {
-                    throw confsys_detail::build_configuration_block_exception(cb, "generation \"" + cb.get_name() + "\" has already been defined");
+                    throw build_configuration_block_exception(cb, "generation \"" + cb.get_name() + "\" has already been defined");
                 }
                 GenerationConfigurator gcf(cb);
                 gcf.configure(world);
             }
             if (cb.get_type() == "tree") {
                 if (num_worlds == 0) {
-                    throw confsys_detail::build_configuration_block_exception(cb, "world must be defined before tree building directives defined");
+                    throw build_configuration_block_exception(cb, "world must be defined before tree building directives defined");
                 }
                 TreeSamplingConfigurator scf(cb);
                 scf.configure(world);
             }
             if (cb.get_type() == "occurs") {
                 if (num_worlds == 0) {
-                    throw confsys_detail::build_configuration_block_exception(cb, "world must be defined before occurrence sampling directives defined");
+                    throw build_configuration_block_exception(cb, "world must be defined before occurrence sampling directives defined");
                 }
                 OccurrenceSamplingConfigurator ocf(cb);
                 ocf.configure(world);
@@ -775,27 +777,25 @@ void ConfigurationFile::configure(World& world) {
 
 ///////////////////////////////////////////////////////////////////////////////
 // Implementation details
-
-namespace confsys_detail {
     
-    /**
-     * Composes and returns and appropriate exception.
-     * @param message           error message
-     * @param cb                ConfigurationBlock that has the error
-     * @return                  ConfiguratonError exception to be thrown
-     */
-    ConfigurationError build_configuration_block_exception(const ConfigurationBlock& cb,
-            const std::string& message) {
-        std::ostringstream msg;
-        msg << cb.get_type() << " block ";
-        if (cb.has_name()) {        
-            msg << "\"" << cb.get_name() << "\" ";
-        }            
-        msg << "(file position " << cb.get_block_start_pos() + 1;
-        msg << " to position " << cb.get_block_end_pos() + 1 << ")";
-        msg << ": " << message;
-        return ConfigurationError(msg.str());    
-    }
+/**
+ * Composes and returns and appropriate exception.
+ * @param message           error message
+ * @param cb                ConfigurationBlock that has the error
+ * @return                  ConfiguratonError exception to be thrown
+ */
+ConfigurationError build_configuration_block_exception(const ConfigurationBlock& cb,
+        const std::string& message) {
+    std::ostringstream msg;
+    msg << cb.get_type() << " block ";
+    if (cb.has_name()) {        
+        msg << "\"" << cb.get_name() << "\" ";
+    }            
+    msg << "(file position " << cb.get_block_start_pos() + 1;
+    msg << " to position " << cb.get_block_end_pos() + 1 << ")";
+    msg << ": " << message;
+    return ConfigurationError(msg.str());    
+}
     
 } // confsys_detail
 

@@ -59,7 +59,7 @@ World& configure_world(World& world, const char * conf_fpath);
 World& configure_world(World& world, const std::string& conf_fpath);
 
 ///////////////////////////////////////////////////////////////////////////////
-// Infrastructure supporting above functions.
+// ERRORS AND EXCEPTIONS
 
 /**
  * General configuration error.
@@ -96,6 +96,11 @@ class ConfigurationIncompleteError : public ConfigurationError {
         ConfigurationIncompleteError(const char * msg) : ConfigurationError(msg) {}
         ConfigurationIncompleteError(const std::string& msg) : ConfigurationError(msg) {}
 };
+
+///////////////////////////////////////////////////////////////////////////////
+// IMPLEMENTATION DETAILS
+
+namespace confsys_detail {
 
 /**
  * Track distribution of organisms, either for seed populations or sampling 
@@ -763,20 +768,18 @@ class ConfigurationFile {
 };  
 
 ///////////////////////////////////////////////////////////////////////////////
-// helper functions
-namespace confsys_detail {
+// HELPER FUNCTIONS
     
-    /**
-     * Composes and returns and appropriate exception.
-     * @param cb                ConfigurationBlock that has the error     
-     * @param message           error message
-     * @return                  ConfiguratonError exception to be thrown
-     */
-    ConfigurationError build_configuration_block_exception(const ConfigurationBlock& cb,
-            const std::string& message);
+/**
+ * Composes and returns and appropriate exception.
+ * @param cb                ConfigurationBlock that has the error     
+ * @param message           error message
+ * @return                  ConfiguratonError exception to be thrown
+ */
+ConfigurationError build_configuration_block_exception(const ConfigurationBlock& cb,
+        const std::string& message);
     
 } // confsys_detail
-
 } // namespace confsys
 } // namespace gingko
 
