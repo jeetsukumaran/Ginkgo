@@ -43,7 +43,7 @@ int main(int argc, char* argv[]) {
     bool validate_config_only = false;
     unsigned long rand_seed = 0;
 
-    gingko::OptionParser parser = gingko::OptionParser("Gingko 0.01",
+    gingko::OptionParser parser = gingko::OptionParser("Gingko 0.1.3",
             "Gingko Biogeographical Evolution Simulator",
             "%prog [options] <CONFIGURATION-FILEPATH>");
     
