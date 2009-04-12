@@ -14,7 +14,18 @@ nobase_dist_gingkotests_DATA =  data/dummy1/dummy.conf               \
                                    data/dummy1/grids/spA_barrier.grd    \
                                    data/dummy1/grids/spA_continuous.grd \
                                    data/dummy1/grids/spB_barrier.grd    \
-                                   data/dummy1/grids/spB_continuous.grd
+                                   data/dummy1/grids/spB_continuous.grd \
+                               data/neutral-10x10-continuous/neutral-10x10-continuous.conf \
+                                   data/neutral-10x10-continuous/grids/cc1C.grd \
+                                   data/neutral-10x10-continuous/grids/cc1K.grd \
+                               data/neutral-unstructured/neutral-unstructured.conf \
+                                   data/neutral-unstructured/grids/cc100K.grd \
+                                   data/neutral-unstructured/grids/cc10K.grd \
+                                   data/neutral-unstructured/grids/cc1K.grd \
+                                   data/neutral-unstructured/grids/cc50K.grd \
+                               data/simple/simple.conf \
+                                   data/simple/grids/cc1C.grd \
+                                   data/simple/grids/cc1K.grd 
  
 dist_gingkotests_SCRIPTS = gingko_tests.py \
                    run_test_cmdopt.py \
