@@ -92,8 +92,9 @@ long Tree::process_node(GenealogyNode* node, const std::string * label) {
         this->tree_nodes_.push_back(new_node_parent_idx);
         new_node_parent_idx = this->tree_nodes_.size() - 1;
         this->node_indexes_.insert(std::make_pair(*ranciter, new_node_parent_idx));        
-    }         
-    this->tree_nodes_.push_back(this->process_node(node->get_parent())); 
+    }
+//     assert(new_node_parent_idx == this->process_node(node->get_parent()));
+    this->tree_nodes_.push_back(new_node_parent_idx); 
     
     // record this node's index in the node to array index map
     unsigned long idx = this->tree_nodes_.size() - 1;
