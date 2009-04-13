@@ -82,7 +82,8 @@ long Tree::process_node(GenealogyNode* node, const std::string * label) {
     long new_node_parent_idx = -1;
     if (parent == NULL) {
         new_node_parent_idx = -1;
-    } else if (niter == this->node_indexes_.end()) {
+    } else {
+        assert(niter != this->node_indexes_.end());
         new_node_parent_idx = niter->second;
     }
     for (std::vector<GenealogyNode *>::reverse_iterator ranciter = ancestors.rbegin();
