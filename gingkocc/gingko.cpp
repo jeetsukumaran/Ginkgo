@@ -33,7 +33,7 @@
 #include <ctime>
 #include <string>
 #include <sstream>
-
+#include <config.h>
 
 int main(int argc, char* argv[]) {
 
@@ -43,7 +43,7 @@ int main(int argc, char* argv[]) {
     bool validate_config_only = false;
     unsigned long rand_seed = 0;
 
-    gingko::OptionParser parser = gingko::OptionParser("Gingko 0.1.3",
+    gingko::OptionParser parser = gingko::OptionParser(PACKAGE_STRING,
             "Gingko Biogeographical Evolution Simulator",
             "%prog [options] <CONFIGURATION-FILEPATH>");
     
