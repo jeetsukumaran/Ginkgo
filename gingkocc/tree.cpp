@@ -44,16 +44,17 @@ long Tree::process_node(GenealogyNode* node, const std::string * label) {
     }
     
     // search for the node in the node to parent array index map
-    NodeToIndexMap::iterator nidx = this->node_indexes_.find(node);                
-    if (nidx != this->node_indexes_.end()) {
+    NodeToIndexMap::iterator niter = this->node_indexes_.find(node);                
+    if (niter != this->node_indexes_.end()) {
         // if found, then return its index
-        return nidx->second;
+        return niter->second;
     }
     
     // This node is not already in the parent array, and needs to be
     // added.
     // We need to get the index of this node's parent first so we
     // know what value to store as this node's parent.
+    // OLD LOGIC:
     // So we call <code>process_node</code> again, passing it the 
     // pointer to this node's parent: if this node's parent is not 
     // already in the array, it will then be added and its new index 
@@ -65,6 +66,32 @@ long Tree::process_node(GenealogyNode* node, const std::string * label) {
     // by the <code>process_node</code> and stored in this node's
     // location in lieu of an index, indicating that this node is a 
     // root.
+    // PROBLEM: After long runs, even if the tree itself is small, the logic
+    // runs into recursion limits.
+    // NEW LOGIC: no recursion.
+    GenealogyNode * parent = node->get_parent();
+    niter = this->node_indexes_.find(parent);
+    std::vector<GenealogyNode *> ancestors;
+    while (parent != NULL and niter == this->node_indexes_.end()) {
+        ancestors.push_back(parent);
+        parent = parent->get_parent();
+        if (parent != NULL) {
+            niter = this->node_indexes_.find(parent);
+        }
+    }
+    long new_node_parent_idx = -1;
+    if (parent == NULL) {
+        new_node_parent_idx = -1;
+    } else if (niter == this->node_indexes_.end()) {
+        new_node_parent_idx = niter->second;
+    }
+    for (std::vector<GenealogyNode *>::reverse_iterator ranciter = ancestors.rbegin();
+         ranciter != ancestors.rend();
+         ++ranciter) {
+        this->tree_nodes_.push_back(new_node_parent_idx);
+        new_node_parent_idx = this->tree_nodes_.size() - 1;
+        this->node_indexes_.insert(std::make_pair(*ranciter, new_node_parent_idx));        
+    }         
     this->tree_nodes_.push_back(this->process_node(node->get_parent())); 
     
     // record this node's index in the node to array index map
