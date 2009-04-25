@@ -442,7 +442,7 @@ class World {
          * @param   organisms   sample of organisms
          * @param   out         output stream
          */
-        void write_diploid_trees(Species * sp_ptr,
+        void write_diploid2_trees(Species * sp_ptr,
                 const std::vector<const Organism *>& organisms,
                 std::ostream& out);  
                 
@@ -455,7 +455,7 @@ class World {
          * @param   organisms   sample of organisms
          * @param   out         output stream
          */
-        void write_combined_trees(Species * sp_ptr,
+        void write_diploid1_trees(Species * sp_ptr,
                 const std::vector<const Organism *>& organisms,
                 std::ostream& out);                  
         

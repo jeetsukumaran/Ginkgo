@@ -325,7 +325,7 @@ void World::write_haploid_tree(Species * sp_ptr,
     out << "END;\n\n";
 }
 
-void World::write_diploid_trees(Species * sp_ptr,
+void World::write_diploid2_trees(Species * sp_ptr,
                 const std::vector<const Organism *>& organisms,
                 std::ostream& out) {
                 
@@ -350,7 +350,7 @@ void World::write_diploid_trees(Species * sp_ptr,
     out << "END;\n\n";
 }
 
-void World::write_combined_trees(Species * sp_ptr,
+void World::write_diploid1_trees(Species * sp_ptr,
         const std::vector<const Organism *>& organisms,
         std::ostream& out) {
 
@@ -359,18 +359,18 @@ void World::write_combined_trees(Species * sp_ptr,
     out << "BEGIN TREES;\n";
     
     // dummy scoping to allow tree to be freed when it goes out of scope
-    {
-        Tree tree(this->coalesce_multiple_roots_);        
-        for (std::vector<const Organism *>::const_iterator oi = organisms.begin();
-                oi != organisms.end();
-                ++oi) {
-            tree.process_node((*oi)->get_haploid_node(), &sp_ptr->get_organism_label(**oi));
-        }
-        out << "    TREE HaploidLocus = ";
-        this->write_tree(tree, sp_ptr->get_label(), organisms.size(), out);
-        out << ";\n";  
-    
-    }
+//     {
+//         Tree tree(this->coalesce_multiple_roots_);        
+//         for (std::vector<const Organism *>::const_iterator oi = organisms.begin();
+//                 oi != organisms.end();
+//                 ++oi) {
+//             tree.process_node((*oi)->get_haploid_node(), &sp_ptr->get_organism_label(**oi));
+//         }
+//         out << "    TREE HaploidLocus = ";
+//         this->write_tree(tree, sp_ptr->get_label(), organisms.size(), out);
+//         out << ";\n";  
+//     
+//     }
     
     for (unsigned i = 0; i < NUM_NEUTRAL_DIPLOID_LOCII; ++i) {
         Tree tree(this->coalesce_multiple_roots_);
@@ -415,11 +415,11 @@ void World::save_trees(Species * sp_ptr,
         return;
     }
     
-    this->log_info("Building trees for haploid and sampled diploid locii alleles for " + num_samples + " organisms (" + num_samples + " leaves per tree).");  
+    this->log_info("Building trees for subsampled diploid locii alleles for " + num_samples + " organisms (" + num_samples + " leaves per tree).");  
     std::ofstream combined_trees;            
     this->open_ofstream(combined_trees,
-        this->compose_output_filename(sp_ptr->get_label(), label, "combined.tre"));
-    this->write_combined_trees(sp_ptr, organisms, combined_trees);          
+        this->compose_output_filename(sp_ptr->get_label(), label, "diploid1.tre"));
+    this->write_diploid1_trees(sp_ptr, organisms, combined_trees);          
 
     this->log_info("Building tree of haploid locus alleles for " + num_samples + " organisms (" + num_samples + " leaves per tree).");    
     std::ofstream haploid_trees;
@@ -428,11 +428,11 @@ void World::save_trees(Species * sp_ptr,
         this->compose_output_filename(sp_ptr->get_label(), label, "haploid.tre"));    
     this->write_haploid_tree(sp_ptr, organisms, haploid_trees);
     
-    this->log_info("Building trees for diploid locii alleles for " + num_samples + " organisms (" + convert::to_scalar<std::string>(organisms.size()*2) + " leaves per tree).");  
+    this->log_info("Building trees for full diploid locii complement for " + num_samples + " organisms (" + convert::to_scalar<std::string>(organisms.size()*2) + " leaves per tree).");  
     std::ofstream diploid_trees;
     this->open_ofstream(diploid_trees,
-        this->compose_output_filename(sp_ptr->get_label(), label, "diploid.tre"));  
-    this->write_diploid_trees(sp_ptr, organisms, diploid_trees);
+        this->compose_output_filename(sp_ptr->get_label(), label, "diploid2.tre"));  
+    this->write_diploid2_trees(sp_ptr, organisms, diploid_trees);
  
 }                
 
