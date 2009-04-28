@@ -319,7 +319,7 @@ void World::write_haploid_tree(Species * sp_ptr,
     // write tree
     this->write_nexus_header(sp_ptr, organisms, out);
     out << "BEGIN TREES;\n";
-    out << "    TREE HaploidLocus = ";
+    out << "    TREE HaploidLocus = [&R] ";
     this->write_tree(tree, sp_ptr->get_label(), organisms.size(), out);
     out << ";\n";
     out << "END;\n\n";
@@ -343,7 +343,7 @@ void World::write_diploid2_trees(Species * sp_ptr,
             tree.process_node((*oi)->get_diploid_node1(i), &allele1);
             tree.process_node((*oi)->get_diploid_node2(i), &allele2);            
         }
-        out << "    TREE DiploidLocus" << std::setw(2) << std::setfill('0') << i+1 << " = "; 
+        out << "    TREE DiploidLocus" << std::setw(2) << std::setfill('0') << i+1 << " = [&R] "; 
         this->write_tree(tree, sp_ptr->get_label(), organisms.size(), out);
         out << ";\n";
     }
@@ -379,7 +379,7 @@ void World::write_diploid1_trees(Species * sp_ptr,
                 ++oi) {
             tree.process_node((*oi)->get_diploid_random_node(i, this->rng_), &sp_ptr->get_organism_label(**oi));          
         }
-        out << "    TREE DiploidLocus" << std::setw(2) << std::setfill('0') << i+1 << " = "; 
+        out << "    TREE DiploidLocus" << std::setw(2) << std::setfill('0') << i+1 << " = [&R] "; 
         this->write_tree(tree, sp_ptr->get_label(), organisms.size(), out);
         out << ";\n";
     }
