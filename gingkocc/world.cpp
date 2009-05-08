@@ -40,6 +40,10 @@ World::World()
     : species_(),
       rng_(),
       landscape_(species_, rng_),
+      num_fitness_factors_(1),
+      fitness_factor_resolution_(1),
+      generations_to_run_(0),
+      current_generation_(0),
       coalesce_multiple_roots_(true),
       is_log_to_screen_(true),
       is_produce_final_output_(true) {
@@ -51,6 +55,10 @@ World::World(unsigned long seed)
     : species_(),
       rng_(seed),
       landscape_(species_, rng_),
+      num_fitness_factors_(1),
+      fitness_factor_resolution_(1),
+      generations_to_run_(0),
+      current_generation_(0),      
       coalesce_multiple_roots_(true),
       is_log_to_screen_(true),
       is_produce_final_output_(true) {

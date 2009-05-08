@@ -341,6 +341,13 @@ void WorldConfigurator::parse()  {
     this->size_y_ = this->get_configuration_scalar<unsigned long>("ncols");
     this->generations_to_run_ = this->get_configuration_scalar<unsigned long>("ngens");
     this->num_fitness_factors_ = this->get_configuration_scalar<unsigned>("nfitness", MAX_FITNESS_FACTORS);
+    if (this->num_fitness_factors_ > MAX_FITNESS_FACTORS) {
+        std::ostringstream s;
+        s << "maximum number of fitness factors allowed is " << MAX_FITNESS_FACTORS;        
+        s << ", but requested " << this->num_fitness_factors_;
+        throw this->build_exception(s.str());
+    }
+    this->fitness_factor_resolution_ = this->get_configuration_scalar<unsigned>("fitness-resolution", 1);
     try {
         this->rand_seed_ = this->get_configuration_scalar<unsigned>("rseed");
     } catch (const ConfigurationError& e) {
@@ -356,6 +363,7 @@ void WorldConfigurator::configure(World& world)  {
     world.set_random_seed(this->rand_seed_);
     world.set_generations_to_run(this->generations_to_run_);
     world.set_num_fitness_factors(this->num_fitness_factors_);
+    world.set_fitness_factor_resolution(this->fitness_factor_resolution_);
     world.generate_landscape(this->size_x_, this->size_y_);
     world.set_produce_final_output(this->produce_final_output_);
 }

@@ -510,10 +510,12 @@ class WorldConfigurator : public Configurator {
         unsigned long   generations_to_run_;        
         /** Number of fitness factors. */
         unsigned int    num_fitness_factors_;
+        /** Fitness factor scaling */
+        unsigned int    fitness_factor_resolution_;
         /** Random number seed. */        
         unsigned long   rand_seed_;
         /** Produce final output? */
-        bool            produce_final_output_;
+        bool            produce_final_output_;        
 
 }; // WorldConfigurator
 
