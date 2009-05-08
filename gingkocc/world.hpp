@@ -193,21 +193,21 @@ class World {
         /**
          * Returns the scaling factor for fitness (genotypic and environmental
          * fitness factor values will be divided by this value, providing finer
-         * resolution for tracking fitness factor values).
+         * grain for tracking fitness factor values).
          * @return scaling for fitness factors
          */        
-        unsigned get_fitness_factor_resolution() const {
-            return this->fitness_factor_resolution_;
+        unsigned get_fitness_factor_grain() const {
+            return this->fitness_factor_grain_;
         }
         
         /**
          * Returns the scaling factor for fitness (genotypic and environmental
          * fitness factor values will be divided by this value, providing finer
-         * resolution for tracking fitness factor values).
+         * grain for tracking fitness factor values).
          * @param scaling for fitness factors
          */      
-        void set_fitness_factor_resolution(unsigned fitness_factor_resolution) {
-            this->fitness_factor_resolution_ = fitness_factor_resolution;
+        void set_fitness_factor_grain(unsigned fitness_factor_grain) {
+            this->fitness_factor_grain_ = fitness_factor_grain;
         }        
         
         /**
@@ -566,9 +566,9 @@ class World {
         unsigned                                num_fitness_factors_;
         /** 
          * All genotypic fitness factors will be divided by this value 
-         * to provide finer resolution. 
+         * to provide finer grain. 
          */
-        unsigned                                fitness_factor_resolution_;
+        unsigned                                fitness_factor_grain_;
         /** Tracks the total number of generations to run. */
         unsigned long                           generations_to_run_;        
         /** Tracks the number of generations that have been run. */

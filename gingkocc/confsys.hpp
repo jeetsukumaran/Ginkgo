@@ -511,7 +511,7 @@ class WorldConfigurator : public Configurator {
         /** Number of fitness factors. */
         unsigned int    num_fitness_factors_;
         /** Fitness factor scaling */
-        unsigned int    fitness_factor_resolution_;
+        unsigned int    fitness_factor_grain_;
         /** Random number seed. */        
         unsigned long   rand_seed_;
         /** Produce final output? */

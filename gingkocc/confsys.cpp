@@ -347,7 +347,10 @@ void WorldConfigurator::parse()  {
         s << ", but requested " << this->num_fitness_factors_;
         throw this->build_exception(s.str());
     }
-    this->fitness_factor_resolution_ = this->get_configuration_scalar<unsigned>("fitness-resolution", 1);
+    this->fitness_factor_grain_ = this->get_configuration_scalar<unsigned>("fitness-grain", 1);
+    if (this->fitness_factor_grain_ == 0) {
+        throw this->build_exception("fitness factor grain must be > 0");  
+    }
     try {
         this->rand_seed_ = this->get_configuration_scalar<unsigned>("rseed");
     } catch (const ConfigurationError& e) {
@@ -363,7 +366,7 @@ void WorldConfigurator::configure(World& world)  {
     world.set_random_seed(this->rand_seed_);
     world.set_generations_to_run(this->generations_to_run_);
     world.set_num_fitness_factors(this->num_fitness_factors_);
-    world.set_fitness_factor_resolution(this->fitness_factor_resolution_);
+    world.set_fitness_factor_grain(this->fitness_factor_grain_);
     world.generate_landscape(this->size_x_, this->size_y_);
     world.set_produce_final_output(this->produce_final_output_);
 }
