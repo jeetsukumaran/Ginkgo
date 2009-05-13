@@ -138,7 +138,7 @@ void World::cycle() {
 //     }
 //     this->landscape_.process_migrants();
 
-    if ( this->current_generation_ % 100 == 0) {
+    if ( this->current_generation_ % 10 == 0) {
         std::ostringstream gen;
         gen << "Generation " << this->current_generation_ << " life-cycle running.";
         this->log_info(gen.str());
