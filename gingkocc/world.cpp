@@ -138,22 +138,24 @@ void World::cycle() {
 //     }
 //     this->landscape_.process_migrants();
 
-    std::ostringstream gen;
-    gen << "Generation " << this->current_generation_ << " life-cycle running.";
-    this->log_info(gen.str());
-    this->log_detail("Reproduction/migration phase.");
+    if ( this->current_generation_ % 100 == 0) {
+        std::ostringstream gen;
+        gen << "Generation " << this->current_generation_ << " life-cycle running.";
+        this->log_info(gen.str());
+    }
+//     this->log_detail("Reproduction/migration phase.");
     for (CellIndexType i = 0; i < this->landscape_.size(); ++i) {
         this->landscape_[i].reproduction(); 
         this->landscape_[i].migration();
     }
-    this->log_detail("Processing migrants.");
+//     this->log_detail("Processing migrants.");
     this->landscape_.process_migrants();
-    this->log_detail("Survival/competition phase.");
+//     this->log_detail("Survival/competition phase.");
     for (CellIndexType i = 0; i < this->landscape_.size(); ++i) {    
         this->landscape_[i].survival();
         this->landscape_[i].competition();        
     }    
-    this->log_detail("Generation life-cycle completed.");
+//     this->log_detail("Generation life-cycle completed.");
     ++this->current_generation_;
 }
 
