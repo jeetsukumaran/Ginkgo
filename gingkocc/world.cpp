@@ -88,6 +88,7 @@ void World::generate_landscape(CellIndexType size_x, CellIndexType size_y) {
 Species& World::new_species(const std::string& label) {
     Species* sp = new Species(label, 
                               this->num_fitness_factors_, 
+                              this->fitness_factor_grain_,
                               this->rng_);
     this->species_.insert(std::make_pair(std::string(label), sp));
     std::vector<long> default_movement_costs(this->landscape_.size(), 1);

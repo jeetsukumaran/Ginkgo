@@ -766,6 +766,7 @@ class Species {
          */
         Species(const std::string& label, 
                 unsigned num_fitness_factors,
+                unsigned fitness_factor_grain,
                 RandomNumberGenerator& rng);              
                 
         /**
@@ -991,8 +992,11 @@ class Species {
             const FitnessFactorType * e = environment;
             std::vector<float>::const_iterator s = this->selection_weights_.begin();
             float weighted_distance = 0.0;
+            float diff = 0.0;
             for (unsigned i = 0; i < this->num_fitness_factors_; ++i, ++g, ++e, ++s) {
-                weighted_distance += pow((*e - *g), 2) * *s; // each distance weighted by selection strength
+//                 weighted_distance += pow((*e - *g), 2) * *s; // each distance weighted by selection strength
+                diff = *e/this->fitness_factor_grain_ - *g/this->fitness_factor_grain_;
+                weighted_distance += (diff * diff) * *s; // each distance weighted by selection strength
             }
             return exp(-weighted_distance);
         }                    
@@ -1144,12 +1148,14 @@ class Species {
         std::string                         label_;
         /** number of active fitness factors */
         unsigned                            num_fitness_factors_;
-        /** coefficients for the fitness functions */
+        /** scaling factor for fitness coefficients, for finer resolution of fitness levels */
+        unsigned int                        fitness_factor_grain_;
+        /** species-level weighting coefficients for the fitness functions */
         std::vector<float>                  selection_weights_;
         /** rate of mutation for the genotypic fitness factors */
         float                               mutation_rate_;
         /** window for perturbations of fitness factor values */
-        FitnessFactorType                   max_mutation_size_;        
+        FitnessFactorType                   max_mutation_size_;
         /** mean number of offspring per female */
         unsigned                            mean_reproductive_rate_;
         /** allowing for evolution in fecundity */

@@ -37,9 +37,11 @@ Species& Organism::species() const {
 
 Species::Species(const std::string& label, 
                  unsigned num_fitness_factors,
+                 unsigned fitness_factor_grain,
                  RandomNumberGenerator& rng) 
     : label_(label),
       num_fitness_factors_(num_fitness_factors),
+      fitness_factor_grain_(fitness_factor_grain),
       rng_(rng),
       organism_label_index_(0) {
     this->mutation_rate_ = 0.1;
