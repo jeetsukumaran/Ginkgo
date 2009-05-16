@@ -995,7 +995,7 @@ class Species {
             float diff = 0.0;
             for (unsigned i = 0; i < this->num_fitness_factors_; ++i, ++g, ++e, ++s) {
 //                 weighted_distance += pow((*e - *g), 2) * *s; // each distance weighted by selection strength
-                diff = *e/this->fitness_factor_grain_ - *g/this->fitness_factor_grain_;
+                diff = static_cast<float>(*e)/this->fitness_factor_grain_ - static_cast<float>(*g)/this->fitness_factor_grain_;
                 weighted_distance += (diff * diff) * *s; // each distance weighted by selection strength
             }
             return exp(-weighted_distance);
