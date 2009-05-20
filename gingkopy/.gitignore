@@ -1,11 +1,9 @@
 *.pyc
 *.kpf
 setup.cfg
-DendroPy.egg-info*
+GingkoPy.egg-info*
 .svn*
 .DS_Store*
-dendropy/tests/output/
 build/*
 dist/*
 setuptools-*.egg
-dendropy/tests/data/heavy/*
