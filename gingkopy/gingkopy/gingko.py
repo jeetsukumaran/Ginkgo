@@ -29,14 +29,33 @@ try:
 except:
     pass
 
+from dendropy import splits
+from dendropy import datasets
 from dendropy import treedists
 
-def georeference_tree_taxa(tree):
+def read_trees(src, encode_splits=True, dataset=None):
+    """
+    Wraps reading of trees, georeferencing taxa, and encoding of splits
+    """
+    if dataset is None:
+        dataset = datasets.Dataset()
+    if isinstance(src, str):
+        f = open(src, "rU")
+    else:
+        f = src
+    gtrees = dataset.read_trees(f, "NEXUS")
+    georeference_taxa(dataset.taxa_blocks[0])
+    if encode_splits:
+        for t in gtrees:
+            splits.encode_splits(t)
+    return gtrees            
+    
+def georeference_taxa(taxa_block):
     """
     Decorates taxa with x and y cell coordinates as parsed from the taxon 
     labels.
     """
-    for taxon in tree.taxa_block:
+    for taxon in taxa_block:
         taxon.x = int(re.match(".* x([\d]+) .*", taxon.label).groups(1)[0])
         taxon.y = int(re.match(".* y([\d]+) .*", taxon.label).groups(1)[0])        
     
@@ -65,7 +84,7 @@ def calc_pearsons_r(tree):
     for idx1, leaf1 in enumerate(leaves):
         for idx2, leaf2 in enumerate(leaves[idx1+1:]):
             gd.append(geo_distance(leaf1, leaf2))
-            pd.append(treedists.patristic_distance(leaf1, leaf2))    
+            pd.append(treedists.patristic_distance(tree, leaf1.taxon, leaf2.taxon))
     k = robjects.r.cor(robjects.IntVector(gd), robjects.IntVector(pd), method='pearson')
     tree.pearson_r_val = k[0]
     return tree.pearson_r_val
