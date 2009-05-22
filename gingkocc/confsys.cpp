@@ -286,6 +286,28 @@ std::vector<std::string> Configurator::get_matching_configuration_keys(const std
     return this->configuration_block_.get_keys(key_start);
 }
 
+bool Configurator::parse_position_coordinates(const std::string& pos, CellIndexType& x, CellIndexType &y) {
+    std::string pos_clean = textutil::strip(pos, WHITESPACE);
+    if (pos_clean.size() == 0) {
+        return false;
+    }
+    std::vector<std::string> pos_parts = textutil::split(pos_clean, ",", 1, false);
+    if (pos_parts.size() != 2) {
+        throw this->build_exception("invalid or incomplete position specification: \"" + pos_clean + "\"");
+    }
+    try {
+        x = convert::to_scalar<unsigned long>(pos_parts[0]);
+    } catch (const convert::ValueError& e) {
+        throw this->build_exception("invalid x-coordinate value for position: \"" + pos_parts[0] + "\"");
+    }
+    try {
+        y = convert::to_scalar<unsigned long>(pos_parts[1]);
+    } catch (const convert::ValueError& e) {
+        throw this->build_exception("invalid y-coordinate value for position: \"" + pos_parts[1] + "\"");
+    }
+    return true;
+}
+
 void Configurator::get_configuration_positions(const std::string& key, OrganismDistribution& od, bool allow_wildcard) {
     std::vector<std::string> positions = this->get_configuration_vector<std::string>(key);
     
@@ -297,30 +319,34 @@ void Configurator::get_configuration_positions(const std::string& key, OrganismD
     
     od.x.reserve(od.x.size() + positions.size());
     od.y.reserve(od.y.size() + positions.size());
+    CellIndexType x = 0;
+    CellIndexType y = 0;
     for (std::vector<std::string>::const_iterator pos = positions.begin(); pos < positions.end(); ++pos) {
-        std::string pos_clean = textutil::strip(*pos, WHITESPACE);
-        if (pos_clean.size() == 0) {
-            continue;
+        if (this->parse_position_coordinates(*pos, x, y)) {
+            od.x.push_back(x);
+            od.y.push_back(y);
         }
-        std::vector<std::string> pos_parts = textutil::split(pos_clean, ",", 1, false);
-        if (pos_parts.size() != 2) {
-            throw this->build_exception("invalid or incomplete position specification: \"" + pos_clean + "\"");
-        }
-        try {
-            od.x.push_back(convert::to_scalar<unsigned long>(pos_parts[0]));
-        } catch (const convert::ValueError& e) {
-            throw this->build_exception("invalid x-coordinate value for position: \"" + pos_parts[0] + "\"");
-        }
-        try {
-            od.y.push_back(convert::to_scalar<unsigned long>(pos_parts[1]));
-        } catch (const convert::ValueError& e) {
-            throw this->build_exception("invalid y-coordinate value for position: \"" + pos_parts[1] + "\"");
-        }         
     }
 }
 
 ConfigurationError Configurator::build_exception(const std::string& message) const {
     return build_configuration_block_exception(this->configuration_block_, message);
+}
+
+CellIndexType Configurator::xy_to_index(World& world, CellIndexType x, CellIndexType y) {
+    if (x > world.landscape().size_x()-1) {
+        std::ostringstream msg;
+        msg << "maximum x-coordinate on landscape is " << world.landscape().size_x();
+        msg << " but position specifies x-coordinate of " << x;
+        throw this->build_exception(msg.str());
+    }
+    if (y > world.landscape().size_y()-1) {
+        std::ostringstream msg;
+        msg << "maximum x-coordinate on landscape is " << world.landscape().size_y();
+        msg << " but position specifies x-coordinate of " << y;
+        throw this->build_exception(msg.str());
+    } 
+    return world.landscape().xy_to_index(x, y);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -538,34 +564,46 @@ void GenerationConfigurator::process_movement_costs() {
     }
 }
 
-// void GenerationConfigurator::process_sampling_regimes() {
-//     std::vector<std::string> keys = this->get_matching_configuration_keys("sample");
-//     for (std::vector<std::string>::const_iterator k = keys.begin(); k != keys.end(); ++k) {
-//         OrganismDistribution od = OrganismDistribution();
-//         std::string key = *k;
-//         std::vector<std::string> key_parts = textutil::split(key, ":", 1, false);
-//         
-//         if (key_parts.size() < 2) {
-//             throw this->build_exception("need to specify species label for sampling");
-//         }
-//         
-//         std::vector<std::string> species_number_parts = textutil::split(key_parts[1], "#", 1, false);
-//         if (species_number_parts.size() < 2) {
-//             od.num_organisms_per_cell = 0;
-//         } else if (species_number_parts[1] == "*") {
-//             od.num_organisms_per_cell = 0;
-//         } else {      
-//             try {
-//                 od.num_organisms_per_cell = convert::to_scalar<unsigned long>(species_number_parts[1]);
-//             } catch (const convert::ValueError& e) {
-//                 throw this->build_exception("invalid value for sample number \"" + species_number_parts[1] + "\"");
-//             }
-//         } 
-//         od.species_label = species_number_parts[0];
-//         this->get_configuration_positions(key, od, true);
-//         this->samples_.insert(std::make_pair(od.species_label, od));
-//     }
-// }
+void GenerationConfigurator::process_dispersals() {
+    std::vector<std::string> keys = this->get_matching_configuration_keys("disperse");
+    for (std::vector<std::string>::iterator k = keys.begin(); k != keys.end(); ++k) {
+        OrganismDispersal od;
+        std::string& key = *k;
+        std::vector<std::string> key_parts = textutil::split(key, ":", 1, false);
+        if (key_parts.size() < 2) {
+            throw this->build_exception("must specify species using \":\" token for dispersal event");
+        }
+        std::vector<std::string> species_num_parts = textutil::split(key, "#", 1, false);
+        od.species_label = species_num_parts[0];
+        if (species_num_parts.size() == 2) {
+            try {
+                od.num_organisms = convert::to_scalar<unsigned long>(species_num_parts[1]);
+            } catch (const convert::ValueError& e) {
+                throw this->build_exception("invalid value for number of organisms: \"" + species_num_parts[1] + "\"");
+            }        
+        } else {
+            od.num_organisms = 0;        
+        }
+        std::string disp_pos = this->get_configuration_scalar<std::string>(key);
+        std::vector<std::string> disp_pos_parts = textutil::split(disp_pos, "|", 1, false);
+        if (disp_pos_parts.size() == 1) {
+            od.probability = 1.0;
+        } else {
+            try {
+                od.probability = convert::to_scalar<float>(disp_pos_parts[1]);
+            } catch (const convert::ValueError& e) {
+                throw this->build_exception("invalid value for probability of dispersal: \"" + disp_pos_parts[1] + "\"");
+            }             
+        }
+        std::vector<std::string> positions = textutil::split_on_any(disp_pos_parts[0], WHITESPACE, 1, false);
+        if (positions.size() < 2) {
+            throw this->build_exception("must specify source and destination positions for dispersal");
+        }
+        this->parse_position_coordinates(positions[0], od.src_x, od.src_y);
+        this->parse_position_coordinates(positions[0], od.dest_x, od.dest_y);
+        this->dispersals_.push_back(od);
+    }
+}
 
 void GenerationConfigurator::parse()  {
     try {
@@ -576,6 +614,7 @@ void GenerationConfigurator::parse()  {
     this->process_carrying_capacity();
     this->process_environments();
     this->process_movement_costs();
+    this->process_dispersals();
 }
 
 void GenerationConfigurator::configure(World& world)  {
@@ -599,6 +638,20 @@ void GenerationConfigurator::configure(World& world)  {
             throw this->build_exception("movement costs: species \"" + mci->first + "\" not defined");
         }
         world_settings.movement_costs.insert(std::make_pair(mci->first, this->get_validated_grid_path(mci->second, world)));
+    }
+    for (std::vector<OrganismDispersal>::iterator odi = this->dispersals_.begin(); odi != this->dispersals_.end(); ++odi) {
+        OrganismDispersal& od = *odi;
+        DispersalEvent de;        
+        if (world.has_species(od.species_label)) {
+            de.species_ptr = world.get_species_ptr(od.species_label);
+        } else {
+            throw this->build_exception("Species \"" + od.species_label + "\" not defined");
+        }
+        de.num_organisms = od.num_organisms;
+        de.source = this->xy_to_index(world, od.src_x, od.src_y);
+        de.destination = this->xy_to_index(world, od.dest_x, od.dest_y);
+        de.probability = od.probability;
+        world_settings.dispersal_events.push_back(de);
     }
     world.add_world_settings(this->generation_, world_settings);
 }
@@ -640,20 +693,8 @@ void TreeSamplingConfigurator::configure(World& world) {
     
     assert(this->organism_sampling_.x.size() == this->organism_sampling_.y.size());
     if (this->organism_sampling_.x.size() > 0) {
-        for (unsigned i = 0; i < this->organism_sampling_.x.size(); ++i) {
-            if (this->organism_sampling_.x[i] > world.landscape().size_x()-1) {
-                std::ostringstream msg;
-                msg << "maximum x-coordinate on landscape is " << world.landscape().size_x();
-                msg << " but position specifies x-coordinate of " << this->organism_sampling_.x[i];
-                throw this->build_exception(msg.str());
-            }
-            if (this->organism_sampling_.y[i] > world.landscape().size_y()-1) {
-                std::ostringstream msg;
-                msg << "maximum x-coordinate on landscape is " << world.landscape().size_y();
-                msg << " but position specifies x-coordinate of " << this->organism_sampling_.y[i];
-                throw this->build_exception(msg.str());
-            }              
-            world_sampling_regime.cell_indexes.insert(world.landscape().xy_to_index(this->organism_sampling_.x[i], this->organism_sampling_.y[i]));
+        for (unsigned i = 0; i < this->organism_sampling_.x.size(); ++i) {             
+            world_sampling_regime.cell_indexes.insert(this->xy_to_index(world, this->organism_sampling_.x[i], this->organism_sampling_.y[i]));
         }
             
     } else if (this->random_sample_size_ > 0) {

@@ -430,6 +430,14 @@ class Configurator {
             return this->configuration_block_.has_key(key);
         }
         
+        /** Converts x,y to cell index, with validation. */
+        CellIndexType xy_to_index(World& world, CellIndexType x, CellIndexType y);
+        
+        /**
+         * Parses string in the form of "x,y" to a pair of coordinates.
+         */
+        bool parse_position_coordinates(const std::string& pos, CellIndexType& x, CellIndexType &y);
+        
         /**
          * Retrieves vector of cell positions from a configuration entry,
          * parses them, and adds them to the OrganismDistribution object.         
@@ -621,8 +629,39 @@ class GenerationConfigurator : public Configurator {
         
         /** Processes movement costs. */
         void process_movement_costs();
+        
+        /** Processes dispersal specs */
+        void process_dispersals();
            
     private:
+    
+        struct OrganismDispersal {
+        
+            public:
+                OrganismDispersal() 
+                    : num_organisms(0),
+                      src_x(0),
+                      src_y(0),
+                      dest_x(0),
+                      dest_y(0),
+                      probability(0) { }
+        
+            public:
+                /** Pointer to species. */ 
+                std::string                 species_label;       
+                /**  Number of organisms from cell to be sampled (0 = all). */
+                unsigned long               num_organisms;
+                /** Origin cell index. */
+                CellIndexType               src_x;
+                CellIndexType               src_y;
+                /** Destination cell index. */
+                CellIndexType               dest_x;
+                CellIndexType               dest_y;                
+                /** Probability of dispersal. */
+                float                       probability;
+                
+        };    
+    
     
         /** Generation #. */
         unsigned long                       generation_;
@@ -645,7 +684,7 @@ class GenerationConfigurator : public Configurator {
         /** 
          * Sampling regime.
          */
-        std::map<std::string, OrganismDistribution>   samples_;          
+        std::vector<OrganismDispersal>      dispersals_;     
 
 }; // GenerationConfigurator
 

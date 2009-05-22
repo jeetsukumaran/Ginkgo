@@ -69,6 +69,33 @@ struct SamplingRegime {
 };
 
 /**
+ * Stochastic dispersal.
+ */
+struct DispersalEvent {
+
+    public:
+        DispersalEvent() 
+            : species_ptr(0),
+              num_organisms(0),
+              source(0),
+              destination(0),
+              probability(0) { }
+
+    public:
+        /** Pointer to species. */ 
+        Species *                   species_ptr;       
+        /**  Number of organisms from cell to be sampled (0 = all). */
+        unsigned long               num_organisms;
+        /** Origin cell index. */
+        CellIndexType               source;
+        /** Destination cell index. */
+        CellIndexType               destination;
+        /** Probability of dispersal. */
+        float                       probability;
+        
+};
+
+/**
  * Changes to world geographical template at the start of a generation, 
  * modelling climate change, changes in landscape etc.
  */
@@ -87,7 +114,12 @@ struct WorldSettings {
      * Movement costs that need to be changed/set. (expressed as species labels
      * mapped to ESRI ASCII Grid file paths). 
      */
-    std::map<std::string, std::string>      movement_costs;   
+    std::map<std::string, std::string>      movement_costs;
+    
+    /**
+     * Dispersal events.
+     */
+    std::vector<DispersalEvent>             dispersal_events;     
 
 }; // WorldSettings
 
