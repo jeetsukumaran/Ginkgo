@@ -264,14 +264,14 @@ class Landscape {
             x = this->index_to_x(i) + this->rng_.uniform_int(-1, 1); // to reflect: % this->size_x_; 
             y = this->index_to_y(i) + this->rng_.uniform_int(-1, 1); // to reflect: % this->size_y_; 
             if (x < 0) {
-                x = -x;
+                x = 1;
             } else if (static_cast<unsigned long>(x) >= this->size_x_) {
-                x = (2*this->size_x_) - x;
+                x = this->size_x_ - 2;
             }
             if (y < 0) {
-                y = -y;
+                y = 1;
             } else if (static_cast<unsigned long>(y) >= this->size_y_) {
-                y = (2*this->size_y_) - y;
+                y = this->size_y_ - 2;
             }
             return this->xy_to_index(x, y);
         }
