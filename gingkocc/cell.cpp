@@ -114,16 +114,16 @@ void Cell::migration() {
         Species& sp = og->species();
         int movement = sp.get_movement_capacity();
         CellIndexType curr_idx = this->index_;
-        unsigned int movement_cost = 0;                        
+        int movement_cost = 0;
         while (movement > 0) {
             CellIndexType dest_idx = this->landscape_.random_neighbor(curr_idx);
-            movement_cost = sp.movement_cost(dest_idx);
-            if ( movement - movement_cost >= 0) {
+            movement_cost = static_cast<int>(sp.movement_cost(dest_idx));
+            if ( movement >= movement_cost) {
                 movement -= movement_cost;
                 curr_idx = dest_idx;
             } else {
                 movement -= sp.movement_cost(curr_idx);
-            }            
+            }
         } 
         
         if (curr_idx != this->index_) {

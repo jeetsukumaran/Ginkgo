@@ -218,8 +218,8 @@ void World::process_world_settings() {
     }
     if (wi->second.environments.size() != 0) {
         for (std::map<unsigned, std::string>::iterator ei = wi->second.environments.begin();
-             ei != wi->second.environments.end();
-             ++ei) {
+                 ei != wi->second.environments.end();
+                 ++ei) {
             std::ostringstream msg;
             msg << "Setting environmental variable " <<  ei->first+1 <<  ": \"" <<  ei->second <<  "\"";
             this->log_info(msg.str());
@@ -229,14 +229,48 @@ void World::process_world_settings() {
     }            
     if (wi->second.movement_costs.size() != 0) {
         for (std::map<std::string, std::string>::iterator mi = wi->second.movement_costs.begin();
-             mi != wi->second.movement_costs.end();
-             ++mi) {
+                 mi != wi->second.movement_costs.end();
+                 ++mi) {
             std::ostringstream msg;
             msg << "Setting movement costs for species " <<  mi->first <<  ": \"" <<  mi->second <<  "\"";
             this->log_info(msg.str());
             asciigrid::AsciiGrid grid(mi->second);
             this->set_species_movement_costs(mi->first, grid.get_cell_values());                    
         }
+    }
+    if (wi->second.dispersal_events.size() != 0) {
+        for (std::vector<DispersalEvent>::iterator di = wi->second.dispersal_events.begin();
+                 di != wi->second.dispersal_events.end();
+                 ++di) {
+            DispersalEvent& de = *di; 
+            std::ostringstream msg;
+            msg << "Species " << de.species_ptr->get_label() << " dispersal";
+            msg << " from (" << this->landscape_.index_to_x(de.source) << "," << this->landscape_.index_to_y(de.source) << ")";
+            msg << " to (" << this->landscape_.index_to_x(de.destination) << "," << this->landscape_.index_to_y(de.destination) << "):";
+            if (this->rng().uniform_01() > de.probability) {
+                msg << " FAILED.";
+            } else {
+                std::vector<const Organism *> organisms;
+                this->landscape_[de.source].sample_organisms(de.species_ptr, organisms, de.num_organisms);
+                this->landscape_.clear_migrants();
+                unsigned long num_males = 0;
+                unsigned long num_females = 0;
+                for (std::vector<const Organism *>::iterator oi = organisms.begin();  oi != organisms.end(); ++oi) {
+                    Organism* og = const_cast<Organism*>(*oi);
+                    if (og->is_male()) {
+                        ++num_males;
+                    } else {
+                        ++num_females;
+                    }
+                    this->landscape_.add_migrant(*og, de.destination);
+                    og->set_expired(true);
+                }
+                msg << " " << num_females << " females and " << num_males << " males.";
+                this->landscape_[de.source].purge_expired_organisms();
+                this->landscape_.process_migrants();
+            }
+            this->log_info(msg.str());            
+        }             
     }
 }
 

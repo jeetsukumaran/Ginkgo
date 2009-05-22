@@ -573,7 +573,7 @@ void GenerationConfigurator::process_dispersals() {
         if (key_parts.size() < 2) {
             throw this->build_exception("must specify species using \":\" token for dispersal event");
         }
-        std::vector<std::string> species_num_parts = textutil::split(key, "#", 1, false);
+        std::vector<std::string> species_num_parts = textutil::split(key_parts[1], "#", 1, false);
         od.species_label = species_num_parts[0];
         if (species_num_parts.size() == 2) {
             try {
@@ -600,7 +600,7 @@ void GenerationConfigurator::process_dispersals() {
             throw this->build_exception("must specify source and destination positions for dispersal");
         }
         this->parse_position_coordinates(positions[0], od.src_x, od.src_y);
-        this->parse_position_coordinates(positions[0], od.dest_x, od.dest_y);
+        this->parse_position_coordinates(positions[1], od.dest_x, od.dest_y);
         this->dispersals_.push_back(od);
     }
 }
