@@ -212,7 +212,7 @@ void World::process_world_settings() {
         return;
     }    
     if (wi->second.carrying_capacity.size() != 0) {
-        this->log_info("Setting carrying capacity: \"" + wi->second.carrying_capacity + "\".");
+        this->log_info("[Generation " + convert::to_scalar<std::string>(this->current_generation_) + "] Setting carrying capacity: \"" + wi->second.carrying_capacity + "\".");
         asciigrid::AsciiGrid grid(wi->second.carrying_capacity);
         this->landscape_.set_carrying_capacities(grid.get_cell_values());
     }
@@ -221,7 +221,7 @@ void World::process_world_settings() {
                  ei != wi->second.environments.end();
                  ++ei) {
             std::ostringstream msg;
-            msg << "Setting environmental variable " <<  ei->first+1 <<  ": \"" <<  ei->second <<  "\"";
+            msg << "[Generation " << this->current_generation_ << "] Setting environmental variable " <<  ei->first+1 <<  ": \"" <<  ei->second <<  "\"";
             this->log_info(msg.str());
             asciigrid::AsciiGrid grid(ei->second);
             this->landscape_.set_environment(ei->first, grid.get_cell_values());                    
@@ -232,7 +232,7 @@ void World::process_world_settings() {
                  mi != wi->second.movement_costs.end();
                  ++mi) {
             std::ostringstream msg;
-            msg << "Setting movement costs for species " <<  mi->first <<  ": \"" <<  mi->second <<  "\"";
+            msg << "[Generation " << this->current_generation_ << "] Setting movement costs for species " <<  mi->first <<  ": \"" <<  mi->second <<  "\"";
             this->log_info(msg.str());
             asciigrid::AsciiGrid grid(mi->second);
             this->set_species_movement_costs(mi->first, grid.get_cell_values());                    
@@ -244,7 +244,7 @@ void World::process_world_settings() {
                  ++di) {
             DispersalEvent& de = *di; 
             std::ostringstream msg;
-            msg << "Species " << de.species_ptr->get_label() << " dispersal";
+            msg << "[Generation " << this->current_generation_ << "] Species " << de.species_ptr->get_label() << " dispersal";
             msg << " from (" << this->landscape_.index_to_x(de.source) << "," << this->landscape_.index_to_y(de.source) << ")";
             msg << " to (" << this->landscape_.index_to_x(de.destination) << "," << this->landscape_.index_to_y(de.destination) << "):";
             if (this->rng().uniform_01() > de.probability) {
