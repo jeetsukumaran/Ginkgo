@@ -363,8 +363,8 @@ WorldConfigurator::WorldConfigurator(const ConfigurationBlock& cb)
 }
 
 void WorldConfigurator::parse()  {
-    this->size_x_ = this->get_configuration_scalar<unsigned long>("nrows"); 
-    this->size_y_ = this->get_configuration_scalar<unsigned long>("ncols");
+    this->size_x_ = this->get_configuration_scalar<unsigned long>("ncols"); 
+    this->size_y_ = this->get_configuration_scalar<unsigned long>("nrows");
     this->generations_to_run_ = this->get_configuration_scalar<unsigned long>("ngens");
     this->num_fitness_factors_ = this->get_configuration_scalar<unsigned>("nfitness", MAX_FITNESS_FACTORS);
     if (this->num_fitness_factors_ > MAX_FITNESS_FACTORS) {
