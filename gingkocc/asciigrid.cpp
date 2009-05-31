@@ -24,6 +24,7 @@
 #include <sstream>
 #include <cstdlib>
 #include <cassert>
+#include <iomanip>
 #include "textutil.hpp"
 #include "asciigrid.hpp"
 
@@ -232,7 +233,7 @@ void AsciiGrid::parse_cell_values_() {
         }
         this->cell_values_.push_back(v);        
         x+= 1;
-        if (x > this->ncols_) {
+        if (x >= this->ncols_) {
             x = 0;
             y += 1;
         }
@@ -256,6 +257,16 @@ void AsciiGrid::parse_cell_values_() {
     }
     this->is_cell_values_loaded_ = true;
     
+//     std::cout << std::endl << "*** GRID DUMP ***" << std::endl;
+//     index_type i = 0;
+//     x = 0;
+//     y = 0;
+//     for (y = 0; y < this->nrows_; ++y) {
+//         for (x = 0; x < this->ncols_; ++x, ++i) {
+//             std::cout << std::setw(4) << this->cell_values_.at(i);
+//         }
+//         std::cout << std::endl;
+//     }
 }
 
 } // asciigrid
