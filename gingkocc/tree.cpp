@@ -188,7 +188,7 @@ void Tree::write_newick_node(long node_idx, std::ostream& out) {
         if (this->landscape_ptr_ != NULL) {
             CellIndexType x = this->landscape_ptr_->index_to_x(this->cell_indexes_[node_idx]);        
             CellIndexType y = this->landscape_ptr_->index_to_y(this->cell_indexes_[node_idx]);
-            out << "X" << x << "Y" << y;
+            out << "X" << x << "_" << "Y" << y;
         }
     } else {
         NodeIndexToLabelMap::iterator node_label = this->labels_.find(node_idx);
