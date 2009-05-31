@@ -26,8 +26,9 @@
 
 namespace gingko {
 
-Tree::Tree(bool coalesce_multiple_roots) 
-    : coalesce_multiple_roots_(coalesce_multiple_roots) {
+Tree::Tree(Landscape * landscape_ptr, bool coalesce_multiple_roots) 
+    : landscape_ptr_(landscape_ptr),
+      coalesce_multiple_roots_(coalesce_multiple_roots) {
 }
 
 long Tree::process_node(GenealogyNode* node, const std::string * label) {
@@ -92,7 +93,8 @@ long Tree::process_node(GenealogyNode* node, const std::string * label) {
          ++ranciter) {
         this->tree_nodes_.push_back(new_node_parent_idx);
         new_node_parent_idx = this->tree_nodes_.size() - 1;
-        this->node_indexes_.insert(std::make_pair(*ranciter, new_node_parent_idx));        
+        this->node_indexes_.insert(std::make_pair(*ranciter, new_node_parent_idx));
+        this->cell_indexes_.insert(std::make_pair(new_node_parent_idx, (**ranciter).get_cell_index()));
     }
 //     assert(new_node_parent_idx == this->process_node(node->get_parent()));
     this->tree_nodes_.push_back(new_node_parent_idx); 
@@ -183,6 +185,11 @@ void Tree::write_newick_node(long node_idx, std::ostream& out) {
             this->write_newick_node(*child_iter, out);    
         }
         out << ")";
+        if (this->landscape_ptr_ != NULL) {
+            CellIndexType x = this->landscape_ptr_->index_to_x(this->cell_indexes_[node_idx]);        
+            CellIndexType y = this->landscape_ptr_->index_to_y(this->cell_indexes_[node_idx]);
+            out << "X" << x << "Y" << y;
+        }
     } else {
         NodeIndexToLabelMap::iterator node_label = this->labels_.find(node_idx);
         assert(node_label != this->labels_.end());

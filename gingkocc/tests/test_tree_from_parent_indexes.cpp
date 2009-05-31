@@ -32,7 +32,7 @@ int main(int argc, char* argv[]) {
         exit(1);
     }
     
-    gingko::Tree tree(true);
+    gingko::Tree tree(NULL, true);
     const char * label;
     for (int i = 1; i < argc; ++i) {
         std::vector< std::string > parts = gingko::textutil::split(argv[i], ":");

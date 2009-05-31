@@ -23,6 +23,7 @@
 #define GINGKO_TREE_H
 
 #include "biosys.hpp"
+#include "landscape.hpp"
 #include <functional>
 #include <iterator>
 #include <vector>
@@ -78,6 +79,7 @@ class TreeStructureMultipleRootError : public TreeStructureError {
 class Tree {
 
     typedef std::map< long, std::string >           NodeIndexToLabelMap;
+    typedef std::map< long, CellIndexType >         NodeIndexToCellIndexMap;
     typedef std::map< GenealogyNode*, long >        NodeToIndexMap;
     typedef std::vector<GenealogyNode *>            NodeVector;
     typedef std::vector<long>                       ParentIndexVector;
@@ -90,8 +92,10 @@ class Tree {
          * @param coalesce_multiple_roots if <code>false</code> throws
          *                                exception if nodes do not coalesce
          *                                into single ancestor
+         * @param landscape               needed to convert cell indices to x, 
+         *                                y coordinates.
          */
-        Tree(bool coalesce_multiple_roots=true);
+        Tree(Landscape* landscape_ptr=NULL, bool coalesce_multiple_roots=true);
         
         /**
          * Adds a node (and its lineage to the original ancestor) to the tree 
@@ -192,11 +196,15 @@ class Tree {
          * at each location in the array is the index of the parent of that
          * node.
          */
-        ParentIndexVector                   tree_nodes_;
+        ParentIndexVector                   tree_nodes_;        
         /** Maps node indexes to their corresponding label. */
         NodeIndexToLabelMap                 labels_;
+        /** Maps node indexes to cell indexes. */
+        NodeIndexToCellIndexMap             cell_indexes_;
         /** True if multiple roots are to be coalesced into a single node. */
         bool                                coalesce_multiple_roots_;
+        /** Landscape from which the nodes are derived. */
+        Landscape *                         landscape_ptr_;
 };
 
 

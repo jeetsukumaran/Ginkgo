@@ -358,7 +358,7 @@ void World::write_tree(Tree& tree, const std::string& species_label, unsigned lo
 void World::write_haploid_tree(Species * sp_ptr,
                 const std::vector<const Organism *>& organisms,
                 std::ostream& out) {
-    Tree tree(this->coalesce_multiple_roots_);
+    Tree tree(&this->landscape_, this->coalesce_multiple_roots_);
     
     // build tree
     for (std::vector<const Organism *>::const_iterator oi = organisms.begin();
@@ -384,7 +384,7 @@ void World::write_diploid2_trees(Species * sp_ptr,
     out << std::setfill(' '); // reset
     out << "BEGIN TREES;\n";
     for (unsigned i = 0; i < NUM_NEUTRAL_DIPLOID_LOCII; ++i) {
-        Tree tree(this->coalesce_multiple_roots_);
+        Tree tree(&this->landscape_, this->coalesce_multiple_roots_);
         std::string allele1;
         std::string allele2;
         for (std::vector<const Organism *>::const_iterator oi = organisms.begin();
@@ -426,7 +426,7 @@ void World::write_diploid1_trees(Species * sp_ptr,
 //     }
     
     for (unsigned i = 0; i < NUM_NEUTRAL_DIPLOID_LOCII; ++i) {
-        Tree tree(this->coalesce_multiple_roots_);
+        Tree tree(&this->landscape_, this->coalesce_multiple_roots_);
         for (std::vector<const Organism *>::const_iterator oi = organisms.begin();
                 oi != organisms.end();
                 ++oi) {

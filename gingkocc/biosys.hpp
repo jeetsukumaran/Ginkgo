@@ -66,7 +66,8 @@ class GenealogyNode {
         /** Constructs a node with no antecedents. */
         GenealogyNode()
         : parent_(NULL),
-          reference_count_(1)
+          reference_count_(1),
+          cell_index_(0)
           { }
                   
         /** 
@@ -153,7 +154,14 @@ class GenealogyNode {
          */          
         void set_parent(GenealogyNode * parent) {
             this->parent_ = parent;
-        }       
+        }
+        
+        /**
+         * Returns the cell index of this node.
+         */
+        CellIndexType get_cell_index() {
+            return this->cell_index_;
+        }
         
     private:
     
@@ -168,6 +176,11 @@ class GenealogyNode {
          * this object itself).
          */        
         unsigned            reference_count_;
+        
+        /**
+         * Position of containing organism: for reconstruction.
+         */
+        CellIndexType       cell_index_;         
                
 }; 
 // GenealogyNode
