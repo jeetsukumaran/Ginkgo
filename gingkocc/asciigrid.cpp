@@ -257,6 +257,7 @@ void AsciiGrid::parse_cell_values_() {
     }
     this->is_cell_values_loaded_ = true;
     
+//     out << std::setfill(' '); // reset    
 //     std::cout << std::endl << "*** GRID DUMP ***" << std::endl;
 //     index_type i = 0;
 //     x = 0;

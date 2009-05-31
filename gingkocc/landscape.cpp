@@ -91,9 +91,9 @@ void Landscape::sample_organisms(Species * sp_ptr,
     ////////////////
     // DEBUG CODE //
     ////////////////
-//     unsigned long old_size = 0;
-//     std::vector<unsigned> debug_results;
-//     std::vector<std::string> test_sample;
+    unsigned long old_size = 0;
+    std::vector<unsigned> debug_results;
+    std::vector<std::string> test_sample;
     ////////////////
 
     for (std::set<CellIndexType>::const_iterator ci = cell_indexes.begin();
@@ -105,40 +105,41 @@ void Landscape::sample_organisms(Species * sp_ptr,
         ////////////////
         // DEBUG CODE //
         ////////////////
-//         debug_results.push_back(samples.size() - old_size);
-//         if (samples.size() - old_size > 0) {
-//             std::string label = sp_ptr->get_organism_label(*samples.back());
-//             std::vector<std::string> parts = textutil::split(label, "_");
-//             test_sample.push_back(parts[1] + "," + parts[2]);
-//         } else {
-//             test_sample.push_back("--,--");
-//         }
-//         old_size = samples.size();
+        debug_results.push_back(samples.size() - old_size);
+        if (samples.size() - old_size > 0) {
+            std::string label = sp_ptr->get_organism_label(*samples.back());
+            std::vector<std::string> parts = textutil::split(label, "_");
+            test_sample.push_back(parts[1] + "," + parts[2]);
+        } else {
+            test_sample.push_back("-");
+        }
+        old_size = samples.size();
         ////////////////        
         
     }
 
     ////////////////
     // DEBUG CODE //
-    ////////////////    
-//     std::cout << std::endl << "*** SAMPLING SCHEME ***" << std::endl;
-//     CellIndexType k = 0;    
-//     CellIndexType i = 0;
-//     CellIndexType x = 0;
-//     CellIndexType y = 0;
-//     for (y = 0; y < this->size_y_; ++y) {
-//         for (x = 0; x < this->size_x_; ++x, ++i) {
-//             std::cout << std::setw(8);
-//             if ( cell_indexes.find(i) != cell_indexes.end() ) {
-//                 // std::cout << debug_results.at(k);
-//                 std::cout << test_sample.at(k);
-//                 k += 1;
-//             } else {
-//                 std::cout << "-";
-//             }
-//         }
-//         std::cout << std::endl;
-//     }
+    ////////////////
+    std::cout << std::setfill(' '); // reset
+    std::cout << std::endl << "*** SAMPLING SCHEME ***" << std::endl;
+    CellIndexType k = 0;    
+    CellIndexType i = 0;
+    CellIndexType x = 0;
+    CellIndexType y = 0;
+    for (y = 0; y < this->size_y_; ++y) {
+        for (x = 0; x < this->size_x_; ++x, ++i) {
+            std::cout << std::setw(10);
+            if ( cell_indexes.find(i) != cell_indexes.end() ) {
+                // std::cout << debug_results.at(k);
+                std::cout << test_sample.at(k);
+                k += 1;
+            } else {
+                std::cout << "-";
+            }
+        }
+        std::cout << std::endl;
+    }
     ////////////////    
     
 }
@@ -172,6 +173,7 @@ void Landscape::debug_dump_structure(std::ostream& out) {
         out << " ";
     }
     out << std::endl << std::endl;
+    out << std::setfill(' '); // reset
 }
 
 // Landscape

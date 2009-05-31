@@ -209,6 +209,7 @@ void Tree::add_indexed_node(long parent_index, const char * label) {
 }
 
 void Tree::dump(std::ostream& out) {
+    out << std::setfill(' '); // reset
     out << std::setw(10) << "idx" << "   ";
     out << std::setw(10) << "parent" << "   ";
     out << std::setw(10) << "label" << "\n";        

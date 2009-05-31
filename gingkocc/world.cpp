@@ -380,7 +380,8 @@ void World::write_diploid2_trees(Species * sp_ptr,
                 const std::vector<const Organism *>& organisms,
                 std::ostream& out) {
                 
-    this->write_nexus_header(sp_ptr, organisms, out, true); 
+    this->write_nexus_header(sp_ptr, organisms, out, true);
+    out << std::setfill(' '); // reset
     out << "BEGIN TREES;\n";
     for (unsigned i = 0; i < NUM_NEUTRAL_DIPLOID_LOCII; ++i) {
         Tree tree(this->coalesce_multiple_roots_);
@@ -399,6 +400,7 @@ void World::write_diploid2_trees(Species * sp_ptr,
         out << ";\n";
     }
     out << "END;\n\n";
+    out << std::setfill(' '); // reset
 }
 
 void World::write_diploid1_trees(Species * sp_ptr,
@@ -406,7 +408,7 @@ void World::write_diploid1_trees(Species * sp_ptr,
         std::ostream& out) {
 
     this->write_nexus_header(sp_ptr, organisms, out);
-    
+    out << std::setfill(' '); // reset
     out << "BEGIN TREES;\n";
     
     // dummy scoping to allow tree to be freed when it goes out of scope
@@ -435,7 +437,7 @@ void World::write_diploid1_trees(Species * sp_ptr,
         out << ";\n";
     }
     out << "END;\n\n";        
-        
+    out << std::setfill(' '); // reset        
 }        
 
 void World::save_trees(Species * sp_ptr, 
