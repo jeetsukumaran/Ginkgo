@@ -73,6 +73,22 @@ class Cell {
         CellIndexType get_index() const {
             return this->index_;
         }
+        
+        /**
+         * Returns x-coordinate of this cell in the landscape.
+         * @return x-coordinate of this cell in the landscape
+         */
+        CellIndexType get_x() const {
+            return this->x_;
+        }        
+        
+        /**
+         * Returns y-coordinate of this cell in the landscape.
+         * @return y-coordinate of this cell in the landscape
+         */
+        CellIndexType get_y() const {
+            return this->y_;
+        }           
 
         // --- abiotic ---
         

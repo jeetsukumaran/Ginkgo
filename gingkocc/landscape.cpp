@@ -23,6 +23,7 @@
 
 #include <iostream>
 #include <iomanip>
+#include "textutil.hpp"
 
 using namespace gingko;
 
@@ -86,17 +87,60 @@ void Landscape::sample_organisms(Species * sp_ptr,
         unsigned long num_organisms_per_cell,
         const std::set<CellIndexType>& cell_indexes,
         std::vector<const Organism *>& samples) {
-//     if (num_organisms_per_cell > 0) {        
-//         samples.reserve(samples.size() + (num_organisms_per_cell * cell_indexes.size()));
-//     } else {
-//         samples.reserve(samples.size() + cell_indexes.size());
-//     }
+
+    ////////////////
+    // DEBUG CODE //
+    ////////////////
+    unsigned long old_size = 0;
+    std::vector<unsigned> debug_results;
+    std::vector<std::string> test_sample;
+    ////////////////
+
     for (std::set<CellIndexType>::const_iterator ci = cell_indexes.begin();
             ci != cell_indexes.end();
-            ++ci) {
+            ++ci) {        
         assert(static_cast<unsigned long>(*ci) < this->cells_.size());
         this->cells_[*ci]->sample_organisms(sp_ptr, samples, num_organisms_per_cell);
+        
+        ////////////////
+        // DEBUG CODE //
+        ////////////////
+        debug_results.push_back(samples.size() - old_size);
+        if (samples.size() - old_size > 0) {
+            std::string label = sp_ptr->get_organism_label(*samples.back());
+            std::vector<std::string> parts = textutil::split(label, "_");
+            test_sample.push_back(parts[1] + "," + parts[2]);
+        } else {
+            test_sample.push_back("--,--");
+        }
+        old_size = samples.size();
+        ////////////////        
+        
     }
+
+    ////////////////
+    // DEBUG CODE //
+    ////////////////    
+    std::cout << std::endl << "*** SAMPLING SCHEME ***" << std::endl;
+    CellIndexType k = 0;    
+    CellIndexType i = 0;
+    CellIndexType x = 0;
+    CellIndexType y = 0;
+    for (y = 0; y < this->size_y_; ++y) {
+        for (x = 0; x < this->size_x_; ++x, ++i) {
+            std::cout << std::setw(8);
+            if ( cell_indexes.find(i) != cell_indexes.end() ) {
+                // std::cout << debug_results.at(k);
+                std::cout << test_sample.at(k);
+                k += 1;
+            } else {
+                std::cout << "-";
+            }
+        }
+        std::cout << std::endl;
+    }
+    ////////////////    
+    
 }
 
 void Landscape::count_organisms(Species * sp_ptr, std::vector<long>& counts) const {
@@ -108,19 +152,26 @@ void Landscape::count_organisms(Species * sp_ptr, std::vector<long>& counts) con
 
 // --- debugging ---
 
-unsigned long Landscape::dump(std::ostream& output) {
-    unsigned long num = 0;
-    unsigned long total = 0;
-    for (CellIndexType y = 0; y < this->size_y_; ++y) {
-        for (CellIndexType x = 0; x < this->size_x_; ++x) {
-            num = this->operator()(x,y).num_organisms();
-            total += num;
-            output << std::setw(4) << num << " ";
+ // dump structure to std::cerr
+void Landscape::debug_dump_structure(std::ostream& out) {
+    out << std::endl << "Landscape Structure:";
+    CellIndexType i = 0;
+    unsigned long max_width_x = log10(static_cast<double>(this->size_x_)) + 1;
+    unsigned long max_width_y = log10(static_cast<double>(this->size_y_)) + 1;
+    for (std::vector<Cell*>::iterator ci = this->cells_.begin();
+            ci != this->cells_.end();
+            ++ci, ++i) {
+        CellIndexType x = this->index_to_x(i);
+        CellIndexType y = this->index_to_y(i);
+        if (x == 0) {
+            out << std::endl;
         }
-        output << std::endl;
+        out << std::setfill('0') << std::setw(max_width_x) << (*ci)->get_x();
+        out << ",";
+        out << std::setfill('0') << std::setw(max_width_y) << (*ci)->get_y();
+        out << " ";
     }
-    output << "---\nTotal organisms: " << total << std::endl;            
-    return total;
+    out << std::endl << std::endl;
 }
 
 // Landscape

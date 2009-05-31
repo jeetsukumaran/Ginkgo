@@ -300,9 +300,9 @@ class Landscape {
         
         // --- debugging ---
         
-        /** Write a representation of the landscape to the given outputs stream */
-        unsigned long dump(std::ostream& output = std::cout);       
-    
+        // dump structure to std::cerr
+        void debug_dump_structure(std::ostream& out = std::cerr);
+        
     private:
     
         /** Size of the Landscape in the x-dimension in the geospatial framework */

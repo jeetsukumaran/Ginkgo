@@ -162,6 +162,12 @@ void World::cycle() {
 
 void World::run() {    
     this->open_logs();
+    
+    this->landscape_.debug_dump_structure(this->infos_);
+    if (this->is_log_to_screen_) {
+        this->landscape_.debug_dump_structure(std::cout);
+    }
+    
     this->log_info("Starting simulation.");
     
     while (this->current_generation_ <= this->generations_to_run_) {
