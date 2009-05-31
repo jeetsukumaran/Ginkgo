@@ -41,10 +41,8 @@ typedef int                     FitnessFactorType;
 //! actual number may be less than this.
 typedef FitnessFactorType       FitnessFactors[MAX_FITNESS_FACTORS];
 
-//! The units for referencing cells on the landscape. We allow signed values
-//! even though a negative coordinate is invalide so that negative values can 
-//! be stored and used in calculations.
-typedef unsigned long           CellIndexType;
+//! The units for referencing cells on the landscape.
+typedef unsigned int            CellIndexType;
 
 } // gingko namespace
 
