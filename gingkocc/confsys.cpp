@@ -296,12 +296,12 @@ bool Configurator::parse_position_coordinates(const std::string& pos, CellIndexT
         throw this->build_exception("invalid or incomplete position specification: \"" + pos_clean + "\"");
     }
     try {
-        x = convert::to_scalar<unsigned long>(pos_parts[0]);
+        x = convert::to_scalar<CellIndexType>(pos_parts[0]);
     } catch (const convert::ValueError& e) {
         throw this->build_exception("invalid x-coordinate value for position: \"" + pos_parts[0] + "\"");
     }
     try {
-        y = convert::to_scalar<unsigned long>(pos_parts[1]);
+        y = convert::to_scalar<CellIndexType>(pos_parts[1]);
     } catch (const convert::ValueError& e) {
         throw this->build_exception("invalid y-coordinate value for position: \"" + pos_parts[1] + "\"");
     }
@@ -363,8 +363,8 @@ WorldConfigurator::WorldConfigurator(const ConfigurationBlock& cb)
 }
 
 void WorldConfigurator::parse()  {
-    this->size_x_ = this->get_configuration_scalar<unsigned long>("ncols"); 
-    this->size_y_ = this->get_configuration_scalar<unsigned long>("nrows");
+    this->size_x_ = this->get_configuration_scalar<CellIndexType>("ncols"); 
+    this->size_y_ = this->get_configuration_scalar<CellIndexType>("nrows");
     this->generations_to_run_ = this->get_configuration_scalar<unsigned long>("ngens");
     this->num_fitness_factors_ = this->get_configuration_scalar<unsigned>("nfitness", MAX_FITNESS_FACTORS);
     if (this->num_fitness_factors_ > MAX_FITNESS_FACTORS) {

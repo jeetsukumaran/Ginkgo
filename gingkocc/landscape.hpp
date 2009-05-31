@@ -87,7 +87,7 @@ class Landscape {
          */
         void set_carrying_capacities(const std::vector<unsigned long>& cell_carrying_capacities) {
             assert(cell_carrying_capacities.size() >= this->cells_.size());
-            for (unsigned long i = 0; i < this->cells_.size(); ++i) {
+            for (CellIndexType i = 0; i < this->cells_.size(); ++i) {
                 (*this->cells_[i]).set_carrying_capacity(cell_carrying_capacities[i]);
             }
         }
@@ -100,7 +100,7 @@ class Landscape {
          */
         void set_carrying_capacities(const std::vector<long>& cell_carrying_capacities) {
             assert(cell_carrying_capacities.size() >= this->cells_.size());
-            for (unsigned long i = 0; i < this->cells_.size(); ++i) {
+            for (CellIndexType i = 0; i < this->cells_.size(); ++i) {
                 (*this->cells_[i]).set_carrying_capacity(cell_carrying_capacities[i]);
             }
         }
@@ -113,7 +113,7 @@ class Landscape {
          */
         void set_environment(unsigned index, std::vector<long> cell_environments) {
             assert(cell_environments.size() >= this->cells_.size());
-            for (unsigned long i = 0; i < this->cells_.size(); ++i) {
+            for (CellIndexType i = 0; i < this->cells_.size(); ++i) {
                 (*this->cells_[i]).set_environment_factor(index, cell_environments[i]);
             }        
         }
@@ -265,12 +265,12 @@ class Landscape {
             y = this->index_to_y(i) + this->rng_.uniform_int(-1, 1); // to reflect: % this->size_y_; 
             if (x < 0) {
                 x = 1;
-            } else if (static_cast<unsigned long>(x) >= this->size_x_) {
+            } else if (static_cast<CellIndexType>(x) >= this->size_x_) {
                 x = this->size_x_ - 2;
             }
             if (y < 0) {
                 y = 1;
-            } else if (static_cast<unsigned long>(y) >= this->size_y_) {
+            } else if (static_cast<CellIndexType>(y) >= this->size_y_) {
                 y = this->size_y_ - 2;
             }
             return this->xy_to_index(x, y);
