@@ -30,6 +30,7 @@
 #include <string>
 #include <cmath>
 #include <iomanip>
+#include <stdexcept>
 #include <iostream>
 #include <sstream>
 #include <map>
@@ -1015,44 +1016,26 @@ class Species {
          * Returns a new unique (from the the last resetting of the label
          * index) organism label.
          *
-         * @param   tag     optional extra information to insert into label
-         * @return          OTU label
-         */
-        std::string new_organism_label(const char * tag = NULL) {
-            std::ostringstream label_ostr;
-            label_ostr << this->label_ << "_";
-            if (tag != NULL)
-                label_ostr << tag << "_";
-            label_ostr << this->organism_label_index_++;
-            return label_ostr.str();
-        }
-        
-        /**
-         * Returns a new unique (from the the last resetting of the label
-         * index) organism label.
-         *
          * @param   x       x-coordinate of organism's location
          * @param   y       y-coordiante of organism's location
          * @return          OTU label
          */
-        std::string new_organism_label(CellIndexType x, CellIndexType y) {
+        std::string compose_organism_label(CellIndexType x, CellIndexType y) {
             std::ostringstream label_ostr;
             label_ostr << this->label_ << "_x" << x << "_y" << y << "_" << this->organism_label_index_++;
             return label_ostr.str();
         }        
         
         /**
-         * Returns a label for the given organism, creating a new one if 
-         * it has not already been assigned.
+         * Returns a label for the given organism.
          *
          * @param   organism    organism to be labelled
-         * @param   tag         optional extra information to insert into label    
          * @return              unique label for organism
          */
-         const std::string& get_organism_label(const Organism& organism, const char * tag = NULL) {
+         const std::string& get_organism_label(const Organism& organism) {
             std::map<const Organism *, std::string>::const_iterator ol = this->organism_labels_.find(&organism);
             if (ol == this->organism_labels_.end()) {
-                return this->organism_labels_.insert(std::make_pair(&organism, this->new_organism_label(tag))).first->second;
+                throw std::runtime_error("label requested, but not assigned to organism");
             } else {
                 return ol->second;
             }
@@ -1064,16 +1047,13 @@ class Species {
          *
          * @param   organism    organism to be labelled
          * @param   x           x-coordinate of organism's location
-         * @param   y           y-coordiante of organism's location
+         * @param   y           y-coordinate of organism's location
          * @return              unique label for organism
          */
-         const std::string& get_organism_label(const Organism& organism, CellIndexType x, CellIndexType y) {
+         const std::string& set_organism_label(const Organism& organism, CellIndexType x, CellIndexType y) {
+            this->organism_labels_[&organism] = this->compose_organism_label(x, y);
             std::map<const Organism *, std::string>::const_iterator ol = this->organism_labels_.find(&organism);
-            if (ol == this->organism_labels_.end()) {
-                return this->organism_labels_.insert(std::make_pair(&organism, this->new_organism_label(x, y))).first->second;
-            } else {
-                return ol->second;
-            }
+            return ol->second;
          }         
          
         /**

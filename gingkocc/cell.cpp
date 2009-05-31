@@ -190,7 +190,7 @@ void Cell::sample_organisms(Species * sp_ptr,
     species_organisms.reserve(this->organisms_.size());
     for (OrganismVector::const_iterator og = this->organisms_.begin(); og != this->organisms_.end(); ++og) {
         if (&og->species() == sp_ptr) {
-            sp_ptr->get_organism_label(*og, this->x_, this->y_);
+            sp_ptr->set_organism_label(*og, this->x_, this->y_);
             species_organisms.push_back(&(*og));
         }
     }
