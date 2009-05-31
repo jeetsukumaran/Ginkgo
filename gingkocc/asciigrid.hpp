@@ -30,6 +30,8 @@
 namespace gingko {
 namespace asciigrid {
 
+typedef unsigned long index_type;
+
 /**
  * Writes out a vector of longs as an ASCII Grid file.
  * @param   vals    cell values
@@ -38,8 +40,8 @@ namespace asciigrid {
  * @param   out     destination
  */
 void write_grid(const std::vector<long>& vals, 
-        unsigned long ncols,
-        unsigned long nrows, 
+        index_type ncols,
+        index_type nrows, 
         std::ostream& out);
 
 /**
@@ -90,7 +92,7 @@ class AsciiGridFormatValueError : public AsciiGridFormatError {
 
 /**
  * Encapsulates parsing of an ESRI ASCII Grid format file into a vector
- * of unsigned longs.
+ * of index_types.
  *
  * (From the ArcWorkstation 8.3 Help File)-------------------------------------
  * 
@@ -180,7 +182,7 @@ class AsciiGrid {
          * Returns number of columns in grid.
          * @return number of columns in grid
          */
-        unsigned long get_ncols() {
+        index_type get_ncols() {
             if (not this->is_metadata_loaded_) {
                 this->parse_metadata_();
             }
@@ -191,7 +193,7 @@ class AsciiGrid {
          * Returns number of rows in grid.
          * @return number of rows in grid
          */
-        unsigned long get_nrows() {
+        index_type get_nrows() {
             if (not this->is_metadata_loaded_) {
                 this->parse_metadata_();
             }        
@@ -216,7 +218,7 @@ class AsciiGrid {
          * @param   y   required y dimension of grid
          * @return      <code>true</code> if grid dimensions are as specified
          */
-        bool has_size(unsigned long x, unsigned long y) {
+        bool has_size(index_type x, index_type y) {
             if (this->get_ncols() == x && this->get_nrows() == y) {
                 return true;
             } else {
@@ -243,9 +245,9 @@ class AsciiGrid {
          * Read and parse a metadata row into into its components.
          *
          * @param metadata_name     store name of metadata
-         * @param metadata_value    store value of metadata (as unsigned long)
+         * @param metadata_value    store value of metadata (as index_type)
          */       
-        void read_metadata_(std::string& metadata_name, unsigned long& metadata_value);        
+        void read_metadata_(std::string& metadata_name, index_type& metadata_value);        
         
         /**
          * Read and parse a metadata row into into its components.
@@ -284,9 +286,9 @@ class AsciiGrid {
         /** Tracks whether or not metadata has been parsed. */
         bool                is_cell_values_loaded_;        
         /** Number of columns in the grid. */
-        unsigned long       ncols_;
+        index_type       ncols_;
         /** Number of rows in the grid. */
-        unsigned long       nrows_;
+        index_type       nrows_;
         /** Geographical X-coordinate of the lower-left cell corner of the grid. */
         float               xllcorner_;
         /** Geographical Y-coordinate of the lower-left cell corner of the grid.  */

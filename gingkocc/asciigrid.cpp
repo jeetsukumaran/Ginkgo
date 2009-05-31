@@ -31,8 +31,8 @@ namespace gingko {
 namespace asciigrid {
 
 void write_grid(const std::vector<long>& vals, 
-        unsigned long ncols,
-        unsigned long nrows, 
+        index_type ncols,
+        index_type nrows, 
         std::ostream& out) {
     assert(vals.size() == ncols * nrows);        
     out << "ncols           " << ncols << std::endl;
@@ -41,9 +41,9 @@ void write_grid(const std::vector<long>& vals,
     out << "yllcorner       0.0" << std::endl;    
     out << "cellsize        1.0" << std::endl;
     out << "NODATA_value    -9999" << std::endl;
-    unsigned long index = 0;
-    for (unsigned long row = 0; row < nrows; ++row) {
-        for (unsigned long col = 0; col < ncols; ++col, ++index) {
+    index_type index = 0;
+    for (index_type row = 0; row < nrows; ++row) {
+        for (index_type col = 0; col < ncols; ++col, ++index) {
             out << vals[index] << " ";
         }
         out << std::endl;
@@ -110,7 +110,7 @@ void AsciiGrid::read_metadata_(std::string& metadata_name, long& metadata_value)
     }
 }
 
-void AsciiGrid::read_metadata_(std::string& metadata_name, unsigned long& metadata_value) {
+void AsciiGrid::read_metadata_(std::string& metadata_name, index_type& metadata_value) {
     assert(this->src_);
     this->src_ >> metadata_name;
     if (this->src_.eof()) {
@@ -121,7 +121,7 @@ void AsciiGrid::read_metadata_(std::string& metadata_name, unsigned long& metada
         throw AsciiGridFormatEofError("unexpected EOF while reading metadata");
     }
     if (this->src_.fail()) {    
-        throw AsciiGridFormatValueError("value error while reading metadata (expecting unsigned long)");
+        throw AsciiGridFormatValueError("value error while reading metadata (expecting index_type)");
     }
 }
 
@@ -204,8 +204,8 @@ void AsciiGrid::parse_cell_values_() {
     this->cell_values_.reserve(this->nrows_ * this->ncols_);
     
     // track position (for error reporting)
-    unsigned long x = 0;
-    unsigned long y = 0;
+    index_type x = 0;
+    index_type y = 0;
     
     // process optional nodata value
     std::string token;
