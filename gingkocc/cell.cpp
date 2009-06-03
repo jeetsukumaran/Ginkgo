@@ -63,7 +63,7 @@ Cell::Cell(CellIndexType index,
 void Cell::generate_new_organisms(Species * sp, unsigned long num) {
     this->organisms_.reserve(this->organisms_.size() + num);
     for ( ; num > 0; --num) {
-        this->organisms_.push_back(sp->new_organism());
+        this->organisms_.push_back(sp->new_organism(this->index_));
     }
 }
 
@@ -125,7 +125,7 @@ void Cell::reproduction() {
                 for (unsigned n = 0; n <= num_offspring; ++n) {                    
                     const Organism* male = this->rng_.select(breeding_male_ptrs);
                     const Organism* female = *fptr;
-                    this->organisms_.push_back(sp->new_organism(*female, *male));
+                    this->organisms_.push_back(sp->new_organism(*female, *male, this->index_));
                 } // for each offspring     
             } // for each female
         } // if females > 0 and males > 0

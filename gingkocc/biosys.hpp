@@ -163,6 +163,14 @@ class GenealogyNode {
             return this->cell_index_;
         }
         
+        /**
+         * Sets the cell index.
+         * @param cell_index    index of cell occupied by current organism.
+         */
+        void set_cell_index(CellIndexType cell_index) {
+            this->cell_index_ = cell_index;
+        }        
+        
     private:
     
         /** 
@@ -264,6 +272,16 @@ class HaploidMarker {
             GenealogyNode * t = this->allele_;
             this->allele_ = h.allele_;
             h.allele_ = t;
+        }
+        
+        /**
+         * Georeferences the current alleles.
+         * @param cell_index    index of cell occupied by current organism.
+         */
+        void set_cell_index(CellIndexType cell_index) {
+            if (this->allele_ != NULL) {
+                this->allele_->set_cell_index(cell_index);
+            }
         }        
         
     private:   
@@ -394,6 +412,19 @@ class DiploidMarker {
             d.allele2_ = t2;
         }
         
+        /**
+         * Georeferences the current alleles.
+         * @param cell_index    index of cell occupied by current organism.
+         */
+        void set_cell_index(CellIndexType cell_index) {
+            if (this->allele1_ != NULL) {
+                this->allele1_->set_cell_index(cell_index);
+            }
+            if (this->allele2_ != NULL) {
+                this->allele2_->set_cell_index(cell_index);
+            }
+        }        
+        
     private:
     
         /** 
@@ -443,12 +474,14 @@ class Organism {
          */ 
         Organism(Species * species,
                  const FitnessFactors& new_genotype, 
-                 Organism::Sex new_sex) 
+                 Organism::Sex new_sex,
+                 CellIndexType cell_index) 
                 : species_(species),
                   sex_(new_sex),
                   fitness_(-1),
                   expired_(false) {
             memcpy(this->genotypic_fitness_factors_, new_genotype, MAX_FITNESS_FACTORS*sizeof(FitnessFactorType));
+            this->set_cell_index(cell_index);
         }
         
         /** 
@@ -460,11 +493,14 @@ class Organism {
          * @param sex               gender of this organism
          */        
         Organism(Species * species,      
-                 Organism::Sex new_sex) 
+                 Organism::Sex new_sex,
+                 CellIndexType cell_index) 
                 : species_(species),              
                   sex_(new_sex),
                   fitness_(-1),
-                  expired_(false) { }
+                  expired_(false) { 
+            this->set_cell_index(cell_index);                  
+        }                
         
         /**
          * Copy constructor, delegate work to assignment operator.
@@ -710,6 +746,17 @@ class Organism {
             for (unsigned i = 0; i < NUM_NEUTRAL_DIPLOID_LOCII; ++i) {
                 this->neutral_diploid_markers_[i].inherit(female.neutral_diploid_markers_[i], male.neutral_diploid_markers_[i], rng);
             }                
+        }
+        
+        /**
+         * Georeferences the current alleles.
+         * @param cell_index    index of cell occupied by current organism.
+         */
+        void set_cell_index(CellIndexType cell_index) {
+            this->neutral_haploid_marker_.set_cell_index(cell_index);
+            for (int i = 0; i < NUM_NEUTRAL_DIPLOID_LOCII; ++i) {
+                this->neutral_diploid_markers_[i].set_cell_index(cell_index);
+            }
         }
         
     private:
@@ -1096,10 +1143,11 @@ class Species {
          *
          * @return  a default Organism object.
          */
-        Organism new_organism() {
+        Organism new_organism(CellIndexType cell_index) {
             return Organism(this, 
                             this->default_genotypic_fitness_factors_, 
-                            this->get_random_sex());
+                            this->get_random_sex(),
+                            cell_index);
         }
         
         /**
@@ -1118,8 +1166,8 @@ class Species {
          * @param male      male parent
          * @return          offspring 
          */
-        Organism new_organism(const Organism& female, const Organism& male) {
-            Organism organism(this, this->get_random_sex());
+        Organism new_organism(const Organism& female, const Organism& male, CellIndexType cell_index) {
+            Organism organism(this, this->get_random_sex(), cell_index);
             organism.inherit_genotypic_fitness_factors(female, 
                                                        male, 
                                                        this->num_fitness_factors_, 
