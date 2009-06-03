@@ -482,11 +482,11 @@ void SpeciesConfigurator::process_seed_populations() {
         std::string key = *k;
         std::vector<std::string> key_parts = textutil::split(key, "(", 1, false);
         if (key_parts.size() < 2) {
-            throw this->build_exception("full specification of seed population in the form of \"init(n:N#G)\" required, where: n = seed population size, N = ancestral seed population size, and G = ancestral bootstrap number of generations.");
+            throw this->build_exception("full specification of seed population in the form of \"init(n:N*G)\" required, where: n = seed population size, N = ancestral seed population size, and G = ancestral bootstrap number of generations.");
         }
-        std::vector<std::string> subparts = textutil::split_on_any(key_parts[1], ":#", 0, false);
+        std::vector<std::string> subparts = textutil::split_on_any(key_parts[1], ":*", 0, false);
         if (subparts.size() != 3) {
-            throw this->build_exception("full specification of seed population in the form of \"init(n:N#G)\" required, where: n = seed population size, N = ancestral seed population size, and G = ancestral bootstrap number of generations.");
+            throw this->build_exception("full specification of seed population in the form of \"init(n:N*G)\" required, where: n = seed population size, N = ancestral seed population size, and G = ancestral bootstrap number of generations.");
         }
         try {
             od.num_organisms_per_cell = convert::to_scalar<unsigned long>(subparts[0]);
