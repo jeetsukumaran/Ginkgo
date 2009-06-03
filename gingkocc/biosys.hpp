@@ -1128,8 +1128,8 @@ class Species {
                                                        this->rng_);
             organism.inherit_genealogies(female, male, this->rng_);
             return organism;
-        }        
-        
+        }
+                       
     private:
         /** Copy constructor, private declaration with no definition to disabled */
         Species(const Species&);    

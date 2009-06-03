@@ -179,7 +179,28 @@ class Cell {
          * @param species       pointer to Species object
          * @param num           number of organisms to create
          */
-        void generate_new_organisms(Species * sp, CellIndexType num);
+        void generate_new_organisms(Species * sp, unsigned long num);
+        
+        
+        /**
+         * Generates a new population of organisms, and runs reproductive cycles
+         * under random/panmictic mating and fixed population size for specified 
+         * generations. Useful for "bootstrapping" a seed or colonizing 
+         * population of organsms. Typically, you would specify a fairly small 
+         * popultion size (e.g. N = 100 - 1000), and run this process for 
+         * 10N-20N generations, to ensure coalescence of all the final 
+         * generation to a single ancestor.
+         *
+         * @param sp                       pointer to species
+         * @param final_pop_size           number of individuals to sample from 
+         *                                 the ancestral population (n)
+         * @param ancestral_pop_size       size of ancestral population (N; 0 => N = n )
+         * @param ancestral_generations    number of generations to run (0 => 10N)
+         */
+        void generate_new_population(Species * sp, 
+            unsigned long final_pop_size,
+            unsigned long ancestral_pop_size = 0,      
+            unsigned long ancestral_generations = 0);
         
         /**
          * Adds a single organism to the population of this cell.

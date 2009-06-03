@@ -60,12 +60,39 @@ Cell::Cell(CellIndexType index,
 
 // --- basic biotics ---
 
-void Cell::generate_new_organisms(Species * sp, CellIndexType num) {
+void Cell::generate_new_organisms(Species * sp, unsigned long num) {
     this->organisms_.reserve(this->organisms_.size() + num);
     for ( ; num > 0; --num) {
         this->organisms_.push_back(sp->new_organism());
     }
 }
+
+void Cell::generate_new_population(Species * sp, 
+        unsigned long final_pop_size,
+        unsigned long ancestral_pop_size,        
+        unsigned long ancestral_generations) {
+    if (ancestral_pop_size == 0) {
+        ancestral_pop_size = final_pop_size;
+    }
+    if (ancestral_generations == 0) {
+        ancestral_generations = ancestral_pop_size * 10;
+    }
+
+    Cell temp_cell(0, 0, 0, this->num_fitness_factors_, this->landscape_, this->species_, this->rng_);
+    temp_cell.generate_new_organisms(sp, ancestral_pop_size);
+    for (unsigned long g = 0; g != ancestral_generations; ++g) {
+        temp_cell.reproduction();
+    }
+    std::vector<const Organism *> subsampled;
+    temp_cell.sample_organisms(sp, subsampled, final_pop_size);
+
+    this->organisms_.reserve(this->organisms_.size() + subsampled.size());
+    for (std::vector<const Organism *>::const_iterator s = subsampled.begin();
+            s != subsampled.end();
+            ++s) {
+        this->organisms_.push_back(**s);        
+    }          
+}        
 
 // --- primary biogeographical and evolutionary processes ---
 
