@@ -48,6 +48,35 @@ class WorldIOError : public std::runtime_error {
 };
 
 /**
+ * Seed colonies.
+ */
+struct SeedPopulation {
+    public:
+        CellIndexType       cell_index;
+        std::string         species_label;
+        unsigned long       pop_size;
+        unsigned long       ancestral_pop_size;
+        unsigned long       ancestral_generations;
+    public:
+        SeedPopulation()
+            : cell_index(0),
+              pop_size(0),
+              ancestral_pop_size(0),
+              ancestral_generations(0) { }
+              
+        SeedPopulation(CellIndexType cell_index, 
+            const std::string& species_label, 
+            unsigned long pop_size,
+            unsigned long ancestral_pop_size,
+            unsigned long ancestral_generations)
+            : cell_index(cell_index),
+              species_label(species_label),
+              pop_size(pop_size),
+              ancestral_pop_size(ancestral_pop_size),
+              ancestral_generations(ancestral_generations) { }            
+};
+
+/**
  * Sampling regime, tracking the number of organisms and list of cells to
  * be sampled.
  */
@@ -397,7 +426,7 @@ class World {
          * @param ancestral_pop_size       size of ancestral population of seed population (N; 0 => N = n )
          * @param ancestral_generations    number of generations in ancestral population  (0 => 10N)         
          */        
-        void seed_population(CellIndexType cell_index, 
+        void generate_seed_population(CellIndexType cell_index, 
                 const std::string& species_label, 
                 unsigned long pop_size,
                 unsigned long ancestral_pop_size,
@@ -428,7 +457,23 @@ class World {
          * @param   generation       generation number for this occurrence be built
          * @param   species_ptr      pointer to species 
          */
-        void add_occurrence_sampling(unsigned long generation, Species * species_ptr);         
+        void add_occurrence_sampling(unsigned long generation, Species * species_ptr);
+        
+        /**
+         * Add a directive to seed a population.
+         * @param cell_index     the vector index of the Cell into which the 
+         *                       new Organism objects will be added
+         * @param species_index  index of pointer to the Species object in the
+         *                       Species pool of the Landscape/World
+         * @param size           number of new Organism objects to generate
+         * @param ancestral_pop_size       size of ancestral population of seed population (N; 0 => N = n )
+         * @param ancestral_generations    number of generations in ancestral population  (0 => 10N) 
+         */
+        void add_seed_population(CellIndexType cell_index, 
+                const std::string& species_label, 
+                unsigned long pop_size,
+                unsigned long ancestral_pop_size,
+                unsigned long ancestral_generations);          
         
         // --- simulation cycles ---
         
@@ -632,7 +677,9 @@ class World {
         /** Collection of tree building directives (key = generation #). */
         std::multimap<unsigned long, SamplingRegime> tree_samples_;
         /** Collection of occurrence description directives (key = generation #). */
-        std::map<unsigned long, Species *> occurrence_samples_;        
+        std::map<unsigned long, Species *> occurrence_samples_; 
+        /** Collection of seed population directives. */
+        std::vector<SeedPopulation>             seed_populations_; 
         /** Track output filenames, so as to prevent clashes. */
         std::set<std::string>                   output_filenames_;
 

@@ -103,26 +103,32 @@ Species& World::new_species(const std::string& label) {
 // }
 
 // Populates the cell cell_index with organisms of the given species.
-void World::seed_population(CellIndexType cell_index, 
+void World::generate_seed_population(CellIndexType cell_index, 
         const std::string& species_label, 
         unsigned long pop_size,
         unsigned long ancestral_pop_size,
         unsigned long ancestral_generations) {
     assert(this->species_.find(species_label) != this->species_.end());
     
-    std::ostringstream msg;
-    msg << "[Generation " << this->current_generation_ << "] ";
-    msg << "Seeding population ";
-    msg << "of species " << species_label << " ";
-    msg << "in (" << this->landscape_.index_to_x(cell_index) <<  "," << this->landscape_.index_to_y(cell_index) << "): ";
-    msg << pop_size << " individuals drawn from an ancestral population of " << ancestral_pop_size << " ";
-    msg << "after " << ancestral_generations << " generations.";
-    this->log_info(msg.str());
+    std::ostringstream pre_msg;
+    pre_msg << "[Generation " << this->current_generation_ << "] ";
+    pre_msg << "Bootstrapping seed population of species " << species_label << ": ";   
+    pre_msg << ancestral_pop_size << " individuals for " << ancestral_generations << " generations.";
+    this->log_info(pre_msg.str());
+        
     this->landscape_.at(cell_index).generate_new_population(this->species_[species_label],
             pop_size,
             ancestral_pop_size,
             ancestral_generations);
-
+            
+    std::ostringstream post_msg;
+    post_msg << "[Generation " << this->current_generation_ << "] ";
+    post_msg << "Seeding population ";
+    post_msg << "of species " << species_label << " ";
+    post_msg << "in (" << this->landscape_.index_to_x(cell_index) <<  "," << this->landscape_.index_to_y(cell_index) << "): ";
+    post_msg << pop_size << " individuals drawn from an ancestral population of " << ancestral_pop_size << " ";
+    post_msg << "after " << ancestral_generations << " generations.";
+    this->log_info(post_msg.str());
 }
 
 // --- event handlers ---
@@ -138,6 +144,15 @@ void World::add_tree_sampling(unsigned long generation, const SamplingRegime& sa
 void World::add_occurrence_sampling(unsigned long generation, Species * species_ptr) {
     this->occurrence_samples_.insert(std::make_pair(generation, species_ptr));
 }
+
+void World::add_seed_population(CellIndexType cell_index, 
+        const std::string& species_label, 
+        unsigned long pop_size,
+        unsigned long ancestral_pop_size,
+        unsigned long ancestral_generations) {
+    this->seed_populations_.push_back( SeedPopulation(cell_index, species_label, pop_size, ancestral_pop_size, ancestral_generations) );           
+}        
+
 
 // --- simulation cycles ---
 
@@ -186,6 +201,18 @@ void World::run() {
     }
     
     this->log_info("Starting simulation.");
+    
+    // startup    
+    for (std::vector<SeedPopulation>::iterator spi = this->seed_populations_.begin();
+            spi != this->seed_populations_.end();
+            ++spi) {
+        SeedPopulation& sp = *spi;
+        this->generate_seed_population(sp.cell_index, 
+            sp.species_label, 
+            sp.pop_size, 
+            sp.ancestral_pop_size,
+            sp.ancestral_generations);
+    }            
     
     while (this->current_generation_ <= this->generations_to_run_) {
         

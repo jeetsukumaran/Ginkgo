@@ -469,7 +469,7 @@ void SpeciesConfigurator::configure(World& world)  {
                 throw this->build_exception(msg.str());
             }              
             CellIndexType cell_index = world.landscape().xy_to_index(od.x[i], od.y[i]);
-            world.seed_population(cell_index, label, od.num_organisms_per_cell, od.ancestral_population_size, od.ancestral_generations);
+            world.add_seed_population(cell_index, label, od.num_organisms_per_cell, od.ancestral_population_size, od.ancestral_generations);
         }
     }
 }
@@ -484,7 +484,7 @@ void SpeciesConfigurator::process_seed_populations() {
         if (key_parts.size() < 2) {
             throw this->build_exception("full specification of seed population in the form of \"init(n:N#G)\" required, where: n = seed population size, N = ancestral seed population size, and G = ancestral bootstrap number of generations.");
         }
-        std::vector<std::string> subparts = textutil::split_on_any(key, ":#", 0, false);
+        std::vector<std::string> subparts = textutil::split_on_any(key_parts[1], ":#", 0, false);
         if (subparts.size() != 3) {
             throw this->build_exception("full specification of seed population in the form of \"init(n:N#G)\" required, where: n = seed population size, N = ancestral seed population size, and G = ancestral bootstrap number of generations.");
         }
@@ -499,7 +499,7 @@ void SpeciesConfigurator::process_seed_populations() {
             throw this->build_exception("invalid value for seed population ancestral size: \"" + subparts[1] + "\"");
         }
         try {
-            std::string g = textutil::strip(")");
+            std::string g = textutil::strip(subparts[1], ")");
             od.ancestral_generations = convert::to_scalar<unsigned long>(g);
         } catch (const convert::ValueError& e) {
             throw this->build_exception("invalid value for seed population ancestral generations : \"" + subparts[2] + "\"");

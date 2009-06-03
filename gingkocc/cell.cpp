@@ -78,10 +78,14 @@ void Cell::generate_new_population(Species * sp,
         ancestral_generations = ancestral_pop_size * 10;
     }
 
-    Cell temp_cell(0, 0, 0, this->num_fitness_factors_, this->landscape_, this->species_, this->rng_);
+    Cell temp_cell(this->index_, this->x_, this->y_, this->num_fitness_factors_, this->landscape_, this->species_, this->rng_);
     temp_cell.generate_new_organisms(sp, ancestral_pop_size);
     for (unsigned long g = 0; g != ancestral_generations; ++g) {
         temp_cell.reproduction();
+        // std::random_shuffle(temp_cell.organisms_.begin(), temp_cell.organisms_.end(), rp);
+        if (temp_cell.organisms_.size() > ancestral_pop_size) {
+            temp_cell.organisms_.erase(temp_cell.organisms_.begin() + ancestral_pop_size, temp_cell.organisms_.end());
+        }            
     }
     std::vector<const Organism *> subsampled;
     temp_cell.sample_organisms(sp, subsampled, final_pop_size);
