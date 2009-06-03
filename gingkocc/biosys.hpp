@@ -474,14 +474,12 @@ class Organism {
          */ 
         Organism(Species * species,
                  const FitnessFactors& new_genotype, 
-                 Organism::Sex new_sex,
-                 CellIndexType cell_index) 
+                 Organism::Sex new_sex) 
                 : species_(species),
                   sex_(new_sex),
                   fitness_(-1),
                   expired_(false) {
             memcpy(this->genotypic_fitness_factors_, new_genotype, MAX_FITNESS_FACTORS*sizeof(FitnessFactorType));
-            this->set_cell_index(cell_index);
         }
         
         /** 
@@ -493,13 +491,11 @@ class Organism {
          * @param sex               gender of this organism
          */        
         Organism(Species * species,      
-                 Organism::Sex new_sex,
-                 CellIndexType cell_index) 
+                 Organism::Sex new_sex) 
                 : species_(species),              
                   sex_(new_sex),
                   fitness_(-1),
-                  expired_(false) { 
-            this->set_cell_index(cell_index);                  
+                  expired_(false) {                 
         }                
         
         /**
@@ -741,22 +737,14 @@ class Organism {
          */
         void inherit_genealogies(const Organism& female, 
                                  const Organism& male,
-                                 RandomNumberGenerator& rng) {
+                                 RandomNumberGenerator& rng,
+                                 CellIndexType cell_index) {
             this->neutral_haploid_marker_.inherit(female.neutral_haploid_marker_);  
+            this->neutral_haploid_marker_.set_cell_index(cell_index);
             for (unsigned i = 0; i < NUM_NEUTRAL_DIPLOID_LOCII; ++i) {
                 this->neutral_diploid_markers_[i].inherit(female.neutral_diploid_markers_[i], male.neutral_diploid_markers_[i], rng);
-            }                
-        }
-        
-        /**
-         * Georeferences the current alleles.
-         * @param cell_index    index of cell occupied by current organism.
-         */
-        void set_cell_index(CellIndexType cell_index) {
-            this->neutral_haploid_marker_.set_cell_index(cell_index);
-            for (int i = 0; i < NUM_NEUTRAL_DIPLOID_LOCII; ++i) {
                 this->neutral_diploid_markers_[i].set_cell_index(cell_index);
-            }
+            }                
         }
         
     private:
@@ -1146,8 +1134,7 @@ class Species {
         Organism new_organism(CellIndexType cell_index) {
             return Organism(this, 
                             this->default_genotypic_fitness_factors_, 
-                            this->get_random_sex(),
-                            cell_index);
+                            this->get_random_sex());
         }
         
         /**
@@ -1167,14 +1154,14 @@ class Species {
          * @return          offspring 
          */
         Organism new_organism(const Organism& female, const Organism& male, CellIndexType cell_index) {
-            Organism organism(this, this->get_random_sex(), cell_index);
+            Organism organism(this, this->get_random_sex());
             organism.inherit_genotypic_fitness_factors(female, 
                                                        male, 
                                                        this->num_fitness_factors_, 
                                                        this->mutation_rate_, 
                                                        this->max_mutation_size_, 
                                                        this->rng_);
-            organism.inherit_genealogies(female, male, this->rng_);
+            organism.inherit_genealogies(female, male, this->rng_, cell_index);
             return organism;
         }
                        
