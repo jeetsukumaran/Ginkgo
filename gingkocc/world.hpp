@@ -383,7 +383,7 @@ class World {
          * @param species_label  label of the Species object
          * @param size           number of new Organism objects to generate
          */
-        void seed_population(CellIndexType x, CellIndexType y, const std::string& species_label, unsigned long size);
+//         void seed_population(CellIndexType x, CellIndexType y, const std::string& species_label, unsigned long size);
         
         /**
          * Generates specified number of new Organism objects of the specified 
@@ -394,8 +394,14 @@ class World {
          * @param species_index  index of pointer to the Species object in the
          *                       Species pool of the Landscape/World
          * @param size           number of new Organism objects to generate
+         * @param ancestral_pop_size       size of ancestral population of seed population (N; 0 => N = n )
+         * @param ancestral_generations    number of generations in ancestral population  (0 => 10N)         
          */        
-        void seed_population(CellIndexType cell_index, const std::string& species_label, unsigned long size);
+        void seed_population(CellIndexType cell_index, 
+                const std::string& species_label, 
+                unsigned long pop_size,
+                unsigned long ancestral_pop_size,
+                unsigned long ancestral_generations);
         
         // --- event handlers ---
         

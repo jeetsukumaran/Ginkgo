@@ -97,15 +97,32 @@ Species& World::new_species(const std::string& label) {
 }
 
 // Populates the cell at (x,y) with organisms of the given species.
-void World::seed_population(CellIndexType x, CellIndexType y, const std::string& species_label, unsigned long size) {
-    assert(this->species_.find(species_label) != this->species_.end());
-    this->landscape_.at(x, y).generate_new_organisms(this->species_[species_label], size);
-}
+// void World::seed_population(CellIndexType x, CellIndexType y, const std::string& species_label, unsigned long size) {
+//     assert(this->species_.find(species_label) != this->species_.end());
+//     // this->landscape_.at(x, y).generate_new_organisms(this->species_[species_label], size);
+// }
 
 // Populates the cell cell_index with organisms of the given species.
-void World::seed_population(CellIndexType cell_index, const std::string& species_label, unsigned long size) {
+void World::seed_population(CellIndexType cell_index, 
+        const std::string& species_label, 
+        unsigned long pop_size,
+        unsigned long ancestral_pop_size,
+        unsigned long ancestral_generations) {
     assert(this->species_.find(species_label) != this->species_.end());
-    this->landscape_.at(cell_index).generate_new_organisms(this->species_[species_label], size);
+    
+    std::ostringstream msg;
+    msg << "[Generation " << this->current_generation_ << "] ";
+    msg << "Seeding population ";
+    msg << "of species " << species_label << " ";
+    msg << "in (" << this->landscape_.index_to_x(cell_index) <<  "," << this->landscape_.index_to_y(cell_index) << "): ";
+    msg << pop_size << " individuals drawn from an ancestral population of " << ancestral_pop_size << " ";
+    msg << "after " << ancestral_generations << " generations.";
+    this->log_info(msg.str());
+    this->landscape_.at(cell_index).generate_new_population(this->species_[species_label],
+            pop_size,
+            ancestral_pop_size,
+            ancestral_generations);
+
 }
 
 // --- event handlers ---
