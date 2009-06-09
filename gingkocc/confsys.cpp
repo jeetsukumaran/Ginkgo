@@ -427,7 +427,7 @@ void SpeciesConfigurator::parse()  {
     this->mean_reproductive_rate_ = this->get_configuration_scalar<unsigned>("fecundity", 8);    
     this->reproductive_rate_mutation_size_ = this->get_configuration_scalar<unsigned>("fecundity-evolution-size", 1);
     this->movement_capacity_ = this->get_configuration_scalar<unsigned>("movement-capacity", 1);
-    this->movement_probability_ = this->get_configuration_scalar<unsigned>("movement-probability", 1.0);
+    this->movement_probability_ = this->get_configuration_scalar<float>("movement-probability", 1.0);
     this->process_seed_populations();
 }
 
