@@ -427,6 +427,7 @@ void SpeciesConfigurator::parse()  {
     this->mean_reproductive_rate_ = this->get_configuration_scalar<unsigned>("fecundity", 8);    
     this->reproductive_rate_mutation_size_ = this->get_configuration_scalar<unsigned>("fecundity-evolution-size", 1);
     this->movement_capacity_ = this->get_configuration_scalar<unsigned>("movement-capacity", 1);
+    this->movement_probability_ = this->get_configuration_scalar<unsigned>("movement-probability", 1.0);
     this->process_seed_populations();
 }
 
@@ -452,6 +453,7 @@ void SpeciesConfigurator::configure(World& world)  {
     sp.set_mean_reproductive_rate(this->mean_reproductive_rate_);
 //     sp.set_reproductive_rate_mutation_size(this->reproductive_rate_mutation_size_);
     sp.set_movement_capacity(this->movement_capacity_);
+    sp.set_movement_probability(this->movement_probability_);
     for (std::vector<OrganismDistribution>::iterator odi = this->seed_populations_.begin(); odi != this->seed_populations_.end(); ++odi) {
         OrganismDistribution& od = *odi;
         assert(od.x.size() == od.y.size());

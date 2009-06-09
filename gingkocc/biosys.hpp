@@ -934,7 +934,25 @@ class Species {
          */          
         void set_movement_capacity(int moves) {
             this->movement_capacity_ = moves;
-        }   
+        }  
+        
+        /**
+         * Sets the probability of movement of an organism.
+         *
+         * @param movement_probability probability of movement
+         */
+        void set_movement_probability(float movement_probability) {
+            this->movement_probability_ = movement_probability;
+        }
+                
+        /**
+         * Gets the probability of movement of an organism.
+         *
+         * @param movement_probability probability of movement
+         */
+        float get_movement_probability() {
+            return this->movement_probability_;
+        }        
         
         /**
          * Defines the costs for entering cells in the landscape.
@@ -1189,9 +1207,11 @@ class Species {
         /** allowing for evolution in fecundity */
         unsigned                            reproductive_rate_mutation_size_;
         /** landscape migration potential for this species */
-        std::vector<long>                    movement_costs_;
+        std::vector<long>                   movement_costs_;
         /** movement potential of each organism at the start of each round */
         int                                 movement_capacity_;
+        /** probability of movement of each organism */
+        float                               movement_probability_;
         /** genotype for organisms created de novo */
         FitnessFactors                      default_genotypic_fitness_factors_;
         /** source of random numbers of various distributions */

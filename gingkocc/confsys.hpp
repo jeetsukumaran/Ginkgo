@@ -577,6 +577,8 @@ class SpeciesConfigurator : public Configurator {
         std::vector<int>                    movement_costs_;
         /** movement potential of each organism at the start of each round */
         int                                 movement_capacity_;
+        /** probability of movement per organisms */
+        float                               movement_probability_;
         /** genotype for organisms created de novo */
         std::vector<FitnessFactorType>      default_genotypic_fitness_factors_;
         /** seed populations */
