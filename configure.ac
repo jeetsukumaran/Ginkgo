@@ -2,7 +2,7 @@
 # This file was written by hand (by mth using PAUP's configure.ac and http://autotoolset.sourceforge.net/tutorial.html as guides).
 
 AC_PREREQ(2.59)
-AC_INIT([gingko], [2.6], [jeet@ku.edu])
+AC_INIT([gingko], [2.6.1], [jeet@ku.edu])
 
 # AC_CONFIG_SRCDIR (UNIQUE-FILE-IN-SOURCE-DIR) UNIQUE-FILE-IN-SOURCE-DIR
 # is some file that is in the package's source directory; `configure'

@@ -501,7 +501,7 @@ void SpeciesConfigurator::process_seed_populations() {
             throw this->build_exception("invalid value for seed population ancestral size: \"" + subparts[1] + "\"");
         }
         try {
-            std::string g = textutil::strip(subparts[1], ")");
+            std::string g = textutil::strip(subparts[2], ")");
             od.ancestral_generations = convert::to_scalar<unsigned long>(g);
         } catch (const convert::ValueError& e) {
             throw this->build_exception("invalid value for seed population ancestral generations : \"" + subparts[2] + "\"");
