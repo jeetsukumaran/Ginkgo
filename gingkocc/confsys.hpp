@@ -473,7 +473,11 @@ class Configurator {
          * @param message   information regarding error
          * @return          exception object
          */
-        ConfigurationError build_exception(const std::string& message) const;       
+        ConfigurationError build_exception(const std::string& message) const;
+        
+        ConfigurationBlock::MultiEntryIterator entries_for_key(const std::string& key) {
+            return this->configuration_block_.equal_range(key);        
+        }
 
     private:
         /** Underlying configuration block. */        

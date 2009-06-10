@@ -582,15 +582,18 @@ void GenerationConfigurator::process_movement_costs() {
 }
 
 void GenerationConfigurator::process_dispersals() {
-    std::vector<std::string> keys = this->get_matching_configuration_keys("disperse");
-    for (std::vector<std::string>::iterator k = keys.begin(); k != keys.end(); ++k) {
-        OrganismDispersal od;
-        std::string& key = *k;
-        std::vector<std::string> key_parts = textutil::split(key, ":", 1, false);
+
+    ConfigurationBlock::MultiEntryIterator entries = this->entries_for_key("disperse");        
+    for (std::multimap<std::string, std::string>::iterator it = entries.first; 
+            it != entries.second; 
+            ++it) {   
+        OrganismDispersal od;    
+        std::string& disp_spec = (*it).second;            
+        std::vector<std::string> key_parts = textutil::split(disp_spec, ":", 1, false);
         if (key_parts.size() < 2) {
-            throw this->build_exception("must specify species using \":\" token for dispersal event");
+            throw this->build_exception("dispersal event must follow format: \"<SP>#<NUM>: <X,Y> <X,Y>\"");
         }
-        std::vector<std::string> species_num_parts = textutil::split(key_parts[1], "#", 1, false);
+        std::vector<std::string> species_num_parts = textutil::split(key_parts[0], "#", 1, false);
         od.species_label = species_num_parts[0];
         if (species_num_parts.size() == 2) {
             try {
@@ -601,7 +604,9 @@ void GenerationConfigurator::process_dispersals() {
         } else {
             od.num_organisms = 0;        
         }
-        std::string disp_pos = this->get_configuration_scalar<std::string>(key);
+        
+             
+        std::string& disp_pos = key_parts[1];
         std::vector<std::string> disp_pos_parts = textutil::split(disp_pos, "|", 1, false);
         if (disp_pos_parts.size() == 1) {
             od.probability = 1.0;
@@ -618,7 +623,7 @@ void GenerationConfigurator::process_dispersals() {
         }
         this->parse_position_coordinates(positions[0], od.src_x, od.src_y);
         this->parse_position_coordinates(positions[1], od.dest_x, od.dest_y);
-        this->dispersals_.push_back(od);
+        this->dispersals_.push_back(od);         
     }
 }
 
