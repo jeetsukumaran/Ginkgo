@@ -67,7 +67,7 @@ ConfigurationFile::ConfigurationFile(const char * fpath) {
 //     bool success = this->xml_.Load(fpath);
 //     if (!success) {
 //         std::ostringstream msg;
-//         msg << "invalid source \"" << fpath << "\"";
+//         msg << "invalineage_id source \"" << fpath << "\"";
 //         throw ConfigurationIOError(msg.str());    
 //     }
 }
@@ -77,7 +77,7 @@ ConfigurationFile::ConfigurationFile(const std::string& fpath) {
 //     bool success = this->xml_.Load(fpath);
 //     if (!success) {
 //         std::ostringstream msg;
-//         msg << "invalid source \"" << fpath << "\"";
+//         msg << "invalineage_id source \"" << fpath << "\"";
 //         throw ConfigurationIOError(msg.str());    
 //     }
 }
@@ -104,6 +104,11 @@ void ConfigurationFile::process_world(World& world) {
     world.set_label( this->get_attribute<std::string>(world_node, "label", "GingkoWorld") );
     world.set_random_seed( this->get_attribute<unsigned long>(world_node, "random_seed", time(0)) );
     world.set_generations_to_run( this->get_attribute<unsigned long>(world_node, "num_gens") );
+    try {
+        world.set_global_cell_carrying_capacity(this->get_attribute<unsigned long>(world_node, "default_cell_carrying_capacity"));
+    } catch (ConfigurationIncompleteError& c) {
+        // do nothing
+    }
 
     unsigned fitness_dim = this->get_attribute<unsigned>(world_node, "fitness_dimensions");    
     if (fitness_dim > MAX_FITNESS_FACTORS) {
@@ -136,23 +141,23 @@ void ConfigurationFile::process_biota(World& world) {
     }
     
     for (unsigned i = 0; i < bio_node.nChildNode("lineage"); ++i) {
-        XmlElementType lnode = bio_node.getChildNode("lineage", i);
-        this->process_lineage(lnode, world);
+        XmlElementType lineage_node = bio_node.getChildNode("lineage", i);
+        this->process_lineage(lineage_node, world);
     }
     
 }
 
-void ConfigurationFile::process_lineage(XmlElementType& lnode, World& world) {
+void ConfigurationFile::process_lineage(XmlElementType& lineage_node, World& world) {
 
     // lineage name / id
-    std::string lid = this->get_attribute<std::string>(lnode, "id");
-    if (world.has_species(lid)) {
-        throw ConfigurationError("lineage \"" + lid + "\" defined multiple times");
+    std::string lineage_id = this->get_attribute<std::string>(lineage_node, "id");
+    if (world.has_species(lineage_id)) {
+        throw ConfigurationError("lineage \"" + lineage_id + "\" defined multiple times");
     }
-    Species& lineage = world.new_species(lid);
+    Species& lineage = world.new_species(lineage_id);
     
     // genotypic fitness factor
-    XmlElementType gtf_node = this->get_child_node(lnode, "genotypicFitness", false);
+    XmlElementType gtf_node = this->get_child_node(lineage_node, "genotypicFitness", false);
     if (!gtf_node.isEmpty()) {
         std::vector<int> gff = this->get_element_vector<int>(gtf_node);
         if (gff.size() != lineage.get_num_fitness_factors()) {
@@ -166,7 +171,7 @@ void ConfigurationFile::process_lineage(XmlElementType& lnode, World& world) {
     }            
    
     // selection weights
-    XmlElementType sw_node = this->get_child_node(lnode, "selectionWeights", false);
+    XmlElementType sw_node = this->get_child_node(lineage_node, "selectionWeights", false);
     if (!sw_node.isEmpty()) {
         std::vector<float> sw = this->get_element_vector<float>(sw_node);
         if (sw.size() != lineage.get_num_fitness_factors()) {
@@ -179,17 +184,17 @@ void ConfigurationFile::process_lineage(XmlElementType& lnode, World& world) {
         lineage.set_selection_weights(sw);
     }            
           
-    lineage.set_mutation_rate(this->get_child_node_scalar<float>(lnode, "genotypicFitnessMutationRate", 0.0));
-    lineage.set_max_mutation_size(this->get_child_node_scalar<float>(lnode, "genotypicFitnessMutationSize", 0.0));
-    lineage.set_mean_reproductive_rate(this->get_child_node_scalar<float>(lnode, "fecundity", 16));
-//         lineage.set_reproductive_rate_mutation_size(this->get_child_node_scalar<float>(lnode, "fecundityMutationRate", 0.0));
-    lineage.set_movement_probability(this->get_child_node_scalar<float>(lnode, "movementProbability", 1.0));
-    lineage.set_movement_capacity(this->get_child_node_scalar<unsigned>(lnode, "movementCapacity", 1));
+    lineage.set_mutation_rate(this->get_child_node_scalar<float>(lineage_node, "genotypicFitnessMutationRate", 0.0));
+    lineage.set_max_mutation_size(this->get_child_node_scalar<float>(lineage_node, "genotypicFitnessMutationSize", 0.0));
+    lineage.set_mean_reproductive_rate(this->get_child_node_scalar<float>(lineage_node, "fecundity", 16));
+//         lineage.set_reproductive_rate_mutation_size(this->get_child_node_scalar<float>(lineage_node, "fecundityMutationRate", 0.0));
+    lineage.set_movement_probability(this->get_child_node_scalar<float>(lineage_node, "movementProbability", 1.0));
+    lineage.set_movement_capacity(this->get_child_node_scalar<unsigned>(lineage_node, "movementCapacity", 1));
     
     // seed populations
-    XmlElementType seed_pops = lnode.getChildNode("seedPopulations");
+    XmlElementType seed_pops = lineage_node.getChildNode("seedPopulations");
     if (seed_pops.isEmpty()) {
-        throw ConfigurationError("no seed populations defined for lineage \"" + lid + "\"");   
+        throw ConfigurationError("no seed populations defined for lineage \"" + lineage_id + "\"");   
     }
     for (unsigned i = 0; i < seed_pops.nChildNode("seedPopulation"); ++i) {
         XmlElementType pop_node = seed_pops.getChildNode("seedPopulation", i);
@@ -197,21 +202,21 @@ void ConfigurationFile::process_lineage(XmlElementType& lnode, World& world) {
         if (x > world.landscape().size_x()-1) {
             std::ostringstream msg;
             msg << "maximum x-coordinate on landscape is " << world.landscape().size_x();
-            msg << " but seed population position for species " << lid << " specifies x-coordinate of " << x;
+            msg << " but seed population position for species " << lineage_id << " specifies x-coordinate of " << x;
             throw ConfigurationError(msg.str());
         }        
         CellIndexType y = this->get_attribute<CellIndexType>(pop_node, "y");
         if (y > world.landscape().size_y()-1) {
             std::ostringstream msg;
             msg << "maximum y-coordinate on landscape is " << world.landscape().size_y();
-            msg << " but seed population position for species " << lid << " specifies y-coordinate of " << y;
+            msg << " but seed population position for species " << lineage_id << " specifies y-coordinate of " << y;
             throw ConfigurationError(msg.str());
         }
         CellIndexType cell_index = world.landscape().xy_to_index(x, y);
         unsigned long size = this->get_attribute<CellIndexType>(pop_node, "size");
         unsigned long ancestral_pop_size = this->get_child_node_scalar<unsigned long>(pop_node, "ancestralPopulationSize");
         unsigned long ancestral_generations = this->get_child_node_scalar<unsigned long>(pop_node, "ancestralGenerations");
-        world.add_seed_population(cell_index, lid, size, ancestral_pop_size, ancestral_generations);
+        world.add_seed_population(cell_index, lineage_id, size, ancestral_pop_size, ancestral_generations);
     }    
 }
 
