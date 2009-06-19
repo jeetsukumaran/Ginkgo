@@ -182,6 +182,26 @@ class ConfigurationFile {
             }
         }
         
+        template <typename T>
+        T get_attribute( const std::string& attr_name) const {
+            std::string attr_value = this->xml_.GetAttrib(attr_name);
+            if (attr_value.size() == 0 ) {
+                throw ConfigurationIncompleteError("attribute \"" + attr_name + "\" not found");
+            }
+            return convert::to_scalar<T>(attr_value);
+        }        
+        
+        template <typename T>
+        T get_attribute(const std::string& attr_name, T default_value) const {
+            std::string attr_value = this->xml_.GetAttrib(attr_name);
+            if (attr_value.size() == 0 ) {
+                return default_value;
+            }
+            return convert::to_scalar<T>(attr_value);
+        }
+        
+        void process_world(World& world);
+        
     private: 
         
         /** Path to configuration file. */

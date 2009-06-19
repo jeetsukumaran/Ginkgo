@@ -82,20 +82,40 @@ ConfigurationFile::ConfigurationFile(const std::string& fpath) {
 
 ConfigurationFile::~ConfigurationFile() { }
 
-void ConfigurationFile::configure(World& world) {
-    
+void ConfigurationFile::process_world(World& world) {
     if (!this->to_world_element()) {
-    
+        throw ConfigurationSyntaxError("world element is missing from configuration file");
     }
     
-//         <world label="gingko1" 
-//            x_range = "40" 
-//            y_range = "50" 
-//            num_gens = "20001" 
-//            fitness_dimensions = "5" 
-//            fitness_grain ="1"
-//            suppress_final_output = "True"
-//            random_seed ="2718281828">
+    world.set_label( this->get_attribute<std::string>("label", "GingkoWorld") );
+    world.set_random_seed( this->get_attribute<unsigned long>("random_seed", time(0)) );
+    world.set_generations_to_run( this->get_attribute<unsigned long>("num_gens") );
+
+    unsigned fitness_dim = this->get_attribute<unsigned>("fitness_dimensions");    
+    if (fitness_dim > MAX_FITNESS_FACTORS) {
+        std::ostringstream s;
+        s << "maximum number of fitness factors allowed is " << MAX_FITNESS_FACTORS;        
+        s << ", but requested " << fitness_dim;
+        throw ConfigurationError(s.str());
+    }
+    world.set_num_fitness_factors(fitness_dim);
+    
+    world.set_fitness_factor_grain(this->get_attribute<unsigned>("fitness_grain", 1));     
+    
+    
+    std::string produce_final = this->get_attribute<std::string>("suppress_final_output", "False");
+    if (produce_final == "True") {
+        world.set_produce_final_output(true);
+    } else {
+        world.set_produce_final_output(false);
+    }
+    
+    world.generate_landscape( this->get_attribute<CellIndexType>("x_range"), 
+                              this->get_attribute<CellIndexType>("y_range") );
+}
+
+void ConfigurationFile::configure(World& world) {
+    this->process_world(world);
 }
     
 } // confsys_detail
