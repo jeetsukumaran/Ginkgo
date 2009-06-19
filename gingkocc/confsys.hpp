@@ -233,6 +233,7 @@ class ConfigurationFile {
         void process_world(World& world);
         void process_biota(World& world);
         void process_lineage(XmlElementType& lnode, World& world);
+        void process_environments(World& world);
         
     private: 
         

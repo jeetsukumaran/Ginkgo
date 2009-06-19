@@ -144,11 +144,6 @@ struct WorldSettings {
      * mapped to ESRI ASCII Grid file paths). 
      */
     std::map<std::string, std::string>      movement_costs;
-    
-    /**
-     * Dispersal events.
-     */
-    std::vector<DispersalEvent>             dispersal_events;     
 
 }; // WorldSettings
 
@@ -435,13 +430,23 @@ class World {
         // --- event handlers ---
         
         /**
-         * Add a set of "events" that reconfigure the world environment.
+         * Add a set of environments and settings that reconfigure the 
+         * world.
          *
          * @param   generation      generation number for this set of events
          *                          to be activated
          * @param   world_settings  WorldSettings data
          */
         void add_world_settings(unsigned long generation, const WorldSettings& world_settings);
+        
+        /**
+         * Add a dispersal event.
+         *
+         * @param   generation      generation number for this set of events
+         *                          to be activated
+         * @param   dispersal_event descripion of event
+         */
+        void add_dispersal_event(unsigned long generation, const DispersalEvent& dispersal_event);        
         
         /**
          * Add a directive to sample organisms and save a tree.
@@ -492,6 +497,11 @@ class World {
          * Process world settings for the current generation.
          */
         void process_world_settings();     
+        
+        /**
+         * Process dispersal events for the current generation.
+         */
+        void process_dispersal_events();             
         
         /**
          * Process tree building directives for the current generation.
@@ -673,8 +683,10 @@ class World {
         /** Produce final set of trees/occurrences, even if not requested? */
         bool                                    is_produce_final_output_;
         /** Collection of events (key = generation #). */
-        std::map<unsigned long, WorldSettings>  world_settings_;    
-        /** Collection of tree building directives (key = generation #). */
+        std::map<unsigned long, WorldSettings>  world_settings_;
+        /** Collection of dispersal events (key = generation #). */
+        std::multimap<unsigned long, DispersalEvent>  dispersal_events_; 
+        /** Collection of tree building directives (key = generation #). */                
         std::multimap<unsigned long, SamplingRegime> tree_samples_;
         /** Collection of occurrence description directives (key = generation #). */
         std::map<unsigned long, Species *> occurrence_samples_; 

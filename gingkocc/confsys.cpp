@@ -134,7 +134,6 @@ void ConfigurationFile::process_world(World& world) {
 }
 
 void ConfigurationFile::process_biota(World& world) {
-
     XmlElementType bio_node = this->xml_.getChildNode("world").getChildNode("biota");
     if (bio_node.isEmpty()) {
         throw ConfigurationSyntaxError("biota element is missing from configuration file");
@@ -143,8 +142,7 @@ void ConfigurationFile::process_biota(World& world) {
     for (unsigned i = 0; i < bio_node.nChildNode("lineage"); ++i) {
         XmlElementType lineage_node = bio_node.getChildNode("lineage", i);
         this->process_lineage(lineage_node, world);
-    }
-    
+    }    
 }
 
 void ConfigurationFile::process_lineage(XmlElementType& lineage_node, World& world) {
@@ -218,6 +216,15 @@ void ConfigurationFile::process_lineage(XmlElementType& lineage_node, World& wor
         unsigned long ancestral_generations = this->get_child_node_scalar<unsigned long>(pop_node, "ancestralGenerations");
         world.add_seed_population(cell_index, lineage_id, size, ancestral_pop_size, ancestral_generations);
     }    
+}
+
+void ConfigurationFile::process_environments(World& world) {
+    XmlElementType environs = this->xml_.getChildNode("world").getChildNode("environments");
+    if (!environs.isEmpty()) {
+        for (unsigned i = 0; i < environs.nChildNode("enviroment"); ++i) {
+            XmlElementType env_node = environs.getChildNode("enviroment", i);
+        }            
+    }
 }
 
 void ConfigurationFile::configure(World& world) {
