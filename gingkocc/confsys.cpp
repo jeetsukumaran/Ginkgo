@@ -146,9 +146,9 @@ void ConfigurationFile::process_biota(World& world) {
         Species& lineage = world.new_species(lid);
         
         // genotypic fitness factor
-        XmlElementType gtf_node = this->get_child_node(this->xml_, "genotypicFitness", false);
+        XmlElementType gtf_node = this->get_child_node(lnode, "genotypicFitness", false);
         if (!gtf_node.isEmpty()) {
-            std::vector<int> gff = this->get_vector_element<int>(gtf_node);
+            std::vector<int> gff = this->get_element_vector<int>(gtf_node);
             if (gff.size() != lineage.get_num_fitness_factors()) {
                 std::ostringstream msg;
                 msg << "expecting " << lineage.get_num_fitness_factors();
@@ -159,14 +159,26 @@ void ConfigurationFile::process_biota(World& world) {
             lineage.set_default_genotypic_fitness_factors(gff);
         }            
        
-        
-//     sp.set_default_genotypic_fitness_factors(this->default_genotypic_fitness_factors_);
-//     sp.set_mutation_rate(this->mutation_rate_);
-//     sp.set_max_mutation_size(this->max_mutation_size_);
-//     sp.set_mean_reproductive_rate(this->mean_reproductive_rate_);
-//     sp.set_reproductive_rate_mutation_size(this->reproductive_rate_mutation_size_);
-//     sp.set_movement_capacity(this->movement_capacity_);
-//     sp.set_movement_probability(this->movement_probability_);
+        // selection weights
+        XmlElementType sw_node = this->get_child_node(lnode, "selectionWeights", false);
+        if (!sw_node.isEmpty()) {
+            std::vector<float> sw = this->get_element_vector<float>(sw_node);
+            if (sw.size() != lineage.get_num_fitness_factors()) {
+                std::ostringstream msg;
+                msg << "expecting " << lineage.get_num_fitness_factors();
+                msg << " default selection weights, but found ";
+                msg << sw.size() << " instead";
+                throw ConfigurationError(msg.str());            
+            }
+            lineage.set_selection_weights(sw);
+        }            
+              
+        lineage.set_mutation_rate(this->get_child_node_scalar<float>(lnode, "genotypicFitnessMutationRate", 0.0));
+        lineage.set_max_mutation_size(this->get_child_node_scalar<float>(lnode, "genotypicFitnessMutationSize", 0.0));
+        lineage.set_mean_reproductive_rate(this->get_child_node_scalar<float>(lnode, "fecundity", 16));
+//         lineage.set_reproductive_rate_mutation_size(this->get_child_node_scalar<float>(lnode, "fecundityMutationRate", 0.0));
+        lineage.set_movement_probability(this->get_child_node_scalar<float>(lnode, "movementProbability", 1.0));
+        lineage.set_movement_capacity(this->get_child_node_scalar<unsigned>(lnode, "movementCapacity", 1));
     }
     
 }

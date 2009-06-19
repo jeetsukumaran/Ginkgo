@@ -183,7 +183,44 @@ class ConfigurationFile {
         }
         
         template <typename T>
-        std::vector<T> get_vector_element(XmlElementType& xml) {
+        T get_child_node_scalar(XmlElementType& xml, const char * node_name) const {
+            XmlElementType cnode = xml.getChildNode(node_name);
+            if (cnode.isEmpty()) {
+                std::ostringstream msg;
+                msg << "mandatory sub-element \"" << node_name << "\" missing for element \"" << xml.getName() << "\"";
+                throw ConfigurationIncompleteError(msg.str());
+            }
+            std::ostringstream raw;
+            for (unsigned i = 0; i < cnode.nText(); ++i) {
+                raw << cnode.getText(i);
+            }
+            return convert::to_scalar<T>(raw.str());
+        }     
+        
+        template <typename T>
+        T get_child_node_scalar(XmlElementType& xml, const char * node_name, T default_value) const {
+            XmlElementType cnode = xml.getChildNode(node_name);
+            if (cnode.isEmpty()) {
+                return default_value;
+            }
+            std::ostringstream raw;
+            for (unsigned i = 0; i < cnode.nText(); ++i) {
+                raw << cnode.getText(i);
+            }
+            return convert::to_scalar<T>(raw.str());
+        }          
+
+        template <typename T>
+        std::vector<T> get_element_scalar(XmlElementType& xml) {
+            std::ostringstream raw;
+            for (unsigned i = 0; i < xml.nText(); ++i) {
+                raw << xml.getText(i);
+            }
+            return convert::to_scalar<T>(raw.str());
+        }        
+        
+        template <typename T>
+        std::vector<T> get_element_vector(XmlElementType& xml) {
             std::ostringstream raw;
             for (unsigned i = 0; i < xml.nText(); ++i) {
                 raw << xml.getText(i);
