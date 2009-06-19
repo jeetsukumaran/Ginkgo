@@ -77,7 +77,8 @@ test_parse_conf_file_SOURCES = \
     ../landscape.cpp \
     ../biosys.cpp \
     ../asciigrid.cpp\
-    ../tree.cpp 
+    ../tree.cpp \
+    ../support/Markup.cpp
     
 test_convert_SOURCES = \
     test_convert.cpp \
@@ -96,4 +97,5 @@ test_world_log_SOURCES = \
     ../tree.cpp \
     ../confsys.cpp \
     ../asciigrid.cpp  \
-    ../filesys.cpp 
+    ../filesys.cpp \
+    ../support/Markup.cpp  

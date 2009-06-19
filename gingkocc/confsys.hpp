@@ -135,13 +135,6 @@ class ConfigurationFile {
     public:
         
         /**
-         * Initializes metadata and binds to source stream.
-         *
-         * @param src   data source
-         */
-        ConfigurationFile(std::istream& src);
-        
-        /**
          * Initializes metadata and binds to source file.
          *
          * @param fpath filepath of data source
@@ -167,30 +160,35 @@ class ConfigurationFile {
         
     private:
     
-        void find_world(XmlElementType& xml) {
-            xml.ResetPos();
-            xml.IntoElem(); // at GINGKO
-            xml.FindChildElem("gingko");
-            xml.FindChildElem("world"); 
-            xml.IntoElem(); 
+        bool to_world_element() {
+            this->xml_.ResetPos();
+            this->xml_.IntoElem(); // at GINGKO
+            this->xml_.FindChildElem("gingko");
+            if (this->xml_.FindChildElem("world")) {
+                this->xml_.IntoElem();
+                return true;
+            } else {
+                return false;
+            }
         }
         
-        void find_biota(XmlElementType& xml) {
-            find_world(xml);
-            xml.FindChildElem("biota");
-            xml.IntoElem();
+        bool to_biota_element() {
+            to_world_element();
+            if (this->xml_.FindChildElem("biota")) {
+                this->xml_.IntoElem();
+                return true;
+            } else {
+                return false;
+            }
         }
         
     private: 
         
         /** Path to configuration file. */
-        std::string         config_filepath_;    
-    
-        /** Input (file) stream. */
-        std::ifstream       fsrc_;
+        std::string         config_filepath_;
         
-        /** Input stream. */
-        std::istream&       src_;
+        /** XML parser. */
+        XmlElementType      xml_;      
         
 };  
 

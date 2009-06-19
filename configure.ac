@@ -184,6 +184,8 @@ fi
 #                                                        #
 ##########################################################
 
+# -DMARKUP_STDCONV = flag for CMarkup
+
 AC_LANG(C++)
 CXXFLAGS="$CXXFLAGS $CXXFLAGS_OPTIM_SPEED -DMARKUP_STDCONV"
 

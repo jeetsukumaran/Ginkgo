@@ -54,12 +54,6 @@ namespace confsys {
 ///////////////////////////////////////////////////////////////////////////////
 // Client code should call one of the following to configure World objects.
 
-World& configure_world(World& world, std::istream& conf_src) {
-    confsys_detail::ConfigurationFile cf(conf_src);
-    cf.configure(world);
-    return world;
-}
-
 World& configure_world(World& world, const char * conf_fpath) {
     std::string s(conf_fpath);
     return configure_world(world, s);
@@ -81,42 +75,40 @@ namespace confsys_detail {
 ///////////////////////////////////////////////////////////////////////////////
 // ConfigurationFile
 
-ConfigurationFile::ConfigurationFile(std::istream& src)
-        : src_(src) {
-    if (not this->src_) {
-        throw ConfigurationIOError("invalid source stream");
+ConfigurationFile::ConfigurationFile(const char * fpath) {
+    bool success = this->xml_.Load(fpath);
+    if (!success) {
+        std::ostringstream msg;
+        msg << "invalid source \"" << fpath << "\"";
+        throw ConfigurationIOError(msg.str());    
     }
 }
 
-ConfigurationFile::ConfigurationFile(const char * fpath)
-        : config_filepath_(fpath),
-          fsrc_(fpath),
-          src_(fsrc_) {
-    if (not this->src_) {
+ConfigurationFile::ConfigurationFile(const std::string& fpath) {
+    bool success = this->xml_.Load(fpath);
+    if (!success) {
         std::ostringstream msg;
         msg << "invalid source \"" << fpath << "\"";
-        throw ConfigurationIOError(msg.str());
-    }          
-}
-
-ConfigurationFile::ConfigurationFile(const std::string& fpath) 
-        : config_filepath_(fpath),
-          fsrc_(fpath.c_str()),
-          src_(fsrc_) {
-    if (not this->src_) {
-        std::ostringstream msg;
-        msg << "invalid source \"" << fpath << "\"";
-        throw ConfigurationIOError(msg.str());
+        throw ConfigurationIOError(msg.str());    
     }
 }
 
 ConfigurationFile::~ConfigurationFile() { }
 
 void ConfigurationFile::configure(World& world) {
-    assert(this->src_);
-    unsigned num_worlds = 0;
-    std::set<std::string> species_labels;
-    std::set<unsigned long> generations;
+    
+    if (!this->to_world_element()) {
+    
+    }
+    
+//         <world label="gingko1" 
+//            x_range = "40" 
+//            y_range = "50" 
+//            num_gens = "20001" 
+//            fitness_dimensions = "5" 
+//            fitness_grain ="1"
+//            suppress_final_output = "True"
+//            random_seed ="2718281828">
 }
     
 } // confsys_detail
