@@ -274,9 +274,11 @@ class Cell {
         
         /** 
          * Given a species index, extracts pointers to male and female 
-         * organisms of the specified species within this cell.
+         * organisms of the specified species (or any species, if none specified) 
+         * within this cell.
          *
-         * @param sp_ptr            pointer to Species object
+         * @param sp_ptr            pointer to Species object; if not NULL, 
+         *                          only organisms of this species will be sampled
          * @param organisms         vector of organisms (source)
          * @param female_ptrs       pointers to organisms in source vector
          *                          that are females of the specified species

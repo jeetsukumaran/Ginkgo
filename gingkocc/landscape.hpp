@@ -127,7 +127,10 @@ class Landscape {
          * at random. If num_organisms exceeds the number of organisms of 
          * given species in the cell, then all the organisms are returned.
          * Organisms will be assigned labels based on their position.
-         * @param sp                     pointer to Species object
+         * @param sp                     pointer to Species object; if NULL all 
+         *                               organisms will be subject to sampling,
+         *                               otherwise, only organisms of specified 
+         *                               species
          * @param num_organisms_per_cell number of organisms (0=all)
          * @param cell_indexes           indexes of cells from which to sample
          */
