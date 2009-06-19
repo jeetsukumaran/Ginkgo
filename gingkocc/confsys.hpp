@@ -201,6 +201,7 @@ class ConfigurationFile {
         }
         
         void process_world(World& world);
+        void process_biota(World& world);
         
     private: 
         

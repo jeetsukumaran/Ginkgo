@@ -114,8 +114,13 @@ void ConfigurationFile::process_world(World& world) {
                               this->get_attribute<CellIndexType>("y_range") );
 }
 
+void ConfigurationFile::process_biota(World& world) {
+
+}
+
 void ConfigurationFile::configure(World& world) {
     this->process_world(world);
+    this->process_biota(world);
 }
     
 } // confsys_detail
