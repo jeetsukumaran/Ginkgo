@@ -88,13 +88,19 @@ void ConfigurationFile::open(const char * fpath) {
     this->xml_ = XMLNode::openFileHelper(fpath,"gingko");
 }
 
+XmlElementType ConfigurationFile::get_child_node(XmlElementType& current_node, const char * node_name, bool required) {
+    XmlElementType cnode = this->xml_.getChildNode(node_name);
+    if (cnode.isEmpty() && required) {
+        std::ostringstream msg;
+        msg << "mandatory element \"" << node_name << "\" is missing from configuration file";
+        throw ConfigurationSyntaxError(msg.str());
+    }
+    return cnode;
+}
+
 void ConfigurationFile::process_world(World& world) {
 
-    XmlElementType world_node = this->xml_.getChildNode("world");
-    if (world_node.isEmpty()) {
-        throw ConfigurationSyntaxError("world element is missing from configuration file");
-    }
-    
+    XmlElementType world_node = this->get_child_node(this->xml_, "world");
     world.set_label( this->get_attribute<std::string>(world_node, "label", "GingkoWorld") );
     world.set_random_seed( this->get_attribute<unsigned long>(world_node, "random_seed", time(0)) );
     world.set_generations_to_run( this->get_attribute<unsigned long>(world_node, "num_gens") );
@@ -131,13 +137,28 @@ void ConfigurationFile::process_biota(World& world) {
     
     for (unsigned i = 0; i < bio_node.nChildNode("lineage"); ++i) {
         XmlElementType lnode = bio_node.getChildNode("lineage", i);
+        
+        // lineage name / id
         std::string lid = this->get_attribute<std::string>(lnode, "id");
         if (world.has_species(lid)) {
             throw ConfigurationError("lineage \"" + lid + "\" defined multiple times");
         }
         Species& lineage = world.new_species(lid);
         
-        
+        // genotypic fitness factor
+        XmlElementType gtf_node = this->get_child_node(this->xml_, "genotypicFitness", false);
+        if (!gtf_node.isEmpty()) {
+            std::vector<int> gff = this->get_vector_element<int>(gtf_node);
+            if (gff.size() != lineage.get_num_fitness_factors()) {
+                std::ostringstream msg;
+                msg << "expecting " << lineage.get_num_fitness_factors();
+                msg << " default genotypic fitness factors, but found ";
+                msg << gff.size() << " instead";
+                throw ConfigurationError(msg.str());            
+            }
+            lineage.set_default_genotypic_fitness_factors(gff);
+        }            
+       
         
 //     sp.set_default_genotypic_fitness_factors(this->default_genotypic_fitness_factors_);
 //     sp.set_mutation_rate(this->mutation_rate_);

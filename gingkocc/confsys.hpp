@@ -188,9 +188,10 @@ class ConfigurationFile {
             for (unsigned i = 0; i < xml.nText(); ++i) {
                 raw << xml.getText(i);
             }
-            return convert::to_vector_on_any(raw.str(), " \t\r\n", true);
+            return convert::to_vector_on_any<T>(raw.str(), " \t\r\n", true);
         }
         
+        XmlElementType get_child_node(XmlElementType& current_node, const char * node_name, bool required=true);
         void process_world(World& world);
         void process_biota(World& world);
         
