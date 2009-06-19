@@ -229,8 +229,10 @@ class ConfigurationFile {
         }
         
         XmlElementType get_child_node(XmlElementType& current_node, const char * node_name, bool required=true);
+        
         void process_world(World& world);
         void process_biota(World& world);
+        void process_lineage(XmlElementType& lnode, World& world);
         
     private: 
         
