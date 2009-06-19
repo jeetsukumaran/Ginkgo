@@ -89,7 +89,8 @@ void ConfigurationFile::open(const char * fpath) {
 }
 
 void ConfigurationFile::process_world(World& world) {
-    XMLNode world_node = this->xml_.getChildNode("world");
+
+    XmlElementType world_node = this->xml_.getChildNode("world");
     if (world_node.isEmpty()) {
         throw ConfigurationSyntaxError("world element is missing from configuration file");
     }
@@ -123,6 +124,30 @@ void ConfigurationFile::process_world(World& world) {
 
 void ConfigurationFile::process_biota(World& world) {
 
+    XmlElementType bio_node = this->xml_.getChildNode("biota");
+    if (bio_node.isEmpty()) {
+        throw ConfigurationSyntaxError("biota element is missing from configuration file");
+    }
+    
+    for (unsigned i = 0; i < bio_node.nChildNode("lineage"); ++i) {
+        XmlElementType lnode = bio_node.getChildNode("lineage", i);
+        std::string lid = this->get_attribute<std::string>(lnode, "id");
+        if (world.has_species(lid)) {
+            throw ConfigurationError("lineage \"" + lid + "\" defined multiple times");
+        }
+        Species& lineage = world.new_species(lid);
+        
+        
+        
+//     sp.set_default_genotypic_fitness_factors(this->default_genotypic_fitness_factors_);
+//     sp.set_mutation_rate(this->mutation_rate_);
+//     sp.set_max_mutation_size(this->max_mutation_size_);
+//     sp.set_mean_reproductive_rate(this->mean_reproductive_rate_);
+//     sp.set_reproductive_rate_mutation_size(this->reproductive_rate_mutation_size_);
+//     sp.set_movement_capacity(this->movement_capacity_);
+//     sp.set_movement_probability(this->movement_probability_);
+    }
+    
 }
 
 void ConfigurationFile::configure(World& world) {

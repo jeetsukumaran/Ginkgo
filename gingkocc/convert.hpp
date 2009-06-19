@@ -86,6 +86,32 @@ std::vector<T> to_vector(U from, const char * separator = " ", bool strip_whites
     return results;
 }
 
+/**
+ * Converts from one simple streamable type to vector of streamable types.
+ * @param from          representation of vector (e.g. "3 32 1 3 4", 
+ *                      "1.2,1.3,3.1", "dda;adf;da" etc.)
+ * @param separator     element delimiter (e.g, ",", " ", etc.)
+ * @return              value represented in type T
+ */
+template <typename T, typename U>
+std::vector<T> to_vector_on_any(U from, const char * separator = " \t\r\n", bool strip_whitespace=false) {
+    std::ostringstream o;
+    o << from;
+    std::vector<std::string> elements = textutil::split_on_any(o.str(), separator, 0, false);
+    std::vector<T> results;
+    results.reserve(elements.size());
+    for (std::vector<std::string>::iterator i = elements.begin(); i != elements.end(); ++i) {
+        std::string s = *i;
+        if (strip_whitespace) {
+            s = textutil::strip(s, "\n\t ");
+        }
+        if (s.size() > 0) {
+            results.push_back( to_scalar<T>(s) );
+        }                        
+    }
+    return results;
+}
+
 } // convert
 } // gingko
 

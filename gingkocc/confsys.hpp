@@ -182,6 +182,15 @@ class ConfigurationFile {
             return convert::to_scalar<T>(attr_value);
         }
         
+        template <typename T>
+        std::vector<T> get_vector_element(XmlElementType& xml) {
+            std::ostringstream raw;
+            for (unsigned i = 0; i < xml.nText(); ++i) {
+                raw << xml.getText(i);
+            }
+            return convert::to_vector_on_any(raw.str(), " \t\r\n", true);
+        }
+        
         void process_world(World& world);
         void process_biota(World& world);
         
