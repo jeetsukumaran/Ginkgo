@@ -32,7 +32,7 @@
 
 #include "world.hpp"
 #include "convert.hpp"
-#include "Markup.h"
+#include "xmlParser.h"
 
 #if !defined(GINGKO_CONFSYS_H)
 #define GINGKO_CONFSYS_H
@@ -103,7 +103,7 @@ class ConfigurationIncompleteError : public ConfigurationError {
 
 namespace confsys_detail {
 
-typedef CMarkup XmlElementType;
+typedef XMLNode XmlElementType;
 
 /**
  * Track distribution of organisms, either for seed populations or sampling 
@@ -160,41 +160,23 @@ class ConfigurationFile {
         
     private:
     
-        bool to_world_element() {
-            this->xml_.ResetPos();
-            this->xml_.IntoElem(); // at GINGKO
-            this->xml_.FindChildElem("gingko");
-            if (this->xml_.FindChildElem("world")) {
-                this->xml_.IntoElem();
-                return true;
-            } else {
-                return false;
-            }
-        }
-        
-        bool to_biota_element() {
-            to_world_element();
-            if (this->xml_.FindChildElem("biota")) {
-                this->xml_.IntoElem();
-                return true;
-            } else {
-                return false;
-            }
-        }
+        void open(const char *fpath);
         
         template <typename T>
-        T get_attribute( const std::string& attr_name) const {
-            std::string attr_value = this->xml_.GetAttrib(attr_name);
-            if (attr_value.size() == 0 ) {
-                throw ConfigurationIncompleteError("attribute \"" + attr_name + "\" not found");
+        T get_attribute(XmlElementType& xml, const char * attr_name) const {
+            const char * attr_value = xml.getAttribute(attr_name);
+            if (attr_value == NULL) {
+                std::ostringstream msg;
+                msg << "mandatory attribute \"" << attr_name << "\" missing for element \"" << xml.getName() << "\"";
+                throw ConfigurationIncompleteError(msg.str());
             }
             return convert::to_scalar<T>(attr_value);
         }        
         
         template <typename T>
-        T get_attribute(const std::string& attr_name, T default_value) const {
-            std::string attr_value = this->xml_.GetAttrib(attr_name);
-            if (attr_value.size() == 0 ) {
+        T get_attribute(XmlElementType& xml, const char * attr_name, T default_value) const {
+            const char * attr_value = xml.getAttribute(attr_name);
+            if (attr_value == NULL) {
                 return default_value;
             }
             return convert::to_scalar<T>(attr_value);

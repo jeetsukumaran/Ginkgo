@@ -32,7 +32,7 @@
 #include "biosys.hpp"
 #include "asciigrid.hpp"
 #include "filesys.hpp"
-#include "Markup.h"
+#include "xmlParser.h"
 
 namespace gingko {
 namespace confsys {
@@ -63,35 +63,42 @@ namespace confsys_detail {
 // ConfigurationFile
 
 ConfigurationFile::ConfigurationFile(const char * fpath) {
-    bool success = this->xml_.Load(fpath);
-    if (!success) {
-        std::ostringstream msg;
-        msg << "invalid source \"" << fpath << "\"";
-        throw ConfigurationIOError(msg.str());    
-    }
+    this->open(fpath);
+//     bool success = this->xml_.Load(fpath);
+//     if (!success) {
+//         std::ostringstream msg;
+//         msg << "invalid source \"" << fpath << "\"";
+//         throw ConfigurationIOError(msg.str());    
+//     }
 }
 
 ConfigurationFile::ConfigurationFile(const std::string& fpath) {
-    bool success = this->xml_.Load(fpath);
-    if (!success) {
-        std::ostringstream msg;
-        msg << "invalid source \"" << fpath << "\"";
-        throw ConfigurationIOError(msg.str());    
-    }
+    this->open(fpath.c_str());
+//     bool success = this->xml_.Load(fpath);
+//     if (!success) {
+//         std::ostringstream msg;
+//         msg << "invalid source \"" << fpath << "\"";
+//         throw ConfigurationIOError(msg.str());    
+//     }
 }
 
 ConfigurationFile::~ConfigurationFile() { }
 
+void ConfigurationFile::open(const char * fpath) {
+    this->xml_ = XMLNode::openFileHelper(fpath,"gingko");
+}
+
 void ConfigurationFile::process_world(World& world) {
-    if (!this->to_world_element()) {
+    XMLNode world_node = this->xml_.getChildNode("world");
+    if (world_node.isEmpty()) {
         throw ConfigurationSyntaxError("world element is missing from configuration file");
     }
     
-    world.set_label( this->get_attribute<std::string>("label", "GingkoWorld") );
-    world.set_random_seed( this->get_attribute<unsigned long>("random_seed", time(0)) );
-    world.set_generations_to_run( this->get_attribute<unsigned long>("num_gens") );
+    world.set_label( this->get_attribute<std::string>(world_node, "label", "GingkoWorld") );
+    world.set_random_seed( this->get_attribute<unsigned long>(world_node, "random_seed", time(0)) );
+    world.set_generations_to_run( this->get_attribute<unsigned long>(world_node, "num_gens") );
 
-    unsigned fitness_dim = this->get_attribute<unsigned>("fitness_dimensions");    
+    unsigned fitness_dim = this->get_attribute<unsigned>(world_node, "fitness_dimensions");    
     if (fitness_dim > MAX_FITNESS_FACTORS) {
         std::ostringstream s;
         s << "maximum number of fitness factors allowed is " << MAX_FITNESS_FACTORS;        
@@ -100,18 +107,18 @@ void ConfigurationFile::process_world(World& world) {
     }
     world.set_num_fitness_factors(fitness_dim);
     
-    world.set_fitness_factor_grain(this->get_attribute<unsigned>("fitness_grain", 1));     
+    world.set_fitness_factor_grain(this->get_attribute<unsigned>(world_node, "fitness_grain", 1));     
     
     
-    std::string produce_final = this->get_attribute<std::string>("suppress_final_output", "False");
+    std::string produce_final = this->get_attribute<std::string>(world_node, "suppress_final_output", "False");
     if (produce_final == "True") {
         world.set_produce_final_output(true);
     } else {
         world.set_produce_final_output(false);
     }
     
-    world.generate_landscape( this->get_attribute<CellIndexType>("x_range"), 
-                              this->get_attribute<CellIndexType>("y_range") );
+    world.generate_landscape( this->get_attribute<CellIndexType>(world_node, "x_range"), 
+                              this->get_attribute<CellIndexType>(world_node, "y_range") );
 }
 
 void ConfigurationFile::process_biota(World& world) {

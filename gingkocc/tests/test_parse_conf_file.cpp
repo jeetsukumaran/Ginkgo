@@ -32,17 +32,19 @@
 
 using namespace gingko;
 
-void test_parse_dummy1(const char * prog_path) {
+void test_parse_dummy1(const char * fpath) {
     World   world;
-    std::string srcf = filesys::compose_path(filesys::get_path_parent(prog_path), 
-                                             "data/dummy1/dummy.conf");
-    confsys::confsys_detail::ConfigurationFile cf(srcf);
+    confsys::confsys_detail::ConfigurationFile cf(fpath);
     cf.configure(world);
 }
 
 int main(int argc, char * argv[]) {
     assert(argc);
-    test_parse_dummy1(argv[0]);
+    if (argc < 2) {
+        std::cerr << "need to specify path to configuration file\n";
+        exit(1);
+    }
+    test_parse_dummy1(argv[1]);
 }
 
 
