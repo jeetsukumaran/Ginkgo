@@ -211,7 +211,7 @@ class ConfigurationFile {
         }          
 
         template <typename T>
-        std::vector<T> get_element_scalar(XmlElementType& xml) {
+        T get_element_scalar(XmlElementType& xml) {
             std::ostringstream raw;
             for (unsigned i = 0; i < xml.nText(); ++i) {
                 raw << xml.getText(i);
@@ -228,6 +228,7 @@ class ConfigurationFile {
             return convert::to_vector_on_any<T>(raw.str(), " \t\r\n", true);
         }
         
+        std::string get_validated_grid_path(const std::string& grid_path, const World& world);
         XmlElementType get_child_node(XmlElementType& current_node, const char * node_name, bool required=true);
         
         void process_world(World& world);

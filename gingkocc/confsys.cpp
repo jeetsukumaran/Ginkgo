@@ -85,6 +85,7 @@ ConfigurationFile::ConfigurationFile(const std::string& fpath) {
 ConfigurationFile::~ConfigurationFile() { }
 
 void ConfigurationFile::open(const char * fpath) {
+    this->config_filepath_ = fpath;
     this->xml_ = XMLNode::openFileHelper(fpath,"gingko");
 }
 
@@ -223,7 +224,58 @@ void ConfigurationFile::process_environments(World& world) {
     if (!environs.isEmpty()) {
         for (unsigned i = 0; i < environs.nChildNode("enviroment"); ++i) {
             XmlElementType env_node = environs.getChildNode("enviroment", i);
+            unsigned long gen = this->get_attribute<unsigned long>(env_node, "gen");
+            WorldSettings world_settings;
+            for (unsigned j = 0; j < env_node.nChildNode(); ++j) {
+                XmlElementType sub_node = env_node.getChildNode(i);
+                if (sub_node.getName() == "carryingCapacity") {
+                    world_settings.carrying_capacity = this->get_validated_grid_path(this->get_element_scalar<std::string>(sub_node), world);
+                } else if (sub_node.getName() == "environmentFactor") {
+                    unsigned eidx = this->get_attribute<unsigned>(sub_node, "id");
+                    if (eidx > world.get_num_fitness_factors()) {
+                        std::ostringstream msg;
+                        msg << "invalid environment factor index: " << eidx;
+                        msg << " (maximum valid index is " << world.get_num_fitness_factors();
+                        msg << ", given " << world.get_num_fitness_factors() << " defined factors)";
+                        throw ConfigurationError(msg.str());           
+                    }                    
+                    std::string gridfile = this->get_validated_grid_path(this->get_element_scalar<std::string>(sub_node), world);
+                    world_settings.environments.insert(std::make_pair(eidx-1, gridfile));
+                } else if (sub_node.getName() == "movementCosts") {
+                    std::string lineage_id = this->get_attribute<std::string>(sub_node, "lineage");
+                    if (not world.has_species(lineage_id)) {
+                        throw ConfigurationError("movement costs: lineage \"" + lineage_id + "\" not defined");
+                    }
+                    std::string gridfile = this->get_validated_grid_path(this->get_element_scalar<std::string>(sub_node), world);
+                    world_settings.movement_costs.insert(std::make_pair(lineage_id, gridfile));
+                }                
+            }
         }            
+    }
+}
+
+std::string ConfigurationFile::get_validated_grid_path(const std::string& grid_path, const World& world) {   
+    std::string root_filepath = this->config_filepath_;
+    std::string full_grid_path;    
+    if (filesys::is_abs_path(grid_path) or root_filepath.size() == 0) {
+        full_grid_path = grid_path;      
+    } else {        
+        full_grid_path = filesys::compose_path(root_filepath, grid_path);      
+    } 
+    try {
+        asciigrid::AsciiGrid grid(full_grid_path);
+        std::vector<long> values = grid.get_cell_values();
+        if (values.size() != world.size()) {
+            std::ostringstream msg;
+            msg << "landscape has " << world.size() << " cells, ";
+            msg << "but grid \"" << full_grid_path << "\" describes " << values.size() << " cells";
+            throw ConfigurationError(msg.str());        
+        }
+        return full_grid_path;
+    } catch (asciigrid::AsciiGridIOError e) {
+        throw ConfigurationIOError("I/O error reading grid \"" + full_grid_path + "\": " + e.what());
+    } catch (asciigrid::AsciiGridFormatError e) {
+        throw ConfigurationIOError("format error reading grid \"" + full_grid_path + "\": " + e.what());
     }
 }
 
