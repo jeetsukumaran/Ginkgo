@@ -37,19 +37,6 @@
 namespace gingko {
 namespace confsys {
 
-/* PARSE LOGIC:
- *
- * text => structured text [ConfigurationBlock] => structured values [XXXConf]
- *
- * (1) Data file parsed into [ConfigurationBlock] objects.
- * (2) Each [ConfigurationBlock] object = structured string representation of 
- *     data (e.g., name, type, and dictionary mapping string to strings).
- * (3) Each [ConfigurationBlock] object then is mapped into a corresponding
- *     WorldConfigurator, SpeciesConf, etc. objects, which take the strings and convert
- *     them into values of the appropriate type.
- * (4) The configure_world() functions then take the structured values and 
- *     populate/configure the World object correspondingly.
- */
 
 ///////////////////////////////////////////////////////////////////////////////
 // Client code should call one of the following to configure World objects.

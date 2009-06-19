@@ -50,7 +50,9 @@ test_parse_conf_block_SOURCES = \
     ../biosys.cpp   \
     ../asciigrid.cpp \
     ../filesys.cpp\
-    ../tree.cpp 
+    ../tree.cpp \
+    ../Markup.cpp    
+    
     
 test_textutil_SOURCES = \
     test_textutil.cpp \
@@ -78,7 +80,7 @@ test_parse_conf_file_SOURCES = \
     ../biosys.cpp \
     ../asciigrid.cpp\
     ../tree.cpp \
-    ../support/Markup.cpp
+    ../Markup.cpp
     
 test_convert_SOURCES = \
     test_convert.cpp \
@@ -98,4 +100,4 @@ test_world_log_SOURCES = \
     ../confsys.cpp \
     ../asciigrid.cpp  \
     ../filesys.cpp \
-    ../support/Markup.cpp  
+    ../Markup.cpp  

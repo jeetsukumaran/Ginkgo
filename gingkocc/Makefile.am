@@ -21,4 +21,4 @@ gingko_SOURCES = \
     confsys.cpp \
     asciigrid.cpp  \
     filesys.cpp \
-    support/Markup.cpp
+    Markup.cpp
