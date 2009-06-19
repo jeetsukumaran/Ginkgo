@@ -32,6 +32,7 @@
 
 #include "world.hpp"
 #include "convert.hpp"
+#include "Markup.h"
 
 #if !defined(GINGKO_CONFSYS_H)
 #define GINGKO_CONFSYS_H
@@ -102,6 +103,8 @@ class ConfigurationIncompleteError : public ConfigurationError {
 
 namespace confsys_detail {
 
+typedef CMarkup XmlElementType;
+
 /**
  * Track distribution of organisms, either for seed populations or sampling 
  * regimes.
@@ -161,6 +164,22 @@ class ConfigurationFile {
          * Parses the configuration file, loading data into blocks.
          */
         void configure(World& world);
+        
+    private:
+    
+        void find_world(XmlElementType& xml) {
+            xml.ResetPos();
+            xml.IntoElem(); // at GINGKO
+            xml.FindChildElem("gingko");
+            xml.FindChildElem("world"); 
+            xml.IntoElem(); 
+        }
+        
+        void find_biota(XmlElementType& xml) {
+            find_world(xml);
+            xml.FindChildElem("biota");
+            xml.IntoElem();
+        }
         
     private: 
         

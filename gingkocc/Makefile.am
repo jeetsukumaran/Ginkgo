@@ -20,4 +20,5 @@ gingko_SOURCES = \
     tree.cpp \
     confsys.cpp \
     asciigrid.cpp  \
-    filesys.cpp
+    filesys.cpp \
+    Markup.cpp

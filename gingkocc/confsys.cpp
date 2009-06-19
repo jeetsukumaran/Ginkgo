@@ -32,6 +32,7 @@
 #include "biosys.hpp"
 #include "asciigrid.hpp"
 #include "filesys.hpp"
+#include "Markup.h"
 
 namespace gingko {
 namespace confsys {

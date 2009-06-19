@@ -185,7 +185,7 @@ fi
 ##########################################################
 
 AC_LANG(C++)
-CXXFLAGS="$CXXFLAGS $CXXFLAGS_OPTIM_SPEED"
+CXXFLAGS="$CXXFLAGS $CXXFLAGS_OPTIM_SPEED -DMARKUP_STDCONV"
 
 
 ################################################################################
