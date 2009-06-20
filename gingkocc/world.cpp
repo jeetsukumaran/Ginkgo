@@ -286,11 +286,11 @@ void World::process_world_settings() {
         }
     }            
     if (wi->second.movement_costs.size() != 0) {
-        for (std::map<std::string, std::string>::iterator mi = wi->second.movement_costs.begin();
+        for (std::map<Species *, std::string>::iterator mi = wi->second.movement_costs.begin();
                  mi != wi->second.movement_costs.end();
                  ++mi) {
             std::ostringstream msg;
-            msg << "[Generation " << this->current_generation_ << "] Setting movement costs for species " <<  mi->first <<  ": \"" <<  mi->second <<  "\"";
+            msg << "[Generation " << this->current_generation_ << "] Setting movement costs for species " <<  mi->first->get_label() <<  ": \"" <<  mi->second <<  "\"";
             this->log_info(msg.str());
             asciigrid::AsciiGrid grid(mi->second);
             this->set_species_movement_costs(mi->first, grid.get_cell_values());                    

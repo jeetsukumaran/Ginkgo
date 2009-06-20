@@ -246,8 +246,9 @@ void ConfigurationFile::process_environments(World& world) {
                     if (not world.has_species(lineage_id)) {
                         throw ConfigurationError("movement costs: lineage \"" + lineage_id + "\" not defined");
                     }
+                    Species * lineage = world.get_species_ptr(lineage_id);
                     std::string gridfile = this->get_validated_grid_path(this->get_element_scalar<std::string>(sub_node), world);
-                    world_settings.movement_costs.insert(std::make_pair(lineage_id, gridfile));
+                    world_settings.movement_costs.insert(std::make_pair(lineage, gridfile));
                 }                
             }
         }            

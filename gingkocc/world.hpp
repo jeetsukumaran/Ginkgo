@@ -143,7 +143,7 @@ struct WorldSettings {
      * Movement costs that need to be changed/set. (expressed as species labels
      * mapped to ESRI ASCII Grid file paths). 
      */
-    std::map<std::string, std::string>      movement_costs;
+    std::map<Species *, std::string>        movement_costs;
 
 }; // WorldSettings
 
@@ -344,6 +344,10 @@ class World {
             }        
         }
         
+
+
+       
+        
         /**
          * Set the costs for entering particular cells on the landscape for 
          * a particular species.
@@ -360,6 +364,20 @@ class World {
         }
         
         /**
+         * Set the costs for entering particular cells on the landscape for 
+         * a particular species.
+         *
+         * @param species_ptr   pointer to species object
+         * @param costs         vector of costs for entering a cell, with 
+         *                      cost for cell \f$i\f$ in the landscape given
+         *                      by element \f$i\f$ in the costs vector
+         */
+        void set_species_movement_costs(Species * species_ptr, const std::vector<long>& costs) {
+            assert(costs.size() == static_cast<unsigned long>(this->landscape_.size()));
+            species_ptr->set_movement_costs(costs);
+        }
+        
+        /**
          * Sets the weight for each fitness factor for a particular species.
          *
          * @param species_label  label of the Species object
@@ -373,6 +391,19 @@ class World {
         }
         
         /**
+         * Sets the weight for each fitness factor for a particular species.
+         *
+         * @param species_ptr   pointer to species object
+         * @param strengths     vector coeffecients to the Gaussian distance
+         *                      equation used to evaluate fitness
+         */
+        void set_species_selection_weights(Species * species_ptr, const std::vector<float>& strengths) {    
+            assert(strengths.size() == this->num_fitness_factors_);
+            species_ptr->set_selection_weights(strengths);
+        }
+                
+        
+        /**
          * Sets the default genotypic (inheritable) component of fitness for a 
          * organisms of the given species when generated de novo.
          *
@@ -383,7 +414,19 @@ class World {
         void set_species_default_genotype(const std::string& species_label, const FitnessFactors& genotype) {
             assert(this->species_.find(species_label) != this->species_.end());    
             this->species_[species_label]->set_default_genotypic_fitness_factors(genotype);
-        }        
+        }
+        
+        /**
+         * Sets the default genotypic (inheritable) component of fitness for a 
+         * organisms of the given species when generated de novo.
+         *
+         * @param species_ptr   pointer to species object
+         * @param genotype      vector genotypic fitness values for a new 
+         *                      organism of the given species
+         */        
+        void set_species_default_genotype(Species * species_ptr, const FitnessFactors& genotype) {
+            species_ptr->set_default_genotypic_fitness_factors(genotype);
+        }           
                                 
         // --- setup, initialization and seeding ---
         
