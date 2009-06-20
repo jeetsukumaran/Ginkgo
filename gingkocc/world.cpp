@@ -303,18 +303,21 @@ void World::process_dispersal_events() {
     for (gen_disp_t::iterator di = this_gen_dispersals.first; di != this_gen_dispersals.second; ++di) {            
         DispersalEvent& de = di->second;
         std::ostringstream msg;
-        msg << "[Generation " << this->current_generation_ << "] Species " << de.species_ptr->get_label() << " dispersal";
+        msg << "[Generation " << this->current_generation_ << "] Dispersal";
+        if (de.species_ptr != NULL) {
+            msg << " of " << de.species_ptr->get_label();
+        }
         msg << " from (" << this->landscape_.index_to_x(de.source) << "," << this->landscape_.index_to_y(de.source) << ")";
-        msg << " to (" << this->landscape_.index_to_x(de.destination) << "," << this->landscape_.index_to_y(de.destination) << "):";
-        if (this->rng().uniform_01() > de.probability) {
-            msg << " FAILED.";
-        } else {
-            std::vector<const Organism *> organisms;
-            this->landscape_[de.source].sample_organisms(de.species_ptr, organisms, de.num_organisms);
-            this->landscape_.clear_migrants();
-            unsigned long num_males = 0;
-            unsigned long num_females = 0;
-            for (std::vector<const Organism *>::iterator oi = organisms.begin();  oi != organisms.end(); ++oi) {
+        msg << " to (" << this->landscape_.index_to_x(de.destination) << "," << this->landscape_.index_to_y(de.destination) << ")";
+        msg << " with probability " << de.probability << ": ";
+        
+        std::vector<const Organism *> organisms;
+        this->landscape_[de.source].sample_organisms(de.species_ptr, organisms, de.num_organisms);
+        this->landscape_.clear_migrants();
+        unsigned long num_males = 0;
+        unsigned long num_females = 0;
+        for (std::vector<const Organism *>::iterator oi = organisms.begin();  oi != organisms.end(); ++oi) {
+            if (this->rng().uniform_01() > de.probability) {
                 Organism* og = const_cast<Organism*>(*oi);
                 if (og->is_male()) {
                     ++num_males;
@@ -323,11 +326,11 @@ void World::process_dispersal_events() {
                 }
                 this->landscape_.add_migrant(*og, de.destination);
                 og->set_expired(true);
-            }
-            msg << " " << num_females << " females and " << num_males << " males.";
-            this->landscape_[de.source].purge_expired_organisms();
-            this->landscape_.process_migrants();
+            }                
         }
+        msg << " " << num_females << " females and " << num_males << " males.";
+        this->landscape_[de.source].purge_expired_organisms();
+        this->landscape_.process_migrants();
         this->log_info(msg.str());              
     }
 }
