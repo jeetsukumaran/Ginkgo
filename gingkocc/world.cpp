@@ -104,19 +104,17 @@ Species& World::new_species(const std::string& label) {
 
 // Populates the cell cell_index with organisms of the given species.
 void World::generate_seed_population(CellIndexType cell_index, 
-        const std::string& species_label, 
+        Species * species_ptr, 
         unsigned long pop_size,
         unsigned long ancestral_pop_size,
         unsigned long ancestral_generations) {
-    assert(this->species_.find(species_label) != this->species_.end());
-    
     std::ostringstream pre_msg;
     pre_msg << "[Generation " << this->current_generation_ << "] ";
-    pre_msg << "Bootstrapping seed population of species " << species_label << ": ";   
+    pre_msg << "Bootstrapping seed population of species " << species_ptr->get_label() << ": ";   
     pre_msg << ancestral_pop_size << " individuals for " << ancestral_generations << " generations.";
     this->log_info(pre_msg.str());
         
-    this->landscape_.at(cell_index).generate_new_population(this->species_[species_label],
+    this->landscape_.at(cell_index).generate_new_population(species_ptr,
             pop_size,
             ancestral_pop_size,
             ancestral_generations);
@@ -124,7 +122,7 @@ void World::generate_seed_population(CellIndexType cell_index,
     std::ostringstream post_msg;
     post_msg << "[Generation " << this->current_generation_ << "] ";
     post_msg << "Seeding population ";
-    post_msg << "of species " << species_label << " ";
+    post_msg << "of species " << species_ptr->get_label()  << " ";
     post_msg << "in (" << this->landscape_.index_to_x(cell_index) <<  "," << this->landscape_.index_to_y(cell_index) << "): ";
     post_msg << pop_size << " individuals drawn from an ancestral population of " << ancestral_pop_size << " ";
     post_msg << "after " << ancestral_generations << " generations.";
@@ -151,11 +149,11 @@ void World::add_occurrence_sampling(unsigned long generation, Species * species_
 }
 
 void World::add_seed_population(CellIndexType cell_index, 
-        const std::string& species_label, 
+        Species * species_ptr,
         unsigned long pop_size,
         unsigned long ancestral_pop_size,
         unsigned long ancestral_generations) {
-    this->seed_populations_.push_back( SeedPopulation(cell_index, species_label, pop_size, ancestral_pop_size, ancestral_generations) );           
+    this->seed_populations_.push_back( SeedPopulation(cell_index, species_ptr, pop_size, ancestral_pop_size, ancestral_generations) );           
 }        
 
 
@@ -213,7 +211,7 @@ void World::run() {
             ++spi) {
         SeedPopulation& sp = *spi;
         this->generate_seed_population(sp.cell_index, 
-            sp.species_label, 
+            sp.species_ptr, 
             sp.pop_size, 
             sp.ancestral_pop_size,
             sp.ancestral_generations);

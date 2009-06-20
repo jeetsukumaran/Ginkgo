@@ -197,25 +197,16 @@ void ConfigurationFile::process_lineage(XmlElementType& lineage_node, World& wor
     }
     for (unsigned i = 0; i < seed_pops.nChildNode("seedPopulation"); ++i) {
         XmlElementType pop_node = seed_pops.getChildNode("seedPopulation", i);
-        CellIndexType x = this->get_attribute<CellIndexType>(pop_node, "x");
-        if (x > world.landscape().size_x()-1) {
-            std::ostringstream msg;
-            msg << "maximum x-coordinate on landscape is " << world.landscape().size_x();
-            msg << " but seed population position for species " << lineage_id << " specifies x-coordinate of " << x;
-            throw ConfigurationError(msg.str());
-        }        
-        CellIndexType y = this->get_attribute<CellIndexType>(pop_node, "y");
-        if (y > world.landscape().size_y()-1) {
-            std::ostringstream msg;
-            msg << "maximum y-coordinate on landscape is " << world.landscape().size_y();
-            msg << " but seed population position for species " << lineage_id << " specifies y-coordinate of " << y;
-            throw ConfigurationError(msg.str());
-        }
-        CellIndexType cell_index = world.landscape().xy_to_index(x, y);
+        std::ostringstream item_desc;
+        item_desc << "seed population " << i+1 << " for lineage \"" << lineage_id << "\"";
+        CellIndexType cell_index = this->get_validated_cell_index(this->get_attribute<CellIndexType>(pop_node, "x"),
+                                                                  this->get_attribute<CellIndexType>(pop_node, "y"),
+                                                                  world,
+                                                                  item_desc.str().c_str());
         unsigned long size = this->get_attribute<CellIndexType>(pop_node, "size");
         unsigned long ancestral_pop_size = this->get_child_node_scalar<unsigned long>(pop_node, "ancestralPopulationSize");
         unsigned long ancestral_generations = this->get_child_node_scalar<unsigned long>(pop_node, "ancestralGenerations");
-        world.add_seed_population(cell_index, lineage_id, size, ancestral_pop_size, ancestral_generations);
+        world.add_seed_population(cell_index, &lineage, size, ancestral_pop_size, ancestral_generations);
     }    
 }
 
@@ -255,6 +246,29 @@ void ConfigurationFile::process_environments(World& world) {
     }
 }
 
+void ConfigurationFile::process_dispersals(World& world) {
+    XmlElementType dispersals = this->xml_.getChildNode("world").getChildNode("dispersals");
+    if (!dispersals.isEmpty()) {
+        for (unsigned i = 0; i < dispersals.nChildNode("dispersal"); ++i) {
+            XmlElementType disp_node = dispersals.getChildNode("dispersal", i);
+            unsigned long gen = this->get_attribute<unsigned long>(disp_node, "gen");
+            std::ostringstream item_desc;
+            item_desc << "dispersal event " << i+1 << " in generation " << gen;
+            CellIndexType src = this->get_validated_cell_index(this->get_attribute<unsigned long>(disp_node, "from_x"),
+                    this->get_attribute<unsigned long>(disp_node, "from_y"),
+                    world,
+                    item_desc.str().c_str());
+            
+            CellIndexType dest = this->get_validated_cell_index(this->get_attribute<unsigned long>(disp_node, "to_x"),
+                    this->get_attribute<unsigned long>(disp_node, "to_y"),
+                    world,
+                    item_desc.str().c_str());
+            
+            // validate etc.
+        }            
+    }
+}
+
 std::string ConfigurationFile::get_validated_grid_path(const std::string& grid_path, const World& world) {   
     std::string root_filepath = this->config_filepath_;
     std::string full_grid_path;    
@@ -280,9 +294,36 @@ std::string ConfigurationFile::get_validated_grid_path(const std::string& grid_p
     }
 }
 
+CellIndexType ConfigurationFile::get_validated_cell_index(CellIndexType x, 
+        CellIndexType y, 
+        World& world, 
+        const char * item_desc) {
+    if (x > world.landscape().size_x() - 1) {
+        std::ostringstream msg;
+        msg << "maximum x-coordinate on landscape is " << world.landscape().size_x() - 1;
+        msg << " (0-based indexing), but x-coordinate of " << x << " specified";
+        if (item_desc != NULL) {
+            msg << " for " << item_desc;
+        }            
+        throw ConfigurationError(msg.str());
+    }
+    if (y > world.landscape().size_y() - 1) {
+        std::ostringstream msg;
+        msg << "maximum y-coordinate on landscape is " << world.landscape().size_y() - 1;
+        msg << " (0-based indexing), but y-coordinate of " << y << " specified";
+        if (item_desc != NULL) {
+            msg << " for " << item_desc;
+        }        
+        throw ConfigurationError(msg.str());
+    }
+    return world.landscape().xy_to_index(x, y);
+}
+
 void ConfigurationFile::configure(World& world) {
     this->process_world(world);
     this->process_biota(world);
+    this->process_environments(world);
+    this->process_dispersals(world);
 }
     
 } // confsys_detail

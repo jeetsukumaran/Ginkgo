@@ -53,24 +53,25 @@ class WorldIOError : public std::runtime_error {
 struct SeedPopulation {
     public:
         CellIndexType       cell_index;
-        std::string         species_label;
+        Species *           species_ptr;
         unsigned long       pop_size;
         unsigned long       ancestral_pop_size;
         unsigned long       ancestral_generations;
     public:
         SeedPopulation()
             : cell_index(0),
+              species_ptr(NULL),
               pop_size(0),
               ancestral_pop_size(0),
               ancestral_generations(0) { }
               
         SeedPopulation(CellIndexType cell_index, 
-            const std::string& species_label, 
+            Species * species_ptr, 
             unsigned long pop_size,
             unsigned long ancestral_pop_size,
             unsigned long ancestral_generations)
             : cell_index(cell_index),
-              species_label(species_label),
+              species_ptr(species_ptr),
               pop_size(pop_size),
               ancestral_pop_size(ancestral_pop_size),
               ancestral_generations(ancestral_generations) { }            
@@ -465,7 +466,7 @@ class World {
          * @param ancestral_generations    number of generations in ancestral population  (0 => 10N)         
          */        
         void generate_seed_population(CellIndexType cell_index, 
-                const std::string& species_label, 
+                Species * species_ptr, 
                 unsigned long pop_size,
                 unsigned long ancestral_pop_size,
                 unsigned long ancestral_generations);
@@ -518,7 +519,7 @@ class World {
          * @param ancestral_generations    number of generations in ancestral population  (0 => 10N) 
          */
         void add_seed_population(CellIndexType cell_index, 
-                const std::string& species_label, 
+                Species * species_ptr,
                 unsigned long pop_size,
                 unsigned long ancestral_pop_size,
                 unsigned long ancestral_generations);          

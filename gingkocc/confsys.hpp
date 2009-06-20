@@ -228,6 +228,7 @@ class ConfigurationFile {
             return convert::to_vector_on_any<T>(raw.str(), " \t\r\n", true);
         }
         
+        CellIndexType get_validated_cell_index(CellIndexType x, CellIndexType y, World& world, const char * item_desc);
         std::string get_validated_grid_path(const std::string& grid_path, const World& world);
         XmlElementType get_child_node(XmlElementType& current_node, const char * node_name, bool required=true);
         
@@ -235,6 +236,7 @@ class ConfigurationFile {
         void process_biota(World& world);
         void process_lineage(XmlElementType& lnode, World& world);
         void process_environments(World& world);
+        void process_dispersals(World& world);
         
     private: 
         
