@@ -285,7 +285,7 @@ std::string ConfigurationFile::get_validated_grid_path(const std::string& grid_p
         if (values.size() != world.size()) {
             std::ostringstream msg;
             msg << "landscape has " << world.size() << " cells, ";
-            msg << "but grid \"" << full_grid_path << "\" describes " << values.size() << " cells";
+            msg << "but grid \"" << full_grid_path << "\" describes " << values.size() << " cells";                                
             throw ConfigurationError(msg.str());        
         }
         return full_grid_path;
