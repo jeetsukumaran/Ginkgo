@@ -659,14 +659,14 @@ void World::log_configuration() {
             for (std::map<unsigned, std::string>::iterator ei = wi->second.environments.begin();
                      ei != wi->second.environments.end();
                      ++ei) {
-                out << "Environment Factor #" << ei->first << ": \"" << ei->second << "\"" << std::endl;                                                 
+                out << "Environment factor #" << (ei->first + 1) << ": \"" << ei->second << "\"" << std::endl;                                                 
             }
         }            
         if (wi->second.movement_costs.size() != 0) {
             for (std::map<Species *, std::string>::iterator mi = wi->second.movement_costs.begin();
                      mi != wi->second.movement_costs.end();
                      ++mi) {
-                out << "Movement Costs for \"" << mi->first->get_label() << "\": \"" << mi->second << "\"" << std::endl;                   
+                out << "Movement costs for lineage \"" << mi->first->get_label() << "\": \"" << mi->second << "\"" << std::endl;                   
             }
         }    
     }
