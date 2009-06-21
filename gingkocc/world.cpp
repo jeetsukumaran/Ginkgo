@@ -613,15 +613,16 @@ void World::log_configuration() {
 
     out << std::endl;
     out << "*** LINEAGES ***" << std::endl;
+    out << "(" << this->species_.size() << " lineages specified)" << std::endl;
     unsigned i = 0;
     for (SpeciesByLabel::iterator spi = this->species_.begin(); spi != this->species_.end(); ++spi) {
         i += 1;
         Species& lineage = *spi->second;
         out << std::endl;
-        out << lineage.get_label() << " (Lineage " << i << " of " << this->species_.size() << ")"  << std::endl;
-        out << "   Fitness factors: " << lineage.get_num_fitness_factors() << std::endl;
-        out << "   Fitness grain: " << lineage.get_fitness_factor_grain() << std::endl;
-        out << "   Selection weights: ";
+        out << "\"" << lineage.get_label() << "\"" << std::endl;
+        out << "     Fitness factors: " << lineage.get_num_fitness_factors() << std::endl;
+        out << "     Fitness grain: " << lineage.get_fitness_factor_grain() << std::endl;
+        out << "     Selection weights: ";
         std::vector<float> sw = lineage.get_selection_weights();
         for (std::vector<float>::iterator swi = sw.begin(); swi != sw.end(); ++swi) {
             if ((swi - sw.begin()) > 0) {
@@ -630,7 +631,7 @@ void World::log_configuration() {
             out << *swi;
         }
         out << std::endl;
-        out << "   Initial genotypic fitness factors: ";
+        out << "     Initial genotypic fitness factors: ";
         std::vector<FitnessFactorType> g = lineage.get_default_genotypic_fitness_factors();
         for (std::vector<FitnessFactorType>::iterator gi = g.begin(); gi != g.end(); ++gi) {
             if ((gi - g.begin()) > 0) {
@@ -639,11 +640,11 @@ void World::log_configuration() {
             out << *gi;
         }           
         out << std::endl;
-        out << "   Genotypic fitness mutation rate: " << lineage.get_mutation_rate() << std::endl;
-        out << "   Genotypic fitness maximum mutation size: " << lineage.get_max_mutation_size() << std::endl;
-        out << "   Fecundity: " <<  lineage.get_mean_reproductive_rate() << std::endl;
-        out << "   Movement probability: " << lineage.get_movement_probability() << std::endl;
-        out << "   Movement capacity: " << lineage.get_movement_capacity() << std::endl;
+        out << "     Genotypic fitness mutation rate: " << lineage.get_mutation_rate() << std::endl;
+        out << "     Genotypic fitness maximum mutation size: " << lineage.get_max_mutation_size() << std::endl;
+        out << "     Fecundity: " <<  lineage.get_mean_reproductive_rate() << std::endl;
+        out << "     Movement probability: " << lineage.get_movement_probability() << std::endl;
+        out << "     Movement capacity: " << lineage.get_movement_capacity() << std::endl;
     }
 
     out << std::endl;
@@ -653,20 +654,20 @@ void World::log_configuration() {
     for (std::map<unsigned long, WorldSettings>::iterator wi = this->world_settings_.begin(); wi != this->world_settings_.end(); ++wi) {
         out << "\n[ENVIRONMENT: GENERATION " << wi->first << "]" << std::endl;
         if (wi->second.carrying_capacity.size() != 0) {
-            out << "Carrying-capacity: \"" << wi->second.carrying_capacity << "\"" << std::endl;
+            out << "    Carrying-capacity: \"" << wi->second.carrying_capacity << "\"" << std::endl;
         }
         if (wi->second.environments.size() != 0) {
             for (std::map<unsigned, std::string>::iterator ei = wi->second.environments.begin();
                      ei != wi->second.environments.end();
                      ++ei) {
-                out << "Environment factor #" << (ei->first + 1) << ": \"" << ei->second << "\"" << std::endl;                                                 
+                out << "    Environment factor #" << (ei->first + 1) << ": \"" << ei->second << "\"" << std::endl;                                                 
             }
         }            
         if (wi->second.movement_costs.size() != 0) {
             for (std::map<Species *, std::string>::iterator mi = wi->second.movement_costs.begin();
                      mi != wi->second.movement_costs.end();
                      ++mi) {
-                out << "Movement costs for lineage \"" << mi->first->get_label() << "\": \"" << mi->second << "\"" << std::endl;                   
+                out << "    Movement costs for lineage \"" << mi->first->get_label() << "\": \"" << mi->second << "\"" << std::endl;                   
             }
         }    
     }
