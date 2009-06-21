@@ -272,12 +272,12 @@ void ConfigurationFile::process_dispersals(World& world) {
 }
 
 std::string ConfigurationFile::get_validated_grid_path(const std::string& grid_path, const World& world) {   
-    std::string root_filepath = this->config_filepath_;
+    std::string top_dir = filesys::get_path_parent(this->config_filepath_);
     std::string full_grid_path;    
-    if (filesys::is_abs_path(grid_path) or root_filepath.size() == 0) {
+    if (filesys::is_abs_path(grid_path) or top_dir.size() == 0) {
         full_grid_path = grid_path;      
     } else {        
-        full_grid_path = filesys::compose_path(root_filepath, grid_path);      
+        full_grid_path = filesys::compose_path(top_dir, grid_path);      
     } 
     try {
         asciigrid::AsciiGrid grid(full_grid_path);
