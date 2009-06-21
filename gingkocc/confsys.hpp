@@ -237,6 +237,7 @@ class ConfigurationFile {
         void process_lineage(XmlElementType& lnode, World& world);
         void process_environments(World& world);
         void process_dispersals(World& world);
+        void process_samplings(World& world);
         
     private: 
         

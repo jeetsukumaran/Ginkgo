@@ -51,7 +51,7 @@ std::string textwrap(const std::string& source,
  * @param src           source string to be split
  * @param sep           separator token (single or multiple characters)
  * @max_splits          maximum number of splits (0 = no limit)
- * @param include_empty_tokens treat consecutive delimiters as single?
+ * @param include_empty_tokens treat consecutive delimiters as valid (separating empty fields)?
  * @return      vector of std::string tokens
  */
 std::vector<std::string> split(const char * ssrc, const char * sep = " ", unsigned max_splits=0, bool include_empty_tokens=true);
@@ -63,7 +63,7 @@ std::vector<std::string> split(const char * ssrc, const char * sep = " ", unsign
  * @param src   source string to be split
  * @param sep   separator token (single or multiple characters)
  * @max_splits          maximum number of splits (0 = no limit) 
- * @param include_empty_tokens treat consecutive delimiters as single?
+ * @param include_empty_tokens treat consecutive delimiters as valid (separating empty fields)?
  * @return      vector of std::string tokens
  */
 std::vector<std::string> split(const std::string& src, const char * sep = " ", unsigned max_splits=0, bool include_empty_tokens=true);
@@ -75,7 +75,7 @@ std::vector<std::string> split(const std::string& src, const char * sep = " ", u
  * @param src           source string to be split
  * @param sep           separator token (single or multiple characters)
  * @max_splits          maximum number of splits (0 = no limit)
- * @param include_empty_tokens treat consecutive delimiters as single?
+ * @param include_empty_tokens treat consecutive delimiters as valid (separating empty fields)?
  * @return      vector of std::string tokens
  */
 std::vector<std::string> split_on_any(const char * ssrc, const char * sep = " ", unsigned max_splits=0, bool include_empty_tokens=true);
@@ -87,7 +87,7 @@ std::vector<std::string> split_on_any(const char * ssrc, const char * sep = " ",
  * @param src   source string to be split
  * @param sep   separator token (single or multiple characters)
  * @max_splits          maximum number of splits (0 = no limit) 
- * @param include_empty_tokens treat consecutive delimiters as single?
+ * @param include_empty_tokens treat consecutive delimiters as valid (separating empty fields)?
  * @return      vector of std::string tokens
  */
 std::vector<std::string> split_on_any(const std::string& src, const char * sep = " ", unsigned max_splits=0, bool include_empty_tokens=true);
