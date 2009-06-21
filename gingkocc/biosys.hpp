@@ -858,7 +858,18 @@ class Species {
          */             
         void set_num_fitness_factors(unsigned num_fitness_factors) {
             this->num_fitness_factors_ = num_fitness_factors;
-        }      
+        }
+        
+        /**
+         * Returns fitness factor grain.
+         *
+         * Returns the scaling factor for fitness calculation.
+         *
+         * @return number of fitness factor grain
+         */        
+        unsigned get_fitness_factor_grain() const {
+            return this->fitness_factor_grain_;
+        }        
 
         /**
          * Returns the probability of mutation when inheriting an organism 
@@ -898,6 +909,10 @@ class Species {
          */          
         void set_max_mutation_size(FitnessFactorType mutation_size) {
             this->max_mutation_size_ = mutation_size;
+        }
+        
+        FitnessFactorType get_max_mutation_size() {
+            return this->max_mutation_size_;
         }
         
         /**
@@ -995,6 +1010,21 @@ class Species {
         }
         
         /**
+         * Gets the strengths of individual fitness factors on the fitness as 
+         * calculated for this species.
+         *
+         * Each element in the vector is a coefficient for the fitness function 
+         * calculated using the corresponding elements of the environmental and
+         * genotypic fitness factor vectors.
+         *
+         * @param  strengths    vector of coefficients to the multivariate 
+         *                      fitness function
+         */        
+        std::vector<float> get_selection_weights() {
+            return this->selection_weights_;
+        }        
+        
+        /**
          * Sets the strengths of individual fitness factors on the fitness as 
          * calculated for this species.
          *
@@ -1025,6 +1055,15 @@ class Species {
             for (unsigned i = 0; i != genotype.size(); ++i) {
                 this->default_genotypic_fitness_factors_[i] = genotype[i];
             }
+        }
+        
+        std::vector<FitnessFactorType> get_default_genotypic_fitness_factors() {
+            std::vector<FitnessFactorType> v;
+            v.reserve(this->get_num_fitness_factors());
+            for (unsigned i = 0; i < this->get_num_fitness_factors(); ++i) {
+                v.push_back(this->default_genotypic_fitness_factors_[i]);    
+            }
+            return v;
         }          
         
         /**

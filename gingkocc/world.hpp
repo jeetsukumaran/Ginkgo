@@ -345,10 +345,6 @@ class World {
             }        
         }
         
-
-
-       
-        
         /**
          * Set the costs for entering particular cells on the landscape for 
          * a particular species.
@@ -558,6 +554,11 @@ class World {
         void process_occurrence_samplings();          
         
         // --- logging and output ---
+        
+        /**
+         * Dump out configuration file.
+         */
+        void log_configuration();
         
         /**
          * Save occurrence info for the current generation.

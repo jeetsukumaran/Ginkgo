@@ -155,7 +155,6 @@ void Landscape::count_organisms(Species * sp_ptr, std::vector<long>& counts) con
 
  // dump structure to std::cerr
 void Landscape::debug_dump_structure(std::ostream& out) {
-    out << std::endl << "Landscape Structure:";
     CellIndexType i = 0;
     unsigned long max_width_x = static_cast<unsigned long>(log10(static_cast<double>(this->size_x_))) + 1;
     unsigned long max_width_y = static_cast<unsigned long>(log10(static_cast<double>(this->size_y_))) + 1;

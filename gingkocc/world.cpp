@@ -197,12 +197,8 @@ void World::cycle() {
 
 void World::run() {    
     this->open_logs();
-    
-    this->landscape_.debug_dump_structure(this->infos_);
-    if (this->is_log_to_screen_) {
-        this->landscape_.debug_dump_structure(std::cout);
-    }
-    
+    this->log_configuration();
+        
     this->log_info("Starting simulation.");
     
     // startup    
@@ -543,7 +539,7 @@ void World::save_trees(Species * sp_ptr,
         this->compose_output_filename(sp_ptr->get_label(), label, "diploid2.tre"));  
     this->write_diploid2_trees(sp_ptr, organisms, diploid_trees);
  
-}                
+}
 
 void World::open_ofstream(std::ofstream& out, const std::string& fpath) {
     std::string full_fpath = filesys::compose_path(this->output_dir_, fpath);
@@ -588,6 +584,76 @@ std::string World::compose_output_filename(const std::string& species_label,
     this->output_filenames_.insert(candidate_name);
     return candidate_name;
 }        
+
+
+void World::log_configuration() {
+    std::ofstream out;
+    this->open_ofstream(out, this->get_output_filename_stem() + ".conf.log");
+    out <<  "GINGKO CONFIGURATION LOG " << this->get_timestamp() << std::endl;
+        
+    out << std::endl;
+    out << "*** WORLD ***" << std::endl;
+    out << "Label: " << this->label_ << std::endl;
+    out << "Random seed: " << this->rng_.get_seed() << std::endl;
+    out << "Fitness factors: " << this->num_fitness_factors_ << std::endl;
+    out << "Fitness grain: " << this->fitness_factor_grain_ << std::endl;
+    out << "Generations to run: " << this->generations_to_run_ << std::endl;
+    out << "Output directory: " << this->output_dir_ << std::endl;
+    out << "Replicate ID: " << this->replicate_id_ << std::endl; 
+
+    out << std::endl;
+    out << "*** LANDSCAPE ***" << std::endl;
+    out << "Rows (X-dimension): " << this->landscape_.size_x() << std::endl;
+    out << "Columns (Y-dimension): " << this->landscape_.size_y() << std::endl; 
+    out << "Structure: " << std::endl;
+    this->landscape_.debug_dump_structure(out);
+
+    out << std::endl;
+    out << "*** LINEAGES ***" << std::endl;
+    unsigned i = 0;
+    for (SpeciesByLabel::iterator spi = this->species_.begin(); spi != this->species_.end(); ++spi) {
+        i += 1;
+        Species& lineage = *spi->second;
+        out << std::endl;
+        out << lineage.get_label() << " (" << i << " of " << this->species_.size() << ")"  << std::endl;
+        out << "   Fitness factors: " << lineage.get_num_fitness_factors() << std::endl;
+        out << "   Fitness grain: " << lineage.get_fitness_factor_grain() << std::endl;
+        out << "   Selection weights: ";
+        std::vector<float> sw = lineage.get_selection_weights();
+        for (std::vector<float>::iterator swi = sw.begin(); swi != sw.end(); ++swi) {
+            if ((swi - sw.begin()) > 0) {
+                out << " ";
+            }
+            out << *swi;
+        }
+        out << std::endl;
+        out << "   Initial genotypic fitness factors: ";
+        std::vector<FitnessFactorType> g = lineage.get_default_genotypic_fitness_factors();
+        for (std::vector<FitnessFactorType>::iterator gi = g.begin(); gi != g.end(); ++gi) {
+            if ((gi - g.begin()) > 0) {
+                out << " ";
+            }
+            out << *gi;
+        }           
+        out << std::endl;
+        out << "   Genotypic fitness mutation rate: " << lineage.get_mutation_rate() << std::endl;
+        out << "   Genotypic fitness maximum mutation size: " << lineage.get_max_mutation_size() << std::endl;
+        out << "   Fecundity: " <<  lineage.get_mean_reproductive_rate() << std::endl;
+        out << "   Movement probability: " << lineage.get_movement_probability() << std::endl;
+        out << "   Movement capacity: " << lineage.get_movement_capacity() << std::endl;
+    }
+    
+    // *** LINEAGES ***
+    // number of lineages
+    // list of lineage names
+    // for each lineage
+    
+    // *** EVENTS ***
+    // In each generation, environmental layers loaded and corresponding idx
+    // etc.
+
+    out.close();
+}
 
 void World::open_logs() {    
     if (not this->infos_.is_open()) {
