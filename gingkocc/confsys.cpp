@@ -210,9 +210,10 @@ void ConfigurationFile::process_environments(World& world) {
             WorldSettings world_settings;            
             for (unsigned j = 0; j < env_node.nChildNode(); ++j) {
                 XmlElementType sub_node = env_node.getChildNode(j);
-                if (sub_node.getName() == "carryingCapacity") {
+                std::string node_name = sub_node.getName();
+                if ( node_name == "carryingCapacity") {
                     world_settings.carrying_capacity = this->get_validated_grid_path(this->get_element_scalar<std::string>(sub_node), world);
-                } else if (sub_node.getName() == "environmentFactor") {
+                } else if (node_name == "environmentFactor") {
                     unsigned eidx = this->get_attribute<unsigned>(sub_node, "id");
                     if (eidx > world.get_num_fitness_factors()) {
                         std::ostringstream msg;
@@ -223,7 +224,7 @@ void ConfigurationFile::process_environments(World& world) {
                     }                    
                     std::string gridfile = this->get_validated_grid_path(this->get_element_scalar<std::string>(sub_node), world);
                     world_settings.environments.insert(std::make_pair(eidx-1, gridfile));
-                } else if (sub_node.getName() == "movementCosts") {
+                } else if (node_name == "movementCosts") {
                     std::string lineage_id = this->get_attribute<std::string>(sub_node, "lineage");
                     if (not world.has_species(lineage_id)) {
                         throw ConfigurationError("movement costs: lineage \"" + lineage_id + "\" not defined");
