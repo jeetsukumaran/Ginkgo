@@ -305,6 +305,7 @@ class Landscape {
         
         // dump structure to std::cerr
         void debug_dump_structure(std::ostream& out = std::cerr);
+        void debug_dump_carrying_capacity(std::ostream& out = std::cerr);
         
     private:
     

@@ -607,6 +607,9 @@ void World::log_configuration() {
     out << "Columns (Y-dimension): " << this->landscape_.size_y() << std::endl; 
     out << "Structure: " << std::endl;
     this->landscape_.debug_dump_structure(out);
+    out << std::endl;
+    out << "Default Carrying Capacity: " << std::endl;
+    this->landscape_.debug_dump_carrying_capacity(out);
 
     out << std::endl;
     out << "*** LINEAGES ***" << std::endl;

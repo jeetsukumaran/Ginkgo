@@ -175,5 +175,19 @@ void Landscape::debug_dump_structure(std::ostream& out) {
     out << std::setfill(' '); // reset
 }
 
+void Landscape::debug_dump_carrying_capacity(std::ostream& out) {
+    CellIndexType i = 0;
+    for (std::vector<Cell*>::iterator ci = this->cells_.begin();
+            ci != this->cells_.end();
+            ++ci, ++i) {
+        CellIndexType x = this->index_to_x(i);            
+        if (x == 0) {
+            out << std::endl;
+        }
+        out << this->cells_[i]->get_carrying_capacity() << " ";
+    }
+    out << std::endl << std::endl;
+}
+
 // Landscape
 ///////////////////////////////////////////////////////////////////////////////	

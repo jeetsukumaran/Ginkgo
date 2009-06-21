@@ -105,12 +105,6 @@ void ConfigurationFile::process_world(World& world) {
     world.set_label( this->get_attribute<std::string>(world_node, "label", "GingkoWorld") );
     world.set_random_seed( this->get_attribute<unsigned long>(world_node, "random_seed", time(0)) );
     world.set_generations_to_run( this->get_attribute<unsigned long>(world_node, "num_gens") );
-    try {
-        world.set_global_cell_carrying_capacity(this->get_attribute<unsigned long>(world_node, "default_cell_carrying_capacity"));
-    } catch (ConfigurationIncompleteError& c) {
-        // do nothing
-    }
-
     unsigned fitness_dim = this->get_attribute<unsigned>(world_node, "fitness_dimensions");    
     if (fitness_dim > MAX_FITNESS_FACTORS) {
         std::ostringstream s;
@@ -118,20 +112,17 @@ void ConfigurationFile::process_world(World& world) {
         s << ", but requested " << fitness_dim;
         throw ConfigurationError(s.str());
     }
-    world.set_num_fitness_factors(fitness_dim);
-    
-    world.set_fitness_factor_grain(this->get_attribute<unsigned>(world_node, "fitness_grain", 1));     
-    
-    
+    world.set_num_fitness_factors(fitness_dim);    
+    world.set_fitness_factor_grain(this->get_attribute<unsigned>(world_node, "fitness_grain", 1));             
     std::string produce_final = this->get_attribute<std::string>(world_node, "suppress_final_output", "False");
     if (produce_final == "True") {
         world.set_produce_final_output(true);
     } else {
         world.set_produce_final_output(false);
-    }
-    
+    }    
     world.generate_landscape( this->get_attribute<CellIndexType>(world_node, "x_range"), 
                               this->get_attribute<CellIndexType>(world_node, "y_range") );
+    world.set_global_cell_carrying_capacity(this->get_attribute<unsigned long>(world_node, "default_cell_carrying_capacity", 0));                              
 }
 
 void ConfigurationFile::process_biota(World& world) {
