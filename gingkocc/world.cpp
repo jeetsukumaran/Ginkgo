@@ -618,7 +618,7 @@ void World::log_configuration() {
         i += 1;
         Species& lineage = *spi->second;
         out << std::endl;
-        out << lineage.get_label() << " (" << i << " of " << this->species_.size() << ")"  << std::endl;
+        out << lineage.get_label() << " (Lineage " << i << " of " << this->species_.size() << ")"  << std::endl;
         out << "   Fitness factors: " << lineage.get_num_fitness_factors() << std::endl;
         out << "   Fitness grain: " << lineage.get_fitness_factor_grain() << std::endl;
         out << "   Selection weights: ";
@@ -645,16 +645,35 @@ void World::log_configuration() {
         out << "   Movement probability: " << lineage.get_movement_probability() << std::endl;
         out << "   Movement capacity: " << lineage.get_movement_capacity() << std::endl;
     }
-    
-    // *** LINEAGES ***
-    // number of lineages
-    // list of lineage names
-    // for each lineage
-    
-    // *** EVENTS ***
-    // In each generation, environmental layers loaded and corresponding idx
-    // etc.
 
+    out << std::endl;
+    out << "*** ENVIRONMENTS ***" << std::endl;
+    out << "(" << this->world_settings_.size() << " event groups specified)" << std::endl;
+    
+    for (std::map<unsigned long, WorldSettings>::iterator wi = this->world_settings_.begin(); wi != this->world_settings_.end(); ++wi) {
+        out << "\n[ENVIRONMENT: GENERATION " << wi->first << "]" << std::endl;
+        if (wi->second.carrying_capacity.size() != 0) {
+            out << "Carrying-capacity: \"" << wi->second.carrying_capacity << "\"" << std::endl;
+        }
+        if (wi->second.environments.size() != 0) {
+            for (std::map<unsigned, std::string>::iterator ei = wi->second.environments.begin();
+                     ei != wi->second.environments.end();
+                     ++ei) {
+                out << "Environment Factor #" << ei->first << ": \"" << ei->second << "\"" << std::endl;                                                 
+            }
+        }            
+        if (wi->second.movement_costs.size() != 0) {
+            for (std::map<Species *, std::string>::iterator mi = wi->second.movement_costs.begin();
+                     mi != wi->second.movement_costs.end();
+                     ++mi) {
+                out << "Movement Costs for \"" << mi->first->get_label() << "\": \"" << mi->second << "\"" << std::endl;                   
+            }
+        }    
+    }
+
+    out << std::endl;
+    out << "*** DISPERSALS ***" << std::endl;    
+    
     out.close();
 }
 

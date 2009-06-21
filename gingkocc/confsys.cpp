@@ -204,12 +204,12 @@ void ConfigurationFile::process_lineage(XmlElementType& lineage_node, World& wor
 void ConfigurationFile::process_environments(World& world) {
     XmlElementType environs = this->xml_.getChildNode("world").getChildNode("environments");
     if (!environs.isEmpty()) {
-        for (unsigned i = 0; i < environs.nChildNode("enviroment"); ++i) {
-            XmlElementType env_node = environs.getChildNode("enviroment", i);
+        for (unsigned i = 0; i < environs.nChildNode("environment"); ++i) {
+            XmlElementType env_node = environs.getChildNode("environment", i);
             unsigned long gen = this->get_attribute<unsigned long>(env_node, "gen");
-            WorldSettings world_settings;
+            WorldSettings world_settings;            
             for (unsigned j = 0; j < env_node.nChildNode(); ++j) {
-                XmlElementType sub_node = env_node.getChildNode(i);
+                XmlElementType sub_node = env_node.getChildNode(j);
                 if (sub_node.getName() == "carryingCapacity") {
                     world_settings.carrying_capacity = this->get_validated_grid_path(this->get_element_scalar<std::string>(sub_node), world);
                 } else if (sub_node.getName() == "environmentFactor") {
@@ -233,6 +233,7 @@ void ConfigurationFile::process_environments(World& world) {
                     world_settings.movement_costs.insert(std::make_pair(lineage, gridfile));
                 }                
             }
+            world.add_world_settings(gen, world_settings);
         }            
     }
 }
