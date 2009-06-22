@@ -708,26 +708,21 @@ void World::log_configuration() {
         if (sr.label.size() > 0) {
             out << " [sample \"" << sr.label << "\"]";
         }
-        out << sr.species_ptr->get_label();
+        out << " Lineage \"" << sr.species_ptr->get_label() << "\"";
         if (sr.num_organisms_per_cell == 0) {
             out << ", all individuals";
         } else {
             out << ", " << sr.num_organisms_per_cell << " individuals";
         }
         if (sr.cell_indexes.size() == 0) {
-            out << " from all cells";
+            out << " from each cell, all cells";
         } else {
-            out << " from cells: ";
-            unsigned long pos_count = 0;
+            out << " from each cell, from following cells: ";
             for (std::set<CellIndexType>::iterator ci = sr.cell_indexes.begin(); ci != sr.cell_indexes.end(); ++ci) {
-                if (pos_count > 30) {
-                    out << std::endl;
-                    pos_count = 0;
-                }
-                pos_count += 1;
                 out << this->landscape_.index_to_x(*ci) << "," << this->landscape_.index_to_y(*ci) << " ";
             }
         }
+        out << std::endl;
     }      
     out.close();
 }

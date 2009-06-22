@@ -342,7 +342,7 @@ void ConfigurationFile::process_samplings(World& world) {
                     throw ConfigurationError("tree sample: lineage \"" + lineage_id + "\" not defined");
                 }
                 world_sampling_regime.species_ptr = world.get_species_ptr(lineage_id);
-                std::string label = this->get_attribute<std::string>(snode, "lineage", "");
+                std::string label = this->get_attribute<std::string>(snode, "label", "");
                 if (label.size() > 0) {
                     world_sampling_regime.label = label;   
                 }
@@ -370,6 +370,7 @@ void ConfigurationFile::process_samplings(World& world) {
                         }
                     }
                 }
+                world.add_tree_sampling(gen, world_sampling_regime);
             }
         }
     }        
