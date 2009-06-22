@@ -326,14 +326,15 @@ void ConfigurationFile::process_samplings(World& world) {
     if (!samplings.isEmpty()) {    
         for (unsigned i = 0; i < samplings.nChildNode(); ++i) {
             XmlElementType snode = samplings.getChildNode(i);
-            if (snode.getName() == "occurrence") {            
+            std::string node_name = snode.getName();
+            if (node_name == "occurrence") {            
                 unsigned long gen = this->get_attribute<unsigned long>(snode, "gen");
                 std::string lineage_id = this->get_attribute<std::string>(snode, "lineage");
                 if (not world.has_species(lineage_id)) {
                     throw ConfigurationError("occurrence sample: lineage \"" + lineage_id + "\" not defined");
                 }
                 world.add_occurrence_sampling(gen, world.get_species_ptr(lineage_id));
-            } else if (snode.getName() == "tree") {
+            } else if (node_name == "tree") {
                 SamplingRegime world_sampling_regime;
                 unsigned long gen = this->get_attribute<unsigned long>(snode, "gen");
                 std::string lineage_id = this->get_attribute<std::string>(snode, "lineage");
@@ -346,23 +347,30 @@ void ConfigurationFile::process_samplings(World& world) {
                     world_sampling_regime.label = label;   
                 }
                 world_sampling_regime.num_organisms_per_cell = this->get_child_node_scalar<unsigned long>(snode, "individualsPerCell", 0);
-                std::string cells_desc = this->get_child_node_scalar<std::string>(snode, "cells", "");
-                if (cells_desc.size() > 0) {
-                    std::vector<std::string> cells_vec = textutil::split_on_any(cells_desc, " \r\n\t", 0, false); 
-                    for (std::vector<std::string>::iterator ci = cells_vec.begin(); ci != cells_vec.end(); ++ci) {
-                        std::vector<std::string> xy = textutil::split(*ci, ",", 0, false);
-                        if (xy.size() < 2) {
-                            throw ConfigurationError("tree sample cell position: missing coordinate");
-                        } else if (xy.size() > 2) {
-                            throw ConfigurationError("tree sample cell position: too many coordinates");
+                XmlElementType cells_node = snode.getChildNode("cells");
+                if (!cells_node.isEmpty()) {
+                    std::ostringstream raw;
+                    for (unsigned i = 0; i < cells_node.nText(); ++i) {
+                        raw << cells_node.getText(i);
+                    }
+                    std::string cells_desc = raw.str();
+                    if (cells_desc.size() > 0) {
+                        std::vector<std::string> cells_vec = textutil::split_on_any(cells_desc, " \r\n\t", 0, false); 
+                        for (std::vector<std::string>::iterator ci = cells_vec.begin(); ci != cells_vec.end(); ++ci) {
+                            std::vector<std::string> xy = textutil::split(*ci, ",", 0, false);
+                            if (xy.size() < 2) {
+                                throw ConfigurationError("tree sample cell position: missing coordinate");
+                            } else if (xy.size() > 2) {
+                                throw ConfigurationError("tree sample cell position: too many coordinates");
+                            }
+                            unsigned long x = convert::to_scalar<unsigned long>(xy[0]);
+                            unsigned long y = convert::to_scalar<unsigned long>(xy[1]);
+                            unsigned long cell_index = this->get_validated_cell_index(x, y, world, "sampling coordinate"); 
+                            world_sampling_regime.cell_indexes.insert(cell_index);
                         }
-                        unsigned long x = convert::to_scalar<unsigned long>(xy[0]);
-                        unsigned long y = convert::to_scalar<unsigned long>(xy[1]);
-                        unsigned long cell_index = this->get_validated_cell_index(x, y, world, "sampling coordinate"); 
-                        world_sampling_regime.cell_indexes.insert(cell_index);
                     }
                 }
-           }
+            }
         }
     }        
 }

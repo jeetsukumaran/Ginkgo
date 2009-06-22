@@ -195,8 +195,8 @@ class ConfigurationFile {
                 raw << cnode.getText(i);
             }
             return convert::to_scalar<T>(raw.str());
-        }     
-        
+        }
+
         template <typename T>
         T get_child_node_scalar(XmlElementType& xml, const char * node_name, T default_value) const {
             XmlElementType cnode = xml.getChildNode(node_name);

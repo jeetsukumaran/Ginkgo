@@ -674,22 +674,27 @@ void World::log_configuration() {
 
     out << std::endl;
     out << "*** DISPERSALS ***" << std::endl;
-    out << "(" << this->dispersal_events_.size() << " dispersal events specified)" << std::endl;
-    
+    out << "(" << this->dispersal_events_.size() << " dispersal events specified)" << std::endl;    
+    out << std::endl;    
     for (std::map<unsigned long, DispersalEvent>::iterator di = this->dispersal_events_.begin(); di != this->dispersal_events_.end(); ++di) {
-        out << std::endl;
-        out << "[DISPERSAL: GENERATION " << di->first << "]" << std::endl;
-            DispersalEvent& de = di->second;
-            out << "    Dispersal";
-            if (de.species_ptr != NULL) {
-                out << " of " << de.species_ptr->get_label();
-            }
-            out << " from (" << this->landscape_.index_to_x(de.source) << "," << this->landscape_.index_to_y(de.source) << ")";
-            out << " to (" << this->landscape_.index_to_x(de.destination) << "," << this->landscape_.index_to_y(de.destination) << ")";
-            out << " with probability " << de.probability << ".";             
+        DispersalEvent& de = di->second;
+        out << "    GENERATION " << di->first << ": " << "Dispersal";
+        if (de.species_ptr != NULL) {
+            out << " of " << de.species_ptr->get_label();
+        }
+        out << " from (" << this->landscape_.index_to_x(de.source) << "," << this->landscape_.index_to_y(de.source) << ")";
+        out << " to (" << this->landscape_.index_to_x(de.destination) << "," << this->landscape_.index_to_y(de.destination) << ")";
+        out << " with probability " << de.probability << "." << std::endl;
     }    
     
-    
+    out << std::endl;
+    out << "*** OCCURRENCE SAMPLINGS ***";
+    out << std::endl;    
+    for (std::map<unsigned long, Species *>::iterator oci = this->occurrence_samples_.begin(); 
+            oci != this->occurrence_samples_.end(); 
+            ++oci) {
+        out << "    GENERATION " << oci->first << ": " << oci->second->get_label() << std::endl;     
+    }    
     
     out.close();
 }
