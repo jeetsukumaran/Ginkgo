@@ -734,7 +734,7 @@ class World {
         /** Collection of tree building directives (key = generation #). */                
         std::multimap<unsigned long, SamplingRegime> tree_samples_;
         /** Collection of occurrence description directives (key = generation #). */
-        std::map<unsigned long, Species *> occurrence_samples_; 
+        std::multimap<unsigned long, Species *> occurrence_samples_; 
         /** Collection of seed population directives. */
         std::vector<SeedPopulation>             seed_populations_; 
         /** Track output filenames, so as to prevent clashes. */

@@ -341,12 +341,13 @@ void World::process_tree_samplings() {
 }
 
 void World::process_occurrence_samplings() {
-    std::map<unsigned long, Species *>::iterator oci = this->occurrence_samples_.find(this->current_generation_);    
-    if (oci == this->occurrence_samples_.end()) {
-        return;
+    typedef std::multimap<unsigned long, Species *> gen_sample_t;
+    typedef std::pair<gen_sample_t::iterator, gen_sample_t::iterator> gen_sample_iter_pair_t;    
+    gen_sample_iter_pair_t this_gen_samples = this->occurrence_samples_.equal_range(this->current_generation_);
+    for (gen_sample_t::iterator i = this_gen_samples.first; i != this_gen_samples.second; ++i) {
+        this->save_occurrences(i->second);
     }
-    this->save_occurrences(oci->second);
-}    
+}  
 
 // --- logging and output ---
 
@@ -688,14 +689,46 @@ void World::log_configuration() {
     }    
     
     out << std::endl;
-    out << "*** OCCURRENCE SAMPLINGS ***";
+    out << "*** OCCURRENCE SAMPLES ***";
     out << std::endl;    
-    for (std::map<unsigned long, Species *>::iterator oci = this->occurrence_samples_.begin(); 
+    for (std::multimap<unsigned long, Species *>::iterator oci = this->occurrence_samples_.begin(); 
             oci != this->occurrence_samples_.end(); 
             ++oci) {
         out << "    GENERATION " << oci->first << ": " << oci->second->get_label() << std::endl;     
-    }    
+    }
     
+    out << std::endl;
+    out << "*** TREE SAMPLES ***";
+    out << std::endl;    
+    for (std::multimap<unsigned long, SamplingRegime>::iterator tci = this->tree_samples_.begin(); 
+            tci != this->tree_samples_.end(); 
+            ++tci) {
+        SamplingRegime& sr = tci->second;            
+        out << "    GENERATION " << tci->first << ":";
+        if (sr.label.size() > 0) {
+            out << " [sample \"" << sr.label << "\"]";
+        }
+        out << sr.species_ptr->get_label();
+        if (sr.num_organisms_per_cell == 0) {
+            out << ", all individuals";
+        } else {
+            out << ", " << sr.num_organisms_per_cell << " individuals";
+        }
+        if (sr.cell_indexes.size() == 0) {
+            out << " from all cells";
+        } else {
+            out << " from cells: ";
+            unsigned long pos_count = 0;
+            for (std::set<CellIndexType>::iterator ci = sr.cell_indexes.begin(); ci != sr.cell_indexes.end(); ++ci) {
+                if (pos_count > 30) {
+                    out << std::endl;
+                    pos_count = 0;
+                }
+                pos_count += 1;
+                out << this->landscape_.index_to_x(*ci) << "," << this->landscape_.index_to_y(*ci) << " ";
+            }
+        }
+    }      
     out.close();
 }
 
