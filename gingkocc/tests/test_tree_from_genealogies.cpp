@@ -220,7 +220,7 @@ int main(int, char *) {
     std::string expected2 = "((((a:1, b:1):1, (c:1, d:1):1):1, e:3):1, f:4):9999";
 
     std::string tree1 = build_tree1();
-    if (tree1 != expected1) {
+    if (true) {
         //std::cout << "FAIL" << std::endl;
         std::cerr << "\nExpecting:" << std::endl;
         std::cerr << expected1 << std::endl;

@@ -28,6 +28,7 @@
 #include <iterator>
 #include <vector>
 #include <map>
+#include <list>
 #include <sstream>
 #include <iomanip>
 #include <iostream>
@@ -78,40 +79,31 @@ class TreeStructureMultipleRootError : public TreeStructureError {
 class Path {
 
     public:
-        Path(unsigned long index,
-             std::vector<Path>* paths_ptr,
-             std::map<GenealogyNode *, std::string>* node_labels_map_ptr,
-             std::map<GenealogyNode *, unsigned long>* node_path_index_map_ptr,
+        Path(std::map<GenealogyNode *, std::string>* node_labels_map_ptr,
+             std::map<GenealogyNode *, Path *>* node_path_map_ptr,
              std::map<GenealogyNode *, CellIndexType>* node_cell_indexes_map_ptr,
              Landscape * landscape_ptr);
         void add_node(GenealogyNode * node);
         void split_after_node(GenealogyNode * node, 
-                              unsigned long new_child_path_idx, 
-                              unsigned long other_child_path_idx);
+                              Path * new_child_path, 
+                              Path * other_child_path);
         unsigned long size() {
             return this->path_nodes_.size();
         }
         GenealogyNode * get_tip_node() {
             return this->path_nodes_.front();
         }
-        unsigned long get_index() {
-            return this->index_;
-        }
         void write_newick(std::ostream& out);
 
     private:
-        /** Index of this path in master path pool. */
-        unsigned long                               index_;
-        /** Pointer to master path pool. */
-        std::vector<Path>*                          paths_ptr_;
         /** Tracks nodes within this path. */
         std::vector<GenealogyNode *>                path_nodes_;
         /** Tracks paths branching off this one. */
-        std::vector<unsigned long>                  child_path_indexes_;
+        std::vector<Path *>                         child_paths_;
         /** Maps node indexes to their corresponding label. */
         std::map<GenealogyNode *, std::string>*     node_labels_map_ptr_;
         /** Tracks path of nodes. */
-        std::map<GenealogyNode *, unsigned long>*   node_path_index_map_ptr_;        
+        std::map<GenealogyNode *, Path *>*          node_path_map_ptr_;        
         /** Tracks indexes of cells. */
         std::map<GenealogyNode *, CellIndexType>*   node_cell_indexes_map_ptr_;          
         /** Landscape from which the nodes are derived. */
@@ -158,26 +150,24 @@ class Tree {
         void write_newick_tree(std::ostream& out);
         
         Path * add_new_path() {
-            this->paths_.push_back(Path(this->paths_.size(), 
-                                        &this->paths_, 
-                                        &this->node_labels_map_, 
-                                        &this->node_path_index_map_, 
+            this->paths_list_.push_back(Path(&this->node_labels_map_, 
+                                        &this->node_path_map_, 
                                         &this->node_cell_indexes_map_, 
                                         this->landscape_ptr_));
-            return &this->paths_.back();
+            return &this->paths_list_.back();
         }
 
     private:    
         /** Maps node indexes to their corresponding label. */
         std::map<GenealogyNode *, std::string>      node_labels_map_;
         /** Tracks path of nodes. */
-        std::map<GenealogyNode *, unsigned long>    node_path_index_map_;
+        std::map<GenealogyNode *, Path *>           node_path_map_;
         /** Tracks indexes of nodes. */
         std::map<GenealogyNode *, CellIndexType>    node_cell_indexes_map_;        
         /** Landscape from which the nodes are derived. */
         Landscape *                                 landscape_ptr_;       
         /** Paths, with [0] being main path */        
-        std::vector<Path>                           paths_;
+        std::list<Path>                             paths_list_;
         
 };
 
