@@ -81,7 +81,7 @@ void Path::split_after_node(GenealogyNode * node,
     assert(node_loc !=  this->path_nodes_.end());
     for (std::vector<GenealogyNode *>::iterator i = this->path_nodes_.begin(); i < node_loc; ++i) {
         this->paths_ptr_->at(new_child_path_idx).add_node(*i);
-        assert((*(this->node_path_index_map_ptr_))[node] == new_child_path_idx);
+        assert((*(this->node_path_index_map_ptr_))[*i] == new_child_path_idx);
     }
     this->path_nodes_.erase(this->path_nodes_.begin(), node_loc);   
     this->paths_ptr_->at(new_child_path_idx).child_path_indexes_.swap(this->child_path_indexes_);
