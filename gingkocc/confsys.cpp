@@ -90,7 +90,7 @@ void ConfigurationFile::open(const char * fpath) {
 }
 
 XmlElementType ConfigurationFile::get_child_node(XmlElementType& current_node, const char * node_name, bool required) {
-    XmlElementType cnode = this->xml_.getChildNode(node_name);
+    XmlElementType cnode = current_node.getChildNode(node_name);
     if (cnode.isEmpty() && required) {
         std::ostringstream msg;
         msg << "mandatory element \"" << node_name << "\" is missing from configuration file";
@@ -131,7 +131,7 @@ void ConfigurationFile::process_biota(World& world) {
         throw ConfigurationSyntaxError("biota element is missing from configuration file");
     }
     
-    for (unsigned i = 0; i < bio_node.nChildNode("lineage"); ++i) {
+    for (int i = 0; i < bio_node.nChildNode("lineage"); ++i) {
         XmlElementType lineage_node = bio_node.getChildNode("lineage", i);
         this->process_lineage(lineage_node, world);
     }    
@@ -186,7 +186,7 @@ void ConfigurationFile::process_lineage(XmlElementType& lineage_node, World& wor
     if (seed_pops.isEmpty()) {
         throw ConfigurationError("no seed populations defined for lineage \"" + lineage_id + "\"");   
     }
-    for (unsigned i = 0; i < seed_pops.nChildNode("seedPopulation"); ++i) {
+    for (int i = 0; i < seed_pops.nChildNode("seedPopulation"); ++i) {
         XmlElementType pop_node = seed_pops.getChildNode("seedPopulation", i);
         std::ostringstream item_desc;
         item_desc << "seed population " << i+1 << " for lineage \"" << lineage_id << "\"";
@@ -204,11 +204,11 @@ void ConfigurationFile::process_lineage(XmlElementType& lineage_node, World& wor
 void ConfigurationFile::process_environments(World& world) {
     XmlElementType environs = this->xml_.getChildNode("world").getChildNode("environments");
     if (!environs.isEmpty()) {
-        for (unsigned i = 0; i < environs.nChildNode("environment"); ++i) {
+        for (int i = 0; i < environs.nChildNode("environment"); ++i) {
             XmlElementType env_node = environs.getChildNode("environment", i);
             unsigned long gen = this->get_attribute<unsigned long>(env_node, "gen");
             WorldSettings world_settings;            
-            for (unsigned j = 0; j < env_node.nChildNode(); ++j) {
+            for (int j = 0; j < env_node.nChildNode(); ++j) {
                 XmlElementType sub_node = env_node.getChildNode(j);
                 std::string node_name = sub_node.getName();
                 if ( node_name == "carryingCapacity") {
@@ -242,7 +242,7 @@ void ConfigurationFile::process_environments(World& world) {
 void ConfigurationFile::process_dispersals(World& world) {
     XmlElementType dispersals = this->xml_.getChildNode("world").getChildNode("dispersals");
     if (!dispersals.isEmpty()) {
-        for (unsigned i = 0; i < dispersals.nChildNode("dispersal"); ++i) {
+        for (int i = 0; i < dispersals.nChildNode("dispersal"); ++i) {
             XmlElementType disp_node = dispersals.getChildNode("dispersal", i);
             unsigned long gen = this->get_attribute<unsigned long>(disp_node, "gen");
             DispersalEvent disp_event;
@@ -324,7 +324,7 @@ CellIndexType ConfigurationFile::get_validated_cell_index(CellIndexType x,
 void ConfigurationFile::process_samplings(World& world) {
     XmlElementType samplings = this->xml_.getChildNode("world").getChildNode("samples");
     if (!samplings.isEmpty()) {    
-        for (unsigned i = 0; i < samplings.nChildNode(); ++i) {
+        for (int i = 0; i < samplings.nChildNode(); ++i) {
             XmlElementType snode = samplings.getChildNode(i);
             std::string node_name = snode.getName();
             if (node_name == "occurrence") {            
@@ -350,7 +350,7 @@ void ConfigurationFile::process_samplings(World& world) {
                 XmlElementType cells_node = snode.getChildNode("cells");
                 if (!cells_node.isEmpty()) {
                     std::ostringstream raw;
-                    for (unsigned i = 0; i < cells_node.nText(); ++i) {
+                    for (int i = 0; i < cells_node.nText(); ++i) {
                         raw << cells_node.getText(i);
                     }
                     std::string cells_desc = raw.str();

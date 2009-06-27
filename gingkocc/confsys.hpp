@@ -191,7 +191,7 @@ class ConfigurationFile {
                 throw ConfigurationIncompleteError(msg.str());
             }
             std::ostringstream raw;
-            for (unsigned i = 0; i < cnode.nText(); ++i) {
+            for (int i = 0; i < cnode.nText(); ++i) {
                 raw << cnode.getText(i);
             }
             return convert::to_scalar<T>(raw.str());
@@ -204,7 +204,7 @@ class ConfigurationFile {
                 return default_value;
             }
             std::ostringstream raw;
-            for (unsigned i = 0; i < cnode.nText(); ++i) {
+            for (int i = 0; i < cnode.nText(); ++i) {
                 raw << cnode.getText(i);
             }
             return convert::to_scalar<T>(raw.str());
@@ -213,7 +213,7 @@ class ConfigurationFile {
         template <typename T>
         T get_element_scalar(XmlElementType& xml) {
             std::ostringstream raw;
-            for (unsigned i = 0; i < xml.nText(); ++i) {
+            for (int i = 0; i < xml.nText(); ++i) {
                 raw << xml.getText(i);
             }
             return convert::to_scalar<T>(raw.str());
@@ -222,7 +222,7 @@ class ConfigurationFile {
         template <typename T>
         std::vector<T> get_element_vector(XmlElementType& xml) {
             std::ostringstream raw;
-            for (unsigned i = 0; i < xml.nText(); ++i) {
+            for (int i = 0; i < xml.nText(); ++i) {
                 raw << xml.getText(i);
             }
             return convert::to_vector_on_any<T>(raw.str(), " \t\r\n", true);
