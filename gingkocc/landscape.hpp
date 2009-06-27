@@ -132,7 +132,8 @@ class Landscape {
          *                               otherwise, only organisms of specified 
          *                               species
          * @param num_organisms_per_cell number of organisms (0=all)
-         * @param cell_indexes           indexes of cells from which to sample
+         * @param cell_indexes           indexes of cells from which to sample 
+         *                               (empty set means sample all cells)
          */
         void sample_organisms(Species * sp_ptr, 
                     unsigned long num_organisms_per_cell, 
