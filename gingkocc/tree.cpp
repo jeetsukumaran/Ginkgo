@@ -71,32 +71,28 @@ Path * Path::find_node(GenealogyNode * node, long& idx) {
 Path * Path::split_on_index(long idx, Path& new_child) {
     assert(static_cast<unsigned long>(idx) < this->path_nodes_.size());
     assert(idx >= 0);
-    this->child_paths_.push_back(new_child);    
-    this->child_paths_.push_back(Path());
-    Path& p = this->child_paths_.back();
-    for (std::vector<GenealogyNode *>::iterator i = this->path_nodes_.begin(); i <= (this->path_nodes_.begin() + idx); ++i) {
-        p.add_node(*i);
+    Path split_path;
+    for (std::vector<GenealogyNode *>::iterator i = this->path_nodes_.begin(); i < (this->path_nodes_.begin() + idx); ++i) {
+        split_path.add_node(*i);
         this->node_to_indexes_.erase(*i);        
     }
-    this->path_nodes_.erase(this->path_nodes_.begin(), this->path_nodes_.begin()+idx+1);
-    assert(this->node_to_indexes_.size() == this->path_nodes_.size());
-    return &p;
+    this->path_nodes_.erase(this->path_nodes_.begin(), this->path_nodes_.begin()+idx);
+    assert(this->node_to_indexes_.size() == this->path_nodes_.size());    
+    split_path.child_paths_.swap(this->child_paths_);
+    this->child_paths_.push_back(new_child);    
+    this->child_paths_.push_back(split_path);    
+    return &this->child_paths_.back();
 }
 
-void Path::write_newick(std::ostream& out, std::map<GenealogyNode *, std::string> labels) {
+void Path::write_newick(std::ostream& out, std::map<GenealogyNode *, std::string>& labels) {
     if (this->child_paths_.size() == 0) {
         std::map<GenealogyNode *, std::string>::iterator pni = labels.find(this->path_nodes_.front());
-//         assert(pni != labels.end());
+        //assert(pni != labels.end());
         if (pni == labels.end()) {
-            std::cout << "Size: " << this->path_nodes_.size() << std::endl;
-            for (std::vector<GenealogyNode*>::iterator i = this->path_nodes_.begin(); i != this->path_nodes_.end(); ++i) {
-                pni = labels.find(*i);
-                std::cout << *i << ": found =" << (pni != labels.end()) << std::endl;
-            }
-            out << "x";
+            out << "x:" << this->size();
         } else {
-            out << pni->second << ":" << this->size();
-        }            
+            out << pni->second << ":" << this->size();            
+        }
     } else {
         out << "(";
         for (std::vector<Path>::iterator pi = this->child_paths_.begin(); pi != this->child_paths_.end(); ++pi) {
@@ -146,10 +142,17 @@ void Tree::process_node(GenealogyNode* node, const std::string * label) {
         }
         assert(coalesced); // TODO: if not coalesced here, multiple roots
     }
-
 }
 
 void Tree::write_newick_tree(std::ostream& out) {
+//     Path * p = this->start_path_.find_leaf_path();
+//     if (p != NULL) {
+//         GenealogyNode * n = p->get_tip_node();
+//         std::map<GenealogyNode *, std::string>::iterator pni = this->labels_.find(n);
+//         if (pni == this->labels_.end()) {
+//             std::cout << "**** hssssere ****" << std::endl << std::endl;
+//         }
+//     }
     this->start_path_.write_newick(out, this->labels_);
 }
 

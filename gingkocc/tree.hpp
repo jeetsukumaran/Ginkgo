@@ -86,11 +86,37 @@ class Path {
         unsigned long size() {
             return this->path_nodes_.size();
         }
-        GenealogyNode * tip_node() {
+        GenealogyNode * get_tip_node() {
             return this->path_nodes_.front();
         }
+        Path * find_singleton_path() {
+            if (this->size() == 1) {
+                return this;
+            } else {
+                for (std::vector<Path>::iterator pi = this->child_paths_.begin(); pi != this->child_paths_.end(); ++pi) { 
+                    Path * p = pi->find_singleton_path();
+                    if (p != NULL) {
+                        return p;
+                    }
+                }
+            }
+            return NULL;
+        }
+        Path * find_leaf_path() {
+            if (this->child_paths_.size() == 0) {
+                return this;
+            } else {
+                for (std::vector<Path>::iterator pi = this->child_paths_.begin(); pi != this->child_paths_.end(); ++pi) { 
+                    Path * p = pi->find_leaf_path();
+                    if (p != NULL) {
+                        return p;
+                    }
+                }
+            }
+            return NULL;
+        }        
         Path * find_node(GenealogyNode * node, long& idx);
-        void write_newick(std::ostream& out, std::map<GenealogyNode *, std::string> labels);
+        void write_newick(std::ostream& out, std::map<GenealogyNode *, std::string>& labels);
 
     private:
         std::vector<GenealogyNode *>                path_nodes_;
