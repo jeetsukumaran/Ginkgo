@@ -135,14 +135,10 @@ class Tree {
     
         /**
          * Constructor.
-         *
-         * @param coalesce_multiple_roots if <code>false</code> throws
-         *                                exception if nodes do not coalesce
-         *                                into single ancestor
          * @param landscape               needed to convert cell indices to x, 
          *                                y coordinates.
          */
-        Tree(Landscape* landscape_ptr=NULL, bool coalesce_multiple_roots=true);
+        Tree(Landscape* landscape_ptr=NULL);
         
         /**
          * Adds a node (and its lineage to the original ancestor) to the tree 
@@ -157,7 +153,7 @@ class Tree {
          *                  without a parent passed its parent pointer to be 
          *                  inserted into the array)
          */
-        void process_node(GenealogyNode* node, const std::string * label=NULL);
+        void add_node(GenealogyNode* node, const std::string * label=NULL);
 
         /**
          * Writes newick string representing the tree structure to the given
@@ -165,38 +161,15 @@ class Tree {
          * 
          * @param out   output stream to which to write the tree
          */
-        void write_newick_tree(std::ostream& out);
-        
-        /**
-         * Returns the current mode of treating multiple roots (as errors
-         * or as coalescence in infinity).
-         *
-         * @return  <code>true</code> if multiple roots get automatically 
-         *          coalesced
-         */
-        bool get_coalesce_multiple_roots() const;
-        
-        /**
-         * Sets the current mode of treating multiple roots (as errors
-         * or as coalescence in infinity).
-         *
-         * @param val   <code>true</code> if multiple roots get automatically 
-         *              coalesced
-         */        
-        void set_coalesce_multiple_roots(bool val);
+        void write_newick_tree(std::ostream& out);        
 
     private:    
-        /** Primary path. */        
+        /** Primary path; multiple if multiple roots. */        
         Path                                        start_path_;  
         /** Maps node indexes to their corresponding label. */
         std::map<GenealogyNode *, std::string>      labels_;
         /** Landscape from which the nodes are derived. */
         Landscape *                                 landscape_ptr_;        
-        /** True if multiple roots are to be coalesced into a single node. */
-        bool                                        coalesce_multiple_roots_;
-        std::vector<Path *>                         paths_;
-        
-
 };
 
 

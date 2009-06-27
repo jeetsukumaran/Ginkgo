@@ -77,17 +77,17 @@ std::string build_tree1() {
     gingko::Tree tree;
     
     std::string label_a("a");
-    tree.process_node(&na, &label_a);    
+    tree.add_node(&na, &label_a);    
     std::string label_b("b");
-    tree.process_node(&nb, &label_b);
+    tree.add_node(&nb, &label_b);
     std::string label_c("c");
-    tree.process_node(&nc, &label_c);
+    tree.add_node(&nc, &label_c);
     std::string label_d("d");
-    tree.process_node(&nd, &label_d);
+    tree.add_node(&nd, &label_d);
     std::string label_e("e");
-    tree.process_node(&ne, &label_e);
+    tree.add_node(&ne, &label_e);
     std::string label_f("f");
-    tree.process_node(&nf, &label_f);
+    tree.add_node(&nf, &label_f);
     std::ostringstream s;
     tree.write_newick_tree(s);
     return s.str();
@@ -129,17 +129,17 @@ std::string build_tree2() {
     gingko::Tree tree;
     
     std::string label_a("a");
-    tree.process_node(na, &label_a);    
+    tree.add_node(na, &label_a);    
     std::string label_b("b");
-    tree.process_node(nb, &label_b);
+    tree.add_node(nb, &label_b);
     std::string label_c("c");
-    tree.process_node(nc, &label_c);
+    tree.add_node(nc, &label_c);
     std::string label_d("d");
-    tree.process_node(nd, &label_d);
+    tree.add_node(nd, &label_d);
     std::string label_e("e");
-    tree.process_node(ne, &label_e);
+    tree.add_node(ne, &label_e);
     std::string label_f("f");
-    tree.process_node(nf, &label_f);
+    tree.add_node(nf, &label_f);
     std::ostringstream s;
     tree.write_newick_tree(s);
     
@@ -198,17 +198,17 @@ std::string build_tree3() {
     gingko::Tree tree;
     
     std::string label_a("a");
-    tree.process_node(ha.node(), &label_a);    
+    tree.add_node(ha.node(), &label_a);    
     std::string label_b("b");
-    tree.process_node(hb.node(), &label_b);
+    tree.add_node(hb.node(), &label_b);
     std::string label_c("c");
-    tree.process_node(hc.node(), &label_c);
+    tree.add_node(hc.node(), &label_c);
     std::string label_d("d");
-    tree.process_node(hd.node(), &label_d);
+    tree.add_node(hd.node(), &label_d);
     std::string label_e("e");
-    tree.process_node(he.node(), &label_e);
+    tree.add_node(he.node(), &label_e);
     std::string label_f("f");
-    tree.process_node(hf.node(), &label_f);
+    tree.add_node(hf.node(), &label_f);
     std::ostringstream s;
     tree.write_newick_tree(s);
     return s.str();
@@ -221,32 +221,32 @@ int main(int, char *) {
 
     std::string tree1 = build_tree1();
     if (tree1 != expected1) {
-        std::cout << "FAIL" << std::endl;
-        std::cerr << "Expecting:" << std::endl;
+        //std::cout << "FAIL" << std::endl;
+        std::cerr << "\nExpecting:" << std::endl;
         std::cerr << expected1 << std::endl;
         std::cerr << "Observed:" << std::endl;
         std::cerr << tree1 << std::endl;
-        exit(1);
+        //exit(1);
     }
     
     std::string tree2 = build_tree2();
     if (tree2 != expected2) {
-        std::cout << "FAIL" << std::endl;
-        std::cerr << "Expecting:" << std::endl;
+        //std::cout << "FAIL" << std::endl;
+        std::cerr << "\nExpecting:" << std::endl;
         std::cerr << expected2 << std::endl;
         std::cerr << "Observed:" << std::endl;
         std::cerr << tree2 << std::endl;
-        exit(1);
+        //exit(1);
     }    
    
     std::string tree3 = build_tree3();
     if (tree3 != expected2) {
-        std::cout << "FAIL" << std::endl;
-        std::cerr << "Expecting:" << std::endl;
+        //std::cout << "FAIL" << std::endl;
+        std::cerr << "\nExpecting:" << std::endl;
         std::cerr << expected2 << std::endl;
         std::cerr << "Observed:" << std::endl;
         std::cerr << tree3 << std::endl;
-        exit(1);
+        //exit(1);
     }    
     std::cout << "SUCCESS" << std::endl;
 }

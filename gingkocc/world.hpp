@@ -711,8 +711,6 @@ class World {
         unsigned long                           generations_to_run_;        
         /** Tracks the number of generations that have been run. */
         unsigned long                           current_generation_;
-        /** Whether or not we force coalescence if multiple roots are found. */
-        bool                                    coalesce_multiple_roots_;
         /** Output directory. */
         std::string                             output_dir_;
         /** Replicate id. */

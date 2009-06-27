@@ -108,19 +108,17 @@ void Path::write_newick(std::ostream& out, std::map<GenealogyNode *, std::string
 ///////////////////////////////////////////////////////////////////////////////
 // Tree
 
-Tree::Tree(Landscape * landscape_ptr, bool coalesce_multiple_roots) 
-    : landscape_ptr_(landscape_ptr),
-      coalesce_multiple_roots_(coalesce_multiple_roots) {
+Tree::Tree(Landscape * landscape_ptr) 
+    : landscape_ptr_(landscape_ptr) {
 }
 
-void Tree::process_node(GenealogyNode* node, const std::string * label) {
+void Tree::add_node(GenealogyNode* node, const std::string * label) {
 
     if (label != NULL) {
         this->labels_.insert(std::make_pair(node, *label));
     } 
 
     if (this->start_path_.size() == 0) {
-        this->paths_.push_back(&this->start_path_);
         while (node != NULL) {
             this->start_path_.add_node(node);
             node = node->get_parent();
@@ -145,24 +143,7 @@ void Tree::process_node(GenealogyNode* node, const std::string * label) {
 }
 
 void Tree::write_newick_tree(std::ostream& out) {
-//     Path * p = this->start_path_.find_leaf_path();
-//     if (p != NULL) {
-//         GenealogyNode * n = p->get_tip_node();
-//         std::map<GenealogyNode *, std::string>::iterator pni = this->labels_.find(n);
-//         if (pni == this->labels_.end()) {
-//             std::cout << "**** hssssere ****" << std::endl << std::endl;
-//         }
-//     }
     this->start_path_.write_newick(out, this->labels_);
-}
-
-bool Tree::get_coalesce_multiple_roots() const {
-    return this->coalesce_multiple_roots_;
-}
-
-void Tree::set_coalesce_multiple_roots(bool val) {
-    this->coalesce_multiple_roots_ = val;
-}
-       
+}  
 
 } // namespace gingko

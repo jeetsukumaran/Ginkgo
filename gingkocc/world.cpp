@@ -44,7 +44,6 @@ World::World()
       fitness_factor_grain_(1),
       generations_to_run_(0),
       current_generation_(0),
-      coalesce_multiple_roots_(true),
       is_log_to_screen_(true),
       is_produce_final_output_(true) {
     this->current_generation_ = 0;    
@@ -58,8 +57,7 @@ World::World(unsigned long seed)
       num_fitness_factors_(1),
       fitness_factor_grain_(1),
       generations_to_run_(0),
-      current_generation_(0),      
-      coalesce_multiple_roots_(true),
+      current_generation_(0),
       is_log_to_screen_(true),
       is_produce_final_output_(true) {
     this->current_generation_ = 0;    
@@ -410,13 +408,13 @@ void World::write_tree(Tree& tree, const std::string& species_label, unsigned lo
 void World::write_haploid_tree(Species * sp_ptr,
                 const std::vector<const Organism *>& organisms,
                 std::ostream& out) {
-    Tree tree(&this->landscape_, this->coalesce_multiple_roots_);
+    Tree tree(&this->landscape_);
     
     // build tree
     for (std::vector<const Organism *>::const_iterator oi = organisms.begin();
             oi != organisms.end();
             ++oi) {
-        tree.process_node((*oi)->get_haploid_node(), &sp_ptr->get_organism_label(**oi));
+        tree.add_node((*oi)->get_haploid_node(), &sp_ptr->get_organism_label(**oi));
     }
     
     // write tree
@@ -436,7 +434,7 @@ void World::write_diploid2_trees(Species * sp_ptr,
     out << std::setfill(' '); // reset
     out << "BEGIN TREES;\n";
     for (unsigned i = 0; i < NUM_NEUTRAL_DIPLOID_LOCII; ++i) {
-        Tree tree(&this->landscape_, this->coalesce_multiple_roots_);
+        Tree tree(&this->landscape_);
         std::string allele1;
         std::string allele2;
         for (std::vector<const Organism *>::const_iterator oi = organisms.begin();
@@ -444,8 +442,8 @@ void World::write_diploid2_trees(Species * sp_ptr,
                 ++oi) {
             allele1 = sp_ptr->get_organism_label(**oi) + "_a1";
             allele2 = sp_ptr->get_organism_label(**oi) + "_a2";
-            tree.process_node((*oi)->get_diploid_node1(i), &allele1);
-            tree.process_node((*oi)->get_diploid_node2(i), &allele2);            
+            tree.add_node((*oi)->get_diploid_node1(i), &allele1);
+            tree.add_node((*oi)->get_diploid_node2(i), &allele2);            
         }
         out << "    TREE DiploidLocus" << std::setw(2) << std::setfill('0') << i+1 << " = [&R] "; 
         this->write_tree(tree, sp_ptr->get_label(), organisms.size(), out);
@@ -463,26 +461,12 @@ void World::write_diploid1_trees(Species * sp_ptr,
     out << std::setfill(' '); // reset
     out << "BEGIN TREES;\n";
     
-    // dummy scoping to allow tree to be freed when it goes out of scope
-//     {
-//         Tree tree(this->coalesce_multiple_roots_);        
-//         for (std::vector<const Organism *>::const_iterator oi = organisms.begin();
-//                 oi != organisms.end();
-//                 ++oi) {
-//             tree.process_node((*oi)->get_haploid_node(), &sp_ptr->get_organism_label(**oi));
-//         }
-//         out << "    TREE HaploidLocus = ";
-//         this->write_tree(tree, sp_ptr->get_label(), organisms.size(), out);
-//         out << ";\n";  
-//     
-//     }
-    
     for (unsigned i = 0; i < NUM_NEUTRAL_DIPLOID_LOCII; ++i) {
-        Tree tree(&this->landscape_, this->coalesce_multiple_roots_);
+        Tree tree(&this->landscape_);
         for (std::vector<const Organism *>::const_iterator oi = organisms.begin();
                 oi != organisms.end();
                 ++oi) {
-            tree.process_node((*oi)->get_diploid_random_node(i, this->rng_), &sp_ptr->get_organism_label(**oi));          
+            tree.add_node((*oi)->get_diploid_random_node(i, this->rng_), &sp_ptr->get_organism_label(**oi));          
         }
         out << "    TREE DiploidLocus" << std::setw(2) << std::setfill('0') << i+1 << " = [&R] "; 
         this->write_tree(tree, sp_ptr->get_label(), organisms.size(), out);
