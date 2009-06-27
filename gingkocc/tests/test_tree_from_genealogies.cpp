@@ -228,25 +228,4 @@ int main(int, char *) {
         std::cerr << tree1 << std::endl;
         //exit(1);
     }
-    
-    std::string tree2 = build_tree2();
-    if (tree2 != expected2) {
-        //std::cout << "FAIL" << std::endl;
-        std::cerr << "\nExpecting:" << std::endl;
-        std::cerr << expected2 << std::endl;
-        std::cerr << "Observed:" << std::endl;
-        std::cerr << tree2 << std::endl;
-        //exit(1);
-    }    
-   
-    std::string tree3 = build_tree3();
-    if (tree3 != expected2) {
-        //std::cout << "FAIL" << std::endl;
-        std::cerr << "\nExpecting:" << std::endl;
-        std::cerr << expected2 << std::endl;
-        std::cerr << "Observed:" << std::endl;
-        std::cerr << tree3 << std::endl;
-        //exit(1);
-    }    
-    std::cout << "SUCCESS" << std::endl;
 }
