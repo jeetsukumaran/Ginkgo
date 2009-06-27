@@ -87,61 +87,26 @@ void Landscape::sample_organisms(Species * sp_ptr,
         unsigned long num_organisms_per_cell,
         const std::set<CellIndexType>& cell_indexes,
         std::vector<const Organism *>& samples) {
-
-    ////////////////
-    // DEBUG CODE //
-    ////////////////
-//     unsigned long old_size = 0;
-//     std::vector<unsigned> debug_results;
-//     std::vector<std::string> test_sample;
-    ////////////////
-
-    for (std::set<CellIndexType>::const_iterator ci = cell_indexes.begin();
-            ci != cell_indexes.end();
+        
+    std::set<CellIndexType>::const_iterator start;
+    std::set<CellIndexType>::const_iterator end;
+    std::set<CellIndexType> all_cells;
+    if (cell_indexes.size() == 0) {
+        for (CellIndexType i = 0; i < this->cells_.size(); ++i) {
+            all_cells.insert(i);
+        }
+        start = all_cells.begin();
+        end = all_cells.end();
+    } else { 
+        start = cell_indexes.begin();
+        end = cell_indexes.end();
+    }
+    for (std::set<CellIndexType>::const_iterator ci = start;
+            ci != end;
             ++ci) {        
         assert(static_cast<unsigned long>(*ci) < this->cells_.size());
-        this->cells_[*ci]->sample_organisms(sp_ptr, samples, num_organisms_per_cell);
-        
-        ////////////////
-        // DEBUG CODE //
-        ////////////////
-//         debug_results.push_back(samples.size() - old_size);
-//         if (samples.size() - old_size > 0) {
-//             std::string label = sp_ptr->get_organism_label(*samples.back());
-//             std::vector<std::string> parts = textutil::split(label, "_");
-//             test_sample.push_back(parts[1] + "," + parts[2]);
-//         } else {
-//             test_sample.push_back("-");
-//         }
-//         old_size = samples.size();
-        ////////////////        
-        
+        this->cells_[*ci]->sample_organisms(sp_ptr, samples, num_organisms_per_cell);        
     }
-
-    ////////////////
-    // DEBUG CODE //
-    ////////////////
-//     std::cout << std::setfill(' '); // reset
-//     std::cout << std::endl << "*** SAMPLING SCHEME ***" << std::endl;
-//     CellIndexType k = 0;    
-//     CellIndexType i = 0;
-//     CellIndexType x = 0;
-//     CellIndexType y = 0;
-//     for (y = 0; y < this->size_y_; ++y) {
-//         for (x = 0; x < this->size_x_; ++x, ++i) {
-//             std::cout << std::setw(10);
-//             if ( cell_indexes.find(i) != cell_indexes.end() ) {
-//                 // std::cout << debug_results.at(k);
-//                 std::cout << test_sample.at(k);
-//                 k += 1;
-//             } else {
-//                 std::cout << "-";
-//             }
-//         }
-//         std::cout << std::endl;
-//     }
-    ////////////////    
-    
 }
 
 void Landscape::count_organisms(Species * sp_ptr, std::vector<long>& counts) const {
