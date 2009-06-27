@@ -414,7 +414,7 @@ void World::write_haploid_tree(Species * sp_ptr,
     for (std::vector<const Organism *>::const_iterator oi = organisms.begin();
             oi != organisms.end();
             ++oi) {
-        tree.add_node((*oi)->get_haploid_node(), &sp_ptr->get_organism_label(**oi));
+        tree.add_leaf((*oi)->get_haploid_node(), &sp_ptr->get_organism_label(**oi));
     }
     
     // write tree
@@ -442,8 +442,8 @@ void World::write_diploid2_trees(Species * sp_ptr,
                 ++oi) {
             allele1 = sp_ptr->get_organism_label(**oi) + "_a1";
             allele2 = sp_ptr->get_organism_label(**oi) + "_a2";
-            tree.add_node((*oi)->get_diploid_node1(i), &allele1);
-            tree.add_node((*oi)->get_diploid_node2(i), &allele2);            
+            tree.add_leaf((*oi)->get_diploid_node1(i), &allele1);
+            tree.add_leaf((*oi)->get_diploid_node2(i), &allele2);            
         }
         out << "    TREE DiploidLocus" << std::setw(2) << std::setfill('0') << i+1 << " = [&R] "; 
         this->write_tree(tree, sp_ptr->get_label(), organisms.size(), out);
@@ -466,7 +466,7 @@ void World::write_diploid1_trees(Species * sp_ptr,
         for (std::vector<const Organism *>::const_iterator oi = organisms.begin();
                 oi != organisms.end();
                 ++oi) {
-            tree.add_node((*oi)->get_diploid_random_node(i, this->rng_), &sp_ptr->get_organism_label(**oi));          
+            tree.add_leaf((*oi)->get_diploid_random_node(i, this->rng_), &sp_ptr->get_organism_label(**oi));          
         }
         out << "    TREE DiploidLocus" << std::setw(2) << std::setfill('0') << i+1 << " = [&R] "; 
         this->write_tree(tree, sp_ptr->get_label(), organisms.size(), out);

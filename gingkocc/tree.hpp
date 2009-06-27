@@ -78,7 +78,11 @@ class TreeStructureMultipleRootError : public TreeStructureError {
 class Path {
 
     public:
-        Path();
+        Path(std::map<GenealogyNode *, std::string>* labels_ptr,
+             std::map<GenealogyNode *, CellIndexType>* cell_indexes_ptr,
+             Landscape * landscape_ptr);
+        Path(const Path& p);
+        const Path& operator=(const Path& p);
         ~Path();
         void add_node(GenealogyNode * node);
         long get_node_index(GenealogyNode * node);
@@ -116,14 +120,23 @@ class Path {
             return NULL;
         }        
         Path * find_node(GenealogyNode * node, long& idx);
-        void write_newick(std::ostream& out, std::map<GenealogyNode *, std::string>& labels, Landscape * landscape_ptr);
+        void write_newick(std::ostream& out);
 
     private:
+        /** Tracks nodes within this path. */
         std::vector<GenealogyNode *>                path_nodes_;
+        /** Tracks indexes. */
         std::map<GenealogyNode *, long>             node_to_indexes_;
+        /** Tracks paths branching off this one. */
         std::vector<Path>                           child_paths_;
+        /** Maps node indexes to their corresponding label. */
+        std::map<GenealogyNode *, std::string>*     labels_ptr_;
+        /** Tracks indexes of cells. */
+        std::map<GenealogyNode *, CellIndexType>*   cell_indexes_ptr_;          
+        /** Landscape from which the nodes are derived. */
+        Landscape *                                 landscape_ptr_;      
+        
 };
- 
 
 /**
  * Encapsulates the building of trees from a collection of GenealogyNode 
@@ -153,7 +166,7 @@ class Tree {
          *                  without a parent passed its parent pointer to be 
          *                  inserted into the array)
          */
-        void add_node(GenealogyNode* node, const std::string * label=NULL);
+        void add_leaf(GenealogyNode* node, const std::string * label=NULL);
 
         /**
          * Writes newick string representing the tree structure to the given
@@ -164,12 +177,14 @@ class Tree {
         void write_newick_tree(std::ostream& out);        
 
     private:    
-        /** Primary path; multiple if multiple roots. */        
-        Path                                        start_path_;  
         /** Maps node indexes to their corresponding label. */
         std::map<GenealogyNode *, std::string>      labels_;
         /** Landscape from which the nodes are derived. */
-        Landscape *                                 landscape_ptr_;        
+        Landscape *                                 landscape_ptr_;
+        /** Tracks indexes of cells. */
+        std::map<GenealogyNode *, CellIndexType >   cell_indexes_;
+        /** Primary path; multiple if multiple roots. */        
+        Path                                        start_path_;          
 };
 
 

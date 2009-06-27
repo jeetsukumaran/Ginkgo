@@ -77,17 +77,17 @@ std::string build_tree1() {
     gingko::Tree tree;
     
     std::string label_a("a");
-    tree.add_node(&na, &label_a);    
+    tree.add_leaf(&na, &label_a);    
     std::string label_b("b");
-    tree.add_node(&nb, &label_b);
+    tree.add_leaf(&nb, &label_b);
     std::string label_c("c");
-    tree.add_node(&nc, &label_c);
+    tree.add_leaf(&nc, &label_c);
     std::string label_d("d");
-    tree.add_node(&nd, &label_d);
+    tree.add_leaf(&nd, &label_d);
     std::string label_e("e");
-    tree.add_node(&ne, &label_e);
+    tree.add_leaf(&ne, &label_e);
     std::string label_f("f");
-    tree.add_node(&nf, &label_f);
+    tree.add_leaf(&nf, &label_f);
     std::ostringstream s;
     tree.write_newick_tree(s);
     return s.str();
@@ -129,17 +129,17 @@ std::string build_tree2() {
     gingko::Tree tree;
     
     std::string label_a("a");
-    tree.add_node(na, &label_a);    
+    tree.add_leaf(na, &label_a);    
     std::string label_b("b");
-    tree.add_node(nb, &label_b);
+    tree.add_leaf(nb, &label_b);
     std::string label_c("c");
-    tree.add_node(nc, &label_c);
+    tree.add_leaf(nc, &label_c);
     std::string label_d("d");
-    tree.add_node(nd, &label_d);
+    tree.add_leaf(nd, &label_d);
     std::string label_e("e");
-    tree.add_node(ne, &label_e);
+    tree.add_leaf(ne, &label_e);
     std::string label_f("f");
-    tree.add_node(nf, &label_f);
+    tree.add_leaf(nf, &label_f);
     std::ostringstream s;
     tree.write_newick_tree(s);
     
@@ -198,17 +198,17 @@ std::string build_tree3() {
     gingko::Tree tree;
     
     std::string label_a("a");
-    tree.add_node(ha.node(), &label_a);    
+    tree.add_leaf(ha.node(), &label_a);    
     std::string label_b("b");
-    tree.add_node(hb.node(), &label_b);
+    tree.add_leaf(hb.node(), &label_b);
     std::string label_c("c");
-    tree.add_node(hc.node(), &label_c);
+    tree.add_leaf(hc.node(), &label_c);
     std::string label_d("d");
-    tree.add_node(hd.node(), &label_d);
+    tree.add_leaf(hd.node(), &label_d);
     std::string label_e("e");
-    tree.add_node(he.node(), &label_e);
+    tree.add_leaf(he.node(), &label_e);
     std::string label_f("f");
-    tree.add_node(hf.node(), &label_f);
+    tree.add_leaf(hf.node(), &label_f);
     std::ostringstream s;
     tree.write_newick_tree(s);
     return s.str();
