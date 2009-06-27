@@ -81,14 +81,21 @@ class Path {
         Path();
         ~Path();
         void add_node(GenealogyNode * node);
-        long find_node(GenealogyNode * node);
-        Path split_on_index(long idx);
+        long get_node_index(GenealogyNode * node);
+        Path * split_on_index(long idx, Path& new_child);
+        unsigned long size() {
+            return this->path_nodes_.size();
+        }
+        GenealogyNode * tip_node() {
+            return this->path_nodes_.front();
+        }
+        Path * find_node(GenealogyNode * node, long& idx);
+        void write_newick(std::ostream& out, std::map<GenealogyNode *, std::string> labels);
 
     private:
         std::vector<GenealogyNode *>                path_nodes_;
         std::map<GenealogyNode *, long>             node_to_indexes_;
-        Path *                                      first_child_;
-        Path *                                      next_sib_;
+        std::vector<Path>                           child_paths_;
 };
  
 
@@ -152,18 +159,16 @@ class Tree {
          */        
         void set_coalesce_multiple_roots(bool val);
 
-
-    private:
-        /** List of paths. */        
-        std::vector<Path>                           paths_;        
+    private:    
         /** Primary path. */        
-        Path *                                      start_path_;  
+        Path                                        start_path_;  
         /** Maps node indexes to their corresponding label. */
-        std::map<GenealogyNode *, std::string>   labels_;
+        std::map<GenealogyNode *, std::string>      labels_;
+        /** Landscape from which the nodes are derived. */
+        Landscape *                                 landscape_ptr_;        
         /** True if multiple roots are to be coalesced into a single node. */
         bool                                        coalesce_multiple_roots_;
-        /** Landscape from which the nodes are derived. */
-        Landscape *                                 landscape_ptr_;
+        std::vector<Path *>                         paths_;
         
 
 };
