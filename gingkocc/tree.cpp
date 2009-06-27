@@ -84,7 +84,7 @@ Path * Path::split_on_index(long idx, Path& new_child) {
     return &this->child_paths_.back();
 }
 
-void Path::write_newick(std::ostream& out, std::map<GenealogyNode *, std::string>& labels) {
+void Path::write_newick(std::ostream& out, std::map<GenealogyNode *, std::string>& labels, Landscape * landscape_ptr) {
     if (this->child_paths_.size() == 0) {
         std::map<GenealogyNode *, std::string>::iterator pni = labels.find(this->path_nodes_.front());
         //assert(pni != labels.end());
@@ -99,9 +99,16 @@ void Path::write_newick(std::ostream& out, std::map<GenealogyNode *, std::string
             if (pi != this->child_paths_.begin()) {
                 out << ",";
             }
-            pi->write_newick(out, labels);
+            pi->write_newick(out, labels, landscape_ptr);
         }
-        out << "):" << this->size();
+        out << ")";
+        if (landscape_ptr != NULL) {
+            CellIndexType cell_index = this->path_nodes_.front()->get_cell_index();
+            CellIndexType x = landscape_ptr->index_to_x(cell_index);        
+            CellIndexType y = landscape_ptr->index_to_y(cell_index);
+            out << "x" << x << "_" << "y" << y;
+        }        
+        out << ":" << this->size();
     }
 }
 
@@ -143,7 +150,7 @@ void Tree::add_node(GenealogyNode* node, const std::string * label) {
 }
 
 void Tree::write_newick_tree(std::ostream& out) {
-    this->start_path_.write_newick(out, this->labels_);
+    this->start_path_.write_newick(out, this->labels_, this->landscape_ptr_);
 }  
 
 } // namespace gingko

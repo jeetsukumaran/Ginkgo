@@ -116,7 +116,7 @@ class Path {
             return NULL;
         }        
         Path * find_node(GenealogyNode * node, long& idx);
-        void write_newick(std::ostream& out, std::map<GenealogyNode *, std::string>& labels);
+        void write_newick(std::ostream& out, std::map<GenealogyNode *, std::string>& labels, Landscape * landscape_ptr);
 
     private:
         std::vector<GenealogyNode *>                path_nodes_;
