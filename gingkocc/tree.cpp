@@ -135,14 +135,15 @@ void Tree::add_leaf(GenealogyNode* node, const std::string * label) {
         }
     } else {
         Path * new_node_path = this->add_new_path();
+        unsigned long new_node_path_index = new_node_path->get_index();
         bool coalesced = false;
         while (node != NULL) {
             std::map<GenealogyNode *, unsigned long>::iterator npi = this->node_path_index_map_.find(node);            
             if (npi != this->node_path_index_map_.end()) {
-                Path * new_split_child_path = this->add_new_path();
+                Path * new_split_child_path = this->add_new_path(); // note: at this point 'new_node_path' could be invalid (if memory allocation occurs)!
                 this->paths_.at(npi->second).split_after_node(node, 
                                                                 new_split_child_path->get_index(), 
-                                                                new_node_path->get_index());
+                                                                new_node_path_index);
                 coalesced = true;
                 return;
             } else {
