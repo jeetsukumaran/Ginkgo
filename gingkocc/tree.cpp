@@ -27,8 +27,8 @@
 namespace gingko {
 
 Tree::Tree(Landscape * landscape_ptr, bool coalesce_multiple_roots) 
-    : landscape_ptr_(landscape_ptr),
-      coalesce_multiple_roots_(coalesce_multiple_roots) {
+    : coalesce_multiple_roots_(coalesce_multiple_roots),
+      landscape_ptr_(landscape_ptr) {
 }
 
 long Tree::process_node(GenealogyNode* node, const std::string * label) {
