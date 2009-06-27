@@ -97,7 +97,7 @@ void Path::write_newick(std::ostream& out, std::map<GenealogyNode *, std::string
         out << "(";
         for (std::vector<Path>::iterator pi = this->child_paths_.begin(); pi != this->child_paths_.end(); ++pi) {
             if (pi != this->child_paths_.begin()) {
-                out << ",";
+                out << ", ";
             }
             pi->write_newick(out, labels, landscape_ptr);
         }
