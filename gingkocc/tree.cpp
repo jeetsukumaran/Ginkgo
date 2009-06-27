@@ -26,176 +26,78 @@
 
 namespace gingko {
 
+///////////////////////////////////////////////////////////////////////////////
+// Path
+
+Path::Path()
+    : first_child_(NULL),
+      next_sib_(NULL) { }
+      
+Path::~Path() { }
+
+void Path::add_node(GenealogyNode * node) {
+    this->path_nodes_.push_back(node);
+    this->node_to_indexes_.insert(std::make_pair(node, this->path_nodes_.size()-1));
+}
+
+long Path::find_node(GenealogyNode * node) {
+    std::map<GenealogyNode *, long>::iterator i = this->node_to_indexes_.find(node);
+    if ( i == this->node_to_indexes_.end() ) {
+        return -1;
+    } else {
+        return i->second;
+    }
+}
+
+Path Path::split_on_index(long idx) {
+    assert(idx < this->path_nodes_.size() && idx >= 0);
+    Path p;
+    for (long i = this->path_nodes_.size(); i>= idx; --i) {
+        p.add_node(this->path_nodes_[i]);
+        this->node_to_indexes_.erase(this->path_nodes_[i]);        
+    }
+    this->path_nodes_.erase(this->path_nodes_.begin()+idx, this->path_nodes_.end());    
+    return p;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// Tree
+
 Tree::Tree(Landscape * landscape_ptr, bool coalesce_multiple_roots) 
     : landscape_ptr_(landscape_ptr),
       coalesce_multiple_roots_(coalesce_multiple_roots) {
 }
 
-long Tree::process_node(GenealogyNode* node, const std::string * label) {
+void Tree::process_node(GenealogyNode* node, const std::string * label) {
+
+    bool coalesced = false;
+    this->paths_.push_back(Path());
+    Path& new_node_path = this->paths_.back();
+    while (node != NULL and not coalesced) {
+        for (std::vector<Path>::iterator pi = this->paths_.begin(); pi != this->paths_.end(); ++pi) {
+            long idx = (*pi).find_node(node);
+            if (idx >= 0) {
+                this->paths_.push_back((*pi).split_on_index(idx));
+                coalesced = true;
+                break;
+            }
+        }
+        if (not coalesced) {
+            new_node_path.add_node(node);
+            node = node->get_parent();
+        }            
+    }
     if (node == NULL) {
-        // Before a node can be inserted, it needs the index of its 
-        // parent; 
-        // Thus a node typically calls <code>process_node</code>
-        // on its parent pointer to obtain this index before inserting
-        // itself. 
-        // If a node has no parent, then the pointer passed here will 
-        // be NULL, and so a flag is returned indicating that the node
-        // is a root.
-        return -1;
+        this->start_path_ = &new_node_path;
     }
-    
-    // search for the node in the node to parent array index map
-    NodeToIndexMap::iterator niter = this->node_indexes_.find(node);                
-    if (niter != this->node_indexes_.end()) {
-        // if found, then return its index
-        return niter->second;
-    }
-    
-    // This node is not already in the parent array, and needs to be
-    // added.
-    // We need to get the index of this node's parent first so we
-    // know what value to store as this node's parent.
-    // OLD LOGIC:
-    // So we call <code>process_node</code> again, passing it the 
-    // pointer to this node's parent: if this node's parent is not 
-    // already in the array, it will then be added and its new index 
-    // returned, otherwise the index of the existing parent node in the 
-    // array will be returned. 
-    // This index will be inserted into the array in the position 
-    // corresponding to this node.
-    // If this node's parent pointer is NULL, then -1 will be returned
-    // by the <code>process_node</code> and stored in this node's
-    // location in lieu of an index, indicating that this node is a 
-    // root.
-    // PROBLEM: After long runs, even if the tree itself is small, the logic
-    // runs into recursion limits.
-    // NEW LOGIC: no recursion.
-    GenealogyNode * parent = node->get_parent();
-    niter = this->node_indexes_.find(parent);
-    std::vector<GenealogyNode *> ancestors;
-    while (parent != NULL and niter == this->node_indexes_.end()) {
-        ancestors.push_back(parent);
-        parent = parent->get_parent();
-        if (parent != NULL) {
-            niter = this->node_indexes_.find(parent);
-        }
-    }
-    long new_node_parent_idx = -1;
-    if (parent == NULL) {
-        new_node_parent_idx = -1;
-    } else {
-        assert(niter != this->node_indexes_.end());
-        new_node_parent_idx = niter->second;
-    }
-    this->tree_nodes_.reserve(this->tree_nodes_.size() + ancestors.size() + 1);
-    for (std::vector<GenealogyNode *>::reverse_iterator ranciter = ancestors.rbegin();
-         ranciter != ancestors.rend();
-         ++ranciter) {
-        this->tree_nodes_.push_back(new_node_parent_idx);
-        new_node_parent_idx = this->tree_nodes_.size() - 1;
-        this->node_indexes_.insert(std::make_pair(*ranciter, new_node_parent_idx));
-        this->cell_indexes_.insert(std::make_pair(new_node_parent_idx, (**ranciter).get_cell_index()));
-    }
-//     assert(new_node_parent_idx == this->process_node(node->get_parent()));
-    this->tree_nodes_.push_back(new_node_parent_idx); 
-    
-    // record this node's index in the node to array index map
-    unsigned long idx = this->tree_nodes_.size() - 1;
-    this->node_indexes_.insert(std::make_pair(node, idx));
-    
-    // and, if a label was passed, store it in the node index to label
-    // map
     if (label != NULL) {
-        this->labels_.insert(std::make_pair(idx, *label));
+        this->labels_.insert(std::make_pair(node, *label));
     } 
-//     else {
-//         assert(node->get_first_child() != NULL);
-//     }
-    return idx;
 }
 
-std::vector<long> Tree::get_children(long parent) {
-    std::vector<long> children;
-    for (unsigned long i = parent+1; i < this->tree_nodes_.size(); ++i) {
-        if (this->tree_nodes_[i] == parent) {
-            children.push_back(i);
-        }
-    }
-    return children;
-}
-
-const std::string& Tree::get_label_for_node(long node_idx) {
-    NodeIndexToLabelMap::iterator node_label = this->labels_.find(node_idx);
-    assert(node_label != this->labels_.end());
-    return node_label->second;
-}
 
 void Tree::write_newick_tree(std::ostream& out) {
-    int num_roots = std::count(this->tree_nodes_.begin(), this->tree_nodes_.end(), -1);         
-    if (num_roots == 0) {
-        throw TreeStructureMissingRootError("no root nodes found (possibly because node list was empty)");
-    }
-    if (this->coalesce_multiple_roots_ and num_roots > 1) {
-        ParentIndexVector::iterator root = std::find(this->tree_nodes_.begin(), this->tree_nodes_.end(), -1);
-        out << "(";
-        this->write_newick_node(root-this->tree_nodes_.begin(), out);                
-        while (root != this->tree_nodes_.end()) {
-            root = std::find(root+1, this->tree_nodes_.end(), -1);
-            if (root != this->tree_nodes_.end()) {
-                out << ", ";
-                this->write_newick_node(root-this->tree_nodes_.begin(), out);
-            }                        
-        }
-        out << "):9999"; // add infinite branch length?                
-    } else {
-        if (num_roots >= 2)  {
-            throw TreeStructureMultipleRootError("multiple roots found");
-        }
-        ParentIndexVector::iterator root = std::find(this->tree_nodes_.begin(),
-                this->tree_nodes_.end(), -1);
-        if (root == this->tree_nodes_.end())  {
-            throw TreeStructureMissingRootError("no root nodes found (possibly because node list was empty)");
-        }
-        this->write_newick_node(root-this->tree_nodes_.begin(), out);
-    }                
-}
-
-void Tree::write_newick_node(long node_idx, std::ostream& out) {
-    unsigned edge_length = 1; 
-    std::vector<long> children = this->get_children(node_idx);
-    while (children.size() == 1) {
-        // this deals with nodes of outdegree 1 still in the structure
-        ++edge_length;
-        long only_child = children[0];
-        children = this->get_children(only_child);
-        if (children.size() == 0) {
-            // node has chain of outdegree 1 descendents all the way
-            // to single terminal: collapse to child
-            node_idx = only_child;
-        }
-    }
-    if (children.size() > 0) {
-        out << "(";
-        for (std::vector<long>::iterator child_iter = children.begin();
-             child_iter != children.end();
-             ++child_iter) {
-             if (child_iter != children.begin()) {
-                out << ", ";
-             }
-            this->write_newick_node(*child_iter, out);    
-        }
-        out << ")";
-        if (this->landscape_ptr_ != NULL) {
-            CellIndexType x = this->landscape_ptr_->index_to_x(this->cell_indexes_[node_idx]);        
-            CellIndexType y = this->landscape_ptr_->index_to_y(this->cell_indexes_[node_idx]);
-            out << "X" << x << "_" << "Y" << y;
-        }
-    } else {
-        NodeIndexToLabelMap::iterator node_label = this->labels_.find(node_idx);
-        assert(node_label != this->labels_.end());
-        out << node_label->second;
-    }
-    out << ":" << edge_length;
+               
 }
 
 bool Tree::get_coalesce_multiple_roots() const {
@@ -205,26 +107,6 @@ bool Tree::get_coalesce_multiple_roots() const {
 void Tree::set_coalesce_multiple_roots(bool val) {
     this->coalesce_multiple_roots_ = val;
 }
-
-void Tree::add_indexed_node(long parent_index, const char * label) {
-    this->tree_nodes_.push_back(parent_index);
-    if (label != NULL) {
-        std::string label_str(label);
-        unsigned long idx = this->tree_nodes_.size() - 1;
-        this->labels_.insert(std::make_pair(idx, label_str));
-    }
-}
-
-void Tree::dump(std::ostream& out) {
-    out << std::setfill(' '); // reset
-    out << std::setw(10) << "idx" << "   ";
-    out << std::setw(10) << "parent" << "   ";
-    out << std::setw(10) << "label" << "\n";        
-    for (unsigned i = 0; i < this->tree_nodes_.size(); ++i) {
-        out << std::setw(10) << i << "   ";
-        out << std::setw(10) << this->tree_nodes_[i] << "   ";
-        out << std::setw(10) << this->labels_[i] << "\n";
-    }
-}        
+       
 
 } // namespace gingko

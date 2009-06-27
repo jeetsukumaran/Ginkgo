@@ -26,26 +26,26 @@
 #include <cstdlib>
 
 int main(int argc, char* argv[]) {
-
-    if (argc == 1) {
-        std::cerr << "No parent indexes specified" << std::endl;
-        exit(1);
-    }
-    
-    gingko::Tree tree(NULL, true);
-    const char * label;
-    for (int i = 1; i < argc; ++i) {
-        std::vector< std::string > parts = gingko::textutil::split(argv[i], ":");
-        unsigned long idx = atol(parts[0].c_str());            
-        if (parts.size() > 1) {
-            label = parts[1].c_str();
-        } else {
-            label = NULL;
-        }
-        tree.add_indexed_node(idx, label);
-    }
-    tree.dump(std::cerr);
-    std::cerr << std::endl;
-    tree.write_newick_tree(std::cout);
-    std::cerr << std::endl;
+// 
+//     if (argc == 1) {
+//         std::cerr << "No parent indexes specified" << std::endl;
+//         exit(1);
+//     }
+//     
+//     gingko::Tree tree(NULL, true);
+//     const char * label;
+//     for (int i = 1; i < argc; ++i) {
+//         std::vector< std::string > parts = gingko::textutil::split(argv[i], ":");
+//         unsigned long idx = atol(parts[0].c_str());            
+//         if (parts.size() > 1) {
+//             label = parts[1].c_str();
+//         } else {
+//             label = NULL;
+//         }
+//         tree.add_indexed_node(idx, label);
+//     }
+//     tree.dump(std::cerr);
+//     std::cerr << std::endl;
+//     tree.write_newick_tree(std::cout);
+//     std::cerr << std::endl;
 }

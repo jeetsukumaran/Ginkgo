@@ -73,16 +73,30 @@ class TreeStructureMultipleRootError : public TreeStructureError {
 };
 
 /**
+ * Tracks a subset of paths on a tree.
+ */
+class Path {
+
+    public:
+        Path();
+        ~Path();
+        void add_node(GenealogyNode * node);
+        long find_node(GenealogyNode * node);
+        Path split_on_index(long idx);
+
+    private:
+        std::vector<GenealogyNode *>                path_nodes_;
+        std::map<GenealogyNode *, long>             node_to_indexes_;
+        Path *                                      first_child_;
+        Path *                                      next_sib_;
+};
+ 
+
+/**
  * Encapsulates the building of trees from a collection of GenealogyNode 
  * objects.
  */
 class Tree {
-
-    typedef std::map< long, std::string >           NodeIndexToLabelMap;
-    typedef std::map< long, CellIndexType >         NodeIndexToCellIndexMap;
-    typedef std::map< GenealogyNode*, long >        NodeToIndexMap;
-    typedef std::vector<GenealogyNode *>            NodeVector;
-    typedef std::vector<long>                       ParentIndexVector;
 
     public:
     
@@ -110,35 +124,8 @@ class Tree {
          *                  without a parent passed its parent pointer to be 
          *                  inserted into the array)
          */
-        long process_node(GenealogyNode* node, const std::string * label=NULL);
-        
-        /**
-         * Given an index of a node in the parent array, returns the indexes
-         * of all its children.
-         *
-         * @param   parent  index of a node in the parent array
-         * @returns         vector of indexes of all nodes with this node as
-         *                  parent
-         */
-        std::vector<long> get_children(long parent);
-        
-        /**
-         * Returns label for given node.
-         *
-         * @param   node_idx    index of node
-         * @return              label for node
-         */
-         const std::string& get_label_for_node(long node_idx);
-         
-        /**
-         * Composes newick string representation of node relationships given
-         * in the parent array. Multiple trees are returned if the nodes have 
-         * not coalesced.
-         * 
-         * @param out   output stream to which to write the tree
-         */
-//         std::vector<std::string> Tree::compose_newick_tree()         
-        
+        void process_node(GenealogyNode* node, const std::string * label=NULL);
+
         /**
          * Writes newick string representing the tree structure to the given
          * output stream.
@@ -146,15 +133,6 @@ class Tree {
          * @param out   output stream to which to write the tree
          */
         void write_newick_tree(std::ostream& out);
-        
-        /**
-         * Writes the newick representation of a single node specified by its
-         * index the parent array structure to the given output stream.
-         *
-         * @param node_idx  index of node in the parent array structure
-         * @param out       output stream to which to write the newick string
-         */
-        void write_newick_node(long node_idx, std::ostream& out);
         
         /**
          * Returns the current mode of treating multiple roots (as errors
@@ -174,37 +152,20 @@ class Tree {
          */        
         void set_coalesce_multiple_roots(bool val);
 
-        /**
-         * Writes out tree structure in human readable format for debugging.
-         * @param out   output stream to write to
-         */
-        void dump(std::ostream& out);
-        
-        /**
-         * Directly adds an element into the parent index array.
-         *
-         * @param parent_idx    index of parent of the node
-         * @param label         label of the node
-         */
-        void add_indexed_node(long parent_index, const char * label = NULL);
 
     private:
-        /** Maps node pointers to indexes of the corresponding node in the parent array */
-        NodeToIndexMap                      node_indexes_;
-        /** 
-         * Parent array structure tracking nodes in a tree, where the value
-         * at each location in the array is the index of the parent of that
-         * node.
-         */
-        ParentIndexVector                   tree_nodes_;        
+        /** List of paths. */        
+        std::vector<Path>                           paths_;        
+        /** Primary path. */        
+        Path *                                      start_path_;  
         /** Maps node indexes to their corresponding label. */
-        NodeIndexToLabelMap                 labels_;
-        /** Maps node indexes to cell indexes. */
-        NodeIndexToCellIndexMap             cell_indexes_;
+        std::map<GenealogyNode *, std::string>   labels_;
         /** True if multiple roots are to be coalesced into a single node. */
-        bool                                coalesce_multiple_roots_;
+        bool                                        coalesce_multiple_roots_;
         /** Landscape from which the nodes are derived. */
-        Landscape *                         landscape_ptr_;
+        Landscape *                                 landscape_ptr_;
+        
+
 };
 
 
