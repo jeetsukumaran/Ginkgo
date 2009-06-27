@@ -162,7 +162,6 @@ void Landscape::debug_dump_structure(std::ostream& out) {
             ci != this->cells_.end();
             ++ci, ++i) {
         CellIndexType x = this->index_to_x(i);
-        CellIndexType y = this->index_to_y(i);
         if (x == 0) {
             out << std::endl;
         }

@@ -747,6 +747,13 @@ class Organism {
             }                
         }
         
+        void set_cell_index(CellIndexType cell_index) {
+            this->neutral_haploid_marker_.set_cell_index(cell_index);
+            for (unsigned i = 0; i < NUM_NEUTRAL_DIPLOID_LOCII; ++i) {
+                 this->neutral_diploid_markers_[i].set_cell_index(cell_index);
+            }        
+        }
+        
     private:
     
         /** 
@@ -1189,9 +1196,11 @@ class Species {
          * @return  a default Organism object.
          */
         Organism new_organism(CellIndexType cell_index) {
-            return Organism(this, 
+            Organism    org(this, 
                             this->default_genotypic_fitness_factors_, 
                             this->get_random_sex());
+            org.set_cell_index(cell_index);
+            return org;
         }
         
         /**
