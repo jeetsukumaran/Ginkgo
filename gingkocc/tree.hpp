@@ -84,7 +84,7 @@ class Path {
     public:
         Path(Tree * tree_ptr);
         void add_node(GenealogyNode * node);
-        void add_split_at_node(GenealogyNode * node, Path * other_child_path);
+        void add_split_after_node(GenealogyNode * node, Path * other_child_path);
         unsigned long size() {
             return this->path_nodes_.size();
         }
