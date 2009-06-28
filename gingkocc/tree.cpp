@@ -122,7 +122,9 @@ void Tree::add_leaf(GenealogyNode* node, const std::string * label) {
                 node = node->get_parent();
             }            
         }
-        assert(coalesced); // TODO: if not coalesced here, multiple roots
+        if (!coalesced) {
+            throw TreeStructureMultipleRootError("failure to coalesce to single ancestor in sample");
+        }
     }
 }
 
