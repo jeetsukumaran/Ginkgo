@@ -175,8 +175,8 @@ void ConfigurationFile::process_lineage(XmlElementType& lineage_node, World& wor
     }            
           
     lineage.set_mutation_rate(this->get_child_node_scalar<float>(lineage_node, "genotypicFitnessMutationRate", 0.0));
-    lineage.set_max_mutation_size(this->get_child_node_scalar<float>(lineage_node, "genotypicFitnessMutationSize", 0.0));
-    lineage.set_mean_reproductive_rate(this->get_child_node_scalar<float>(lineage_node, "fecundity", 16));
+    lineage.set_max_mutation_size(this->get_child_node_scalar<FitnessFactorType>(lineage_node, "genotypicFitnessMutationSize", 0));
+    lineage.set_mean_reproductive_rate(this->get_child_node_scalar<unsigned>(lineage_node, "fecundity", 16));
 //         lineage.set_reproductive_rate_mutation_size(this->get_child_node_scalar<float>(lineage_node, "fecundityMutationRate", 0.0));
     lineage.set_movement_probability(this->get_child_node_scalar<float>(lineage_node, "movementProbability", 1.0));
     lineage.set_movement_capacity(this->get_child_node_scalar<unsigned>(lineage_node, "movementCapacity", 1));
