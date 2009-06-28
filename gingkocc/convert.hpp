@@ -61,6 +61,23 @@ T to_scalar(U from) {
 }
 
 /**
+ * Converts from one simple streamable type to another.
+ * @param from  representation of value (e.g. "3.14")
+ * @return      value represented in type T
+ */
+template <typename U>
+bool to_bool(U from) {
+    std::ostringstream o;
+    o << from;
+    std::string s = o.str();
+    if ((s.size() > 0) && (s[0] == '1' || s[1] == 't' || s[1] == 'T' || s[1] == 'y' || s[1] == 'Y')) {
+        return true;
+    } else {
+        return false;
+    }
+}
+
+/**
  * Converts from one simple streamable type to vector of streamable types.
  * @param from          representation of vector (e.g. "3 32 1 3 4", 
  *                      "1.2,1.3,3.1", "dda;adf;da" etc.)

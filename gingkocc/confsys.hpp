@@ -182,6 +182,14 @@ class ConfigurationFile {
             return convert::to_scalar<T>(attr_value);
         }
         
+        bool get_bool_attribute(XmlElementType& xml, const char * attr_name, bool default_value) const {
+            const char * attr_value = xml.getAttribute(attr_name);
+            if (attr_value == NULL) {
+                return default_value;
+            }
+            return convert::to_bool(attr_value);
+        }        
+        
         template <typename T>
         T get_child_node_scalar(XmlElementType& xml, const char * node_name) const {
             XmlElementType cnode = xml.getChildNode(node_name);
