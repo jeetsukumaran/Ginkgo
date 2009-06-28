@@ -25,7 +25,7 @@
 #include <vector>
 #include <cstdlib>
 
-int main(int argc, char* argv[]) {
+int main(int , char* ) {
 // 
 //     if (argc == 1) {
 //         std::cerr << "No parent indexes specified" << std::endl;
