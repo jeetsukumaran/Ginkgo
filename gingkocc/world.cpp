@@ -389,96 +389,93 @@ void World::write_nexus_header(Species * sp_ptr,
     out << "END;\n\n";
 }        
 
-void World::write_tree(Tree& tree, const std::string& species_label, unsigned long num_taxa, std::ostream& out) {
-    try {
-        tree.write_newick_tree(out);
-    } catch (const TreeStructureMissingRootError& e) {
-        std::ostringstream msg;
-        msg << "tree for sample of organisms of species " << species_label;
-        msg << " in generation " << this->current_generation_;
-        msg << " could not be built due to missing root node";
-        msg << " (organism sample size = " << num_taxa << ")";
-        this->log_error(msg.str());
-    } catch (const TreeStructureMultipleRootError& e) {
-        std::ostringstream msg;
-        msg << "tree for sample of organisms of species " << species_label;
-        msg << " in generation " << this->current_generation_;
-        msg << " could not be built due to multiple root nodes";
-        msg << " (organism sample size = " << num_taxa << ")";
-        this->log_error(msg.str());    
-    }
-}
-
 void World::write_haploid_tree(Species * sp_ptr,
                 const std::vector<const Organism *>& organisms,
                 std::ostream& out) {
-    Tree tree(&this->landscape_);
-    
-    // build tree
-    for (std::vector<const Organism *>::const_iterator oi = organisms.begin();
-            oi != organisms.end();
-            ++oi) {
-        tree.add_leaf((*oi)->get_haploid_node(), &sp_ptr->get_organism_label(**oi));
-    }
-    
-    // write tree
-    this->write_nexus_header(sp_ptr, organisms, out);
-    out << "BEGIN TREES;\n";
-    out << "    TREE HaploidLocus = [&R] ";
-    this->write_tree(tree, sp_ptr->get_label(), organisms.size(), out);
-    out << ";\n";
-    out << "END;\n\n";
+        Tree tree(&this->landscape_);
+    try {           
+        // build tree
+        for (std::vector<const Organism *>::const_iterator oi = organisms.begin();
+                oi != organisms.end();
+                ++oi) {
+            tree.add_leaf((*oi)->get_haploid_node(), &sp_ptr->get_organism_label(**oi));
+        }
+        
+        // write tree
+        this->write_nexus_header(sp_ptr, organisms, out);
+        out << "BEGIN TREES;\n";
+        out << "    TREE HaploidLocus = [&R] ";
+        tree.write_newick_tree(out);
+        out << ";\n";
+        out << "END;\n\n";
+    } catch (const TreeStructureMultipleRootError& e) {        
+        this->log_tree_multiple_root_error(sp_ptr->get_label(), organisms.size());
+    }         
 }
 
 void World::write_diploid2_trees(Species * sp_ptr,
                 const std::vector<const Organism *>& organisms,
                 std::ostream& out) {
-                
-    this->write_nexus_header(sp_ptr, organisms, out, true);
-    out << std::setfill(' '); // reset
-    out << "BEGIN TREES;\n";
-    for (unsigned i = 0; i < NUM_NEUTRAL_DIPLOID_loci; ++i) {
-        Tree tree(&this->landscape_);
-        std::string allele1;
-        std::string allele2;
-        for (std::vector<const Organism *>::const_iterator oi = organisms.begin();
-                oi != organisms.end();
-                ++oi) {
-            allele1 = sp_ptr->get_organism_label(**oi) + "_a1";
-            allele2 = sp_ptr->get_organism_label(**oi) + "_a2";
-            tree.add_leaf((*oi)->get_diploid_node1(i), &allele1);
-            tree.add_leaf((*oi)->get_diploid_node2(i), &allele2);            
+    try {                 
+        this->write_nexus_header(sp_ptr, organisms, out, true);
+        out << std::setfill(' '); // reset
+        out << "BEGIN TREES;\n";
+        for (unsigned i = 0; i < NUM_NEUTRAL_DIPLOID_loci; ++i) {
+            Tree tree(&this->landscape_);
+            std::string allele1;
+            std::string allele2;
+            for (std::vector<const Organism *>::const_iterator oi = organisms.begin();
+                    oi != organisms.end();
+                    ++oi) {
+                allele1 = sp_ptr->get_organism_label(**oi) + "_a1";
+                allele2 = sp_ptr->get_organism_label(**oi) + "_a2";
+                tree.add_leaf((*oi)->get_diploid_node1(i), &allele1);
+                tree.add_leaf((*oi)->get_diploid_node2(i), &allele2);            
+            }
+            out << "    TREE DiploidLocus" << std::setw(2) << std::setfill('0') << i+1 << " = [&R] "; 
+            tree.write_newick_tree(out);
+            out << ";\n";
         }
-        out << "    TREE DiploidLocus" << std::setw(2) << std::setfill('0') << i+1 << " = [&R] "; 
-        this->write_tree(tree, sp_ptr->get_label(), organisms.size(), out);
-        out << ";\n";
-    }
-    out << "END;\n\n";
-    out << std::setfill(' '); // reset
+        out << "END;\n\n";
+        out << std::setfill(' '); // reset
+    } catch (const TreeStructureMultipleRootError& e) {        
+        this->log_tree_multiple_root_error(sp_ptr->get_label(), organisms.size());
+    } 
 }
 
 void World::write_diploid1_trees(Species * sp_ptr,
         const std::vector<const Organism *>& organisms,
         std::ostream& out) {
-
-    this->write_nexus_header(sp_ptr, organisms, out);
-    out << std::setfill(' '); // reset
-    out << "BEGIN TREES;\n";
-    
-    for (unsigned i = 0; i < NUM_NEUTRAL_DIPLOID_loci; ++i) {
-        Tree tree(&this->landscape_);
-        for (std::vector<const Organism *>::const_iterator oi = organisms.begin();
-                oi != organisms.end();
-                ++oi) {
-            tree.add_leaf((*oi)->get_diploid_random_node(i, this->rng_), &sp_ptr->get_organism_label(**oi));          
+    try { 
+        this->write_nexus_header(sp_ptr, organisms, out);
+        out << std::setfill(' '); // reset
+        out << "BEGIN TREES;\n";        
+        for (unsigned i = 0; i < NUM_NEUTRAL_DIPLOID_loci; ++i) {
+            Tree tree(&this->landscape_);
+            for (std::vector<const Organism *>::const_iterator oi = organisms.begin();
+                    oi != organisms.end();
+                    ++oi) {
+                tree.add_leaf((*oi)->get_diploid_random_node(i, this->rng_), &sp_ptr->get_organism_label(**oi));          
+            }
+            out << "    TREE DiploidLocus" << std::setw(2) << std::setfill('0') << i+1 << " = [&R] "; 
+            tree.write_newick_tree(out);
+            out << ";\n";
         }
-        out << "    TREE DiploidLocus" << std::setw(2) << std::setfill('0') << i+1 << " = [&R] "; 
-        this->write_tree(tree, sp_ptr->get_label(), organisms.size(), out);
-        out << ";\n";
-    }
-    out << "END;\n\n";        
-    out << std::setfill(' '); // reset        
+        out << "END;\n\n";        
+        out << std::setfill(' '); // reset        
+    } catch (const TreeStructureMultipleRootError& e) {        
+        this->log_tree_multiple_root_error(sp_ptr->get_label(), organisms.size());
+    }        
 }        
+
+void World::log_tree_multiple_root_error(const std::string& species_label, unsigned long num_taxa) {
+    std::ostringstream msg;
+    msg << "tree for sample of organisms of species " << species_label;
+    msg << " in generation " << this->current_generation_;
+    msg << " could not be built due to multiple root nodes";
+    msg << " (organism sample size = " << num_taxa << ").";
+    this->log_error(msg.str());  
+}
 
 void World::save_trees(Species * sp_ptr, 
                 unsigned long num_organisms_per_cell, 
@@ -509,13 +506,13 @@ void World::save_trees(Species * sp_ptr,
         return;
     }
     
-    this->log_info("[Generation " + convert::to_scalar<std::string>(this->current_generation_) + "] Building trees for diploid loci (one allele sampled per locus) for " + num_samples + " organisms (" + num_samples + " leaves per tree).");  
+    this->log_info("[Generation " + convert::to_scalar<std::string>(this->current_generation_) + "] Building single allele diploid loci trees for " + num_samples + " organisms (" + num_samples + " leaves per tree).");  
     std::ofstream combined_trees;            
     this->open_ofstream(combined_trees,
         this->compose_output_filename(sp_ptr->get_label(), label, "diploid1.tre"));
     this->write_diploid1_trees(sp_ptr, organisms, combined_trees);          
 
-    this->log_info("[Generation " + convert::to_scalar<std::string>(this->current_generation_) + "] Building tree of haploid locus for " + num_samples + " organisms (" + num_samples + " leaves per tree).");    
+    this->log_info("[Generation " + convert::to_scalar<std::string>(this->current_generation_) + "] Building haploid locus tree for " + num_samples + " organisms (" + num_samples + " leaves per tree).");    
     std::ofstream haploid_trees;
         
     this->open_ofstream(haploid_trees, 
@@ -523,7 +520,7 @@ void World::save_trees(Species * sp_ptr,
     this->write_haploid_tree(sp_ptr, organisms, haploid_trees);
     
     if (this->is_produce_full_complement_diploid_trees_) {
-        this->log_info("[Generation " + convert::to_scalar<std::string>(this->current_generation_) + "] Building trees for diploid loci (both alleles at each locus) for " + num_samples + " organisms (" + convert::to_scalar<std::string>(organisms.size()*2) + " leaves per tree).");  
+        this->log_info("[Generation " + convert::to_scalar<std::string>(this->current_generation_) + "] Building full complement diploid loci trees for " + num_samples + " organisms (" + convert::to_scalar<std::string>(organisms.size()*2) + " leaves per tree).");  
         std::ofstream diploid_trees;
         this->open_ofstream(diploid_trees,
             this->compose_output_filename(sp_ptr->get_label(), label, "diploid2.tre"));  
