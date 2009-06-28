@@ -31,8 +31,8 @@ namespace gingko {
 //! that together contribute to the fitness of an individual organism.
 const unsigned MAX_FITNESS_FACTORS = 10;
 
-//! The number of neutral diploid locii to track
-const unsigned NUM_NEUTRAL_DIPLOID_LOCII = 10;
+//! The number of neutral diploid loci to track
+const unsigned NUM_NEUTRAL_DIPLOID_loci = 10;
 
 //! The value type of a fitness factor (both environmental and genotypic.
 typedef int                     FitnessFactorType;

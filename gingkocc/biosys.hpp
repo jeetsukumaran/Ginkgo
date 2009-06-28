@@ -523,7 +523,7 @@ class Organism {
             this->fitness_ = ind.fitness_;
             this->expired_ = ind.expired_;
             this->neutral_haploid_marker_ = ind.neutral_haploid_marker_;
-            for (unsigned i = 0; i < NUM_NEUTRAL_DIPLOID_LOCII; ++i) {
+            for (unsigned i = 0; i < NUM_NEUTRAL_DIPLOID_loci; ++i) {
                 this->neutral_diploid_markers_[i] = ind.neutral_diploid_markers_[i];
             }             
             return *this;
@@ -563,7 +563,7 @@ class Organism {
             this->neutral_haploid_marker_.swap(o2.neutral_haploid_marker_);
             
             // neutral diploid markers
-            for (unsigned i = 0; i < NUM_NEUTRAL_DIPLOID_LOCII; ++i) {
+            for (unsigned i = 0; i < NUM_NEUTRAL_DIPLOID_loci; ++i) {
                 this->neutral_diploid_markers_[i].swap(o2.neutral_diploid_markers_[i]);
             }                                                  
         }
@@ -594,7 +594,7 @@ class Organism {
         
         /** Returns a reference to the diploid marker of this organism. */
         const DiploidMarker& diploid_marker(unsigned idx) const {
-            assert(idx < NUM_NEUTRAL_DIPLOID_LOCII);
+            assert(idx < NUM_NEUTRAL_DIPLOID_loci);
             return this->neutral_diploid_markers_[idx];
         }
         
@@ -605,19 +605,19 @@ class Organism {
         
         /** Returns a reference to allele 1 of the diploid marker of this organism. */
         GenealogyNode * get_diploid_node1(unsigned idx) const {
-            assert(idx < NUM_NEUTRAL_DIPLOID_LOCII);
+            assert(idx < NUM_NEUTRAL_DIPLOID_loci);
             return this->neutral_diploid_markers_[idx].node1();
         }
         
         /** Returns a reference to allele 1 of the diploid marker of this organism. */
         GenealogyNode * get_diploid_node2(unsigned idx) const {
-            assert(idx < NUM_NEUTRAL_DIPLOID_LOCII);
+            assert(idx < NUM_NEUTRAL_DIPLOID_loci);
             return this->neutral_diploid_markers_[idx].node2();
         }
         
         /** Returns a reference to random allele of the diploid marker of this organism. */
         GenealogyNode * get_diploid_random_node(unsigned idx, RandomNumberGenerator& rng) const {
-            assert(idx < NUM_NEUTRAL_DIPLOID_LOCII);
+            assert(idx < NUM_NEUTRAL_DIPLOID_loci);
             return this->neutral_diploid_markers_[idx].random_node(rng);
         }        
         
@@ -741,7 +741,7 @@ class Organism {
                                  CellIndexType cell_index) {
             this->neutral_haploid_marker_.inherit(female.neutral_haploid_marker_);  
             this->neutral_haploid_marker_.set_cell_index(cell_index);
-            for (unsigned i = 0; i < NUM_NEUTRAL_DIPLOID_LOCII; ++i) {
+            for (unsigned i = 0; i < NUM_NEUTRAL_DIPLOID_loci; ++i) {
                 this->neutral_diploid_markers_[i].inherit(female.neutral_diploid_markers_[i], male.neutral_diploid_markers_[i], rng);
                 this->neutral_diploid_markers_[i].set_cell_index(cell_index);
             }                
@@ -749,7 +749,7 @@ class Organism {
         
         void set_cell_index(CellIndexType cell_index) {
             this->neutral_haploid_marker_.set_cell_index(cell_index);
-            for (unsigned i = 0; i < NUM_NEUTRAL_DIPLOID_LOCII; ++i) {
+            for (unsigned i = 0; i < NUM_NEUTRAL_DIPLOID_loci; ++i) {
                  this->neutral_diploid_markers_[i].set_cell_index(cell_index);
             }        
         }
@@ -769,7 +769,7 @@ class Organism {
         HaploidMarker           neutral_haploid_marker_;
         
         /** diploid genealogies */
-        DiploidMarker           neutral_diploid_markers_[NUM_NEUTRAL_DIPLOID_LOCII];
+        DiploidMarker           neutral_diploid_markers_[NUM_NEUTRAL_DIPLOID_loci];
         
         /** for reproduction */
         Organism::Sex           sex_;
@@ -1211,8 +1211,8 @@ class Species {
          * either male or female genotype of corresponding elements, with 
          * random mutation of values. Genealogies are linked in with parental
          * nodes as ancestors: haploid node of offspring takes female's haploid
-         * node as ancestor, whereas in diploid locii, each of the two nodes at
-         * each locii selects one node at random from the male, and one from 
+         * node as ancestor, whereas in diploid loci, each of the two nodes at
+         * each loci selects one node at random from the male, and one from 
          * the female parent. Sex is assigned randomly.
          *
          * @param female    female parent

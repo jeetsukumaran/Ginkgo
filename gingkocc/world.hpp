@@ -230,8 +230,7 @@ class World {
          */      
         void set_log_frequency(unsigned log_freq) {
             this->log_frequency_ = log_freq;
-        } 
-                
+        }                         
         
         /**
          * Switch on/off final output generation.
@@ -239,6 +238,18 @@ class World {
          */
         void set_produce_final_output(bool val) {
             this->is_produce_final_output_ = val;
+        }
+                
+        
+        /**
+         * Switch on/off full diploid tree generation.
+         * @param val   <code>true</code> to produce trees tracking both alleles
+         *              at each locus (by default, only haploid and subsampled 
+         *              diploid, i.e. one allele sampled at random from each
+         *              diploid locus, produced).
+         */
+        void set_produce_full_diploid_trees(bool val) {
+            this->is_produce_full_diploid_trees_ = val;
         }
         
         /**
@@ -632,9 +643,9 @@ class World {
          * the landscape, and write out the corresponding trees.
          * Three tree files will be produced: 
          *   (1) one for the haploid locus
-         *   (2) one for all the diploid locii, with both alleles from each
+         *   (2) one for all the diploid loci, with both alleles from each
          *       individual included
-         *   (3) one for the haploid locus and all the diploid locii, with one
+         *   (3) one for the haploid locus and all the diploid loci, with one
          *       allele sampled at random from each individual's diploid locus
          * @param sp_ptr                    pointer to species
          * @param num_organisms_per_cell    number of organisms of the given 
@@ -737,6 +748,8 @@ class World {
         bool                                    is_log_to_screen_;
         /** Produce final set of trees/occurrences, even if not requested? */
         bool                                    is_produce_final_output_;
+        /** Produce full diploid trees (i.e., both alleles at each locus)? */
+        bool                                    is_produce_full_diploid_trees_;
         /** Collection of events (key = generation #). */
         std::map<unsigned long, WorldSettings>  world_settings_;
         /** Collection of dispersal events (key = generation #). */
