@@ -594,7 +594,15 @@ class World {
                 const std::vector<const Organism *>& organisms,
                 std::ostream& out,
                 bool add_diploid_allele_extensions=false);
-                
+        
+        /**
+         * Writes a newick tree string from a Tree object already loaded with 
+         * nodes, trapping any exceptions. Main purpose is to wrap call to 
+         * Tree.write_newick_tree() so that exceptions can be caught, reported,
+         * and program can proceed.
+         */
+        void write_tree(Tree& tree, const std::string& species_label, unsigned long num_taxa, std::ostream& out);      
+        
         /**
          * Given a list of pointers to organisms, builds and saves a tree
          * of the haploid locus allele to the given outputstream.
@@ -651,8 +659,6 @@ class World {
                         const std::set<CellIndexType>& cell_indexes,
                         const std::string& tree_filename_stem);
                         
-        void log_tree_multiple_root_error(const std::string& species_label, unsigned long num_taxa);
-                 
         /**
          * Tries to open file, throwing exception if failed.
          * @param fpath     file path to open
