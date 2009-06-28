@@ -42,6 +42,7 @@ int main(int argc, char* argv[]) {
     std::string replicate_id;
     bool validate_config_only = false;
     unsigned long rand_seed = 0;
+    unsigned long log_freq = 10;
 
     gingko::OptionParser parser = gingko::OptionParser(PACKAGE_STRING,
             "Gingko Biogeographical Evolution Simulator",
@@ -55,6 +56,8 @@ int main(int argc, char* argv[]) {
                       "load and process configuration file to check for errors, but do not actually execute run");
     parser.add_option<unsigned long>(&rand_seed, "-z", "--random-seed", 
                                "random seed for this run (overrides seed set in configuration file)");
+    parser.add_option<unsigned long>(&log_freq, "-l", "--log-frequency", 
+                               "number of generations between each routine log message (default = 10)");                               
 
     parser.parse(argc, argv);       
     
@@ -85,6 +88,11 @@ int main(int argc, char* argv[]) {
             seed_info << "Using random seed: " << world.get_random_seed() << "."; 
         }
         world.log_info(seed_info.str());
+        
+        if (parser.is_set("--log-frequency")) {
+            world.set_log_frequency(log_freq);
+        }        
+        
         world.run();
         world.close_logs();
     }

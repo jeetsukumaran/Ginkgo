@@ -122,7 +122,8 @@ void ConfigurationFile::process_world(World& world) {
     }    
     world.generate_landscape( this->get_attribute<CellIndexType>(world_node, "x_range"), 
                               this->get_attribute<CellIndexType>(world_node, "y_range") );
-    world.set_global_cell_carrying_capacity(this->get_attribute<unsigned long>(world_node, "default_cell_carrying_capacity", 0));                              
+    world.set_global_cell_carrying_capacity(this->get_attribute<unsigned long>(world_node, "default_cell_carrying_capacity", 0));
+    world.set_log_frequency(this->get_attribute<unsigned>(world_node, "log_frequency", 10));
 }
 
 void ConfigurationFile::process_biota(World& world) {

@@ -44,6 +44,7 @@ World::World()
       fitness_factor_grain_(1),
       generations_to_run_(0),
       current_generation_(0),
+      log_frequency_(10),
       is_log_to_screen_(true),
       is_produce_final_output_(true) {
     this->current_generation_ = 0;    
@@ -58,6 +59,7 @@ World::World(unsigned long seed)
       fitness_factor_grain_(1),
       generations_to_run_(0),
       current_generation_(0),
+      log_frequency_(10),      
       is_log_to_screen_(true),
       is_produce_final_output_(true) {
     this->current_generation_ = 0;    
@@ -172,7 +174,7 @@ void World::cycle() {
 //     }
 //     this->landscape_.process_migrants();
 
-    if ( this->current_generation_ % 10 == 0) {
+    if ( this->current_generation_ % this->log_frequency_ == 0) {
         std::ostringstream gen;
         gen << "Generation " << this->current_generation_ << " life-cycle running.";
         this->log_info(gen.str());

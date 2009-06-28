@@ -224,6 +224,16 @@ class World {
         } 
         
         /**
+         * Sets frequency of routine log messages in terms of numbers of 
+         * generations.
+         * @param log_freq log output interval
+         */      
+        void set_log_frequency(unsigned log_freq) {
+            this->log_frequency_ = log_freq;
+        } 
+                
+        
+        /**
          * Switch on/off final output generation.
          * @param val   <code>true</code> to produce final output.
          */
@@ -721,6 +731,8 @@ class World {
         std::ofstream                           infos_;
         /** Error log stream. */
         std::ofstream                           errs_;
+        /** Frequency (in # of generations) to log status. */
+        unsigned                                log_frequency_;
         /** Duplicate log output to stdout/stderr? */
         bool                                    is_log_to_screen_;
         /** Produce final set of trees/occurrences, even if not requested? */
