@@ -70,7 +70,7 @@ bool to_bool(U from) {
     std::ostringstream o;
     o << from;
     std::string s = o.str();
-    if ((s.size() > 0) && (s[0] == '1' || s[1] == 't' || s[1] == 'T' || s[1] == 'y' || s[1] == 'Y')) {
+    if ((s.size() > 0) && (s[0] == '1' || s[0] == 't' || s[0] == 'T' || s[0] == 'y' || s[0] == 'Y')) {
         return true;
     } else {
         return false;

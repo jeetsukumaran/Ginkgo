@@ -114,8 +114,8 @@ void ConfigurationFile::process_world(World& world) {
     }
     world.set_num_fitness_factors(fitness_dim);    
     world.set_fitness_factor_grain(this->get_attribute<unsigned>(world_node, "fitness_grain", 1));
-    world.set_produce_final_output(this->get_attribute(world_node, "suppress_final_output", false)); 
-    world.set_produce_full_diploid_trees(this->get_attribute(world_node, "produce_full_diploid_trees", false));    
+    world.set_produce_final_output(this->get_attribute_bool(world_node, "final_output", false)); 
+    world.set_produce_full_complement_diploid_trees(this->get_attribute_bool(world_node, "full_complement_diploid_trees", false));    
     world.generate_landscape( this->get_attribute<CellIndexType>(world_node, "x_range"), 
                               this->get_attribute<CellIndexType>(world_node, "y_range") );
     world.set_global_cell_carrying_capacity(this->get_attribute<unsigned long>(world_node, "default_cell_carrying_capacity", 0));

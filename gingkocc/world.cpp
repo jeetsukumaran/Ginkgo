@@ -47,7 +47,7 @@ World::World()
       log_frequency_(10),
       is_log_to_screen_(true),
       is_produce_final_output_(true),
-      is_produce_full_diploid_trees_(false) {
+      is_produce_full_complement_diploid_trees_(false) {
     this->current_generation_ = 0;    
 }
 
@@ -63,7 +63,7 @@ World::World(unsigned long seed)
       log_frequency_(10),      
       is_log_to_screen_(true),
       is_produce_final_output_(true),
-      is_produce_full_diploid_trees_(false) {      
+      is_produce_full_complement_diploid_trees_(false) {      
     this->current_generation_ = 0;    
 }    
 
@@ -522,7 +522,7 @@ void World::save_trees(Species * sp_ptr,
         this->compose_output_filename(sp_ptr->get_label(), label, "haploid.tre"));    
     this->write_haploid_tree(sp_ptr, organisms, haploid_trees);
     
-    if (this->is_produce_full_diploid_trees_) {
+    if (this->is_produce_full_complement_diploid_trees_) {
         this->log_info("[Generation " + convert::to_scalar<std::string>(this->current_generation_) + "] Building trees for diploid loci (both alleles at each locus) for " + num_samples + " organisms (" + convert::to_scalar<std::string>(organisms.size()*2) + " leaves per tree).");  
         std::ofstream diploid_trees;
         this->open_ofstream(diploid_trees,
@@ -590,8 +590,21 @@ void World::log_configuration() {
     out << "Fitness grain: " << this->fitness_factor_grain_ << std::endl;
     out << "Generations to run: " << this->generations_to_run_ << std::endl;
     out << "Output directory: " << this->output_dir_ << std::endl;
-    out << "Replicate ID: " << this->replicate_id_ << std::endl; 
-
+    out << "Replicate ID: " << this->replicate_id_ << std::endl;
+    out << "Log frequency: " << this->log_frequency_ << std::endl;
+    out << "Full complement diploid trees: ";
+    if (this->is_produce_full_complement_diploid_trees_) {
+        out << "yes" << std::endl;
+    } else {
+        out << "no" << std::endl;    
+    }
+    out << "Final output: ";
+    if (this->is_produce_final_output_) {
+        out << "yes" << std::endl;
+    } else {
+        out << "no" << std::endl;    
+    }
+    
     out << std::endl;
     out << "*** LANDSCAPE ***" << std::endl;
     out << "Rows (X-dimension): " << this->landscape_.size_x() << std::endl;

@@ -248,8 +248,8 @@ class World {
          *              diploid, i.e. one allele sampled at random from each
          *              diploid locus, produced).
          */
-        void set_produce_full_diploid_trees(bool val) {
-            this->is_produce_full_diploid_trees_ = val;
+        void set_produce_full_complement_diploid_trees(bool val) {
+            this->is_produce_full_complement_diploid_trees_ = val;
         }
         
         /**
@@ -749,7 +749,7 @@ class World {
         /** Produce final set of trees/occurrences, even if not requested? */
         bool                                    is_produce_final_output_;
         /** Produce full diploid trees (i.e., both alleles at each locus)? */
-        bool                                    is_produce_full_diploid_trees_;
+        bool                                    is_produce_full_complement_diploid_trees_;
         /** Collection of events (key = generation #). */
         std::map<unsigned long, WorldSettings>  world_settings_;
         /** Collection of dispersal events (key = generation #). */
