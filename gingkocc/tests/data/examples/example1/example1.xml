@@ -6,10 +6,11 @@
            num_gens = "20001" 
            fitness_dimensions = "5" 
            fitness_grain ="1"
-           suppress_final_output = "True"
            default_cell_carrying_capacity = "100"
-           random_seed ="2718281828"
-           log_frequency="10">
+           random_seed = "2718281828"
+           log_frequency= "10"
+           suppress_final_output = "True"
+           produce_full_diploid_trees = "False">
            
         <biota>                      
             <lineage id="Supertramp">

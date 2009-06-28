@@ -47,7 +47,7 @@ World::World()
       log_frequency_(10),
       is_log_to_screen_(true),
       is_produce_final_output_(true),
-      is_produce_full_diploid_trees(false), {
+      is_produce_full_diploid_trees_(false) {
     this->current_generation_ = 0;    
 }
 
@@ -63,7 +63,7 @@ World::World(unsigned long seed)
       log_frequency_(10),      
       is_log_to_screen_(true),
       is_produce_final_output_(true),
-      is_produce_full_diploid_trees(false), {      
+      is_produce_full_diploid_trees_(false) {      
     this->current_generation_ = 0;    
 }    
 
@@ -509,24 +509,26 @@ void World::save_trees(Species * sp_ptr,
         return;
     }
     
-    this->log_info("[Generation " + convert::to_scalar<std::string>(this->current_generation_) + "] Building trees for subsampled diploid loci alleles for " + num_samples + " organisms (" + num_samples + " leaves per tree).");  
+    this->log_info("[Generation " + convert::to_scalar<std::string>(this->current_generation_) + "] Building trees for diploid loci (one allele sampled per locus) for " + num_samples + " organisms (" + num_samples + " leaves per tree).");  
     std::ofstream combined_trees;            
     this->open_ofstream(combined_trees,
         this->compose_output_filename(sp_ptr->get_label(), label, "diploid1.tre"));
     this->write_diploid1_trees(sp_ptr, organisms, combined_trees);          
 
-    this->log_info("[Generation " + convert::to_scalar<std::string>(this->current_generation_) + "] Building tree of haploid locus alleles for " + num_samples + " organisms (" + num_samples + " leaves per tree).");    
+    this->log_info("[Generation " + convert::to_scalar<std::string>(this->current_generation_) + "] Building tree of haploid locus for " + num_samples + " organisms (" + num_samples + " leaves per tree).");    
     std::ofstream haploid_trees;
         
     this->open_ofstream(haploid_trees, 
         this->compose_output_filename(sp_ptr->get_label(), label, "haploid.tre"));    
     this->write_haploid_tree(sp_ptr, organisms, haploid_trees);
     
-    this->log_info("[Generation " + convert::to_scalar<std::string>(this->current_generation_) + "] Building trees for full diploid loci complement for " + num_samples + " organisms (" + convert::to_scalar<std::string>(organisms.size()*2) + " leaves per tree).");  
-    std::ofstream diploid_trees;
-    this->open_ofstream(diploid_trees,
-        this->compose_output_filename(sp_ptr->get_label(), label, "diploid2.tre"));  
-    this->write_diploid2_trees(sp_ptr, organisms, diploid_trees);
+    if (this->is_produce_full_diploid_trees_) {
+        this->log_info("[Generation " + convert::to_scalar<std::string>(this->current_generation_) + "] Building trees for diploid loci (both alleles at each locus) for " + num_samples + " organisms (" + convert::to_scalar<std::string>(organisms.size()*2) + " leaves per tree).");  
+        std::ofstream diploid_trees;
+        this->open_ofstream(diploid_trees,
+            this->compose_output_filename(sp_ptr->get_label(), label, "diploid2.tre"));  
+        this->write_diploid2_trees(sp_ptr, organisms, diploid_trees);
+    }
  
 }
 
