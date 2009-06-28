@@ -39,7 +39,7 @@ void Path::add_node(GenealogyNode * node) {
     this->tree_ptr_->set_node_path(node, this);
 }
 
-void Path::add_split_below_node(GenealogyNode * node, Path * other_child_path) {
+void Path::add_split_at_node(GenealogyNode * node, Path * other_child_path) {
     Path * new_child_path = this->tree_ptr_->add_new_path();
     std::vector<GenealogyNode *>::iterator node_loc = std::find(this->path_nodes_.begin(), this->path_nodes_.end(), node);    
     assert(node_loc !=  this->path_nodes_.end());
@@ -95,7 +95,7 @@ void Tree::add_leaf(GenealogyNode* node, const std::string * label) {
         while (node != NULL) {
             std::map<GenealogyNode *, Path *>::iterator npi = this->node_path_map_.find(node);            
             if (npi != this->node_path_map_.end()) {
-                npi->second->add_split_below_node(node, new_node_path);
+                npi->second->add_split_at_node(node, new_node_path);
                 coalesced = true;
                 return;
             } else {
