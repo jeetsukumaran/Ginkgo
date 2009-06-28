@@ -73,20 +73,18 @@ class TreeStructureMultipleRootError : public TreeStructureError {
         TreeStructureMultipleRootError(const std::string& msg) : TreeStructureError(msg.c_str()) {}
 };
 
+class Tree;
+class Path;
+
 /**
  * Tracks a subset of paths on a tree.
  */
 class Path {
 
     public:
-        Path(std::map<GenealogyNode *, std::string>* node_labels_map_ptr,
-             std::map<GenealogyNode *, Path *>* node_path_map_ptr,
-             std::map<GenealogyNode *, CellIndexType>* node_cell_indexes_map_ptr,
-             Landscape * landscape_ptr);
+        Path(Tree * tree_ptr);
         void add_node(GenealogyNode * node);
-        void split_after_node(GenealogyNode * node, 
-                              Path * new_child_path, 
-                              Path * other_child_path);
+        void add_split_below_node(GenealogyNode * node, Path * other_child_path);
         unsigned long size() {
             return this->path_nodes_.size();
         }
@@ -100,14 +98,8 @@ class Path {
         std::vector<GenealogyNode *>                path_nodes_;
         /** Tracks paths branching off this one. */
         std::vector<Path *>                         child_paths_;
-        /** Maps node indexes to their corresponding label. */
-        std::map<GenealogyNode *, std::string>*     node_labels_map_ptr_;
-        /** Tracks path of nodes. */
-        std::map<GenealogyNode *, Path *>*          node_path_map_ptr_;        
-        /** Tracks indexes of cells. */
-        std::map<GenealogyNode *, CellIndexType>*   node_cell_indexes_map_ptr_;          
-        /** Landscape from which the nodes are derived. */
-        Landscape *                                 landscape_ptr_;      
+        /** Pointer to parent tree. */
+        Tree *                                      tree_ptr_;     
         
 };
 
@@ -149,14 +141,13 @@ class Tree {
          */
         void write_newick_tree(std::ostream& out);
         
-        Path * add_new_path() {
-            this->paths_list_.push_back(Path(&this->node_labels_map_, 
-                                        &this->node_path_map_, 
-                                        &this->node_cell_indexes_map_, 
-                                        this->landscape_ptr_));
-            return &this->paths_list_.back();
-        }
-
+        Path * get_node_path(GenealogyNode * node);
+        void set_node_path(GenealogyNode * node, Path * path);
+        void write_node_cell_xy(GenealogyNode * node, std::ostream& out);
+        void store_node_cell_index(GenealogyNode * node);
+        Path * add_new_path();
+        std::string& get_node_label(GenealogyNode * node);
+        
     private:    
         /** Maps node indexes to their corresponding label. */
         std::map<GenealogyNode *, std::string>      node_labels_map_;
