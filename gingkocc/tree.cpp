@@ -40,18 +40,29 @@ void Path::add_node(GenealogyNode * node) {
 }
 
 void Path::add_split_after_node(GenealogyNode * node, Path * other_child_path) {
-    Path * new_child_path = this->tree_ptr_->add_new_path();
     std::vector<GenealogyNode *>::iterator node_loc = std::find(this->path_nodes_.begin(), this->path_nodes_.end(), node);    
-    assert(node_loc !=  this->path_nodes_.end());
-    new_child_path->path_nodes_.reserve( new_child_path->path_nodes_.size() + (node_loc - this->path_nodes_.begin()) );
-    for (std::vector<GenealogyNode *>::iterator i = this->path_nodes_.begin(); i < node_loc; ++i) {
-        new_child_path->add_node(*i);
-        assert(this->tree_ptr_->get_node_path(*i) == new_child_path);
+    assert(node_loc !=  this->path_nodes_.end());    
+    if ((node_loc == this->path_nodes_.begin())
+        && (this->tree_ptr_->is_allow_multifurcations())
+        && (this->child_paths_.size() > 0)) {
+        // inserting below a tip node => adding a new branch to an existing split
+        // if we are allowing multifurcations we simply including the incoming branch
+        // in the set of child branches
+        this->child_paths_.push_back(other_child_path);        
+    } else {
+        // inserting below a tip node would result in a branch length of 0
+        // so if we are disallowing multifurcations we process the split over here 
+        Path * new_child_path = this->tree_ptr_->add_new_path();
+        new_child_path->path_nodes_.reserve( new_child_path->path_nodes_.size() + (node_loc - this->path_nodes_.begin()) );
+        for (std::vector<GenealogyNode *>::iterator i = this->path_nodes_.begin(); i < node_loc; ++i) {
+            new_child_path->add_node(*i);
+            assert(this->tree_ptr_->get_node_path(*i) == new_child_path);
+        }
+        this->path_nodes_.erase(this->path_nodes_.begin(), node_loc);   
+        new_child_path->child_paths_.swap(this->child_paths_);
+        this->child_paths_.push_back(new_child_path);    
+        this->child_paths_.push_back(other_child_path);
     }
-    this->path_nodes_.erase(this->path_nodes_.begin(), node_loc);   
-    new_child_path->child_paths_.swap(this->child_paths_);
-    this->child_paths_.push_back(new_child_path);    
-    this->child_paths_.push_back(other_child_path);    
 }
 
 void Path::write_newick(std::ostream& out) {
@@ -74,8 +85,9 @@ void Path::write_newick(std::ostream& out) {
 ///////////////////////////////////////////////////////////////////////////////
 // Tree
 
-Tree::Tree(Landscape * landscape_ptr) 
-    : landscape_ptr_(landscape_ptr) {
+Tree::Tree(Landscape * landscape_ptr, bool allow_multifurcations) 
+    : landscape_ptr_(landscape_ptr),
+      allow_multifurcations_(allow_multifurcations) {
 }
 
 void Tree::add_leaf(GenealogyNode* node, const std::string * label) {
@@ -160,5 +172,8 @@ std::string& Tree::get_node_label(GenealogyNode * node) {
     return pni->second;
 }        
    
+bool Tree::is_allow_multifurcations() {
+    return this->allow_multifurcations_;
+}
 
 } // namespace gingko

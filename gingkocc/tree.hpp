@@ -99,8 +99,7 @@ class Path {
         /** Tracks paths branching off this one. */
         std::vector<Path *>                         child_paths_;
         /** Pointer to parent tree. */
-        Tree *                                      tree_ptr_;     
-        
+        Tree *                                      tree_ptr_;
 };
 
 /**
@@ -115,8 +114,10 @@ class Tree {
          * Constructor.
          * @param landscape               needed to convert cell indices to x, 
          *                                y coordinates.
+         * @param allow_multifurcations   true to allow polytomies, false to 
+         *                                arbitrarily resolve with branch length 0
          */
-        Tree(Landscape* landscape_ptr=NULL);
+        Tree(Landscape* landscape_ptr=NULL, bool allow_multifurcations=true);
         
         /**
          * Adds a node (and its lineage to the original ancestor) to the tree 
@@ -140,13 +141,14 @@ class Tree {
          * @param out   output stream to which to write the tree
          */
         void write_newick_tree(std::ostream& out);
-        
+                      
         Path * get_node_path(GenealogyNode * node);
         void set_node_path(GenealogyNode * node, Path * path);
         void write_node_cell_xy(GenealogyNode * node, std::ostream& out);
         void store_node_cell_index(GenealogyNode * node);
         Path * add_new_path();
         std::string& get_node_label(GenealogyNode * node);
+        bool is_allow_multifurcations();
         
     private:    
         /** Maps node indexes to their corresponding label. */
@@ -159,6 +161,8 @@ class Tree {
         Landscape *                                 landscape_ptr_;       
         /** Paths, with [0] being main path */        
         std::list<Path>                             paths_list_;
+        /** Allow polytomies? Otherwise branch length of 0 will be used to represent polytomies. */
+        bool                                        allow_multifurcations_;
         
 };
 

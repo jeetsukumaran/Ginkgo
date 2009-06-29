@@ -239,7 +239,15 @@ class World {
         void set_produce_final_output(bool val) {
             this->is_produce_final_output_ = val;
         }
-                
+                        
+        /**
+         * Allow multifurcations in tree (otherwise 0-length branches will 
+         * be used to represent multifurcations.
+         * @param val   <code>true</code> to produce trees with multifurcations.
+         */
+        void set_allow_multifurcations(bool val) {
+            this->allow_multifurcations_ = val;
+        }
         
         /**
          * Switch on/off full diploid tree generation.
@@ -250,7 +258,7 @@ class World {
          */
         void set_produce_full_complement_diploid_trees(bool val) {
             this->is_produce_full_complement_diploid_trees_ = val;
-        }
+        }        
         
         /**
          * Returns number of active fitness factors.
@@ -740,6 +748,8 @@ class World {
         unsigned                                log_frequency_;
         /** Duplicate log output to stdout/stderr? */
         bool                                    is_log_to_screen_;
+        /** Allow multifurcations in tree (otherwise 0-length branches will be used to represent multifurcations. */
+        bool                                    allow_multifurcations_;        
         /** Produce final set of trees/occurrences, even if not requested? */
         bool                                    is_produce_final_output_;
         /** Produce full diploid trees (i.e., both alleles at each locus)? */

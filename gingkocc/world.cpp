@@ -46,6 +46,7 @@ World::World()
       current_generation_(0),
       log_frequency_(10),
       is_log_to_screen_(true),
+      allow_multifurcations_(true),      
       is_produce_final_output_(true),
       is_produce_full_complement_diploid_trees_(false) {
     this->current_generation_ = 0;    
@@ -62,6 +63,7 @@ World::World(unsigned long seed)
       current_generation_(0),
       log_frequency_(10),      
       is_log_to_screen_(true),
+      allow_multifurcations_(true),
       is_produce_final_output_(true),
       is_produce_full_complement_diploid_trees_(false) {      
     this->current_generation_ = 0;    
@@ -392,7 +394,7 @@ void World::write_nexus_header(Species * sp_ptr,
 void World::write_haploid_tree(Species * sp_ptr,
                 const std::vector<const Organism *>& organisms,
                 std::ostream& out) {
-        Tree tree(&this->landscape_);
+        Tree tree(&this->landscape_, this->allow_multifurcations_);
     try {           
         // build tree
         for (std::vector<const Organism *>::const_iterator oi = organisms.begin();
@@ -421,7 +423,7 @@ void World::write_diploid2_trees(Species * sp_ptr,
         out << std::setfill(' '); // reset
         out << "BEGIN TREES;\n";
         for (unsigned i = 0; i < NUM_NEUTRAL_DIPLOID_loci; ++i) {
-            Tree tree(&this->landscape_);
+            Tree tree(&this->landscape_, this->allow_multifurcations_);
             std::string allele1;
             std::string allele2;
             for (std::vector<const Organism *>::const_iterator oi = organisms.begin();
@@ -451,7 +453,7 @@ void World::write_diploid1_trees(Species * sp_ptr,
         out << std::setfill(' '); // reset
         out << "BEGIN TREES;\n";        
         for (unsigned i = 0; i < NUM_NEUTRAL_DIPLOID_loci; ++i) {
-            Tree tree(&this->landscape_);
+            Tree tree(&this->landscape_, this->allow_multifurcations_);
             for (std::vector<const Organism *>::const_iterator oi = organisms.begin();
                     oi != organisms.end();
                     ++oi) {
@@ -589,6 +591,12 @@ void World::log_configuration() {
     out << "Output directory: " << this->output_dir_ << std::endl;
     out << "Replicate ID: " << this->replicate_id_ << std::endl;
     out << "Log frequency: " << this->log_frequency_ << std::endl;
+    out << "Allow multifurcating trees: ";
+    if (this->allow_multifurcations_) {
+        out << "yes" << std::endl;
+    } else {
+        out << "no" << std::endl;    
+    }    
     out << "Full complement diploid trees: ";
     if (this->is_produce_full_complement_diploid_trees_) {
         out << "yes" << std::endl;
