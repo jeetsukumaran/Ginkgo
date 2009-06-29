@@ -163,6 +163,19 @@ class Cell {
         }
         
         /** 
+         * Gets the number of male and female organisms of a particular lineage 
+         * that occupy this cell. 
+         *
+         * @param   species_ptr pointer to species for which to filter; if NULL
+         *                      then not filtered by species
+         * @param   num_females to be loaded with the number of females         
+         * @param   num_males   to be loaded with the number of males
+         *
+         * @return  number of male organisms that occupy this cell.
+         */          
+        void num_organisms(Species * species_ptr, unsigned long& num_females, unsigned long& num_males) const;       
+        
+        /** 
          * Returns the number of organisms of a particular species that occupy 
          * this cell. 
          *

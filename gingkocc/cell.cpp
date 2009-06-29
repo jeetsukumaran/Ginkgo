@@ -77,25 +77,23 @@ void Cell::generate_new_population(Species * sp,
     if (ancestral_generations == 0) {
         ancestral_generations = ancestral_pop_size * 10;
     }
-
     Cell temp_cell(this->index_, this->x_, this->y_, this->num_fitness_factors_, this->landscape_, this->species_, this->rng_);
     temp_cell.generate_new_organisms(sp, ancestral_pop_size);
-    for (unsigned long g = 0; g != ancestral_generations; ++g) {
-        temp_cell.reproduction();
+    for (unsigned long g = 0; g != ancestral_generations; ++g) {    
+        temp_cell.reproduction();       
         // std::random_shuffle(temp_cell.organisms_.begin(), temp_cell.organisms_.end(), rp);
         if (temp_cell.organisms_.size() > ancestral_pop_size) {
             temp_cell.organisms_.erase(temp_cell.organisms_.begin() + ancestral_pop_size, temp_cell.organisms_.end());
-        }            
+        }
     }
     std::vector<const Organism *> subsampled;
     temp_cell.sample_organisms(sp, subsampled, final_pop_size);
-
     this->organisms_.reserve(this->organisms_.size() + subsampled.size());
     for (std::vector<const Organism *>::const_iterator s = subsampled.begin();
             s != subsampled.end();
             ++s) {
         this->organisms_.push_back(**s);        
-    }          
+    }
 }        
 
 // --- primary biogeographical and evolutionary processes ---
@@ -270,6 +268,20 @@ void Cell::extract_breeding_groups(Species * sp_ptr,
         }
     }
 }                                         
+
+void Cell::num_organisms(Species * species_ptr, unsigned long& num_females, unsigned long& num_males) const {
+    num_females = 0;
+    num_males = 0;
+    for (OrganismVector::const_iterator og = this->organisms_.begin(); og != this->organisms_.end(); ++og) {
+        if ((species_ptr == NULL || (&og->species() == species_ptr))) {
+            if (og->is_female()) {
+                num_females += 1;
+            } else {
+                num_males += 1;
+            }
+        }
+    }
+}
 
 // Cell
 ///////////////////////////////////////////////////////////////////////////////	
