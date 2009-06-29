@@ -129,11 +129,11 @@ void Tree::set_node_path(GenealogyNode * node, Path * path) {
 
 void Tree::write_node_cell_xy(GenealogyNode * node, std::ostream& out) {
     std::map<GenealogyNode *, CellIndexType>::iterator ci = this->node_cell_indexes_map_.find(node);
-    if (ci != this->node_cell_indexes_map_.end()) {
+    if (ci == this->node_cell_indexes_map_.end()) {
         return;
     } else {
         if (this->landscape_ptr_ != NULL) {
-            CellIndexType cell_index = ci->second;
+            CellIndexType cell_index = ci->second;         
             CellIndexType x = this->landscape_ptr_->index_to_x(cell_index);        
             CellIndexType y = this->landscape_ptr_->index_to_y(cell_index);
             out << "x" << x << "_" << "y" << y;

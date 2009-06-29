@@ -1199,7 +1199,7 @@ class Species {
             Organism    org(this, 
                             this->default_genotypic_fitness_factors_, 
                             this->get_random_sex());
-            org.set_cell_index(cell_index);
+            org.set_cell_index(cell_index);     
             return org;
         }
         
