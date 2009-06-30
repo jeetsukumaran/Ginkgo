@@ -618,14 +618,22 @@ void World::log_configuration() {
     out << std::endl;
     out << "*** LANDSCAPE ***" << std::endl;
     out << "Rows (X-dimension): " << this->landscape_.size_x() << std::endl;
-    out << "Columns (Y-dimension): " << this->landscape_.size_y() << std::endl; 
-    out << "Structure: " << std::endl;
-    this->landscape_.debug_dump_structure(out);
+    out << "Columns (Y-dimension): " << this->landscape_.size_y() << std::endl;
+    out << "Minumum cell index: 0" << std::endl;
+    out << "Maximum cell index: " << this->landscape_.size()-1 << std::endl;
+    
     out << std::endl;
-    out << "Default Carrying Capacity: " << std::endl;
+    
+    out << "Cell indexes: " << std::endl;
+    this->landscape_.debug_dump_cell_indexes(out);      
+    
+    out << "Cell coordinates: " << std::endl;
+    this->landscape_.debug_dump_cell_xy(out);   
+    
+    out << "Default carrying capacity: " << std::endl;
     this->landscape_.debug_dump_carrying_capacity(out);
-
-    out << std::endl;
+    
+    out << std::endl;    
     out << "*** LINEAGES ***" << std::endl;
     out << "(" << this->species_.size() << " lineages specified)" << std::endl;
     unsigned i = 0;

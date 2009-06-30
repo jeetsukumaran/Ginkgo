@@ -116,10 +116,9 @@ void Landscape::count_organisms(Species * sp_ptr, std::vector<long>& counts) con
     }
 }
 
-// --- debugging ---
+// --- debug output ---
 
- // dump structure to std::cerr
-void Landscape::debug_dump_structure(std::ostream& out) {
+void Landscape::debug_dump_cell_xy(std::ostream& out) {
     CellIndexType i = 0;
     unsigned long max_width_x = static_cast<unsigned long>(log10(static_cast<double>(this->size_x_))) + 1;
     unsigned long max_width_y = static_cast<unsigned long>(log10(static_cast<double>(this->size_y_))) + 1;
@@ -138,6 +137,24 @@ void Landscape::debug_dump_structure(std::ostream& out) {
     out << std::endl << std::endl;
     out << std::setfill(' '); // reset
 }
+
+void Landscape::debug_dump_cell_indexes(std::ostream& out) {
+    CellIndexType i = 0;
+    unsigned long max_width = static_cast<unsigned long>(log10(static_cast<double>(this->size_))) + 1;
+    for (std::vector<Cell*>::iterator ci = this->cells_.begin();
+            ci != this->cells_.end();
+            ++ci, ++i) {
+        CellIndexType x = this->index_to_x(i);
+        if (x == 0) {
+            out << std::endl;
+        }
+        out << std::setfill('0') << std::setw(max_width) << i;
+        out << " ";
+    }
+    out << std::endl << std::endl;
+    out << std::setfill(' '); // reset
+}
+
 
 void Landscape::debug_dump_carrying_capacity(std::ostream& out) {
     CellIndexType i = 0;
