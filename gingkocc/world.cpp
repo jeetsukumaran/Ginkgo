@@ -128,7 +128,12 @@ void World::generate_seed_population(CellIndexType cell_index,
     post_msg << "Seeding population ";
     post_msg << "of species " << species_ptr->get_label()  << " ";
     post_msg << "in (" << this->landscape_.index_to_x(cell_index) <<  "," << this->landscape_.index_to_y(cell_index) << "): ";
-    post_msg << pop_size << " individuals drawn from an ancestral population of " << ancestral_pop_size << " ";
+    
+    unsigned long num_females = 0;
+    unsigned long num_males = 0;    
+    this->landscape_.at(cell_index).num_organisms(species_ptr, num_females, num_males);
+    post_msg << num_females << " females and " << num_males << " males ";
+    post_msg << "drawn from an ancestral population of " << ancestral_pop_size << " ";
     post_msg << "after " << ancestral_generations << " generations.";
     this->log_info(post_msg.str());
 }
