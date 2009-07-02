@@ -31,7 +31,7 @@ test_cmdopt_SOURCES = \
 test_tree_from_parent_indexes_SOURCES = \
     test_tree_from_parent_indexes.cpp \
     ../textutil.cpp \
-    ../biosys.cpp \    
+    ../biosys.cpp \
     ../tree.cpp \
     ../memcheck.cpp
     
