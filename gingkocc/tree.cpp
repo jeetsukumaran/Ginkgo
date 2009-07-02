@@ -77,7 +77,9 @@ void Path::write_newick(std::ostream& out) {
             (*pi)->write_newick(out);
         }
         out << ")";
-        this->tree_ptr_->write_node_cell_xy(this->path_nodes_.front(), out);
+        if (this->path_nodes_.size() > 0) {
+            this->tree_ptr_->write_node_cell_xy(this->path_nodes_.front(), out);
+        }            
         out << ":" << this->size();
     }
 }
