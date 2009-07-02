@@ -26,7 +26,7 @@ namespace gingko {
 
 //! memory deallocation log
 #if defined(MEMCHECK)
-extern std::ofstream            MEMORY_LOG;    
+extern std::ofstream            UNRELEASED_NODES_LOG;    
 #endif
 
 }

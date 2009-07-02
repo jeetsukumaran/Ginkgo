@@ -372,8 +372,8 @@ void World::process_occurrence_samplings() {
         for (CellIndexType i = 0; i < this->landscape_.size(); ++i) {
             this->landscape_.at(i).organisms().clear();
         }
-        MEMORY_LOG.open((this->get_output_filename_stem() + ".mem.log").c_str());
-        MEMORY_LOG << "### This file logs all zombie GenealogyNode objects as they get destroyed ###" << std::endl;
+        UNRELEASED_NODES_LOG.open((this->get_output_filename_stem() + ".unreleased.log").c_str());
+        UNRELEASED_NODES_LOG << "### This file logs all zombie GenealogyNode objects as they get destroyed ###" << std::endl;
     }
 #endif    
 

@@ -87,8 +87,8 @@ class GenealogyNode {
             }
             assert(this->reference_count_ == 0 || this->reference_count_ == 1);
 #if defined(MEMCHECK) 
-    if (MEMORY_LOG.is_open()) {
-        MEMORY_LOG << "GenealogyNode " << this << " destroyed." << std::endl;
+    if (UNRELEASED_NODES_LOG.is_open()) {
+        UNRELEASED_NODES_LOG << "GenealogyNode " << this << " destroyed." << std::endl;
     }
 #endif
         }
