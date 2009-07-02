@@ -31,12 +31,15 @@ test_cmdopt_SOURCES = \
 test_tree_from_parent_indexes_SOURCES = \
     test_tree_from_parent_indexes.cpp \
     ../textutil.cpp \
-    ../tree.cpp
+    ../biosys.cpp \    
+    ../tree.cpp \
+    ../memcheck.cpp
     
 test_tree_from_genealogies_SOURCES = \
     test_tree_from_genealogies.cpp \
     ../biosys.cpp \
-    ../tree.cpp
+    ../tree.cpp \
+    ../memcheck.cpp
     
 test_parse_conf_block_SOURCES = \
     test_parse_conf_block.cpp \
@@ -51,9 +54,9 @@ test_parse_conf_block_SOURCES = \
     ../asciigrid.cpp \
     ../filesys.cpp\
     ../tree.cpp \
-    ../xmlParser.cpp    
-    
-    
+    ../xmlParser.cpp \
+    ../memcheck.cpp    
+        
 test_textutil_SOURCES = \
     test_textutil.cpp \
     ../textutil.cpp
@@ -80,7 +83,8 @@ test_parse_conf_file_SOURCES = \
     ../biosys.cpp \
     ../asciigrid.cpp\
     ../tree.cpp \
-    ../xmlParser.cpp
+    ../xmlParser.cpp \
+    ../memcheck.cpp
     
 test_convert_SOURCES = \
     test_convert.cpp \
@@ -100,4 +104,5 @@ test_world_log_SOURCES = \
     ../confsys.cpp \
     ../asciigrid.cpp  \
     ../filesys.cpp \
-    ../xmlParser.cpp  
+    ../xmlParser.cpp \
+    ../memcheck.cpp

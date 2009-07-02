@@ -33,6 +33,10 @@
 #include "tree.hpp"
 #include "convert.hpp"
 
+#if defined(MEMCHECK)
+#include "memcheck.hpp"
+#endif
+
 using namespace gingko;
 
 // constructor

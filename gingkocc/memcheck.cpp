@@ -21,31 +21,12 @@
 
 #include <fstream>
 
-#if !defined(GINGKO_DEFS_H)
-#define GINGKO_DEFS_H
-
-#define assert_m(cond, out, msg) if (!(cond)) { out << msg << std::endl; assert(cond); }
-
 namespace gingko {
 
-//! The maximum number of fitness factors in the system. A "fitness factor"
-//! represents an environmental variable and a corresponding genotypic variable
-//! that together contribute to the fitness of an individual organism.
-const unsigned MAX_FITNESS_FACTORS = 10;
-
-//! The number of neutral diploid loci to track
-const unsigned NUM_NEUTRAL_DIPLOID_loci = 10;
-
-//! The value type of a fitness factor (both environmental and genotypic.
-typedef int                     FitnessFactorType;
-
-//! The number of dimensions or "slots" reserved for fitness assessment. The
-//! actual number may be less than this.
-typedef FitnessFactorType       FitnessFactors[MAX_FITNESS_FACTORS];
-
-//! The units for referencing cells on the landscape.
-typedef unsigned int            CellIndexType;
-
-} // gingko namespace
-
+//! memory deallocation log
+#if defined(MEMCHECK)
+std::ofstream            MEMORY_LOG;    
 #endif
+
+}
+

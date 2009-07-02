@@ -30,6 +30,7 @@
 #include <string>
 #include <cmath>
 #include <iomanip>
+#include <fstream>
 #include <stdexcept>
 #include <iostream>
 #include <sstream>
@@ -38,6 +39,10 @@
 
 #include "gingko_defs.hpp"
 #include "randgen.hpp"
+
+#if defined(MEMCHECK)
+#include "memcheck.hpp"
+#endif
 
 namespace gingko {
 

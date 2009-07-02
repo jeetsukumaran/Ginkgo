@@ -21,4 +21,5 @@ gingko_SOURCES = \
     confsys.cpp \
     asciigrid.cpp  \
     filesys.cpp \
-    xmlParser.cpp
+    xmlParser.cpp \
+    memcheck.cpp
