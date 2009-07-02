@@ -78,6 +78,15 @@ if test "$enable_debugging" = yes; then
 	   ])
 fi
 
+# Check for memcheck mode.
+AC_ARG_ENABLE(memcheck,
+	AC_HELP_STRING([--enable-memcheck],[build for memory-leak checking]), , [enable_memcheck=no])
+if test "$enable_memcheck" = yes; then
+	AC_MSG_NOTICE([
+	   *** NOTE: memory checks will be run
+	   ])
+fi
+
 # Check whether asserts should be allowed.
 AC_ARG_ENABLE(asserts,
 	AC_HELP_STRING([--enable-asserts],[build with asserts on (NDEBUG not defined)]), , [enable_asserts=no])
@@ -133,9 +142,12 @@ if test "$enable_debugging" = yes; then
 #	CXXFLAGS="$CXXFLAGS -Werror"
 fi
 
-#DJZ allow turning off NDEBUG only
 if test  "$enable_asserts" = no; then
 	CXXFLAGS="$CXXFLAGS -DNDEBUG"
+fi
+
+if test  "$enable_memcheck" = yes; then
+	CXXFLAGS="$CXXFLAGS -DMEMCHECK"
 fi
 
 if test "$CC" = "icc" -o "$CC" = "icc" ; then
