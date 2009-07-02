@@ -591,7 +591,12 @@ std::string World::compose_output_filename(const std::string& species_label,
 void World::log_configuration() {
     std::ofstream out;
     this->open_ofstream(out, this->get_output_filename_stem() + ".conf.log");
-    out <<  "GINGKO CONFIGURATION LOG " << this->get_timestamp() << std::endl;        
+    out <<  "GINGKO CONFIGURATION LOG " << this->get_timestamp() << std::endl;
+    
+    out << std::endl;
+    out << "*** LOGGING ***" << std::endl;
+    out << "Output log: " << this->get_output_filename_stem() + ".out.log" << std::endl;
+    out << "Error log: " << this->get_output_filename_stem() + ".err.log" << std::endl;    
         
     out << std::endl;
     out << "*** WORLD ***" << std::endl;
