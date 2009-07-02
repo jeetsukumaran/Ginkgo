@@ -47,7 +47,7 @@ typedef FitnessFactorType       FitnessFactors[MAX_FITNESS_FACTORS];
 typedef unsigned int            CellIndexType;
 
 #if defined(MEMCHECK)
-std::ofstream                   MEMORY_LOG;    
+static std::ofstream            MEMORY_LOG;    
 #endif
 
 } // gingko namespace

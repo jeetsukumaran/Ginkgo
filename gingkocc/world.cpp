@@ -264,6 +264,10 @@ void World::run() {
         }
     }        
     
+#if defined(MEMCHECK) 
+    run_final_cleanup_and_memory_check();
+#endif       
+    
     this->log_info("Ending simulation.");
 }
 
@@ -359,10 +363,13 @@ void World::process_occurrence_samplings() {
 }  
 
 #if defined(MEMCHECK)        
-        // --- memory check ---
-        void run_final_cleanup_and_memory_check() {
-        
+    // --- memory check ---
+    void World::run_final_cleanup_and_memory_check() {
+        for (CellIndexType i = 0; i < this->landscape_.size(); ++i) {
+            this->landscape_.at(i).organisms().clear();
         }
+        MEMORY_LOG.open((this->get_output_filename_stem() + ".mem.log").c_str());
+    }
 #endif    
 
 // --- logging and output ---
@@ -595,8 +602,14 @@ void World::log_configuration() {
     
     out << std::endl;
     out << "*** LOGGING ***" << std::endl;
+    out << "Configuration log: " << this->get_output_filename_stem() + ".conf.log" << std::endl;      
     out << "Output log: " << this->get_output_filename_stem() + ".out.log" << std::endl;
-    out << "Error log: " << this->get_output_filename_stem() + ".err.log" << std::endl;    
+    out << "Error log: " << this->get_output_filename_stem() + ".err.log" << std::endl; 
+    
+#if defined(MEMCHECK) 
+    out << "!!! RUNNING MEMORY CHECKS !!!" << std::endl;
+    out << "Memory log: " << this->get_output_filename_stem() + ".mem.log" << std::endl;
+#endif       
         
     out << std::endl;
     out << "*** WORLD ***" << std::endl;

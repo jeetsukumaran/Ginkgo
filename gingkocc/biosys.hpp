@@ -79,8 +79,13 @@ class GenealogyNode {
             if (this->parent_) {                
                 this->parent_->decrement_count();      
                 this->parent_ = NULL;
-            }                
+            }
             assert(this->reference_count_ == 0 || this->reference_count_ == 1);
+#if defined(MEMCHECK) 
+    if (MEMORY_LOG.is_open()) {
+        MEMORY_LOG << "GenealogyNode " << this << " destroyed." << std::endl;
+    }
+#endif
         }
           
     private:		
