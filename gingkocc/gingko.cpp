@@ -74,7 +74,7 @@ int main(int argc, char* argv[]) {
        
     gingko::confsys::configure_world(world, args[0]);
     if (validate_config_only) {
-        std::cout << "World configured using: \"" + args[0] + "\"" << std::endl; 
+        std::cout << "World configured using: \"" + args[0] + "\"" << "." << std::endl; 
         std::cout << "Configuration file validates." << std:: endl;
     } else {
         world.open_logs();
