@@ -358,6 +358,13 @@ void World::process_occurrence_samplings() {
     }
 }  
 
+#if defined(MEMCHECK)        
+        // --- memory check ---
+        void run_final_cleanup_and_memory_check() {
+        
+        }
+#endif    
+
 // --- logging and output ---
 
 void World::save_occurrences(Species * species_ptr ) {
@@ -584,7 +591,7 @@ std::string World::compose_output_filename(const std::string& species_label,
 void World::log_configuration() {
     std::ofstream out;
     this->open_ofstream(out, this->get_output_filename_stem() + ".conf.log");
-    out <<  "GINGKO CONFIGURATION LOG " << this->get_timestamp() << std::endl;
+    out <<  "GINGKO CONFIGURATION LOG " << this->get_timestamp() << std::endl;        
         
     out << std::endl;
     out << "*** WORLD ***" << std::endl;

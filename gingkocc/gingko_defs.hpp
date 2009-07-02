@@ -19,6 +19,8 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
+#include <fstream>
+
 #if !defined(GINGKO_DEFS_H)
 #define GINGKO_DEFS_H
 
@@ -43,6 +45,10 @@ typedef FitnessFactorType       FitnessFactors[MAX_FITNESS_FACTORS];
 
 //! The units for referencing cells on the landscape.
 typedef unsigned int            CellIndexType;
+
+#if defined(MEMCHECK)
+std::ofstream                   MEMORY_LOG;    
+#endif
 
 } // gingko namespace
 

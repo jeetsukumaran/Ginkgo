@@ -580,7 +580,12 @@ class World {
         /**
          * Process occurrence sampling directives for the current generation.
          */
-        void process_occurrence_samplings();          
+        void process_occurrence_samplings();
+        
+#if defined(MEMCHECK)        
+        // --- memory check ---
+        void run_final_cleanup_and_memory_check();
+#endif        
         
         // --- logging and output ---
         
