@@ -211,6 +211,14 @@ void World::cycle() {
 void World::run() {    
     this->open_logs();
     this->log_configuration();
+    
+#if defined(DEBUG)
+    this->log_info("RUNNING DEBUG-MODE BUILD.");
+#endif    
+
+#if defined(MEMCHECK)
+    this->log_info("UNRELEASED NODE MEMORY WILL BE LOGGED.");
+#endif    
         
     this->log_info("Starting simulation.");
     

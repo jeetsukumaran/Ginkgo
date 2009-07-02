@@ -138,7 +138,7 @@ CXXFLAGS_OPTIM_SPEED="-O"
 # "-g" may not work with some compilers, but end users shouldn't be
 if test "$enable_debugging" = yes; then
 	CXXFLAGS_OPTIM_SPEED="-O0"
-	CXXFLAGS="$CXXFLAGS -Wall -pedantic -ansi -g -Wreturn-type -Wunused -Wredundant-decls -Wcast-align -Wcomment -Wextra"
+	CXXFLAGS="$CXXFLAGS -Wall -pedantic -ansi -g -Wreturn-type -Wunused -Wredundant-decls -Wcast-align -Wcomment -Wextra -DDEBUG"
 #	CXXFLAGS="$CXXFLAGS -Werror"
 fi
 
