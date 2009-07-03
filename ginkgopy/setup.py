@@ -48,7 +48,7 @@ GINGKO Biogeographical Evolution Simulator Post-Processing Library""",
       package_dir={'gingkopy': 'gingkopy'},
       package_data={
         "" : ['doc/*'],
-        "gingkopy" : ["tests/data/*"]
+        "ginkgopy" : ["tests/data/*"]
       },
       scripts = [('scripts/%s' % i) for i in script_names],
       test_suite = "gingkopy.tests",
