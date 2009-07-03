@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// GINGKO Biogeographical Evolution Simulator.
+// GINKGO Biogeographical Evolution Simulator.
 //
 // Copyright 2009 Jeet Sukumaran and Mark T. Holder.
 //
@@ -37,7 +37,7 @@
 #include "memcheck.hpp"
 #endif
 
-using namespace gingko;
+using namespace ginkgo;
 
 // constructor
 World::World() 
@@ -574,7 +574,7 @@ void World::open_ofstream(std::ofstream& out, const std::string& fpath) {
 std::string World::get_output_filename_stem() {
     if (this->output_filename_stem_.size() == 0) {
         if (this->label_.size() == 0) {
-            this->output_filename_stem_ += "gingkorun";
+            this->output_filename_stem_ += "ginkgorun";
         } else {
             this->output_filename_stem_ += this->label_;        
         }
@@ -611,7 +611,7 @@ std::string World::compose_output_filename(const std::string& species_label,
 void World::log_configuration() {
     std::ofstream out;
     this->open_ofstream(out, this->get_output_filename_stem() + ".conf.log");
-    out <<  "GINGKO CONFIGURATION LOG " << this->get_timestamp() << std::endl;
+    out <<  "GINKGO CONFIGURATION LOG " << this->get_timestamp() << std::endl;
     
     out << std::endl;
     out << "*** LOGGING ***" << std::endl;

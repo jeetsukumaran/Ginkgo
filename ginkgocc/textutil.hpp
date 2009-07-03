@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// GINGKO Biogeographical Evolution Simulator.
+// GINKGO Biogeographical Evolution Simulator.
 //
 // Copyright 2009 Jeet Sukumaran and Mark T. Holder.
 //
@@ -24,10 +24,10 @@
 #include <vector>
 #include <algorithm>
 
-#if !defined(GINGKO_TEXTUTILS_H)
-#define GINGKO_TEXTUTILS_H
+#if !defined(GINKGO_TEXTUTILS_H)
+#define GINKGO_TEXTUTILS_H
 
-namespace gingko {
+namespace ginkgo {
 namespace textutil {
 
 /**
@@ -132,6 +132,6 @@ std::string upper(const std::string& s);
 bool startswith(const std::string& s1, const std::string& s2);
 
 } // namespace textutil
-} // namespace gingko
+} // namespace ginkgo
 
 #endif

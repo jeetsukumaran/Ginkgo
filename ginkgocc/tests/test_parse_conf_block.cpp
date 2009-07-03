@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// GINGKO Biogeographical Evolution Simulator.
+// GINKGO Biogeographical Evolution Simulator.
 //
 // Copyright 2009 Jeet Sukumaran and Mark T. Holder.
 //
@@ -28,7 +28,7 @@
 
 #include "../confsys.hpp"
 
-// using namespace gingko::confsys;
+// using namespace ginkgo::confsys;
 // 
 // const char * SPECIES_BLOCK_CSTR = "\n\n@species Sp1 { \n"
 //                                     "   selection = 1 1 1 1 ; \n"

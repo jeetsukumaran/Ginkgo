@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// GINGKO Biogeographical Evolution Simulator.
+// GINKGO Biogeographical Evolution Simulator.
 //
 // Copyright 2009 Jeet Sukumaran and Mark T. Holder.
 //
@@ -23,7 +23,7 @@
 #include "textutil.hpp"
 #include "filesys.hpp"
 
-namespace gingko {
+namespace ginkgo {
 
 ///////////////////////////////////////////////////////////////////////////////
 // OptionArg
@@ -292,4 +292,4 @@ bool OptionParser::is_set(const char * flag) {
     return oa.is_set();
 }
 
-} // namespace gingko
+} // namespace ginkgo

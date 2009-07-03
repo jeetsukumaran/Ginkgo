@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// GINGKO Biogeographical Evolution Simulator.
+// GINKGO Biogeographical Evolution Simulator.
 //
 // Copyright 2009 Jeet Sukumaran and Mark T. Holder.
 //
@@ -34,10 +34,10 @@
 #include "convert.hpp"
 #include "xmlParser.h"
 
-#if !defined(GINGKO_CONFSYS_H)
-#define GINGKO_CONFSYS_H
+#if !defined(GINKGO_CONFSYS_H)
+#define GINKGO_CONFSYS_H
 
-namespace gingko {
+namespace ginkgo {
 namespace confsys {
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -260,6 +260,6 @@ class ConfigurationFile {
     
 } // confsys_detail
 } // namespace confsys
-} // namespace gingko
+} // namespace ginkgo
 
 #endif

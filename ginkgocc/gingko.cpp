@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// GINGKO Biogeographical Evolution Simulator.
+// GINKGO Biogeographical Evolution Simulator.
 //
 // Copyright 2009 Jeet Sukumaran and Mark T. Holder.
 //
@@ -19,7 +19,7 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "gingko_defs.hpp"
+#include "ginkgo_defs.hpp"
 #include "confsys.hpp"
 #include "biosys.hpp"
 #include "world.hpp"
@@ -44,8 +44,8 @@ int main(int argc, char* argv[]) {
     unsigned long rand_seed = 0;
     unsigned long log_freq = 10;
 
-    gingko::OptionParser parser = gingko::OptionParser(PACKAGE_STRING,
-            "Gingko Biogeographical Evolution Simulator",
+    ginkgo::OptionParser parser = ginkgo::OptionParser(PACKAGE_STRING,
+            "Ginkgo Biogeographical Evolution Simulator",
             "%prog [options] <CONFIGURATION-FILEPATH>");
     
     parser.add_option<std::string>(&replicate_id, "-i", "--replicate-id", 
@@ -68,11 +68,11 @@ int main(int argc, char* argv[]) {
         exit(1);
     }
     
-    gingko::World world;
+    ginkgo::World world;
     world.set_replicate_id(replicate_id);
     world.set_output_dir(output_dir);
        
-    gingko::confsys::configure_world(world, args[0]);
+    ginkgo::confsys::configure_world(world, args[0]);
     if (validate_config_only) {
         std::cout << "World configured using: \"" + args[0] + "\"" << "." << std::endl; 
         std::cout << "Configuration file validates." << std:: endl;

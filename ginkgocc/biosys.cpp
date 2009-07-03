@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// GINGKO Biogeographical Evolution Simulator.
+// GINKGO Biogeographical Evolution Simulator.
 //
 // Copyright 2009 Jeet Sukumaran and Mark T. Holder.
 //
@@ -22,7 +22,7 @@
 #include "biosys.hpp"
 #include "cell.hpp"
 
-using namespace gingko;
+using namespace ginkgo;
 
 ///////////////////////////////////////////////////////////////////////////////	
 // Organism
@@ -64,7 +64,7 @@ namespace std
      * Template specialization of std::swap() for Organism objects.
      */
     template<>
-    void swap(gingko::Organism& o1, gingko::Organism& o2) {
+    void swap(ginkgo::Organism& o1, ginkgo::Organism& o2) {
         o1.swap(o2);        
     }
 }

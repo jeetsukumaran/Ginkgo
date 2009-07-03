@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// GINGKO Biogeographical Evolution Simulator.
+// GINKGO Biogeographical Evolution Simulator.
 //
 // Copyright 2009 Jeet Sukumaran and Mark T. Holder.
 //
@@ -42,31 +42,31 @@
 */  
 
 std::string build_tree1() {
-    gingko::GenealogyNode n0;
-    gingko::GenealogyNode n1;
-    gingko::GenealogyNode n2;   
+    ginkgo::GenealogyNode n0;
+    ginkgo::GenealogyNode n1;
+    ginkgo::GenealogyNode n2;   
     n1.link(&n0);
     n2.link(&n0);
-    gingko::GenealogyNode n3;
-    gingko::GenealogyNode n4;
-    gingko::GenealogyNode n5;
+    ginkgo::GenealogyNode n3;
+    ginkgo::GenealogyNode n4;
+    ginkgo::GenealogyNode n5;
     n3.link(&n1);
     n4.link(&n1);
     n5.link(&n2);
-    gingko::GenealogyNode n6;
-    gingko::GenealogyNode n7;
-    gingko::GenealogyNode n8;
-    gingko::GenealogyNode n9;
+    ginkgo::GenealogyNode n6;
+    ginkgo::GenealogyNode n7;
+    ginkgo::GenealogyNode n8;
+    ginkgo::GenealogyNode n9;
     n6.link(&n3);
     n7.link(&n3);
     n8.link(&n4);
     n9.link(&n5);
-    gingko::GenealogyNode na;
-    gingko::GenealogyNode nb;
-    gingko::GenealogyNode nc;
-    gingko::GenealogyNode nd;
-    gingko::GenealogyNode ne;
-    gingko::GenealogyNode nf;    
+    ginkgo::GenealogyNode na;
+    ginkgo::GenealogyNode nb;
+    ginkgo::GenealogyNode nc;
+    ginkgo::GenealogyNode nd;
+    ginkgo::GenealogyNode ne;
+    ginkgo::GenealogyNode nf;    
     na.link(&n6);
     nb.link(&n6);
     nc.link(&n7);
@@ -74,7 +74,7 @@ std::string build_tree1() {
     ne.link(&n8);
     nf.link(&n9);
     
-    gingko::Tree tree;
+    ginkgo::Tree tree;
     
     std::string label_a("a");
     tree.add_leaf(&na, &label_a);    
@@ -94,31 +94,31 @@ std::string build_tree1() {
 }
 
 std::string build_tree2() {
-    gingko::GenealogyNode * n0 = NULL;
-    gingko::GenealogyNode * n1 = new gingko::GenealogyNode();
-    gingko::GenealogyNode * n2 = new gingko::GenealogyNode();   
+    ginkgo::GenealogyNode * n0 = NULL;
+    ginkgo::GenealogyNode * n1 = new ginkgo::GenealogyNode();
+    ginkgo::GenealogyNode * n2 = new ginkgo::GenealogyNode();   
     n1->link(n0);
     n2->link(n0);
-    gingko::GenealogyNode * n3 = new gingko::GenealogyNode();
-    gingko::GenealogyNode * n4 = new gingko::GenealogyNode();
-    gingko::GenealogyNode * n5 = new gingko::GenealogyNode();
+    ginkgo::GenealogyNode * n3 = new ginkgo::GenealogyNode();
+    ginkgo::GenealogyNode * n4 = new ginkgo::GenealogyNode();
+    ginkgo::GenealogyNode * n5 = new ginkgo::GenealogyNode();
     n3->link(n1);
     n4->link(n1);
     n5->link(n2);
-    gingko::GenealogyNode * n6 = new gingko::GenealogyNode();
-    gingko::GenealogyNode * n7 = new gingko::GenealogyNode();
-    gingko::GenealogyNode * n8 = new gingko::GenealogyNode();
-    gingko::GenealogyNode * n9 = new gingko::GenealogyNode();
+    ginkgo::GenealogyNode * n6 = new ginkgo::GenealogyNode();
+    ginkgo::GenealogyNode * n7 = new ginkgo::GenealogyNode();
+    ginkgo::GenealogyNode * n8 = new ginkgo::GenealogyNode();
+    ginkgo::GenealogyNode * n9 = new ginkgo::GenealogyNode();
     n6->link(n3);
     n7->link(n3);
     n8->link(n4);
     n9->link(n5);
-    gingko::GenealogyNode * na = new gingko::GenealogyNode();
-    gingko::GenealogyNode * nb = new gingko::GenealogyNode();
-    gingko::GenealogyNode * nc = new gingko::GenealogyNode();
-    gingko::GenealogyNode * nd = new gingko::GenealogyNode();
-    gingko::GenealogyNode * ne = new gingko::GenealogyNode();
-    gingko::GenealogyNode * nf = new gingko::GenealogyNode();    
+    ginkgo::GenealogyNode * na = new ginkgo::GenealogyNode();
+    ginkgo::GenealogyNode * nb = new ginkgo::GenealogyNode();
+    ginkgo::GenealogyNode * nc = new ginkgo::GenealogyNode();
+    ginkgo::GenealogyNode * nd = new ginkgo::GenealogyNode();
+    ginkgo::GenealogyNode * ne = new ginkgo::GenealogyNode();
+    ginkgo::GenealogyNode * nf = new ginkgo::GenealogyNode();    
     na->link(n6);
     nb->link(n6);
     nc->link(n7);
@@ -126,7 +126,7 @@ std::string build_tree2() {
     ne->link(n8);
     nf->link(n9);
     
-    gingko::Tree tree;
+    ginkgo::Tree tree;
     
     std::string label_a("a");
     tree.add_leaf(na, &label_a);    
@@ -163,31 +163,31 @@ std::string build_tree2() {
 }
 
 std::string build_tree3() {
-    gingko::HaploidMarker h0;
-    gingko::HaploidMarker h1;
-    gingko::HaploidMarker h2;   
+    ginkgo::HaploidMarker h0;
+    ginkgo::HaploidMarker h1;
+    ginkgo::HaploidMarker h2;   
     h1.inherit(h0);
     h2.inherit(h0);
-    gingko::HaploidMarker h3;
-    gingko::HaploidMarker h4;
-    gingko::HaploidMarker h5;
+    ginkgo::HaploidMarker h3;
+    ginkgo::HaploidMarker h4;
+    ginkgo::HaploidMarker h5;
     h3.inherit(h1);
     h4.inherit(h1);
     h5.inherit(h2);
-    gingko::HaploidMarker h6;
-    gingko::HaploidMarker h7;
-    gingko::HaploidMarker h8;
-    gingko::HaploidMarker h9;
+    ginkgo::HaploidMarker h6;
+    ginkgo::HaploidMarker h7;
+    ginkgo::HaploidMarker h8;
+    ginkgo::HaploidMarker h9;
     h6.inherit(h3);
     h7.inherit(h3);
     h8.inherit(h4);
     h9.inherit(h5);
-    gingko::HaploidMarker ha;
-    gingko::HaploidMarker hb;
-    gingko::HaploidMarker hc;
-    gingko::HaploidMarker hd;
-    gingko::HaploidMarker he;
-    gingko::HaploidMarker hf;    
+    ginkgo::HaploidMarker ha;
+    ginkgo::HaploidMarker hb;
+    ginkgo::HaploidMarker hc;
+    ginkgo::HaploidMarker hd;
+    ginkgo::HaploidMarker he;
+    ginkgo::HaploidMarker hf;    
     ha.inherit(h6);
     hb.inherit(h6);
     hc.inherit(h7);
@@ -195,7 +195,7 @@ std::string build_tree3() {
     he.inherit(h8);
     hf.inherit(h9);
     
-    gingko::Tree tree;
+    ginkgo::Tree tree;
     
     std::string label_a("a");
     tree.add_leaf(ha.node(), &label_a);    

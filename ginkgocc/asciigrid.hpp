@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// GINGKO Biogeographical Evolution Simulator.
+// GINKGO Biogeographical Evolution Simulator.
 //
 // Copyright 2009 Jeet Sukumaran and Mark T. Holder.
 //
@@ -19,15 +19,15 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#if !defined(GINGKO_ASCIIGRID_H)
-#define GINGKO_ASCIIGRID_H
+#if !defined(GINKGO_ASCIIGRID_H)
+#define GINKGO_ASCIIGRID_H
 
 #include <vector>
 #include <fstream>
 #include <istream>
 #include <stdexcept>
 
-namespace gingko {
+namespace ginkgo {
 namespace asciigrid {
 
 typedef unsigned long index_type;
@@ -307,6 +307,6 @@ class AsciiGrid {
 };
 
 } // asciigrid
-} // gingko
+} // ginkgo
 
 #endif

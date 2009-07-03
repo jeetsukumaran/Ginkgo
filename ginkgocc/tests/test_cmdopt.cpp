@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// GINGKO Biogeographical Evolution Simulator.
+// GINKGO Biogeographical Evolution Simulator.
 //
 // Copyright 2009 Jeet Sukumaran and Mark T. Holder.
 //
@@ -23,7 +23,7 @@
 #include <iostream>
 #include <string>
 
-using namespace gingko;
+using namespace ginkgo;
 
 int main(int argc, char* argv[]) {
     long          a = 1000;
@@ -35,7 +35,7 @@ int main(int argc, char* argv[]) {
     bool          g = false;
     
 
-    gingko::OptionParser parser = gingko::OptionParser();                                    
+    ginkgo::OptionParser parser = ginkgo::OptionParser();                                    
     parser.add_option<long>(&a, "-a", "--seta", 
                                      "set value of a", "#");
     parser.add_option<unsigned long>(&b, "-b", "--setb", 

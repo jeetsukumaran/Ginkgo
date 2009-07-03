@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// GINGKO Biogeographical Evolution Simulator.
+// GINKGO Biogeographical Evolution Simulator.
 //
 // Copyright 2009 Jeet Sukumaran and Mark T. Holder.
 //
@@ -27,7 +27,7 @@
 #include <cctype>
 #include "textutil.hpp"
 
-namespace gingko {
+namespace ginkgo {
 namespace textutil {
 
 // Wraps text (preferably at word boundaries).
@@ -177,4 +177,4 @@ bool startswith(const std::string& s1, const std::string& s2) {
 }
 
 } // textutil namespace
-} // gingko namespace
+} // ginkgo namespace

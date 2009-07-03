@@ -3,13 +3,13 @@ AM_LDFLAGS  = @LDFLAGS@
 
 bindir = ${prefix}/@PACKAGE@/bin
 
-bin_PROGRAMS = gingko
+bin_PROGRAMS = ginkgo
 
 noinst_HEADERS = \
-	gingko_defs.hpp
+	ginkgo_defs.hpp
 
-gingko_SOURCES = \
-    gingko.cpp \
+ginkgo_SOURCES = \
+    ginkgo.cpp \
     randgen.cpp \
     biosys.cpp \
     landscape.cpp \

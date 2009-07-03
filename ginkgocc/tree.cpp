@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// GINGKO Biogeographical Evolution Simulator.
+// GINKGO Biogeographical Evolution Simulator.
 //
 // Copyright 2009 Jeet Sukumaran and Mark T. Holder.
 //
@@ -26,7 +26,7 @@
 #include "biosys.hpp"
 #include "tree.hpp"
 
-namespace gingko {
+namespace ginkgo {
 
 ///////////////////////////////////////////////////////////////////////////////
 // Path
@@ -178,4 +178,4 @@ bool Tree::is_allow_multifurcations() {
     return this->allow_multifurcations_;
 }
 
-} // namespace gingko
+} // namespace ginkgo

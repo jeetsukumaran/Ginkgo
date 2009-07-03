@@ -2,8 +2,8 @@ ACLOCAL_AMFLAGS = -I config
 
 EXTRA_DIST = \
     doc \
-    gingkopy \
+    ginkgopy \
 	README
 
-SUBDIRS = gingkocc \
-          gingkocc/tests
+SUBDIRS = ginkgocc \
+          ginkgocc/tests

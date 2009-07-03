@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// GINGKO Biogeographical Evolution Simulator.
+// GINKGO Biogeographical Evolution Simulator.
 //
 // Copyright 2009 Jeet Sukumaran and Mark T. Holder.
 //
@@ -32,11 +32,11 @@ void check_scalar(T expected, T result) {
 template <typename T>
 void check_scalar_error(std::string src) {
     try {
-        T x = gingko::convert::to_scalar<T>(src);
+        T x = ginkgo::convert::to_scalar<T>(src);
         std::cout << "Failed to throw value conversion error (\"" << src << "\"";
         std::cout << " => " << x << ")" << std::endl;
         assert(false);
-    } catch (gingko::convert::ValueError& e) {
+    } catch (ginkgo::convert::ValueError& e) {
         std::cout << "Value error correctly thrown (\"" << src << "\")" << std::endl;
     }    
 }
@@ -96,11 +96,11 @@ void check_vector_string(const std::vector<std::string>& result, const char * ex
 int main(int, char *[]) {
 
     std::cout << "Testing scalar literal conversion ..." << std::endl;
-    check_scalar(gingko::convert::to_scalar<int>("1"), 1);
-    check_scalar(gingko::convert::to_scalar<int>("100"), 100); 
-    check_scalar(gingko::convert::to_scalar<int>("-1"), -1);
-    check_scalar(gingko::convert::to_scalar<double>("0.5"), 0.5);
-    check_scalar(gingko::convert::to_scalar<double>("-0.5"), -0.5);
+    check_scalar(ginkgo::convert::to_scalar<int>("1"), 1);
+    check_scalar(ginkgo::convert::to_scalar<int>("100"), 100); 
+    check_scalar(ginkgo::convert::to_scalar<int>("-1"), -1);
+    check_scalar(ginkgo::convert::to_scalar<double>("0.5"), 0.5);
+    check_scalar(ginkgo::convert::to_scalar<double>("-0.5"), -0.5);
     std::cout << "Scalar literal conversion: PASS" << std::endl;
 
     std::cout << "Testing scalar literal conversion errors ... " << std::endl;
@@ -113,11 +113,11 @@ int main(int, char *[]) {
     std::cout << "Scalar literal conversion errors: PASS" << std::endl;    
     
     std::cout << "Testing vector literal conversion ..." << std::endl;
-    check_vector_int(gingko::convert::to_vector<int>("1 2 3   4"));
-    check_vector_float(gingko::convert::to_vector<float>("0.1   0.2 0.3 0.4"));
+    check_vector_int(ginkgo::convert::to_vector<int>("1 2 3   4"));
+    check_vector_float(ginkgo::convert::to_vector<float>("0.1   0.2 0.3 0.4"));
     const char * e1[] = {"a", "b", "c", "d"};
-    check_vector_string(gingko::convert::to_vector<std::string>("a   b c d"), e1);
+    check_vector_string(ginkgo::convert::to_vector<std::string>("a   b c d"), e1);
     const char * e2[] = {"1,1", "2,2", "3,3", "4,4"};
-    check_vector_string(gingko::convert::to_vector<std::string>("1,1  2,2 3,3 4,4"), e2);    
+    check_vector_string(ginkgo::convert::to_vector<std::string>("1,1  2,2 3,3 4,4"), e2);    
     std::cout << "Vector literal conversion: PASS" << std::endl;
 }

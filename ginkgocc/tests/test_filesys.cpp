@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// GINGKO Biogeographical Evolution Simulator.
+// GINKGO Biogeographical Evolution Simulator.
 //
 // Copyright 2009 Jeet Sukumaran and Mark T. Holder.
 //
@@ -28,7 +28,7 @@
 
 #include "../filesys.hpp"
 
-using namespace gingko::filesys;
+using namespace ginkgo::filesys;
 
 void check_path_op( std::string (*path_op_func)(const char *),  const char * path, const char * expected) {
     std::string result = path_op_func(path);

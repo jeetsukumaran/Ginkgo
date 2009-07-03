@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// GINGKO Biogeographical Evolution Simulator.
+// GINKGO Biogeographical Evolution Simulator.
 //
 // Copyright 2009 Jeet Sukumaran and Mark T. Holder.
 //
@@ -19,10 +19,10 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#if !defined(GINGKO_RANDOM_H)
-#define GINGKO_RANDOM_H
+#if !defined(GINKGO_RANDOM_H)
+#define GINKGO_RANDOM_H
 
-namespace gingko {
+namespace ginkgo {
 
 /**
  * Encapsulates generation of random number from various distribution and 
@@ -126,6 +126,6 @@ class RandomPointer {
         RandomNumberGenerator&  rng_;
 };
 
-} // gingko namespace
+} // ginkgo namespace
 
 #endif

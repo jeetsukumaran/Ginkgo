@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// GINGKO Biogeographical Evolution Simulator.
+// GINKGO Biogeographical Evolution Simulator.
 //
 // Copyright 2009 Jeet Sukumaran and Mark T. Holder.
 //
@@ -32,10 +32,10 @@
 #include "textutil.hpp"
 
 
-#if !defined(GINGKO_CMDOPTS_H)
-#define GINGKO_CMDOPTS_H
+#if !defined(GINKGO_CMDOPTS_H)
+#define GINKGO_CMDOPTS_H
 
-namespace gingko {
+namespace ginkgo {
 
 const unsigned CMDOPTS_LINE_WIDTH = 78;
 const unsigned CMDOPTS_OPTION_COL_WIDTH = 24;
@@ -502,6 +502,6 @@ class OptionParser {
         std::string                                 prog_filename_;
 };
 
-} // namespace gingko
+} // namespace ginkgo
 
 #endif

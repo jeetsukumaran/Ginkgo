@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// GINGKO Biogeographical Evolution Simulator.
+// GINKGO Biogeographical Evolution Simulator.
 //
 // Copyright 2009 Jeet Sukumaran and Mark T. Holder.
 //
@@ -28,7 +28,7 @@
 
 #include "../textutil.hpp"
 
-using namespace gingko::textutil;
+using namespace ginkgo::textutil;
 
 bool check_split(std::vector<std::string> result,
                  char * expected[],

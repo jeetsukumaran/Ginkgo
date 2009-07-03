@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// GINGKO Biogeographical Evolution Simulator.
+// GINKGO Biogeographical Evolution Simulator.
 //
 // Copyright 2009 Jeet Sukumaran and Mark T. Holder.
 //
@@ -28,7 +28,7 @@
 #include <algorithm>
 #include <set>
 
-using namespace gingko;
+using namespace ginkgo;
 
 ///////////////////////////////////////////////////////////////////////////////	
 // Cell

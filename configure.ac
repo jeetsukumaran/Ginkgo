@@ -2,13 +2,13 @@
 # This file was written by hand (by mth using PAUP's configure.ac and http://autotoolset.sourceforge.net/tutorial.html as guides).
 
 AC_PREREQ(2.59)
-AC_INIT([gingko], [3.5.2], [jeet@ku.edu])
+AC_INIT([ginkgo], [3.5.2], [jeet@ku.edu])
 
 # AC_CONFIG_SRCDIR (UNIQUE-FILE-IN-SOURCE-DIR) UNIQUE-FILE-IN-SOURCE-DIR
 # is some file that is in the package's source directory; `configure'
 # checks for this file's existence to make sure that the directory that it
 # is told contains the source code in fact does.
-AC_CONFIG_SRCDIR([gingkocc/gingko.cpp])
+AC_CONFIG_SRCDIR([ginkgocc/ginkgo.cpp])
 AC_CONFIG_HEADER([config.h])
 
 #	Directory that contains install-sh and other auxiliary files
@@ -243,8 +243,8 @@ AC_SUBST(CPPFLAGS)
 
 AC_CONFIG_FILES([
 	Makefile 			\
-	gingkocc/Makefile   \
-	gingkocc/tests/Makefile		\
+	ginkgocc/Makefile   \
+	ginkgocc/tests/Makefile		\
 	])
 
 AC_OUTPUT

@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// GINGKO Biogeographical Evolution Simulator.
+// GINKGO Biogeographical Evolution Simulator.
 //
 // Copyright 2009 Jeet Sukumaran and Mark T. Holder.
 //
@@ -21,7 +21,7 @@
 
 #include "../world.hpp"
 
-using namespace gingko;
+using namespace ginkgo;
 
 int main(int, char * []) {
     World  world;

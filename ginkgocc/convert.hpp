@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// GINGKO Biogeographical Evolution Simulator.
+// GINKGO Biogeographical Evolution Simulator.
 //
 // Copyright 2009 Jeet Sukumaran and Mark T. Holder.
 //
@@ -19,8 +19,8 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#if !defined(GINGKO_CONVERT_H)
-#define GINGKO_CONVERT_H
+#if !defined(GINKGO_CONVERT_H)
+#define GINKGO_CONVERT_H
 
 #include <iostream>
 #include <sstream>
@@ -29,7 +29,7 @@
 
 #include "textutil.hpp"
 
-namespace gingko { 
+namespace ginkgo { 
 namespace convert {
 
 /**
@@ -130,6 +130,6 @@ std::vector<T> to_vector_on_any(U from, const char * separator = " \t\r\n", bool
 }
 
 } // convert
-} // gingko
+} // ginkgo
 
 #endif

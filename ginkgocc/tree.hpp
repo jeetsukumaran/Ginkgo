@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// GINGKO Biogeographical Evolution Simulator.
+// GINKGO Biogeographical Evolution Simulator.
 //
 // Copyright 2009 Jeet Sukumaran and Mark T. Holder.
 //
@@ -19,8 +19,8 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#if !defined(GINGKO_TREE_H)
-#define GINGKO_TREE_H
+#if !defined(GINKGO_TREE_H)
+#define GINKGO_TREE_H
 
 #include "biosys.hpp"
 #include "landscape.hpp"
@@ -35,7 +35,7 @@
 #include <algorithm>
 #include <stdexcept>
 
-namespace gingko {
+namespace ginkgo {
 
 /**
  * General i/o error.
@@ -167,6 +167,6 @@ class Tree {
 };
 
 
-} // namespace gingko
+} // namespace ginkgo
 
 #endif 

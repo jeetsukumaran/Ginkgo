@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// GINGKO Biogeographical Evolution Simulator.
+// GINKGO Biogeographical Evolution Simulator.
 //
 // Copyright 2009 Jeet Sukumaran and Mark T. Holder.
 //
@@ -19,8 +19,8 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#if !defined(GINGKO_WORLD_H)
-#define GINGKO_WORLD_H
+#if !defined(GINKGO_WORLD_H)
+#define GINKGO_WORLD_H
 
 #include <map>
 #include <utility>
@@ -30,13 +30,13 @@
 #include <set>
 #include <string>
 
-#include "gingko_defs.hpp"
+#include "ginkgo_defs.hpp"
 #include "randgen.hpp"
 #include "cell.hpp"
 #include "landscape.hpp"
 #include "tree.hpp"
 
-namespace gingko {
+namespace ginkgo {
 
 /**
  * General i/o error.
@@ -801,6 +801,6 @@ class WorldFactory {
 }; // ConfigurationFileTokenizer
 
 
-} // gingko namespace
+} // ginkgo namespace
 
 #endif

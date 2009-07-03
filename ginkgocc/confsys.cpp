@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// GINGKO Biogeographical Evolution Simulator.
+// GINKGO Biogeographical Evolution Simulator.
 //
 // Copyright 2009 Jeet Sukumaran and Mark T. Holder.
 //
@@ -24,7 +24,7 @@
 #include <vector>
 #include <ctime>
 
-#include "gingko_defs.hpp"
+#include "ginkgo_defs.hpp"
 #include "confsys.hpp"
 #include "textutil.hpp"
 #include "convert.hpp"
@@ -34,7 +34,7 @@
 #include "filesys.hpp"
 #include "xmlParser.h"
 
-namespace gingko {
+namespace ginkgo {
 namespace confsys {
 
 
@@ -86,7 +86,7 @@ ConfigurationFile::~ConfigurationFile() { }
 
 void ConfigurationFile::open(const char * fpath) {
     this->config_filepath_ = fpath;
-    this->xml_ = XMLNode::openFileHelper(fpath,"gingko");
+    this->xml_ = XMLNode::openFileHelper(fpath,"ginkgo");
 }
 
 XmlElementType ConfigurationFile::get_child_node(XmlElementType& current_node, const char * node_name, bool required) {
@@ -102,7 +102,7 @@ XmlElementType ConfigurationFile::get_child_node(XmlElementType& current_node, c
 void ConfigurationFile::process_world(World& world) {
 
     XmlElementType world_node = this->get_child_node(this->xml_, "world");
-    world.set_label( this->get_attribute<std::string>(world_node, "label", "GingkoWorld") );
+    world.set_label( this->get_attribute<std::string>(world_node, "label", "GinkgoWorld") );
     world.set_random_seed( this->get_attribute<unsigned long>(world_node, "random_seed", time(0)) );
     world.set_generations_to_run( this->get_attribute<unsigned long>(world_node, "num_gens") );
     unsigned fitness_dim = this->get_attribute<unsigned>(world_node, "fitness_dimensions");    
@@ -386,4 +386,4 @@ void ConfigurationFile::configure(World& world) {
 
 } // namespace confsys
 
-} // namespace gingko
+} // namespace ginkgo

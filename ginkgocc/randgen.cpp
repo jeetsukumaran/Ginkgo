@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// GINGKO Biogeographical Evolution Simulator.
+// GINKGO Biogeographical Evolution Simulator.
 //
 // Copyright 2009 Jeet Sukumaran and Mark T. Holder.
 //
@@ -24,7 +24,7 @@
 #include <ctime>
 #include "randgen.hpp"
 
-namespace gingko {
+namespace ginkgo {
 
 ///////////////////////////////////////////////////////////////////////////////
 // RandomNumberGenerator
@@ -129,4 +129,4 @@ std::ptrdiff_t RandomPointer::operator() (std::ptrdiff_t max) {
 
 
 
-} // gingko namespace
+} // ginkgo namespace

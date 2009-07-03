@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// GINGKO Biogeographical Evolution Simulator.
+// GINKGO Biogeographical Evolution Simulator.
 //
 // Copyright 2009 Jeet Sukumaran and Mark T. Holder.
 //
@@ -21,10 +21,10 @@
 
 #include <string>
 
-#if !defined(GINGKO_FILESYS_H)
-#define GINGKO_FILESYS_H
+#if !defined(GINKGO_FILESYS_H)
+#define GINKGO_FILESYS_H
 
-namespace gingko {
+namespace ginkgo {
 namespace filesys {
      
 ///////////////////////////////////////////////////////////////////////////////
@@ -104,6 +104,6 @@ std::string current_path();
 
 } // filesys
 
-} // gingko
+} // ginkgo
 
 #endif

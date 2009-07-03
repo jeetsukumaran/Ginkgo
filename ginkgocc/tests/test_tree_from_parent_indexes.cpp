@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// GINGKO Biogeographical Evolution Simulator.
+// GINKGO Biogeographical Evolution Simulator.
 //
 // Copyright 2009 Jeet Sukumaran and Mark T. Holder.
 //
@@ -32,10 +32,10 @@ int main(int , char* ) {
 //         exit(1);
 //     }
 //     
-//     gingko::Tree tree(NULL, true);
+//     ginkgo::Tree tree(NULL, true);
 //     const char * label;
 //     for (int i = 1; i < argc; ++i) {
-//         std::vector< std::string > parts = gingko::textutil::split(argv[i], ":");
+//         std::vector< std::string > parts = ginkgo::textutil::split(argv[i], ":");
 //         unsigned long idx = atol(parts[0].c_str());            
 //         if (parts.size() > 1) {
 //             label = parts[1].c_str();

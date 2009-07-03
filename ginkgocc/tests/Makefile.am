@@ -1,9 +1,9 @@
 AM_CPPFLAGS = @CPPFLAGS@
 AM_LDFLAGS  = @LDFLAGS@
 
-gingkotestsdir = $(prefix)/@PACKAGE@/test
+ginkgotestsdir = $(prefix)/@PACKAGE@/test
  
-dist_gingkotests_SCRIPTS = gingko_tests.py \
+dist_ginkgotests_SCRIPTS = ginkgo_tests.py \
                    run_test_cmdopt.py \
                    run_test_tree.py \
                    run_test_conf_parser.py \
@@ -11,7 +11,7 @@ dist_gingkotests_SCRIPTS = gingko_tests.py \
                    run_test_filesys.py \
                    run_test_asciigrid.py
 
-gingkotests_PROGRAMS = test_cmdopt \
+ginkgotests_PROGRAMS = test_cmdopt \
                test_tree_from_parent_indexes \
                test_tree_from_genealogies \
                test_parse_conf_block \

@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// GINGKO Biogeographical Evolution Simulator.
+// GINKGO Biogeographical Evolution Simulator.
 //
 // Copyright 2009 Jeet Sukumaran and Mark T. Holder.
 //
@@ -21,12 +21,12 @@
 
 #include <fstream>
 
-#if !defined(GINGKO_DEFS_H)
-#define GINGKO_DEFS_H
+#if !defined(GINKGO_DEFS_H)
+#define GINKGO_DEFS_H
 
 #define assert_m(cond, out, msg) if (!(cond)) { out << msg << std::endl; assert(cond); }
 
-namespace gingko {
+namespace ginkgo {
 
 //! The maximum number of fitness factors in the system. A "fitness factor"
 //! represents an environmental variable and a corresponding genotypic variable
@@ -46,6 +46,6 @@ typedef FitnessFactorType       FitnessFactors[MAX_FITNESS_FACTORS];
 //! The units for referencing cells on the landscape.
 typedef unsigned int            CellIndexType;
 
-} // gingko namespace
+} // ginkgo namespace
 
 #endif

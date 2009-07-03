@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// GINGKO Biogeographical Evolution Simulator.
+// GINKGO Biogeographical Evolution Simulator.
 //
 // Copyright 2009 Jeet Sukumaran and Mark T. Holder.
 //
@@ -19,10 +19,10 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#if !defined(GINGKO_MEMCHECK_H)
-#define GINGKO_MEMCHECK_H
+#if !defined(GINKGO_MEMCHECK_H)
+#define GINKGO_MEMCHECK_H
 
-namespace gingko {
+namespace ginkgo {
 
 //! memory deallocation log
 #if defined(MEMCHECK)

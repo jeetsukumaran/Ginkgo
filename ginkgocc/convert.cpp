@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// GINGKO Biogeographical Evolution Simulator.
+// GINKGO Biogeographical Evolution Simulator.
 //
 // Copyright 2009 Jeet Sukumaran and Mark T. Holder.
 //
@@ -22,7 +22,7 @@
 #include <string>
 #include "convert.hpp"
 
-namespace gingko {
+namespace ginkgo {
 namespace convert {
 
 template <>
@@ -41,4 +41,4 @@ std::string to_scalar<std::string>(const char * from) {
 }
 
 } // convert
-} // gingko
+} // ginkgo

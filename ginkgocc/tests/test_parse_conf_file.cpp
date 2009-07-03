@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// GINGKO Biogeographical Evolution Simulator.
+// GINKGO Biogeographical Evolution Simulator.
 //
 // Copyright 2009 Jeet Sukumaran and Mark T. Holder.
 //
@@ -30,7 +30,7 @@
 #include "../confsys.hpp"
 #include "../filesys.hpp"
 
-using namespace gingko;
+using namespace ginkgo;
 
 void test_parse_dummy1(const char * fpath) {
     World   world;

@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// GINGKO Biogeographical Evolution Simulator.
+// GINKGO Biogeographical Evolution Simulator.
 //
 // Copyright 2009 Jeet Sukumaran and Mark T. Holder.
 //
@@ -28,7 +28,7 @@
 
 #include "../asciigrid.hpp"
 
-using namespace gingko;
+using namespace ginkgo;
 
 const char * TEST_GRID1 =
         "ncols         4\n"
