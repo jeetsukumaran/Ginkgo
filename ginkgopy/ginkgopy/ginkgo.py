@@ -2,7 +2,7 @@
 
 ###############################################################################
 ##
-## GINGKO Biogeographical Evolution Simulator Post-Processing Library.
+## GINKGO Biogeographical Evolution Simulator Post-Processing Library.
 ##
 ## Copyright 2009 Jeet Sukumaran and Mark T. Holder.
 ##

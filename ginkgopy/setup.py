@@ -2,7 +2,7 @@
 
 ###############################################################################
 ##
-## GINGKO Biogeographical Evolution Simulator Post-Processing Library.
+## GINKGO Biogeographical Evolution Simulator Post-Processing Library.
 ##
 ## Copyright 2009 Jeet Sukumaran and Mark T. Holder.
 ##
@@ -29,7 +29,7 @@ import ez_setup
 ez_setup.use_setuptools()
 from setuptools import setup
 from setuptools import find_packages
-from gingkopy import PACKAGE_VERSION
+from ginkgopy import PACKAGE_VERSION
 
 import sys
 import os
@@ -42,16 +42,16 @@ setup(name='GingkoPy',
       author_email='jeet@ku.edu and mtholder@ku.edu',
       url='http://sourceforge.net/projects/dendropy/',
       description="""\
-GINGKO Biogeographical Evolution Simulator Post-Processing Library""",
+GINKGO Biogeographical Evolution Simulator Post-Processing Library""",
       license='GPL 3+',
-      packages=['gingkopy'],
-      package_dir={'gingkopy': 'gingkopy'},
+      packages=['ginkgopy'],
+      package_dir={'ginkgopy': 'ginkgopy'},
       package_data={
         "" : ['doc/*'],
         "ginkgopy" : ["tests/data/*"]
       },
       scripts = [('scripts/%s' % i) for i in script_names],
-      test_suite = "gingkopy.tests",
+      test_suite = "ginkgopy.tests",
       include_package_data=True,         
       zip_safe=True,
       install_requires=[
@@ -61,7 +61,7 @@ GINGKO Biogeographical Evolution Simulator Post-Processing Library""",
       # -*- Entry points: -*-
       """,      
       long_description="""\
-A Python library for processing GINGKO output""",
+A Python library for processing GINKGO output""",
       classifiers = [
             "Environment :: Console",
             "Intended Audience :: Developers",
