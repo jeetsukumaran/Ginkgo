@@ -36,7 +36,7 @@ import os
 import subprocess
 
 script_names = []
-setup(name='GingkoPy',
+setup(name='GinkgoPy',
       version=PACKAGE_VERSION,     
       author='Jeet Sukumaran and Mark T. Holder',
       author_email='jeet@ku.edu and mtholder@ku.edu',
