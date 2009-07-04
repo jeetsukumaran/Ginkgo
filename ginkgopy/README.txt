@@ -1,4 +1,4 @@
-Gingko Post-Processing Python Library
+Ginkgo Post-Processing Python Library
 ======================================
 
 (C) 2008 Jeet Sukumaran and Mark T. Holder.
