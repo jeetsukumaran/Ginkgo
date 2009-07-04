@@ -12,13 +12,13 @@
 
  * The following license terms apply to projects that are in some way related to
 
- * the "GINGKO project", including applications
+ * the "GINKGO project", including applications
 
- * using "GINGKO project" and tools developed
+ * using "GINKGO project" and tools developed
 
- * for enhancing "GINGKO project". All other projects
+ * for enhancing "GINKGO project". All other projects
 
- * (not related to "GINGKO project") have to use this
+ * (not related to "GINKGO project") have to use this
 
  * code under the Aladdin Free Public License (AFPL)
 

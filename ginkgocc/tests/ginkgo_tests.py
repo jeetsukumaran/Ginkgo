@@ -2,7 +2,7 @@
 
 ###############################################################################
 ##
-## GINGKO Biogeographical Evolution Simulator.
+## GINKGO Biogeographical Evolution Simulator.
 ##
 ## Copyright 2009 Jeet Sukumaran and Mark T. Holder.
 ##
@@ -31,8 +31,8 @@ import sys
 ###############################################################################
 ## LOGGER SET UP
 
-_LOGGING_LEVEL_ENVAR="GINGKO_LOGGING_LEVEL"
-_LOGGING_FORMAT_ENVAR="GINGKO_LOGGING_FORMAT"
+_LOGGING_LEVEL_ENVAR="GINKGO_LOGGING_LEVEL"
+_LOGGING_FORMAT_ENVAR="GINKGO_LOGGING_FORMAT"
 
 def get_logging_level():
     if _LOGGING_LEVEL_ENVAR in os.environ:
@@ -54,7 +54,7 @@ def get_logging_level():
         level = logging.NOTSET  
     return level        
 
-def get_logger(name="gingko"):
+def get_logger(name="ginkgo"):
     """
     Returns a logger with name set as given, and configured 
     to the level given by the environment variable _LOGGING_LEVEL_ENVAR.
@@ -91,7 +91,7 @@ def get_logger(name="gingko"):
 ###############################################################################
 ## FILE PATHS
 
-GINGKO_BIN_PATH_ENVAR = "GINGKO_BIN_PATH"
+GINKGO_BIN_PATH_ENVAR = "GINKGO_BIN_PATH"
 
 # from: http://stackoverflow.com/questions/377017/test-if-executable-exists-in-python
 def which(prog_name):
@@ -109,21 +109,21 @@ def which(prog_name):
                 return exe_file
     return None
 
-def get_gingko_bin_path():
-    gingko_bin_path = None
-    if GINGKO_BIN_PATH_ENVAR in os.environ:
-        gingko_bin_path = os.environ[GINGKO_BIN_PATH_ENVAR]
-        if not os.path.exists(gingko_bin_path):
-            sys.stderr.write('Path "%s" specified by environmental variable "%s" does not exist.\n' % (gingko_bin_path, GINGKO_BIN_PATH_ENVAR))
+def get_ginkgo_bin_path():
+    ginkgo_bin_path = None
+    if GINKGO_BIN_PATH_ENVAR in os.environ:
+        ginkgo_bin_path = os.environ[GINKGO_BIN_PATH_ENVAR]
+        if not os.path.exists(ginkgo_bin_path):
+            sys.stderr.write('Path "%s" specified by environmental variable "%s" does not exist.\n' % (ginkgo_bin_path, GINKGO_BIN_PATH_ENVAR))
             sys.exit(1)
     else:
-        gingko_bin_path = os.path.dirname(__file__)
-    return gingko_bin_path            
+        ginkgo_bin_path = os.path.dirname(__file__)
+    return ginkgo_bin_path            
             
-def get_gingko_program_path(prog_name):
-    bin_path = get_gingko_bin_path()
+def get_ginkgo_program_path(prog_name):
+    bin_path = get_ginkgo_bin_path()
     if bin_path is not None:
-        prog_path = os.path.join(get_gingko_bin_path(), prog_name)
+        prog_path = os.path.join(get_ginkgo_bin_path(), prog_name)
         if not os.path.exists(prog_path):
             sys.stderr.write('Program not found: "%s"\n' % prog_path)
             sys.exit(1)
@@ -133,7 +133,7 @@ def get_gingko_program_path(prog_name):
     else:
         prog_path = which(prog_name)
         if prog_path is None:
-            sys.stderr.write('Could not find "%s" on system path, and environmental variable "%s" specifying directory not set.\n' % (prog_name, GINGKO_BIN_PATH_ENVAR))
+            sys.stderr.write('Could not find "%s" on system path, and environmental variable "%s" specifying directory not set.\n' % (prog_name, GINKGO_BIN_PATH_ENVAR))
             sys.exit(1)
     return prog_path
     

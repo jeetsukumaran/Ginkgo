@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
-<gingko>
-    <world label="gingko1" 
+<ginkgo>
+    <world label="ginkgo1" 
            x_range = "40" 
            y_range = "50" 
            num_gens = "20001" 
@@ -126,4 +126,4 @@
         </samples>                
         
     </world>
-</gingko>
+</ginkgo>

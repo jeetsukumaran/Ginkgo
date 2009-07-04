@@ -2,7 +2,7 @@
 
 ###############################################################################
 ##
-## GINGKO Biogeographical Evolution Simulator.
+## GINKGO Biogeographical Evolution Simulator.
 ##
 ## Copyright 2009 Jeet Sukumaran and Mark T. Holder.
 ##
@@ -22,17 +22,17 @@
 ###############################################################################
 
 import unittest
-from gingko_tests import get_logger
-from gingko_tests import get_gingko_program_path
-from gingko_tests import run_program
-from gingko_tests import run_external_tests
+from ginkgo_tests import get_logger
+from ginkgo_tests import get_ginkgo_program_path
+from ginkgo_tests import run_program
+from ginkgo_tests import run_external_tests
 
 _LOG = get_logger("test_filesys")
 
 class TextUtilsTest(unittest.TestCase):
 
     def setUp(self):
-        self.prog_path = get_gingko_program_path("test_filesys")
+        self.prog_path = get_ginkgo_program_path("test_filesys")
 
     def testTextUtils(self):
         run_external_tests(self.prog_path, _LOG, "filesys tests")       

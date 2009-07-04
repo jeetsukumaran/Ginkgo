@@ -2,7 +2,7 @@
 
 ###############################################################################
 ##
-## GINGKO Biogeographical Evolution Simulator.
+## GINKGO Biogeographical Evolution Simulator.
 ##
 ## Copyright 2009 Jeet Sukumaran and Mark T. Holder.
 ##
@@ -24,15 +24,15 @@
 import unittest
 import subprocess
 
-from gingko_tests import get_logger
-from gingko_tests import get_gingko_program_path
-from gingko_tests import run_program
+from ginkgo_tests import get_logger
+from ginkgo_tests import get_ginkgo_program_path
+from ginkgo_tests import run_program
 
 _LOG = get_logger("test_cmdopts")
 
 class CmdOptsTest(unittest.TestCase):
     def setUp(self):
-        self.prog_path = get_gingko_program_path("test_cmdopt")
+        self.prog_path = get_ginkgo_program_path("test_cmdopt")
         
     def check_opts_parsing(self, cmd, expected_strings):  
         _LOG.info('Testing arguments parsing: "%s"' % cmd)
