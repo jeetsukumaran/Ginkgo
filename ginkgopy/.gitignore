@@ -1,7 +1,7 @@
 *.pyc
 *.kpf
 setup.cfg
-GingkoPy.egg-info*
+GinkgoPy.egg-info*
 .svn*
 .DS_Store*
 build/*
