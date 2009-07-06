@@ -48,7 +48,55 @@ def read_trees(src, encode_splits=True, dataset=None):
     if encode_splits:
         for t in gtrees:
             splits.encode_splits(t)
-    return gtrees            
+    return gtrees
+    
+class GeographicDistanceMatrix(object):
+    """
+    Calculates and maintains geographic distance information of taxa on a tree.
+    """
+
+    def __init__(self, taxa_block=None):
+        self.taxa_block = None
+        self._geo_dists = {}
+        if taxa_block is not None:
+            self.calc(taxa_block)
+        
+    def __call__(self, taxon1, taxon2):
+        """
+        Returns patristic distance between two taxon objects.
+        """
+        try:
+            return self._geo_dists[taxon1][taxon2]
+        except KeyError, e:
+            return self._geo_dists[taxon2][taxon1]
+        
+    def calc(self, taxa_block):
+        """
+        Calculates the distances.
+        """
+        self.taxa_block = taxa_block
+        georeference_taxa(self.taxa_block)        
+        self._geo_dists = {}
+        for i1, t1 in enumerate(self.taxa_block):
+            self._geo_dists[t1] = {}
+            for i2, t2 in enumerate(self.taxa_block[i1+1:]):
+                self.geo_dists[t1][t2] = euclidean_distance( (t1.x, t1.y), (t2.x, t2.y) )
+                    
+    def distances(self):
+        """
+        Returns list of patristic distances.
+        """
+        dists = []
+        for dt in self._geo_dists.values():
+            for d in dt.values():
+                dists.append(d)
+        return dists
+        
+    def sum_of_distances(self):
+        """
+        Returns sum of patristic distances on tree.
+        """
+        return sum(self.distances())    
     
 def georeference_taxa(taxa_block):
     """
