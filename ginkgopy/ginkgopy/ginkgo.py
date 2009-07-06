@@ -80,7 +80,7 @@ class GeographicDistanceMatrix(object):
         for i1, t1 in enumerate(self.taxa_block):
             self._geo_dists[t1] = {}
             for i2, t2 in enumerate(self.taxa_block[i1+1:]):
-                self.geo_dists[t1][t2] = euclidean_distance( (t1.x, t1.y), (t2.x, t2.y) )
+                self._geo_dists[t1][t2] = euclidean_distance( (t1.x, t1.y), (t2.x, t2.y) )
                     
     def distances(self):
         """
