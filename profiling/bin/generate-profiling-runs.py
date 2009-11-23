@@ -52,7 +52,7 @@ JOB_SGE = """
 #$ -l h_vmem=15G
 #$ -l vf=15G
 #$ -N %(run_title)s
-syrupy.py -r -t %(run_title)_profile -B ginkgo %(run_title)s.xml
+syrupy.py -r -t %(run_title)s_profile -B ginkgo %(run_title)s.xml
 """
 
 def setup_ginkgo_xml(output_dir, run_title, x, y, cc, ngens=1000000):
