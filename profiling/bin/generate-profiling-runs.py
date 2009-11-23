@@ -20,7 +20,7 @@ GINKGO_XML = """
                 <selectionWeights>1</selectionWeights>
                 <genotypicFitness>0</genotypicFitness>
                 <genotypicFitnessMutationRate>0.0</genotypicFitnessMutationRate>
-                <genotypicFitnessMutationSize>0.0</genotypicFitnessMutationSize>
+                <genotypicFitnessMutationSize>0</genotypicFitnessMutationSize>
                 <fecundity>20</fecundity>
                 <seedPopulations>
                     <seedPopulation x="1" y="5" size="10">
