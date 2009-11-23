@@ -6,7 +6,7 @@ import os
 
 GINKGO_XML = """
 <?xml version="1.0"?>
-<gingko>
+<ginkgo>
     <world label="run_%(run_title)s"
            x_range = "%(size_x)d"
            y_range = "%(size_y)d"
@@ -41,7 +41,7 @@ GINKGO_XML = """
             <occurrence lineage="Pseudozoon" gen="10000000" />
         </samples>
     </world>
-</gingko>
+</ginkgo>
 """
 
 JOB_SGE = """
@@ -52,7 +52,7 @@ JOB_SGE = """
 #$ -l h_vmem=15G
 #$ -l vf=15G
 #$ -N %(run_title)s
-syrupy.py -r -B $HOME/Environment/local/opt/gingko/bin/gingko %(run_title)s.xml
+syrupy.py -r -t %(run_title)_profile -B ginkgo %(run_title)s.xml
 """
 
 def setup_ginkgo_xml(output_dir, run_title, x, y, cc, ngens=1000000):
