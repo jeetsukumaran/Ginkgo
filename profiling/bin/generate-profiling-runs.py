@@ -86,7 +86,7 @@ def sweep_over_pop_sizes(output_dir, begin=10000, end=1280000):
     y = 10
     i = begin
     while i <= end:
-        cc = begin / (x*y)
+        cc = i / (x*y)
         setup_run(output_dir, "P%07d" % i, x, y, cc)
         i = i * 2
 
