@@ -7,7 +7,7 @@ import os
 GINKGO_XML = """
 <?xml version="1.0"?>
 <ginkgo>
-    <world label="run_%(run_title)s"
+    <world label="%(run_title)s_run"
            x_range = "%(size_x)d"
            y_range = "%(size_y)d"
            num_gens = "%(ngens)d"
