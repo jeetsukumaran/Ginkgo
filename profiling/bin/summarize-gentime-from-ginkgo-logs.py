@@ -33,9 +33,15 @@ def main():
 
     parser = OptionParser(add_help_option=True, usage="%prog [options] <GINKGO OUTPUT LOGS>")
 
-    parser.add_option('--stop-on-na',
+    parser.add_option('-u', '--unstack',
+        action='store_false',
+        dest='stack',
+        default=True,
+        help='unstack output (separate column for every population size)')
+
+    parser.add_option('--break-on-na',
         action='store_true',
-        dest='stop_on_na',
+        dest='break_on_na',
         default=False,
         help='terminate output when first NA is encountered (default=%default)')
 
@@ -55,25 +61,38 @@ def main():
     gens = list(set(gens))
     gens.sort()
     sys.stdout.write('Gen\t')
-    sys.stdout.write('%s\n' % ('\t'.join(psizes)))
+    if opts.stack:
+        sys.stdout.write('Hours\tPopSize\n')
+    else:
+        sys.stdout.write('%s\n' % ('\t'.join(psizes)))
     na_found = False
     for g in gens:
-        if opts.stop_on_na and na_found:
+        if opts.break_on_na and na_found:
             break
         row = []
-        for p in psizes:
-            r = results[p]
-            if g in r:
-                row.append(str(r[g]))
-            else:
-                if opts.stop_on_na:
-                    na_found = True
-                    break
+        if opts.stack:
+            for p in psizes:
+                r = results[p]
+                if g in r:
+                    sys.stdout.write('%s\t%s\t%s\n' % (g, r[g], p[1:]))
                 else:
-                    row.append('NA')
-        if not (opts.stop_on_na and na_found):
-            sys.stdout.write('%s\t' % g)
-            sys.stdout.write('%s\n' % ('\t'.join(row)))
+                    if opts.break_on_na:
+                        na_found = True
+                        break
+        else:
+            for p in psizes:
+                r = results[p]
+                if g in r:
+                    row.append(str(r[g]))
+                else:
+                    if opts.break_on_na:
+                        na_found = True
+                        break
+                    else:
+                        row.append('NA')
+            if not (opts.break_on_na and na_found):
+                sys.stdout.write('%s\t' % g)
+                sys.stdout.write('%s\n' % ('\t'.join(row)))
 
 if __name__ == '__main__':
     main()
