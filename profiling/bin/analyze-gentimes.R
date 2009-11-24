@@ -1,7 +1,7 @@
 library(ggplot2)
-abcdplot.points.ppdivtime = function(gentimes) {
-    p = ggplot(gentimes)
-    p = p + geom_line(aes(x=Gen, y=Hours, group=PopSize))
+
+plot.gentimes.x.popsize = function(gentimes) {
+    p = ggplot(gentimes) + geom_line(aes(x=Gen, y=Hours, group=PopSize))
     pvalues = unique(gentimes$PopSize)
     plabels = c()
     x = c()
@@ -12,6 +12,15 @@ abcdplot.points.ppdivtime = function(gentimes) {
         y = append(y, max(subset(gentimes, PopSize==pvalue, Hours)))
     }
 
-    p = p + annotate("text", x=x-5, y=y+0.5, label=plabels)
+    p = p + annotate("text", x=x, y=y, label=plabels, size=3, hjust=0.5, vjust=-0.5)
+
+    p = p + xlab("Number of Generations") + ylab("Number of Hours")
+
+    return(p)
+}
+
+plot.genpopsize = function(gentimes, gen=1000) {
+    p = ggplot(subset(gentimes, Gen==gen)) + geom_line(aes(x=PopSize, y=Hours))
+    p = p + xlab("Total Number of Organisms") + ylab("Number of Hours to Complete 1000 Generations")
     return(p)
 }
