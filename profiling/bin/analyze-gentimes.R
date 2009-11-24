@@ -36,7 +36,8 @@ plot.memusage.x.popsize = function(memusage) {
     for (pvalue in pvalues) {
         plabels = append(plabels, paste("N = ", pvalue))
         x = append(x, max(subset(memusage, PopSize==pvalue, Hour)))
-        y = append(y, max(subset(memusage, PopSize==pvalue, Memory)))
+        m = subset(memusage, PopSize==pvalue, Memory)
+        y = append(y, m[nrow(m),])
     }
 
     p = p + annotate("text", x=x, y=y, label=plabels, size=3, hjust=0.5, vjust=-0.5)
