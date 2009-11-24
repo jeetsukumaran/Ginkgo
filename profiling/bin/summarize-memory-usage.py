@@ -80,7 +80,7 @@ def main():
         memory_sizes.extend(r.keys())
     memory_sizes = list(set(memory_sizes))
     memory_sizes.sort()
-    sys.stdout.write('Gen\t')
+    sys.stdout.write('Hour\t')
     if opts.stack:
         sys.stdout.write('Memory\tPopSize\n')
     else:
