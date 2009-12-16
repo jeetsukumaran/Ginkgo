@@ -515,7 +515,7 @@ void AsciiGrid<T>::parse_cell_values_() {
         }
     } else {
         std::istringstream s(token);
-        long v = 0;
+        T v = 0;
         s >> v;
         if (s.fail()) {
             std::ostringstream msg;
@@ -530,7 +530,7 @@ void AsciiGrid<T>::parse_cell_values_() {
         }
     }
 
-    long cell_value;
+    T cell_value;
     this->src_ >> cell_value;
     while (not this->src_.eof()) {
         if (this->src_.fail()) {
