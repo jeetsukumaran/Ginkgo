@@ -104,7 +104,7 @@ void ConfigurationFile::process_world(World& world) {
     XmlElementType world_node = this->get_child_node(this->xml_, "world");
     world.set_label( this->get_attribute<std::string>(world_node, "label", "GinkgoWorld") );
     world.set_random_seed( this->get_attribute<unsigned long>(world_node, "random_seed", time(0)) );
-    world.set_generations_to_run( this->get_attribute<unsigned long>(world_node, "num_gens") );
+    world.set_generations_to_run( this->get_attribute<GenerationCountType>(world_node, "num_gens") );
     unsigned fitness_dim = this->get_attribute<unsigned>(world_node, "fitness_dimensions");
     if (fitness_dim > MAX_FITNESS_FACTORS) {
         std::ostringstream s;
@@ -113,13 +113,12 @@ void ConfigurationFile::process_world(World& world) {
         throw ConfigurationError(s.str());
     }
     world.set_num_fitness_factors(fitness_dim);
-    world.set_fitness_factor_grain(this->get_attribute<unsigned>(world_node, "fitness_grain", 1));
     world.set_allow_multifurcations(this->get_attribute_bool(world_node, "multifurcating_trees", true));
     world.set_produce_final_output(this->get_attribute_bool(world_node, "final_output", false));
     world.set_produce_full_complement_diploid_trees(this->get_attribute_bool(world_node, "full_complement_diploid_trees", false));
     world.generate_landscape( this->get_attribute<CellIndexType>(world_node, "x_range"),
                               this->get_attribute<CellIndexType>(world_node, "y_range") );
-    world.set_global_cell_carrying_capacity(this->get_attribute<unsigned long>(world_node, "default_cell_carrying_capacity", 0));
+    world.set_global_cell_carrying_capacity(this->get_attribute<PopulationCountType>(world_node, "default_cell_carrying_capacity", 0));
     world.set_log_frequency(this->get_attribute<unsigned>(world_node, "log_frequency", 10));
 }
 
@@ -172,12 +171,9 @@ void ConfigurationFile::process_lineage(XmlElementType& lineage_node, World& wor
         lineage.set_selection_weights(sw);
     }
 
-    lineage.set_mutation_rate(this->get_child_node_scalar<float>(lineage_node, "genotypicFitnessMutationRate", 0.0));
-    lineage.set_max_mutation_size(this->get_child_node_scalar<FitnessFactorType>(lineage_node, "genotypicFitnessMutationSize", 0));
     lineage.set_mean_reproductive_rate(this->get_child_node_scalar<unsigned>(lineage_node, "fecundity", 16));
-//         lineage.set_reproductive_rate_mutation_size(this->get_child_node_scalar<float>(lineage_node, "fecundityMutationRate", 0.0));
     lineage.set_movement_probability(this->get_child_node_scalar<float>(lineage_node, "movementProbability", 1.0));
-    lineage.set_movement_capacity(this->get_child_node_scalar<unsigned>(lineage_node, "movementCapacity", 1));
+    lineage.set_movement_capacity(this->get_child_node_scalar<MovementCountType>(lineage_node, "movementCapacity", 1));
 
     // seed populations
     XmlElementType seed_pops = lineage_node.getChildNode("seedPopulations");
@@ -192,9 +188,9 @@ void ConfigurationFile::process_lineage(XmlElementType& lineage_node, World& wor
                                                                   this->get_attribute<CellIndexType>(pop_node, "y"),
                                                                   world,
                                                                   item_desc.str().c_str());
-        unsigned long size = this->get_attribute<CellIndexType>(pop_node, "size");
-        unsigned long ancestral_pop_size = this->get_child_node_scalar<unsigned long>(pop_node, "ancestralPopulationSize");
-        unsigned long ancestral_generations = this->get_child_node_scalar<unsigned long>(pop_node, "ancestralGenerations");
+        PopulationCountType size = this->get_attribute<PopulationCountType>(pop_node, "size");
+        PopulationCountType ancestral_pop_size = this->get_child_node_scalar<PopulationCountType>(pop_node, "ancestralPopulationSize");
+        GenerationCountType ancestral_generations = this->get_child_node_scalar<GenerationCountType>(pop_node, "ancestralGenerations");
         world.add_seed_population(cell_index, &lineage, size, ancestral_pop_size, ancestral_generations);
     }
 }
@@ -204,13 +200,13 @@ void ConfigurationFile::process_environments(World& world) {
     if (!environs.isEmpty()) {
         for (int i = 0; i < environs.nChildNode("environment"); ++i) {
             XmlElementType env_node = environs.getChildNode("environment", i);
-            unsigned long gen = this->get_attribute<unsigned long>(env_node, "gen");
+            GenerationCountType gen = this->get_attribute<GenerationCountType>(env_node, "gen");
             WorldSettings world_settings;
             for (int j = 0; j < env_node.nChildNode(); ++j) {
                 XmlElementType sub_node = env_node.getChildNode(j);
                 std::string node_name = sub_node.getName();
                 if ( node_name == "carryingCapacity") {
-                    world_settings.carrying_capacity = this->get_validated_grid_path<CarryingCapacityType>(this->get_element_scalar<std::string>(sub_node), world);
+                    world_settings.carrying_capacity = this->get_validated_grid_path<PopulationCountType>(this->get_element_scalar<std::string>(sub_node), world);
                 } else if (node_name == "environmentFactor") {
                     unsigned eidx = this->get_attribute<unsigned>(sub_node, "id");
                     if (eidx > world.get_num_fitness_factors()) {
@@ -228,7 +224,7 @@ void ConfigurationFile::process_environments(World& world) {
                         throw ConfigurationError("movement costs: lineage \"" + lineage_id + "\" not defined");
                     }
                     Species * lineage = world.get_species_ptr(lineage_id);
-                    std::string gridfile = this->get_validated_grid_path<MovementCostType>(this->get_element_scalar<std::string>(sub_node), world);
+                    std::string gridfile = this->get_validated_grid_path<MovementCountType>(this->get_element_scalar<std::string>(sub_node), world);
                     world_settings.movement_costs.insert(std::make_pair(lineage, gridfile));
                 }
             }
@@ -242,16 +238,16 @@ void ConfigurationFile::process_dispersals(World& world) {
     if (!dispersals.isEmpty()) {
         for (int i = 0; i < dispersals.nChildNode("dispersal"); ++i) {
             XmlElementType disp_node = dispersals.getChildNode("dispersal", i);
-            unsigned long gen = this->get_attribute<unsigned long>(disp_node, "gen");
+            GenerationCountType gen = this->get_attribute<GenerationCountType>(disp_node, "gen");
             DispersalEvent disp_event;
             std::ostringstream item_desc;
             item_desc << "dispersal event " << i+1 << " in generation " << gen;
-            disp_event.source = this->get_validated_cell_index(this->get_attribute<unsigned long>(disp_node, "from_x"),
-                    this->get_attribute<unsigned long>(disp_node, "from_y"),
+            disp_event.source = this->get_validated_cell_index(this->get_attribute<CellIndexType>(disp_node, "from_x"),
+                    this->get_attribute<CellIndexType>(disp_node, "from_y"),
                     world,
                     item_desc.str().c_str());
-            disp_event.destination = this->get_validated_cell_index(this->get_attribute<unsigned long>(disp_node, "to_x"),
-                    this->get_attribute<unsigned long>(disp_node, "to_y"),
+            disp_event.destination = this->get_validated_cell_index(this->get_attribute<CellIndexType>(disp_node, "to_x"),
+                    this->get_attribute<CellIndexType>(disp_node, "to_y"),
                     world,
                     item_desc.str().c_str());
             disp_event.probability = this->get_child_node_scalar<float>(disp_node, "probability", 1.0);
@@ -327,7 +323,7 @@ void ConfigurationFile::process_samplings(World& world) {
             XmlElementType snode = samplings.getChildNode(i);
             std::string node_name = snode.getName();
             if (node_name == "occurrence") {
-                unsigned long gen = this->get_attribute<unsigned long>(snode, "gen");
+                GenerationCountType gen = this->get_attribute<GenerationCountType>(snode, "gen");
                 std::string lineage_id = this->get_attribute<std::string>(snode, "lineage");
                 if (not world.has_species(lineage_id)) {
                     throw ConfigurationError("occurrence sample: lineage \"" + lineage_id + "\" not defined");
@@ -335,7 +331,7 @@ void ConfigurationFile::process_samplings(World& world) {
                 world.add_occurrence_sampling(gen, world.get_species_ptr(lineage_id));
             } else if (node_name == "tree") {
                 SamplingRegime world_sampling_regime;
-                unsigned long gen = this->get_attribute<unsigned long>(snode, "gen");
+                GenerationCountType gen = this->get_attribute<GenerationCountType>(snode, "gen");
                 std::string lineage_id = this->get_attribute<std::string>(snode, "lineage");
                 if (not world.has_species(lineage_id)) {
                     throw ConfigurationError("tree sample: lineage \"" + lineage_id + "\" not defined");
@@ -345,7 +341,7 @@ void ConfigurationFile::process_samplings(World& world) {
                 if (label.size() > 0) {
                     world_sampling_regime.label = label;
                 }
-                world_sampling_regime.num_organisms_per_cell = this->get_child_node_scalar<unsigned long>(snode, "individualsPerCell", 0);
+                world_sampling_regime.num_organisms_per_cell = this->get_child_node_scalar<PopulationCountType>(snode, "individualsPerCell", 0);
                 XmlElementType cells_node = snode.getChildNode("cells");
                 if (!cells_node.isEmpty()) {
                     std::ostringstream raw;
@@ -362,9 +358,9 @@ void ConfigurationFile::process_samplings(World& world) {
                             } else if (xy.size() > 2) {
                                 throw ConfigurationError("tree sample cell position: too many coordinates");
                             }
-                            unsigned long x = convert::to_scalar<unsigned long>(xy[0]);
-                            unsigned long y = convert::to_scalar<unsigned long>(xy[1]);
-                            unsigned long cell_index = this->get_validated_cell_index(x, y, world, "sampling coordinate");
+                            CellIndexType x = convert::to_scalar<CellIndexType>(xy[0]);
+                            CellIndexType y = convert::to_scalar<CellIndexType>(xy[1]);
+                            CellIndexType cell_index = this->get_validated_cell_index(x, y, world, "sampling coordinate");
                             world_sampling_regime.cell_indexes.insert(cell_index);
                         }
                     }

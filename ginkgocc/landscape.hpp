@@ -77,7 +77,7 @@ class Landscape {
          * Iterates through all cells, setting their carrying capacity.
          * @param carrying_capacity        maximum occupancy of each cell
          */
-        void set_global_cell_carrying_capacity(CarryingCapacityType carrying_capacity);
+        void set_global_cell_carrying_capacity(PopulationCountType carrying_capacity);
 
         /**
          * Individually set the carrying capacity of cells.
@@ -85,20 +85,7 @@ class Landscape {
          *                                   maximum cell occupancy on a per cell
          *                                   basis.
          */
-        void set_carrying_capacities(const std::vector<CarryingCapacityType>& cell_carrying_capacities) {
-            assert(cell_carrying_capacities.size() >= this->cells_.size());
-            for (CellIndexType i = 0; i < this->cells_.size(); ++i) {
-                (*this->cells_[i]).set_carrying_capacity(cell_carrying_capacities[i]);
-            }
-        }
-
-        /**
-         * Individually set the carrying capacity of cells.
-         * @param cell_carrying_capacities   vector of numbers representing
-         *                                   maximum cell occupancy on a per cell
-         *                                   basis.
-         */
-        void set_carrying_capacities(const std::vector<long>& cell_carrying_capacities) {
+        void set_carrying_capacities(const std::vector<PopulationCountType>& cell_carrying_capacities) {
             assert(cell_carrying_capacities.size() >= this->cells_.size());
             for (CellIndexType i = 0; i < this->cells_.size(); ++i) {
                 (*this->cells_[i]).set_carrying_capacity(cell_carrying_capacities[i]);
@@ -136,7 +123,7 @@ class Landscape {
          *                               (empty set means sample all cells)
          */
         void sample_organisms(Species * sp_ptr,
-                    unsigned long num_organisms_per_cell,
+                    PopulationCountType num_organisms_per_cell,
                     const std::set<CellIndexType>& cell_indexes,
                     std::vector<const Organism *>& samples);
 
@@ -145,7 +132,7 @@ class Landscape {
          * @param sp_ptr    pointer to species
          * @param counts    vector of counts to populate
          */
-        void count_organisms(Species * sp_ptr, std::vector<long>& counts) const;
+        void count_organisms(Species * sp_ptr, std::vector<PopulationCountType>& counts) const;
 
         // --- cell access and spatial mapping ---
 

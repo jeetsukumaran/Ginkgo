@@ -715,24 +715,16 @@ class Organism {
          * @param num_fitness_factors   the number of fitness factors (which
          *                              should be less than or equal to
          *                              MAX_FITNESS_FACTORS)
-         * @param mutation_rate         the probability of mutation per
-         *                              factor inheritance
-         * @param max_mutation_size     the window (+/-) that a mutation event
-         *                              can perturb a value
          * @param rng                   source of random numbers
          */
         void inherit_genotypic_fitness_factors(const Organism& female,
                                                const Organism& male,
                                                unsigned num_fitness_factors,
-                                               float mutation_rate,
-                                               int max_mutation_size,
                                                RandomNumberGenerator& rng) {
             assert(num_fitness_factors <= MAX_FITNESS_FACTORS);
             for (unsigned i = 0; i < num_fitness_factors; ++i) {
+                /// TODO: USE JKK's FORMULA HERE ///
                 FitnessFactorType ff_value = rng.select(female.genotypic_fitness_factors_[i], male.genotypic_fitness_factors_[i]);
-                if (rng.uniform_01() < mutation_rate) {
-                    ff_value += rng.uniform_int(-max_mutation_size, max_mutation_size);
-                }
                 this->genotypic_fitness_factors_[i] = ff_value;
             }
         }
@@ -832,7 +824,6 @@ class Species {
          */
         Species(const std::string& label,
                 unsigned num_fitness_factors,
-                unsigned fitness_factor_grain,
                 RandomNumberGenerator& rng);
 
         /**
@@ -878,66 +869,11 @@ class Species {
         }
 
         /**
-         * Returns fitness factor grain.
-         *
-         * Returns the scaling factor for fitness calculation.
-         *
-         * @return number of fitness factor grain
-         */
-        unsigned get_fitness_factor_grain() const {
-            return this->fitness_factor_grain_;
-        }
-
-        /**
-         * Returns the probability of mutation when inheriting an organism
-         * inherits a genotypic fitness factor from its parent.
-         *
-         * @return rate of mutation per factor inheritance
-         */
-        float get_mutation_rate() const {
-            return this->mutation_rate_;
-        }
-
-        /**
-         * Sets the probability of mutation when inheriting an organism
-         * inherits a genotypic fitness factor from its parent.
-         *
-         * @param rate of mutation per factor inheritance
-         */
-        void set_mutation_rate(float mutation_rate) {
-            this->mutation_rate_ = mutation_rate;
-        }
-
-        /**
-         * Returns the window size that a genotypic fitness factor can be
-         * changed when inheriting a genotypic fitness factor from its parent.
-         *
-         * @return size of mutation (+/-)
-         */
-        FitnessFactorType get_max_mutation_size() const {
-            return this->max_mutation_size_;
-        }
-
-        /**
-         * Sets the window size that a genotypic fitness factor can be
-         * changed when inheriting a genotypic fitness factor from its parent.
-         *
-         * @param i size of mutation (+/-)
-         */
-        void set_max_mutation_size(FitnessFactorType mutation_size) {
-            this->max_mutation_size_ = mutation_size;
-        }
-
-        FitnessFactorType get_max_mutation_size() {
-            return this->max_mutation_size_;
-        }
-
-        /**
          * Returns the mean number of offspring per female.
          *
          * @return mean number of offspring per female
          */
-        unsigned get_mean_reproductive_rate() const {
+        PopulationCountType get_mean_reproductive_rate() const {
             return this->mean_reproductive_rate_;
         }
 
@@ -946,7 +882,7 @@ class Species {
          *
          * @param mean number of offspring per female
          */
-        void set_mean_reproductive_rate(unsigned rate) {
+        void set_mean_reproductive_rate(PopulationCountType rate) {
             this->mean_reproductive_rate_ = rate;
         }
 
@@ -955,7 +891,7 @@ class Species {
          *
          * @return the movement potential of an organism
          */
-        int get_movement_capacity() const {
+        MovementCountType get_movement_capacity() const {
             return this->movement_capacity_;
         }
 
@@ -964,7 +900,7 @@ class Species {
          *
          * @param moves the movement potential of an organism
          */
-        void set_movement_capacity(int moves) {
+        void set_movement_capacity(MovementCountType moves) {
             this->movement_capacity_ = moves;
         }
 
@@ -996,7 +932,7 @@ class Species {
          *
          * @param costs vector of movement costs
          */
-        void set_movement_costs(const std::vector<MovementCostType>& costs) {
+        void set_movement_costs(const std::vector<MovementCountType>& costs) {
             this->movement_costs_ = costs;
         }
 
@@ -1006,7 +942,7 @@ class Species {
          * @param  i    index of the cell to be entered
          * @return      value to be deducted from organism's movement capacity
          */
-        int movement_cost(CellIndexType i) {
+        MovementCountType movement_cost(CellIndexType i) {
             assert( i < this->movement_costs_.size() );
             return this->movement_costs_[i];
         }
@@ -1117,8 +1053,7 @@ class Species {
             float weighted_distance = 0.0;
             float diff = 0.0;
             for (unsigned i = 0; i < this->num_fitness_factors_; ++i, ++g, ++e, ++s) {
-//                 weighted_distance += pow((*e - *g), 2) * *s; // each distance weighted by selection strength
-                diff = static_cast<float>(*e)/this->fitness_factor_grain_ - static_cast<float>(*g)/this->fitness_factor_grain_;
+                diff = *e - *g;
                 weighted_distance += (diff * diff) * *s; // each distance weighted by selection strength
             }
             return exp(-weighted_distance);
@@ -1234,8 +1169,6 @@ class Species {
             organism.inherit_genotypic_fitness_factors(female,
                                                        male,
                                                        this->num_fitness_factors_,
-                                                       this->mutation_rate_,
-                                                       this->max_mutation_size_,
                                                        this->rng_);
             organism.inherit_genealogies(female, male, this->rng_, cell_index);
             return organism;
@@ -1253,21 +1186,13 @@ class Species {
         /** number of active fitness factors */
         unsigned                            num_fitness_factors_;
         /** scaling factor for fitness coefficients, for finer resolution of fitness levels */
-        unsigned int                        fitness_factor_grain_;
-        /** species-level weighting coefficients for the fitness functions */
         std::vector<float>                  selection_weights_;
-        /** rate of mutation for the genotypic fitness factors */
-        float                               mutation_rate_;
-        /** window for perturbations of fitness factor values */
-        FitnessFactorType                   max_mutation_size_;
         /** mean number of offspring per female */
-        unsigned                            mean_reproductive_rate_;
-        /** allowing for evolution in fecundity */
-        unsigned                            reproductive_rate_mutation_size_;
+        PopulationCountType                 mean_reproductive_rate_;
         /** landscape migration potential for this species */
-        std::vector<MovementCostType>       movement_costs_;
+        std::vector<MovementCountType>      movement_costs_;
         /** movement potential of each organism at the start of each round */
-        MovementCostType                    movement_capacity_;
+        MovementCountType                   movement_capacity_;
         /** probability of movement of each organism */
         float                               movement_probability_;
         /** genotype for organisms created de novo */

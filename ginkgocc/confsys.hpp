@@ -116,10 +116,10 @@ struct OrganismDistribution {
             : num_organisms_per_cell(0) { }
 
     public:
-        std::string     species_label;
-        unsigned long   num_organisms_per_cell;
-        unsigned long   ancestral_population_size;
-        unsigned long   ancestral_generations;
+        std::string                 species_label;
+        PopulationCountType         num_organisms_per_cell;
+        PopulationCountType         ancestral_population_size;
+        GenerationCountType         ancestral_generations;
         std::vector<CellIndexType>  x;
         std::vector<CellIndexType>  y;
 

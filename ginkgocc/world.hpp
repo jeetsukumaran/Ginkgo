@@ -54,9 +54,9 @@ struct SeedPopulation {
     public:
         CellIndexType       cell_index;
         Species *           species_ptr;
-        unsigned long       pop_size;
-        unsigned long       ancestral_pop_size;
-        unsigned long       ancestral_generations;
+        PopulationCountType pop_size;
+        PopulationCountType ancestral_pop_size;
+        GenerationCountType ancestral_generations;
     public:
         SeedPopulation()
             : cell_index(0),
@@ -67,9 +67,9 @@ struct SeedPopulation {
 
         SeedPopulation(CellIndexType cell_index,
             Species * species_ptr,
-            unsigned long pop_size,
-            unsigned long ancestral_pop_size,
-            unsigned long ancestral_generations)
+            PopulationCountType pop_size,
+            PopulationCountType ancestral_pop_size,
+            GenerationCountType ancestral_generations)
             : cell_index(cell_index),
               species_ptr(species_ptr),
               pop_size(pop_size),
@@ -91,7 +91,7 @@ struct SamplingRegime {
         /** Pointer to species. */
         Species *                   species_ptr;
         /**  Number of organisms from each cell to be sampled (0 = all). */
-        unsigned long               num_organisms_per_cell;
+        PopulationCountType         num_organisms_per_cell;
         /** List of cell indexes to be sampled. */
         std::set<CellIndexType>     cell_indexes;
         /** Label prefix for tree(s) / tree file(s). */
@@ -115,7 +115,7 @@ struct DispersalEvent {
         /** Pointer to species. */
         Species *                   species_ptr;
         /**  Number of organisms from cell to be sampled (0 = all). */
-        unsigned long               num_organisms;
+        PopulationCountType         num_organisms;
         /** Origin cell index. */
         CellIndexType               source;
         /** Destination cell index. */
@@ -277,30 +277,10 @@ class World {
         }
 
         /**
-         * Returns the scaling factor for fitness (genotypic and environmental
-         * fitness factor values will be divided by this value, providing finer
-         * grain for tracking fitness factor values).
-         * @return scaling for fitness factors
-         */
-        unsigned get_fitness_factor_grain() const {
-            return this->fitness_factor_grain_;
-        }
-
-        /**
-         * Returns the scaling factor for fitness (genotypic and environmental
-         * fitness factor values will be divided by this value, providing finer
-         * grain for tracking fitness factor values).
-         * @param scaling for fitness factors
-         */
-        void set_fitness_factor_grain(unsigned fitness_factor_grain) {
-            this->fitness_factor_grain_ = fitness_factor_grain;
-        }
-
-        /**
          * Sets the total number of generations to run.
          * @param ngens     number of generations to run
          */
-        void set_generations_to_run(unsigned long ngens) {
+        void set_generations_to_run(GenerationCountType ngens) {
             this->generations_to_run_ = ngens;
         }
 
@@ -338,8 +318,8 @@ class World {
          * Returns number of cells in the landscape.
          * @param number of cells in the landscape
          */
-        unsigned long size() const {
-            return this->landscape_.size();
+        CellIndexType size() const {
+            return static_cast<CellIndexType>(this->landscape_.size());
         }
 
         /**
@@ -368,7 +348,7 @@ class World {
          *                          occupy each cell at the end of every
          *                          generation
          */
-        void set_global_cell_carrying_capacity(CarryingCapacityType carrying_capacity) {
+        void set_global_cell_carrying_capacity(PopulationCountType carrying_capacity) {
             for (CellIndexType i = 0; i < this->landscape_.size(); ++i) {
                 this->landscape_[i].set_carrying_capacity(carrying_capacity);
             }
@@ -383,7 +363,7 @@ class World {
          *                      cost for cell \f$i\f$ in the landscape given
          *                      by element \f$i\f$ in the costs vector
          */
-        void set_species_movement_costs(const std::string& species_label, const std::vector<MovementCostType>& costs) {
+        void set_species_movement_costs(const std::string& species_label, const std::vector<MovementCountType>& costs) {
             assert(this->species_.find(species_label) != this->species_.end());
             assert(costs.size() == static_cast<CellIndexType>(this->landscape_.size()));
             this->species_[species_label]->set_movement_costs(costs);
@@ -398,7 +378,7 @@ class World {
          *                      cost for cell \f$i\f$ in the landscape given
          *                      by element \f$i\f$ in the costs vector
          */
-        void set_species_movement_costs(Species * species_ptr, const std::vector<MovementCostType>& costs) {
+        void set_species_movement_costs(Species * species_ptr, const std::vector<MovementCountType>& costs) {
             assert(costs.size() == static_cast<CellIndexType>(this->landscape_.size()));
             species_ptr->set_movement_costs(costs);
         }
@@ -492,9 +472,9 @@ class World {
          */
         void generate_seed_population(CellIndexType cell_index,
                 Species * species_ptr,
-                unsigned long pop_size,
-                unsigned long ancestral_pop_size,
-                unsigned long ancestral_generations);
+                PopulationCountType pop_size,
+                PopulationCountType ancestral_pop_size,
+                GenerationCountType ancestral_generations);
 
         // --- event handlers ---
 
@@ -506,7 +486,7 @@ class World {
          *                          to be activated
          * @param   world_settings  WorldSettings data
          */
-        void add_world_settings(unsigned long generation, const WorldSettings& world_settings);
+        void add_world_settings(GenerationCountType generation, const WorldSettings& world_settings);
 
         /**
          * Add a dispersal event.
@@ -515,7 +495,7 @@ class World {
          *                          to be activated
          * @param   dispersal_event descripion of event
          */
-        void add_dispersal_event(unsigned long generation, const DispersalEvent& dispersal_event);
+        void add_dispersal_event(GenerationCountType generation, const DispersalEvent& dispersal_event);
 
         /**
          * Add a directive to sample organisms and save a tree.
@@ -523,7 +503,7 @@ class World {
          * @param   generation       generation number for this tree to be built
          * @param   sampling_regime  the leaves to add to the tree
          */
-        void add_tree_sampling(unsigned long generation, const SamplingRegime& sampling_regime);
+        void add_tree_sampling(GenerationCountType generation, const SamplingRegime& sampling_regime);
 
         /**
          * Add a directive to sample organisms and save their occurrence distribution.
@@ -531,7 +511,7 @@ class World {
          * @param   generation       generation number for this occurrence be built
          * @param   species_ptr      pointer to species
          */
-        void add_occurrence_sampling(unsigned long generation, Species * species_ptr);
+        void add_occurrence_sampling(GenerationCountType generation, Species * species_ptr);
 
         /**
          * Add a directive to seed a population.
@@ -545,9 +525,9 @@ class World {
          */
         void add_seed_population(CellIndexType cell_index,
                 Species * species_ptr,
-                unsigned long pop_size,
-                unsigned long ancestral_pop_size,
-                unsigned long ancestral_generations);
+                PopulationCountType pop_size,
+                PopulationCountType ancestral_pop_size,
+                GenerationCountType ancestral_generations);
 
         // --- simulation cycles ---
 
@@ -660,7 +640,7 @@ class World {
          * @param tree_filename             filename for trees
          */
         void save_trees(Species * sp_ptr,
-                        unsigned long num_organisms_per_cell,
+                        PopulationCountType num_organisms_per_cell,
                         const std::set<CellIndexType>& cell_indexes,
                         const std::string& tree_filename_stem);
 
@@ -730,15 +710,10 @@ class World {
         Landscape                               landscape_;
         /** The number of dimensions to the fitness function. */
         unsigned                                num_fitness_factors_;
-        /**
-         * All genotypic fitness factors will be divided by this value
-         * to provide finer grain.
-         */
-        unsigned                                fitness_factor_grain_;
         /** Tracks the total number of generations to run. */
-        unsigned long                           generations_to_run_;
+        GenerationCountType                     generations_to_run_;
         /** Tracks the number of generations that have been run. */
-        unsigned long                           current_generation_;
+        GenerationCountType                     current_generation_;
         /** Output directory. */
         std::string                             output_dir_;
         /** Replicate id. */
@@ -760,13 +735,13 @@ class World {
         /** Produce full diploid trees (i.e., both alleles at each locus)? */
         bool                                    is_produce_full_complement_diploid_trees_;
         /** Collection of events (key = generation #). */
-        std::map<unsigned long, WorldSettings>  world_settings_;
+        std::map<GenerationCountType, WorldSettings>  world_settings_;
         /** Collection of dispersal events (key = generation #). */
-        std::multimap<unsigned long, DispersalEvent>  dispersal_events_;
+        std::multimap<GenerationCountType, DispersalEvent>  dispersal_events_;
         /** Collection of tree building directives (key = generation #). */
-        std::multimap<unsigned long, SamplingRegime> tree_samples_;
+        std::multimap<GenerationCountType, SamplingRegime> tree_samples_;
         /** Collection of occurrence description directives (key = generation #). */
-        std::multimap<unsigned long, Species *> occurrence_samples_;
+        std::multimap<GenerationCountType, Species *> occurrence_samples_;
         /** Collection of seed population directives. */
         std::vector<SeedPopulation>             seed_populations_;
         /** Track output filenames, so as to prevent clashes. */

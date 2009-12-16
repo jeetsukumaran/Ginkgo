@@ -47,10 +47,13 @@ typedef FitnessFactorType       FitnessFactors[MAX_FITNESS_FACTORS];
 typedef unsigned int            CellIndexType;
 
 //! The carrying capacity type.
-typedef unsigned int            CarryingCapacityType;
+typedef unsigned int            PopulationCountType;
 
 //! The movement economics type.
-typedef unsigned int            MovementCostType;
+typedef unsigned int            MovementCountType;
+
+//! Numbers of generations.
+typedef unsigned int            GenerationCountType;
 
 } // ginkgo namespace
 

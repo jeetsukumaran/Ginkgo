@@ -45,7 +45,6 @@ World::World()
       rng_(),
       landscape_(species_, rng_),
       num_fitness_factors_(1),
-      fitness_factor_grain_(1),
       generations_to_run_(0),
       current_generation_(0),
       log_frequency_(10),
@@ -62,7 +61,6 @@ World::World(unsigned long seed)
       rng_(seed),
       landscape_(species_, rng_),
       num_fitness_factors_(1),
-      fitness_factor_grain_(1),
       generations_to_run_(0),
       current_generation_(0),
       log_frequency_(10),
@@ -96,10 +94,9 @@ void World::generate_landscape(CellIndexType size_x, CellIndexType size_y) {
 Species& World::new_species(const std::string& label) {
     Species* sp = new Species(label,
                               this->num_fitness_factors_,
-                              this->fitness_factor_grain_,
                               this->rng_);
     this->species_.insert(std::make_pair(std::string(label), sp));
-    std::vector<MovementCostType> default_movement_costs(this->landscape_.size(), 1);
+    std::vector<MovementCountType> default_movement_costs(this->landscape_.size(), 1);
     sp->set_movement_costs(default_movement_costs);
     return *sp;
 }
@@ -113,9 +110,9 @@ Species& World::new_species(const std::string& label) {
 // Populates the cell cell_index with organisms of the given species.
 void World::generate_seed_population(CellIndexType cell_index,
         Species * species_ptr,
-        unsigned long pop_size,
-        unsigned long ancestral_pop_size,
-        unsigned long ancestral_generations) {
+        PopulationCountType pop_size,
+        PopulationCountType ancestral_pop_size,
+        GenerationCountType ancestral_generations) {
     std::ostringstream pre_msg;
     pre_msg << "[Generation " << this->current_generation_ << "] ";
     pre_msg << "Bootstrapping seed population of species " << species_ptr->get_label() << ": ";
@@ -133,8 +130,8 @@ void World::generate_seed_population(CellIndexType cell_index,
     post_msg << "of species " << species_ptr->get_label()  << " ";
     post_msg << "in (" << this->landscape_.index_to_x(cell_index) <<  "," << this->landscape_.index_to_y(cell_index) << "): ";
 
-    unsigned long num_females = 0;
-    unsigned long num_males = 0;
+    PopulationCountType num_females = 0;
+    PopulationCountType num_males = 0;
     this->landscape_.at(cell_index).num_organisms(species_ptr, num_females, num_males);
     post_msg << num_females << " females and " << num_males << " males ";
     post_msg << "drawn from an ancestral population of " << ancestral_pop_size << " ";
@@ -144,28 +141,28 @@ void World::generate_seed_population(CellIndexType cell_index,
 
 // --- event handlers ---
 
-void World::add_world_settings(unsigned long generation, const WorldSettings& world_settings) {
+void World::add_world_settings(GenerationCountType generation, const WorldSettings& world_settings) {
     this->world_settings_[generation] = world_settings;
 }
 
-void World::add_dispersal_event(unsigned long generation, const DispersalEvent& dispersal_event) {
+void World::add_dispersal_event(GenerationCountType generation, const DispersalEvent& dispersal_event) {
     this->dispersal_events_.insert(std::make_pair(generation, dispersal_event));
 }
 
 
-void World::add_tree_sampling(unsigned long generation, const SamplingRegime& sampling_regime) {
+void World::add_tree_sampling(GenerationCountType generation, const SamplingRegime& sampling_regime) {
     this->tree_samples_.insert(std::make_pair(generation, sampling_regime));
 }
 
-void World::add_occurrence_sampling(unsigned long generation, Species * species_ptr) {
+void World::add_occurrence_sampling(GenerationCountType generation, Species * species_ptr) {
     this->occurrence_samples_.insert(std::make_pair(generation, species_ptr));
 }
 
 void World::add_seed_population(CellIndexType cell_index,
         Species * species_ptr,
-        unsigned long pop_size,
-        unsigned long ancestral_pop_size,
-        unsigned long ancestral_generations) {
+        PopulationCountType pop_size,
+        PopulationCountType ancestral_pop_size,
+        GenerationCountType ancestral_generations) {
     this->seed_populations_.push_back( SeedPopulation(cell_index, species_ptr, pop_size, ancestral_pop_size, ancestral_generations) );
 }
 
@@ -284,13 +281,13 @@ void World::run() {
 }
 
 void World::process_world_settings() {
-    std::map<unsigned long, WorldSettings>::iterator wi = this->world_settings_.find(this->current_generation_);
+    std::map<GenerationCountType, WorldSettings>::iterator wi = this->world_settings_.find(this->current_generation_);
     if (wi == this->world_settings_.end()) {
         return;
     }
     if (wi->second.carrying_capacity.size() != 0) {
         this->log_info("[Generation " + convert::to_scalar<std::string>(this->current_generation_) + "] Setting carrying capacity: \"" + wi->second.carrying_capacity + "\".");
-        asciigrid::AsciiGrid<CarryingCapacityType> grid(wi->second.carrying_capacity);
+        asciigrid::AsciiGrid<PopulationCountType> grid(wi->second.carrying_capacity);
         this->landscape_.set_carrying_capacities(grid.get_cell_values());
     }
     if (wi->second.environments.size() != 0) {
@@ -311,14 +308,14 @@ void World::process_world_settings() {
             std::ostringstream msg;
             msg << "[Generation " << this->current_generation_ << "] Setting movement costs for species " <<  mi->first->get_label() <<  ": \"" <<  mi->second <<  "\"";
             this->log_info(msg.str());
-            asciigrid::AsciiGrid<MovementCostType> grid(mi->second);
+            asciigrid::AsciiGrid<MovementCountType> grid(mi->second);
             this->set_species_movement_costs(mi->first, grid.get_cell_values());
         }
     }
 }
 
 void World::process_dispersal_events() {
-    typedef std::multimap<unsigned long, DispersalEvent> gen_disp_t;
+    typedef std::multimap<GenerationCountType, DispersalEvent> gen_disp_t;
     typedef std::pair<gen_disp_t::iterator, gen_disp_t::iterator> gen_disp_iter_pair_t;
     gen_disp_iter_pair_t this_gen_dispersals = this->dispersal_events_.equal_range(this->current_generation_);
     for (gen_disp_t::iterator di = this_gen_dispersals.first; di != this_gen_dispersals.second; ++di) {
@@ -357,7 +354,7 @@ void World::process_dispersal_events() {
 }
 
 void World::process_tree_samplings() {
-    typedef std::multimap<unsigned long, SamplingRegime> gen_sample_t;
+    typedef std::multimap<GenerationCountType, SamplingRegime> gen_sample_t;
     typedef std::pair<gen_sample_t::iterator, gen_sample_t::iterator> gen_sample_iter_pair_t;
     gen_sample_iter_pair_t this_gen_samples = this->tree_samples_.equal_range(this->current_generation_);
     for (gen_sample_t::iterator i = this_gen_samples.first; i != this_gen_samples.second; ++i) {
@@ -366,7 +363,7 @@ void World::process_tree_samplings() {
 }
 
 void World::process_occurrence_samplings() {
-    typedef std::multimap<unsigned long, Species *> gen_sample_t;
+    typedef std::multimap<GenerationCountType, Species *> gen_sample_t;
     typedef std::pair<gen_sample_t::iterator, gen_sample_t::iterator> gen_sample_iter_pair_t;
     gen_sample_iter_pair_t this_gen_samples = this->occurrence_samples_.equal_range(this->current_generation_);
     for (gen_sample_t::iterator i = this_gen_samples.first; i != this_gen_samples.second; ++i) {
@@ -389,7 +386,7 @@ void World::process_occurrence_samplings() {
 
 void World::save_occurrences(Species * species_ptr ) {
     this->log_info("[Generation " + convert::to_scalar<std::string>(this->current_generation_) + "] Saving occurrence data for species " + species_ptr->get_label() + ".");
-    std::vector<long> counts;
+    std::vector<PopulationCountType> counts;
     this->landscape_.count_organisms(species_ptr, counts);
     std::ofstream occs;
     this->open_ofstream(occs,
@@ -512,7 +509,7 @@ void World::log_tree_multiple_root_error(const std::string& species_label, unsig
 }
 
 void World::save_trees(Species * sp_ptr,
-                unsigned long num_organisms_per_cell,
+                PopulationCountType num_organisms_per_cell,
                 const std::set<CellIndexType>& cell_indexes,
                 const std::string& label) {
 
@@ -629,7 +626,6 @@ void World::log_configuration() {
     out << "Label: " << this->label_ << std::endl;
     out << "Random seed: " << this->rng_.get_seed() << std::endl;
     out << "Fitness factors: " << this->num_fitness_factors_ << std::endl;
-    out << "Fitness grain: " << this->fitness_factor_grain_ << std::endl;
     out << "Generations to run: " << this->generations_to_run_ << std::endl;
     out << "Output directory: " << this->output_dir_ << std::endl;
     out << "Replicate ID: " << this->replicate_id_ << std::endl;
@@ -681,7 +677,6 @@ void World::log_configuration() {
         out << std::endl;
         out << "\"" << lineage.get_label() << "\"" << std::endl;
         out << "     Fitness factors: " << lineage.get_num_fitness_factors() << std::endl;
-        out << "     Fitness grain: " << lineage.get_fitness_factor_grain() << std::endl;
         out << "     Selection weights: ";
         std::vector<float> sw = lineage.get_selection_weights();
         for (std::vector<float>::iterator swi = sw.begin(); swi != sw.end(); ++swi) {
@@ -700,8 +695,6 @@ void World::log_configuration() {
             out << *gi;
         }
         out << std::endl;
-        out << "     Genotypic fitness mutation rate: " << lineage.get_mutation_rate() << std::endl;
-        out << "     Genotypic fitness maximum mutation size: " << lineage.get_max_mutation_size() << std::endl;
         out << "     Fecundity: " <<  lineage.get_mean_reproductive_rate() << std::endl;
         out << "     Movement probability: " << lineage.get_movement_probability() << std::endl;
         out << "     Movement capacity: " << lineage.get_movement_capacity() << std::endl;
@@ -711,7 +704,7 @@ void World::log_configuration() {
     out << "*** ENVIRONMENTS ***" << std::endl;
     out << "(" << this->world_settings_.size() << " generations with environmental changes specified)" << std::endl;
 
-    for (std::map<unsigned long, WorldSettings>::iterator wi = this->world_settings_.begin(); wi != this->world_settings_.end(); ++wi) {
+    for (std::map<GenerationCountType, WorldSettings>::iterator wi = this->world_settings_.begin(); wi != this->world_settings_.end(); ++wi) {
         out << "\n[ENVIRONMENT: GENERATION " << wi->first << "]" << std::endl;
         if (wi->second.carrying_capacity.size() != 0) {
             out << "    Carrying-capacity: \"" << wi->second.carrying_capacity << "\"" << std::endl;
@@ -736,7 +729,7 @@ void World::log_configuration() {
     out << "*** DISPERSALS ***" << std::endl;
     out << "(" << this->dispersal_events_.size() << " dispersal events specified)" << std::endl;
     out << std::endl;
-    for (std::map<unsigned long, DispersalEvent>::iterator di = this->dispersal_events_.begin(); di != this->dispersal_events_.end(); ++di) {
+    for (std::map<GenerationCountType, DispersalEvent>::iterator di = this->dispersal_events_.begin(); di != this->dispersal_events_.end(); ++di) {
         DispersalEvent& de = di->second;
         out << "    GENERATION " << di->first << ": " << "Dispersal";
         if (de.species_ptr != NULL) {
@@ -750,7 +743,7 @@ void World::log_configuration() {
     out << std::endl;
     out << "*** OCCURRENCE SAMPLES ***";
     out << std::endl;
-    for (std::multimap<unsigned long, Species *>::iterator oci = this->occurrence_samples_.begin();
+    for (std::multimap<GenerationCountType, Species *>::iterator oci = this->occurrence_samples_.begin();
             oci != this->occurrence_samples_.end();
             ++oci) {
         out << "    GENERATION " << oci->first << ": " << oci->second->get_label() << std::endl;
@@ -759,7 +752,7 @@ void World::log_configuration() {
     out << std::endl;
     out << "*** TREE SAMPLES ***";
     out << std::endl;
-    for (std::multimap<unsigned long, SamplingRegime>::iterator tci = this->tree_samples_.begin();
+    for (std::multimap<GenerationCountType, SamplingRegime>::iterator tci = this->tree_samples_.begin();
             tci != this->tree_samples_.end();
             ++tci) {
         SamplingRegime& sr = tci->second;
