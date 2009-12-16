@@ -8,12 +8,12 @@
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation; either version 3 of the License, or
 // (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU General Public License along
 // with this program. If not, see <http://www.gnu.org/licenses/>.
 //
@@ -37,7 +37,7 @@ const unsigned MAX_FITNESS_FACTORS = 10;
 const unsigned NUM_NEUTRAL_DIPLOID_loci = 10;
 
 //! The value type of a fitness factor (both environmental and genotypic.
-typedef int                     FitnessFactorType;
+typedef float                   FitnessFactorType;
 
 //! The number of dimensions or "slots" reserved for fitness assessment. The
 //! actual number may be less than this.
@@ -45,6 +45,12 @@ typedef FitnessFactorType       FitnessFactors[MAX_FITNESS_FACTORS];
 
 //! The units for referencing cells on the landscape.
 typedef unsigned int            CellIndexType;
+
+//! The carrying capacity type.
+typedef unsigned int            CarryingCapacityType;
+
+//! The movement economics type.
+typedef unsigned int            MovementCostType;
 
 } // ginkgo namespace
 

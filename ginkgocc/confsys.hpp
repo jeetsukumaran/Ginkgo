@@ -8,12 +8,12 @@
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation; either version 3 of the License, or
 // (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU General Public License along
 // with this program. If not, see <http://www.gnu.org/licenses/>.
 //
@@ -53,7 +53,7 @@ World& configure_world(World& world, const char * conf_fpath);
 
 /**
  * Build/populate a World object according to a given configuration source file.
- * @param   world       World object to configure 
+ * @param   world       World object to configure
  * @param   conf_fpath  path of configuration file
  * @return              World object
  */
@@ -106,11 +106,11 @@ namespace confsys_detail {
 typedef XMLNode XmlElementType;
 
 /**
- * Track distribution of organisms, either for seed populations or sampling 
+ * Track distribution of organisms, either for seed populations or sampling
  * regimes.
  */
 struct OrganismDistribution {
-    
+
     public:
         OrganismDistribution()
             : num_organisms_per_cell(0) { }
@@ -122,7 +122,7 @@ struct OrganismDistribution {
         unsigned long   ancestral_generations;
         std::vector<CellIndexType>  x;
         std::vector<CellIndexType>  y;
-        
+
 
 }; // OrganismDistribution
 
@@ -133,35 +133,35 @@ struct OrganismDistribution {
 class ConfigurationFile {
 
     public:
-        
+
         /**
          * Initializes metadata and binds to source file.
          *
          * @param fpath filepath of data source
          */
         ConfigurationFile(const char * fpath);
-        
+
         /**
          * Initializes metadata and binds to source file.
          *
          * @param fpath filepath of data source
          */
-        ConfigurationFile(const std::string& fpath);        
-        
+        ConfigurationFile(const std::string& fpath);
+
         /**
          * Default no-op destructor.
          */
-        ~ConfigurationFile();    
-        
+        ~ConfigurationFile();
+
         /**
          * Parses the configuration file, loading data into blocks.
          */
         void configure(World& world);
-        
+
     private:
-    
+
         void open(const char *fpath);
-        
+
         template <typename T>
         T get_attribute(XmlElementType& xml, const char * attr_name) const {
             const char * attr_value = xml.getAttribute(attr_name);
@@ -171,8 +171,8 @@ class ConfigurationFile {
                 throw ConfigurationIncompleteError(msg.str());
             }
             return convert::to_scalar<T>(attr_value);
-        }        
-        
+        }
+
         template <typename T>
         T get_attribute(XmlElementType& xml, const char * attr_name, T default_value) const {
             const char * attr_value = xml.getAttribute(attr_name);
@@ -181,15 +181,15 @@ class ConfigurationFile {
             }
             return convert::to_scalar<T>(attr_value);
         }
-        
+
         bool get_attribute_bool(XmlElementType& xml, const char * attr_name, bool default_value) const {
             const char * attr_value = xml.getAttribute(attr_name);
             if (attr_value == NULL) {
                 return default_value;
             }
             return convert::to_bool(attr_value);
-        }        
-        
+        }
+
         template <typename T>
         T get_child_node_scalar(XmlElementType& xml, const char * node_name) const {
             XmlElementType cnode = xml.getChildNode(node_name);
@@ -216,7 +216,7 @@ class ConfigurationFile {
                 raw << cnode.getText(i);
             }
             return convert::to_scalar<T>(raw.str());
-        }          
+        }
 
         template <typename T>
         T get_element_scalar(XmlElementType& xml) {
@@ -225,8 +225,8 @@ class ConfigurationFile {
                 raw << xml.getText(i);
             }
             return convert::to_scalar<T>(raw.str());
-        }        
-        
+        }
+
         template <typename T>
         std::vector<T> get_element_vector(XmlElementType& xml) {
             std::ostringstream raw;
@@ -235,29 +235,32 @@ class ConfigurationFile {
             }
             return convert::to_vector_on_any<T>(raw.str(), " \t\r\n", true);
         }
-        
+
         CellIndexType get_validated_cell_index(CellIndexType x, CellIndexType y, World& world, const char * item_desc);
+
+        template <class T>
         std::string get_validated_grid_path(const std::string& grid_path, const World& world);
+
         XmlElementType get_child_node(XmlElementType& current_node, const char * node_name, bool required=true);
-        
+
         void process_world(World& world);
         void process_biota(World& world);
         void process_lineage(XmlElementType& lnode, World& world);
         void process_environments(World& world);
         void process_dispersals(World& world);
         void process_samplings(World& world);
-        
-    private: 
-        
+
+    private:
+
         /** Path to configuration file. */
         std::string         config_filepath_;
-        
-        /** XML parser. */
-        XmlElementType      xml_;      
-        
-};  
 
-    
+        /** XML parser. */
+        XmlElementType      xml_;
+
+};
+
+
 } // confsys_detail
 } // namespace confsys
 } // namespace ginkgo

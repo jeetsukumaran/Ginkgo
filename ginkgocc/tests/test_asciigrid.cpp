@@ -44,7 +44,7 @@ const char * TEST_GRID1 =
         "88 75 27 9\n"
         "13 5 1 -9999\n";
 
-bool check_against_expected_grid1(asciigrid::AsciiGrid& ag) {
+bool check_against_expected_grid1(asciigrid::AsciiGrid<long>& ag) {
     assert(ag.get_ncols() == 4);
     assert(ag.get_nrows() == 6);
     assert(ag.has_size(4,6));
@@ -78,7 +78,7 @@ const char * TEST_GRID2 =
         "40 41 42 43 44 45 46 47 48 49\n"
         "50 51 52 53 54 55 56 57 58 59\n";
 
-bool check_against_expected_grid2(asciigrid::AsciiGrid& ag) {
+bool check_against_expected_grid2(asciigrid::AsciiGrid<long>& ag) {
     assert(ag.get_ncols() == 10);
     assert(ag.get_nrows() == 6);
     assert(ag.has_size(10,6));
@@ -112,15 +112,15 @@ const char * TEST_GRID3 =
         "40 41 42 43 44 45 46 47 48 49\n"
         "50 51 52 53 54 55 56 57 58 59\n";
 
-bool check_against_expected_grid3(asciigrid::AsciiGrid& ag) {
+bool check_against_expected_grid3(asciigrid::AsciiGrid<float>& ag) {
     assert(ag.get_ncols() == 10);
     assert(ag.get_nrows() == 6);
     assert(ag.has_size(10,6));
     std::cout << "Grid 3: reported size OK" << std::endl;
-    std::vector<long> cell_vals = ag.get_cell_values();
+    std::vector<float> cell_vals = ag.get_cell_values();
     assert(cell_vals.size() == 60);
     std::cout << "Grid 3: actual size OK" << std::endl;
-    long expected[] = { 0.1,  1.2,  2.3,  3.4,  4.5,  5.6,  6.7,  7.8,  8.9,  9.1,
+    float expected[] = { 0.1,  1.2,  2.3,  3.4,  4.5,  5.6,  6.7,  7.8,  8.9,  9.1,
                        .10, .11, .12, .13, .14, .15, .16, .17, .18, .19,
                        0.20, 0.21, 0.22, 0.23, 0.24, 0.25, 0.26, 0.27, 0.28, 0.29,
                        30, 31, 32, 33, 34, 35, 36, 37, 38, 39,
@@ -136,7 +136,7 @@ bool check_against_expected_grid3(asciigrid::AsciiGrid& ag) {
 void run_internal_tests() {
     std::cout << "Testing Grid 1 (from string)" << std::endl;
     std::istringstream g1(TEST_GRID1);
-    asciigrid::AsciiGrid ag1(g1);
+    asciigrid::AsciiGrid<long> ag1(g1);
     assert(check_against_expected_grid1(ag1));
     std::cout << "Grid 1 (from string): PASS" << std::endl;
 
@@ -146,13 +146,13 @@ void run_internal_tests() {
     asciigrid::write_grid(vals1, ag1.get_ncols(), ag1.get_nrows(), std::cout);
     asciigrid::write_grid(vals1, ag1.get_ncols(), ag1.get_nrows(), sa1);
     std::istringstream sa1i(sa1.str());
-    asciigrid::AsciiGrid ag1b(sa1i);
+    asciigrid::AsciiGrid<long> ag1b(sa1i);
     assert(check_against_expected_grid1(ag1b));
     std::cout << "Grid 1 (round-trip): PASS" << std::endl;
 
     std::cout << "Testing Grid 2 (from string)" << std::endl;
     std::istringstream g2(TEST_GRID2);
-    asciigrid::AsciiGrid ag2(g2);
+    asciigrid::AsciiGrid<long> ag2(g2);
     assert(check_against_expected_grid2(ag2));
     std::cout << "Grid 2 (from string): PASS" << std::endl;
 
@@ -162,36 +162,37 @@ void run_internal_tests() {
     asciigrid::write_grid(vals2, ag2.get_ncols(), ag2.get_nrows(), std::cout);
     asciigrid::write_grid(vals2, ag2.get_ncols(), ag2.get_nrows(), sa2);
     std::istringstream sa2i(sa2.str());
-    asciigrid::AsciiGrid ag2b(sa2i);
+    asciigrid::AsciiGrid<long> ag2b(sa2i);
     assert(check_against_expected_grid2(ag2b));
     std::cout << "Grid 2 (round-trip): PASS" << std::endl;
 
     std::cout << "Testing Grid 3 (from string)" << std::endl;
     std::istringstream g3(TEST_GRID3);
-    asciigrid::AsciiGrid ag3(g3);
+    asciigrid::AsciiGrid<float> ag3(g3);
     assert(check_against_expected_grid3(ag3));
     std::cout << "Grid 3 (from string): PASS" << std::endl;
 
     std::cout << "Testing Grid 3 (round-trip)" << std::endl;
-    std::vector<long> vals3 = ag3.get_cell_values();
+    std::vector<float> vals3 = ag3.get_cell_values();
     std::ostringstream sa3;
     asciigrid::write_grid(vals3, ag3.get_ncols(), ag3.get_nrows(), std::cout);
     asciigrid::write_grid(vals3, ag3.get_ncols(), ag3.get_nrows(), sa3);
     std::istringstream sa3i(sa3.str());
-    asciigrid::AsciiGrid ag3b(sa3i);
+    asciigrid::AsciiGrid<float> ag3b(sa3i);
     assert(check_against_expected_grid3(ag3b));
     std::cout << "Grid 3 (round-trip): PASS" << std::endl;
 }
 
-int main(int argc, char * argv[]) {
-    if (argc == 1) {
-        run_internal_tests();
-    } else {
-        asciigrid::AsciiGrid ag(argv[1]);
-        std::vector<long> v = ag.get_cell_values();
-        for (std::vector<long>::const_iterator i = v.begin(); i != v.end(); ++i) {
-            std::cout << *i << std::endl;
-        }
-    }
+int main(int, char *) {
+    run_internal_tests();
+//    if (argc == 1) {
+//        run_internal_tests();
+//    } else {
+//        asciigrid::AsciiGrid ag(argv[1]);
+//        std::vector<long> v = ag.get_cell_values();
+//        for (std::vector<long>::const_iterator i = v.begin(); i != v.end(); ++i) {
+//            std::cout << *i << std::endl;
+//        }
+//    }
 }
 
