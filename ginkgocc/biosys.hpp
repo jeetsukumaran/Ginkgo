@@ -724,7 +724,8 @@ class Organism {
             assert(num_fitness_factors <= MAX_FITNESS_FACTORS);
             for (unsigned i = 0; i < num_fitness_factors; ++i) {
                 /// TODO: USE JKK's FORMULA HERE ///
-                FitnessFactorType ff_value = static_cast<FitnessFactorType>(female.genotypic_fitness_factors_[i] + male.genotypic_fitness_factors_[i])/2 + rng.normal(0, 1.414214);
+                FitnessFactorType ff_value = static_cast<FitnessFactorType>(female.genotypic_fitness_factors_[i] + male.genotypic_fitness_factors_[i])/2
+                            + rng.normal(0, 0.7071068);
                 this->genotypic_fitness_factors_[i] = ff_value;
             }
         }
@@ -1056,7 +1057,8 @@ class Species {
                 diff = *e - *g;
                 weighted_distance += (diff * diff) * *s; // each distance weighted by selection strength
             }
-            return exp(-weighted_distance);
+            float fitness = exp(-weighted_distance);
+            return fitness;
         }
 
         // --- organism generation and reproduction ---
