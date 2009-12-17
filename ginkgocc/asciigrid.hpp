@@ -26,6 +26,7 @@
 #include <fstream>
 #include <istream>
 #include <sstream>
+#include <iostream>
 #include <cassert>
 #include <stdexcept>
 #include <cstdlib>
@@ -547,18 +548,22 @@ void AsciiGrid<T>::parse_cell_values_() {
         this->src_ >> cell_value;
     }
     this->is_cell_values_loaded_ = true;
-
-//     out << std::setfill(' '); // reset
-//     std::cout << std::endl << "*** GRID DUMP ***" << std::endl;
-//     index_type i = 0;
-//     x = 0;
-//     y = 0;
-//     for (y = 0; y < this->nrows_; ++y) {
-//         for (x = 0; x < this->ncols_; ++x, ++i) {
-//             std::cout << std::setw(4) << this->cell_values_.at(i);
-//         }
-//         std::cout << std::endl;
+//
+//    std::cout << std::setfill(' '); // reset
+//    std::cout << std::endl << "*** GRID DUMP ***" << std::endl;
+//    std::cout << "Cols: " << this->ncols_ << std::endl;
+//    std::cout << "Rows: " << this->nrows_ << std::endl;
+//    std::cout << "Vals: " << this->cell_values_.size() << std::endl;
+//    index_type i = 0;
+//    x = 0;
+//    y = 0;
+//    for (y = 0; y < this->nrows_; ++y) {
+//     for (x = 0; x < this->ncols_; ++x, ++i) {
+//         std::cout << std::setw(4) << this->cell_values_.at(i);
 //     }
+//     std::cout << std::endl;
+//    }
+//    std::cout << "OK" << std::endl;
 }
 
 } // asciigrid
