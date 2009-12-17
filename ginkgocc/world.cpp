@@ -295,7 +295,7 @@ void World::process_world_settings() {
                  ei != wi->second.environments.end();
                  ++ei) {
             std::ostringstream msg;
-            msg << "[Generation " << this->current_generation_ << "] Setting environmental variable " <<  ei->first+1 <<  ": \"" <<  ei->second <<  "\"";
+            msg << "[Generation " << this->current_generation_ << "] Setting environmental variable " <<  ei->first <<  ": \"" <<  ei->second <<  "\"";
             this->log_info(msg.str());
             asciigrid::AsciiGrid<FitnessFactorType> grid(ei->second);
             this->landscape_.set_environment(ei->first, grid.get_cell_values());

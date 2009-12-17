@@ -733,9 +733,13 @@ class Organism {
                                                RandomNumberGenerator& rng) {
             assert(num_fitness_factors <= MAX_FITNESS_FACTORS);
             for (unsigned i = 0; i < num_fitness_factors; ++i) {
-//                FitnessFactorType ff_value = static_cast<FitnessFactorType>(female.genotypic_fitness_factors_[i] + male.genotypic_fitness_factors_[i])/2
-//                            + rng.normal(0, 0.7071068);
-                FitnessFactorType ff_value = rng.select(female.genotypic_fitness_factors_[i], male.genotypic_fitness_factors_[i]);
+                FitnessFactorType ff_value = static_cast<FitnessFactorType>(female.genotypic_fitness_factors_[i] + male.genotypic_fitness_factors_[i])/2
+                            + rng.normal(0, 0.00001);
+                            // OK:      0.0000001
+                            //          0.000001
+                            //          0.00001
+                            // EXTINCT: 0.0001
+//                FitnessFactorType ff_value = rng.select(female.genotypic_fitness_factors_[i], male.genotypic_fitness_factors_[i]);
                 this->genotypic_fitness_factors_[i] = ff_value;
             }
         }
