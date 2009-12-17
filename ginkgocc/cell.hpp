@@ -129,6 +129,7 @@ class Cell {
          * @param  value    the value to set it to
          */
         void set_environment_factor(unsigned idx, FitnessFactorType e) {
+//            std::cout << "idx=" << idx << ", num fitness factors = " << this->num_fitness_factors_ << std::endl;
             assert(idx < this->num_fitness_factors_);
             this->environment_[idx] = e;
         }

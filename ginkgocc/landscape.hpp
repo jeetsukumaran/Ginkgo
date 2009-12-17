@@ -264,6 +264,15 @@ class Landscape {
             } else if (static_cast<CellIndexType>(y) >= this->size_y_) {
                 y = this->size_y_ - 2;
             }
+
+            // special case: size_x or size_y == 1
+            if (x >= this->size_x_) {
+                x = this->size_x_ - 1;
+            }
+            if (y >= this->size_y_) {
+                y = this->size_y_ - 1;
+            }
+
             return this->xy_to_index(x, y);
         }
 
