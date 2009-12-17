@@ -634,6 +634,16 @@ class Organism {
         // --- fitness & survival ---
 
         /**
+         * Returns the i-th fitness factor value.
+         * @return  a floating point value corresponding to the i-th fitness
+         *          factor.
+         */
+        FitnessFactorType get_fitness_factor(unsigned idx) const {
+            assert( idx < MAX_FITNESS_FACTORS );
+            return this->genotypic_fitness_factors_[idx];
+        }
+
+        /**
          * Returns the fitness score of this organism.
          * @return  a floating-point value [0, 1] representing the
          *          pre-calculated fitness of this organism given the its
@@ -935,15 +945,6 @@ class Species {
          */
         void set_movement_costs(const std::vector<MovementCountType>& costs) {
             this->movement_costs_ = costs;
-//            this->movement_costs_.clear();
-//            this->movement_costs_.reserve(costs.size());
-//            for (std::vector<MovementCountType>::const_iterator i = costs.begin();
-//                    i != costs.end();
-//                    ++i) {
-//                std::cout << *i << std::endl;
-//                this->movement_costs_.push_back(*i);
-//            }
-//            std::cout << "size: " << this->movement_costs_.size() << std::endl;
         }
 
         /**

@@ -420,17 +420,29 @@ void World::write_nexus_header(Species * sp_ptr,
     out << "END;\n\n";
 }
 
-//void World::write_traits(Species * sp_ptr,
-//                const std::vector<const Organism *>& organisms,
-//                std::ostream& out) {
-//    // write data
-//    this->write_nexus_header(sp_ptr, organisms, out);
-//    out << "BEGIN TREES;\n";
-//    out << "    TREE HaploidLocus = [&R] ";
-//    tree.write_newick_tree(out);
-//    out << ";\n";
-//    out << "END;\n\n";
-//}
+void World::write_traits(Species * sp_ptr,
+                const std::vector<const Organism *>& organisms,
+                std::ostream& out) {
+    // write data
+    this->write_nexus_header(sp_ptr, organisms, out);
+    out << "BEGIN CHARACTERS;\n";
+    unsigned int nchar = this->num_fitness_factors_ + 1;
+    out << "    DIMENSIONS NCHAR=" << nchar << ";\n";
+    out << "    FORMAT DATATYPE=CONTINUOUS ITEMS=(STATES);\n";
+    out << "    MATRIX\n";
+    for (std::vector<const Organism *>::const_iterator oi = organisms.begin();
+            oi != organisms.end();
+            ++oi) {
+        out << "        " << sp_ptr->get_organism_label(**oi) << "    ";
+        for (unsigned int i=0; i < this->num_fitness_factors_; ++i) {
+            out << "    " << (**oi).get_fitness_factor(i);
+        }
+        out << "    " << (**oi).get_fitness();
+        out << "\n";
+    }
+    out << ";\n";
+    out << "END;\n\n";
+}
 
 void World::write_haploid_tree(Species * sp_ptr,
                 const std::vector<const Organism *>& organisms,
@@ -557,7 +569,6 @@ void World::save_trees(Species * sp_ptr,
 
     this->log_info("[Generation " + convert::to_scalar<std::string>(this->current_generation_) + "] Building haploid locus tree for " + num_samples + " organisms (" + num_samples + " leaves per tree).");
     std::ofstream haploid_trees;
-
     this->open_ofstream(haploid_trees,
         this->compose_output_filename(sp_ptr->get_label(), label, "haploid.tre"));
     this->write_haploid_tree(sp_ptr, organisms, haploid_trees);
@@ -569,6 +580,12 @@ void World::save_trees(Species * sp_ptr,
             this->compose_output_filename(sp_ptr->get_label(), label, "diploid2.tre"));
         this->write_diploid2_trees(sp_ptr, organisms, diploid_trees);
     }
+
+    this->log_info("[Generation " + convert::to_scalar<std::string>(this->current_generation_) + "] Building traits matrix for " + num_samples + " organisms (" + num_samples + " leaves per tree).");
+    std::ofstream traits;
+    this->open_ofstream(traits,
+        this->compose_output_filename(sp_ptr->get_label(), label, "traits.nex"));
+    this->write_traits(sp_ptr, organisms, traits);
 
 }
 

@@ -624,6 +624,16 @@ class World {
                 std::ostream& out);
 
         /**
+         * Given a list of pointers to organisms, writes trait data.
+         * @param   sp_ptr      pointer to species
+         * @param   organisms   sample of organisms
+         * @param   out         output stream
+         */
+        void write_traits(Species * sp_ptr,
+                const std::vector<const Organism *>& organisms,
+                std::ostream& out);
+
+        /**
          * Samples organisms of specified species and specified cells of the
          * the landscape, and write out the corresponding trees.
          * Three tree files will be produced:
