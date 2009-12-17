@@ -420,10 +420,22 @@ void World::write_nexus_header(Species * sp_ptr,
     out << "END;\n\n";
 }
 
+//void World::write_traits(Species * sp_ptr,
+//                const std::vector<const Organism *>& organisms,
+//                std::ostream& out) {
+//    // write data
+//    this->write_nexus_header(sp_ptr, organisms, out);
+//    out << "BEGIN TREES;\n";
+//    out << "    TREE HaploidLocus = [&R] ";
+//    tree.write_newick_tree(out);
+//    out << ";\n";
+//    out << "END;\n\n";
+//}
+
 void World::write_haploid_tree(Species * sp_ptr,
                 const std::vector<const Organism *>& organisms,
                 std::ostream& out) {
-        Tree tree(&this->landscape_, this->allow_multifurcations_);
+    Tree tree(&this->landscape_, this->allow_multifurcations_);
     try {
         // build tree
         for (std::vector<const Organism *>::const_iterator oi = organisms.begin();
