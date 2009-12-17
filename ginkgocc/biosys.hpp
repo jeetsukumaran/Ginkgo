@@ -724,7 +724,7 @@ class Organism {
             assert(num_fitness_factors <= MAX_FITNESS_FACTORS);
             for (unsigned i = 0; i < num_fitness_factors; ++i) {
                 /// TODO: USE JKK's FORMULA HERE ///
-                FitnessFactorType ff_value = rng.select(female.genotypic_fitness_factors_[i], male.genotypic_fitness_factors_[i]);
+                FitnessFactorType ff_value = static_cast<FitnessFactorType>(female.genotypic_fitness_factors_[i] + male.genotypic_fitness_factors_[i])/2 + rng.normal(0, 1.414214);
                 this->genotypic_fitness_factors_[i] = ff_value;
             }
         }
