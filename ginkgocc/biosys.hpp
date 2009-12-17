@@ -935,6 +935,15 @@ class Species {
          */
         void set_movement_costs(const std::vector<MovementCountType>& costs) {
             this->movement_costs_ = costs;
+//            this->movement_costs_.clear();
+//            this->movement_costs_.reserve(costs.size());
+//            for (std::vector<MovementCountType>::const_iterator i = costs.begin();
+//                    i != costs.end();
+//                    ++i) {
+//                std::cout << *i << std::endl;
+//                this->movement_costs_.push_back(*i);
+//            }
+//            std::cout << "size: " << this->movement_costs_.size() << std::endl;
         }
 
         /**

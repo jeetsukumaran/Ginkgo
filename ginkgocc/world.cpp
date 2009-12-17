@@ -253,7 +253,7 @@ void World::run() {
         this->process_world_settings();
 
         // process dispersal events
-        this->process_dispersal_events();
+        // this->process_dispersal_events();
 
         // run the life cycle
         this->cycle();

@@ -50,7 +50,7 @@ typedef unsigned int            CellIndexType;
 typedef unsigned int            PopulationCountType;
 
 //! The movement economics type.
-typedef unsigned int            MovementCountType;
+typedef int                     MovementCountType;
 
 //! Numbers of generations.
 typedef unsigned int            GenerationCountType;
