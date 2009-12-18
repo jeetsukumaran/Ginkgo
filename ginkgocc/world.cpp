@@ -295,7 +295,7 @@ void World::process_world_settings() {
                  ei != wi->second.fitness_trait_optima.end();
                  ++ei) {
             std::ostringstream msg;
-            msg << "[Generation " << this->current_generation_ << "] Setting environmental variable " <<  ei->first <<  ": \"" <<  ei->second <<  "\"";
+            msg << "[Generation " << this->current_generation_ << "] Setting optima for fitness trait " <<  ei->first <<  ": \"" <<  ei->second <<  "\"";
             this->log_info(msg.str());
             asciigrid::AsciiGrid<FitnessTraitType> grid(ei->second);
             this->landscape_.set_environment(ei->first, grid.get_cell_values());
@@ -673,7 +673,7 @@ void World::log_configuration() {
     out << "*** WORLD ***" << std::endl;
     out << "Label: " << this->label_ << std::endl;
     out << "Random seed: " << this->rng_.get_seed() << std::endl;
-    out << "Fitness traits: " << this->num_fitness_traits_ << std::endl;
+    out << "Number of fitness traits: " << this->num_fitness_traits_ << std::endl;
     out << "Generations to run: " << this->generations_to_run_ << std::endl;
     out << "Output directory: " << this->output_dir_ << std::endl;
     out << "Replicate ID: " << this->replicate_id_ << std::endl;
@@ -724,7 +724,7 @@ void World::log_configuration() {
         Species& lineage = *spi->second;
         out << std::endl;
         out << "\"" << lineage.get_label() << "\"" << std::endl;
-        out << "     Fitness traits: " << lineage.get_num_fitness_traits() << std::endl;
+        out << "     Number of fitness traits: " << lineage.get_num_fitness_traits() << std::endl;
         out << "     Selection weights: ";
         std::vector<float> sw = lineage.get_selection_weights();
         for (std::vector<float>::iterator swi = sw.begin(); swi != sw.end(); ++swi) {
