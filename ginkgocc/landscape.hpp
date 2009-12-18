@@ -65,9 +65,9 @@ class Landscape {
          *
          * @param size_x                    x-dimension
          * @param size_y                    y-dimension
-         * @param num_fitness_factors number of active fitness factors
+         * @param num_fitness_traits number of active fitness factors
          */
-        void generate(CellIndexType size_x, CellIndexType size_y, unsigned num_fitness_factors);
+        void generate(CellIndexType size_x, CellIndexType size_y, unsigned num_fitness_traits);
 
         // --- landscape access, control and mutation ---
 
@@ -98,7 +98,7 @@ class Landscape {
          * @param cell_environments  vector of numbers representing the
          *                           environmental value of cells
          */
-        void set_environment(unsigned index, std::vector<FitnessFactorType> cell_environments) {
+        void set_environment(unsigned index, std::vector<FitnessTraitType> cell_environments) {
             assert(cell_environments.size() >= this->cells_.size());
             for (CellIndexType i = 0; i < this->cells_.size(); ++i) {
                 (*this->cells_[i]).set_environment_factor(index, cell_environments[i]);

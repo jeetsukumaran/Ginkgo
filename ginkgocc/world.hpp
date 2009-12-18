@@ -264,16 +264,16 @@ class World {
          * Returns number of active fitness factors.
          * @return number of active fitness factors
          */
-        unsigned get_num_fitness_factors() const {
-            return this->num_fitness_factors_;
+        unsigned get_num_fitness_traits() const {
+            return this->num_fitness_traits_;
         }
 
         /**
          * Sets number of active fitness factors.
-         * @param num_fitness_factors number of active fitness factors
+         * @param num_fitness_traits number of active fitness factors
          */
-        void set_num_fitness_factors(unsigned num_fitness_factors) {
-            this->num_fitness_factors_ = num_fitness_factors;
+        void set_num_fitness_traits(unsigned num_fitness_traits) {
+            this->num_fitness_traits_ = num_fitness_traits;
         }
 
         /**
@@ -392,7 +392,7 @@ class World {
          */
         void set_species_selection_weights(const std::string& species_label, const std::vector<float>& strengths) {
             assert(this->species_.find(species_label) != this->species_.end());
-            assert(strengths.size() == this->num_fitness_factors_);
+            assert(strengths.size() == this->num_fitness_traits_);
             this->species_[species_label]->set_selection_weights(strengths);
         }
 
@@ -404,7 +404,7 @@ class World {
          *                      equation used to evaluate fitness
          */
         void set_species_selection_weights(Species * species_ptr, const std::vector<float>& strengths) {
-            assert(strengths.size() == this->num_fitness_factors_);
+            assert(strengths.size() == this->num_fitness_traits_);
             species_ptr->set_selection_weights(strengths);
         }
 
@@ -417,9 +417,9 @@ class World {
          * @param genotype      vector genotypic fitness values for a new
          *                      organism of the given species
          */
-        void set_species_default_genotype(const std::string& species_label, const FitnessFactors& genotype) {
+        void set_species_default_genotype(const std::string& species_label, const FitnessTraits& genotype) {
             assert(this->species_.find(species_label) != this->species_.end());
-            this->species_[species_label]->set_default_genotypic_fitness_factors(genotype);
+            this->species_[species_label]->set_default_heritable_fitness_traits(genotype);
         }
 
         /**
@@ -430,8 +430,8 @@ class World {
          * @param genotype      vector genotypic fitness values for a new
          *                      organism of the given species
          */
-        void set_species_default_genotype(Species * species_ptr, const FitnessFactors& genotype) {
-            species_ptr->set_default_genotypic_fitness_factors(genotype);
+        void set_species_default_genotype(Species * species_ptr, const FitnessTraits& genotype) {
+            species_ptr->set_default_heritable_fitness_traits(genotype);
         }
 
         // --- setup, initialization and seeding ---
@@ -719,7 +719,7 @@ class World {
         /** The geospatial framework of this World. */
         Landscape                               landscape_;
         /** The number of dimensions to the fitness function. */
-        unsigned                                num_fitness_factors_;
+        unsigned                                num_fitness_traits_;
         /** Tracks the total number of generations to run. */
         GenerationCountType                     generations_to_run_;
         /** Tracks the number of generations that have been run. */

@@ -31,17 +31,17 @@ namespace ginkgo {
 //! The maximum number of fitness factors in the system. A "fitness factor"
 //! represents an environmental variable and a corresponding genotypic variable
 //! that together contribute to the fitness of an individual organism.
-const unsigned MAX_FITNESS_FACTORS = 10;
+const unsigned MAX_FITNESS_TRAITS = 10;
 
 //! The number of neutral diploid loci to track
 const unsigned NUM_NEUTRAL_DIPLOID_loci = 10;
 
 //! The value type of a fitness factor (both environmental and genotypic.
-typedef float                   FitnessFactorType;
+typedef float                   FitnessTraitType;
 
 //! The number of dimensions or "slots" reserved for fitness assessment. The
 //! actual number may be less than this.
-typedef FitnessFactorType       FitnessFactors[MAX_FITNESS_FACTORS];
+typedef FitnessTraitType        FitnessTraits[MAX_FITNESS_TRAITS];
 
 //! The units for referencing cells on the landscape.
 typedef unsigned int            CellIndexType;

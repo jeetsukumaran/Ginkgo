@@ -105,14 +105,14 @@ void ConfigurationFile::process_world(World& world) {
     world.set_label( this->get_attribute<std::string>(world_node, "label", "GinkgoWorld") );
     world.set_random_seed( this->get_attribute<unsigned long>(world_node, "random_seed", time(0)) );
     world.set_generations_to_run( this->get_attribute<GenerationCountType>(world_node, "num_gens") );
-    unsigned fitness_dim = this->get_attribute<unsigned>(world_node, "fitness_dimensions");
-    if (fitness_dim > MAX_FITNESS_FACTORS) {
+    unsigned fitness_dim = this->get_attribute<unsigned>(world_node, "num_fitness_traits");
+    if (fitness_dim > MAX_FITNESS_TRAITS) {
         std::ostringstream s;
-        s << "maximum number of fitness factors allowed is " << MAX_FITNESS_FACTORS;
+        s << "maximum number of fitness traits allowed is " << MAX_FITNESS_TRAITS;
         s << ", but requested " << fitness_dim;
         throw ConfigurationError(s.str());
     }
-    world.set_num_fitness_factors(fitness_dim);
+    world.set_num_fitness_traits(fitness_dim);
     world.set_allow_multifurcations(this->get_attribute_bool(world_node, "multifurcating_trees", true));
     world.set_produce_final_output(this->get_attribute_bool(world_node, "final_output", false));
     world.set_produce_full_complement_diploid_trees(this->get_attribute_bool(world_node, "full_complement_diploid_trees", false));
@@ -146,24 +146,24 @@ void ConfigurationFile::process_lineage(XmlElementType& lineage_node, World& wor
     // genotypic fitness factor
     XmlElementType gtf_node = this->get_child_node(lineage_node, "genotypicFitness", false);
     if (!gtf_node.isEmpty()) {
-        std::vector<FitnessFactorType> gff = this->get_element_vector<FitnessFactorType>(gtf_node);
-        if (gff.size() != lineage.get_num_fitness_factors()) {
+        std::vector<FitnessTraitType> gff = this->get_element_vector<FitnessTraitType>(gtf_node);
+        if (gff.size() != lineage.get_num_fitness_traits()) {
             std::ostringstream msg;
-            msg << "expecting " << lineage.get_num_fitness_factors();
-            msg << " default genotypic fitness factors, but found ";
+            msg << "expecting " << lineage.get_num_fitness_traits();
+            msg << " default genotypic fitness trait values, but found ";
             msg << gff.size() << " instead";
             throw ConfigurationError(msg.str());
         }
-        lineage.set_default_genotypic_fitness_factors(gff);
+        lineage.set_default_heritable_fitness_traits(gff);
     }
 
     // selection weights
     XmlElementType sw_node = this->get_child_node(lineage_node, "selectionWeights", false);
     if (!sw_node.isEmpty()) {
         std::vector<float> sw = this->get_element_vector<float>(sw_node);
-        if (sw.size() != lineage.get_num_fitness_factors()) {
+        if (sw.size() != lineage.get_num_fitness_traits()) {
             std::ostringstream msg;
-            msg << "expecting " << lineage.get_num_fitness_factors();
+            msg << "expecting " << lineage.get_num_fitness_traits();
             msg << " selection weights, but found ";
             msg << sw.size() << " instead";
             throw ConfigurationError(msg.str());
@@ -175,14 +175,14 @@ void ConfigurationFile::process_lineage(XmlElementType& lineage_node, World& wor
     XmlElementType fsd_node = this->get_child_node(lineage_node, "fitnessInheritanceStdDev", false);
     if (!fsd_node.isEmpty()) {
         std::vector<float> sd = this->get_element_vector<float>(fsd_node);
-        if (sd.size() != lineage.get_num_fitness_factors()) {
+        if (sd.size() != lineage.get_num_fitness_traits()) {
             std::ostringstream msg;
-            msg << "expecting " << lineage.get_num_fitness_factors();
+            msg << "expecting " << lineage.get_num_fitness_traits();
             msg << " fitness inheritance standard deviations, but found ";
             msg << sd.size() << " instead";
             throw ConfigurationError(msg.str());
         }
-        lineage.set_fitness_factor_inheritance_sd(sd);
+        lineage.set_fitness_trait_inheritance_sd(sd);
     }
 
     lineage.set_mean_reproductive_rate(this->get_child_node_scalar<unsigned>(lineage_node, "fecundity", 16));
@@ -221,16 +221,16 @@ void ConfigurationFile::process_environments(World& world) {
                 std::string node_name = sub_node.getName();
                 if ( node_name == "carryingCapacity") {
                     world_settings.carrying_capacity = this->get_validated_grid_path<PopulationCountType>(this->get_element_scalar<std::string>(sub_node), world);
-                } else if (node_name == "environmentFactor") {
-                    unsigned eidx = this->get_attribute<unsigned>(sub_node, "id");
-                    if (eidx > world.get_num_fitness_factors()) {
+                } else if (node_name == "fitnessTraitOptima") {
+                    unsigned eidx = this->get_attribute<unsigned>(sub_node, "trait");
+                    if (eidx > world.get_num_fitness_traits()) {
                         std::ostringstream msg;
-                        msg << "invalid environment factor index: " << eidx;
-                        msg << " (maximum valid index is " << world.get_num_fitness_factors();
-                        msg << ", given " << world.get_num_fitness_factors() << " defined factors)";
+                        msg << "invalid fitness trait index: " << eidx;
+                        msg << " (maximum valid index is " << world.get_num_fitness_traits();
+                        msg << ", given " << world.get_num_fitness_traits() << " defined fitness traits)";
                         throw ConfigurationError(msg.str());
                     }
-                    std::string gridfile = this->get_validated_grid_path<FitnessFactorType>(this->get_element_scalar<std::string>(sub_node), world);
+                    std::string gridfile = this->get_validated_grid_path<FitnessTraitType>(this->get_element_scalar<std::string>(sub_node), world);
                     world_settings.environments.insert(std::make_pair(eidx, gridfile));
                 } else if (node_name == "movementCosts") {
                     std::string lineage_id = this->get_attribute<std::string>(sub_node, "lineage");

@@ -477,19 +477,19 @@ class Organism {
          * (fitness) genotype, and sex.
          *
          * @param species           pointer to Species of this Organism
-         * @param genotype          array of fitness factor values representing
+         * @param fitness_traits    array of fitness factor values representing
          *                          the inheritable portion of fitness of this
          *                          individual organism
          * @param sex               gender of this organism
          */
         Organism(Species * species,
-                 const FitnessFactors& new_genotype,
+                 const FitnessTraits& fitness_traits,
                  Organism::Sex new_sex)
                 : species_(species),
                   sex_(new_sex),
                   fitness_(-1),
                   expired_(false) {
-            memcpy(this->genotypic_fitness_factors_, new_genotype, MAX_FITNESS_FACTORS*sizeof(FitnessFactorType));
+            memcpy(this->heritable_fitness_traits_, fitness_traits, MAX_FITNESS_TRAITS*sizeof(FitnessTraitType));
         }
 
         /**
@@ -528,7 +528,7 @@ class Organism {
                 return *this;
             }
             this->species_ = ind.species_;
-            memcpy(this->genotypic_fitness_factors_, ind.genotypic_fitness_factors_, MAX_FITNESS_FACTORS*sizeof(FitnessFactorType));
+            memcpy(this->heritable_fitness_traits_, ind.heritable_fitness_traits_, MAX_FITNESS_TRAITS*sizeof(FitnessTraitType));
             this->sex_ = ind.sex_;
             this->fitness_ = ind.fitness_;
             this->expired_ = ind.expired_;
@@ -548,11 +548,11 @@ class Organism {
             this->species_ = o2.species_;
             o2.species_ = t_species;
 
-            // genotypic_fitness_factors
-            FitnessFactors t_genotypic_fitness_factors;
-            memcpy(t_genotypic_fitness_factors, this->genotypic_fitness_factors_, MAX_FITNESS_FACTORS*sizeof(FitnessFactorType));
-            memcpy(this->genotypic_fitness_factors_, o2.genotypic_fitness_factors_, MAX_FITNESS_FACTORS*sizeof(FitnessFactorType));
-            memcpy(o2.genotypic_fitness_factors_, t_genotypic_fitness_factors, MAX_FITNESS_FACTORS*sizeof(FitnessFactorType));
+            // heritable_fitness_traits
+            FitnessTraits t_heritable_fitness_traits;
+            memcpy(t_heritable_fitness_traits, this->heritable_fitness_traits_, MAX_FITNESS_TRAITS*sizeof(FitnessTraitType));
+            memcpy(this->heritable_fitness_traits_, o2.heritable_fitness_traits_, MAX_FITNESS_TRAITS*sizeof(FitnessTraitType));
+            memcpy(o2.heritable_fitness_traits_, t_heritable_fitness_traits, MAX_FITNESS_TRAITS*sizeof(FitnessTraitType));
 
             // sex
             Organism::Sex t_sex = this->sex_;
@@ -590,11 +590,6 @@ class Organism {
             assert(this->fitness_ >= 0);
             assert(other.fitness_ >= 0);
             return this->fitness_ < other.fitness_;
-        }
-
-        /** Returns reference to the array of inheritable fitness factors. */
-        const FitnessFactors& genotype() const {
-            return this->genotypic_fitness_factors_;
         }
 
         /** Returns a reference to the haploid marker of this organism. */
@@ -638,20 +633,25 @@ class Organism {
          * @return  a floating point value corresponding to the i-th fitness
          *          factor.
          */
-        FitnessFactorType get_fitness_factor(unsigned idx) const {
-            assert( idx < MAX_FITNESS_FACTORS );
-            return this->genotypic_fitness_factors_[idx];
+        FitnessTraitType get_heritable_fitness_trait(unsigned idx) const {
+            assert( idx < MAX_FITNESS_TRAITS );
+            return this->heritable_fitness_traits_[idx];
         }
 
-        void set_fitness_factors(const FitnessFactors& new_genotype) {
-            memcpy(this->genotypic_fitness_factors_, new_genotype, MAX_FITNESS_FACTORS*sizeof(FitnessFactorType));
+        /** Returns reference to the array of inheritable fitness factors. */
+        const FitnessTraits& get_heritable_fitness_traits() const {
+            return this->heritable_fitness_traits_;
+        }
+
+        void set_heritable_fitness_traits(const FitnessTraits& fitness_traits) {
+            memcpy(this->heritable_fitness_traits_, fitness_traits, MAX_FITNESS_TRAITS*sizeof(FitnessTraitType));
         }
 
         /**
          * Returns the fitness score of this organism.
          * @return  a floating-point value [0, 1] representing the
          *          pre-calculated fitness of this organism given the its
-         *          genotype and environment
+         *          fitness_trait and environment
          */
         float get_fitness() const {
             return this->fitness_;
@@ -661,7 +661,7 @@ class Organism {
          * Sets the fitness score of this organism.
          * @param fitness a floating-point value [0, 1] representing the
          *                pre-calculated fitness of this organism given the its
-         *                genotype and environment
+         *                fitness_trait and environment
          */
         void set_fitness(float fitness) {
             this->fitness_ = fitness;
@@ -726,31 +726,31 @@ class Organism {
          *
          * @param female                the female parent
          * @param male                  the other parent
-         * @param num_fitness_factors   the number of fitness factors (which
+         * @param num_fitness_traits   the number of fitness factors (which
          *                              should be less than or equal to
-         *                              MAX_FITNESS_FACTORS)
+         *                              MAX_FITNESS_TRAITS)
          * @param rng                   source of random numbers
          */
-        void inherit_genotypic_fitness_factors(const Organism& female,
+        void inherit_heritable_fitness_traits(const Organism& female,
                                                const Organism& male,
-                                               unsigned num_fitness_factors,
-                                               const std::vector<float>& fitness_factor_inheritance_sd,
+                                               unsigned num_fitness_traits,
+                                               const std::vector<float>& fitness_trait_inheritance_sd,
                                                RandomNumberGenerator& rng) {
-            assert(num_fitness_factors <= MAX_FITNESS_FACTORS);
-            for (unsigned i = 0; i < num_fitness_factors; ++i) {
-                FitnessFactorType ff_value = static_cast<FitnessFactorType>(female.genotypic_fitness_factors_[i] + male.genotypic_fitness_factors_[i])/2
-                            + rng.normal(0, fitness_factor_inheritance_sd.at(i));
+            assert(num_fitness_traits <= MAX_FITNESS_TRAITS);
+            for (unsigned i = 0; i < num_fitness_traits; ++i) {
+                FitnessTraitType ff_value = static_cast<FitnessTraitType>(female.heritable_fitness_traits_[i] + male.heritable_fitness_traits_[i])/2
+                            + rng.normal(0, fitness_trait_inheritance_sd.at(i));
 //                            + rng.normal(0, 0.00001);
                             // OK:      0.0000001
                             //          0.000001
                             //          0.00001
                             // EXTINCT: 0.0001
-//                FitnessFactorType ff_value = rng.select(female.genotypic_fitness_factors_[i], male.genotypic_fitness_factors_[i]);
-//                std::cout << "F=" << female.genotypic_fitness_factors_[i];
-//                std::cout << ", M=" << male.genotypic_fitness_factors_[i];
-//                std::cout << ", sd=" << fitness_factor_inheritance_sd.at(i);
+//                FitnessTraitType ff_value = rng.select(female.heritable_fitness_traits_[i], male.heritable_fitness_traits_[i]);
+//                std::cout << "F=" << female.heritable_fitness_traits_[i];
+//                std::cout << ", M=" << male.heritable_fitness_traits_[i];
+//                std::cout << ", sd=" << fitness_trait_inheritance_sd.at(i);
 //                std::cout << ", Offspring=" << ff_value << std::endl;
-                this->genotypic_fitness_factors_[i] = ff_value;
+                this->heritable_fitness_traits_[i] = ff_value;
             }
         }
 
@@ -790,7 +790,7 @@ class Organism {
         Species *               species_;
 
         /** values of inheritable component of fitness */
-        FitnessFactors          genotypic_fitness_factors_;
+        FitnessTraits          heritable_fitness_traits_;
 
         /** genealogy inherited through female alone */
         HaploidMarker           neutral_haploid_marker_;
@@ -844,11 +844,11 @@ class Species {
          * Constructor.
          *
          * @param label                 identifier string for this species
-         * @param num_fitness_factors   number of factors in fitness function
+         * @param num_fitness_traits   number of factors in fitness function
          * @param rng                   random number generator
          */
         Species(const std::string& label,
-                unsigned num_fitness_factors,
+                unsigned num_fitness_traits,
                 RandomNumberGenerator& rng);
 
         /**
@@ -876,8 +876,8 @@ class Species {
          *
          * @return number of "active" fitness factors
          */
-        unsigned get_num_fitness_factors() const {
-            return this->num_fitness_factors_;
+        unsigned get_num_fitness_traits() const {
+            return this->num_fitness_traits_;
         }
 
         /**
@@ -889,8 +889,8 @@ class Species {
          *
          * @param i number of "active" fitness factors
          */
-        void set_num_fitness_factors(unsigned num_fitness_factors) {
-            this->num_fitness_factors_ = num_fitness_factors;
+        void set_num_fitness_traits(unsigned num_fitness_traits) {
+            this->num_fitness_traits_ = num_fitness_traits;
         }
 
         /**
@@ -1013,8 +1013,8 @@ class Species {
          * @param  strengths    vector of coefficients to the multivariate
          *                      fitness function
          */
-        void set_default_genotypic_fitness_factors(const FitnessFactors& genotype) {
-            memcpy(this->default_genotypic_fitness_factors_, genotype, MAX_FITNESS_FACTORS*sizeof(FitnessFactorType));
+        void set_default_heritable_fitness_traits(const FitnessTraits& fitness_traits) {
+            memcpy(this->default_heritable_fitness_traits_, fitness_traits, MAX_FITNESS_TRAITS*sizeof(FitnessTraitType));
         }
 
         /**
@@ -1028,18 +1028,18 @@ class Species {
          * @param  strengths    vector of coefficients to the multivariate
          *                      fitness function
          */
-        void set_default_genotypic_fitness_factors(std::vector<FitnessFactorType> genotype) {
-            assert(genotype.size() <= MAX_FITNESS_FACTORS);
-            for (unsigned i = 0; i != genotype.size(); ++i) {
-                this->default_genotypic_fitness_factors_[i] = genotype[i];
+        void set_default_heritable_fitness_traits(std::vector<FitnessTraitType> fitness_traits) {
+            assert(fitness_traits.size() <= MAX_FITNESS_TRAITS);
+            for (unsigned i = 0; i != fitness_traits.size(); ++i) {
+                this->default_heritable_fitness_traits_[i] = fitness_traits[i];
             }
         }
 
-        std::vector<FitnessFactorType> get_default_genotypic_fitness_factors() {
-            std::vector<FitnessFactorType> v;
-            v.reserve(this->get_num_fitness_factors());
-            for (unsigned i = 0; i < this->get_num_fitness_factors(); ++i) {
-                v.push_back(this->default_genotypic_fitness_factors_[i]);
+        std::vector<FitnessTraitType> get_default_heritable_fitness_traits() {
+            std::vector<FitnessTraitType> v;
+            v.reserve(this->get_num_fitness_traits());
+            for (unsigned i = 0; i < this->get_num_fitness_traits(); ++i) {
+                v.push_back(this->default_heritable_fitness_traits_[i]);
             }
             return v;
         }
@@ -1053,11 +1053,10 @@ class Species {
          * calculated using the corresponding elements of the environmental and
          * genotypic fitness factor vectors.
          *
-         * @param  variances    vector of coefficients to the multivariate
-         *                      fitness function
+         * @param  sd    vector of standard deviations
          */
-        void set_fitness_factor_inheritance_sd(const std::vector<float>& variances) {
-            this->fitness_factor_inheritance_sd_ = variances;
+        void set_fitness_trait_inheritance_sd(const std::vector<float>& sd) {
+            this->fitness_trait_inheritance_sd_ = sd;
         }
 
         /**
@@ -1071,8 +1070,8 @@ class Species {
          * @param  variances    vector of coefficients to the multivariate
          *                      fitness function
          */
-        std::vector<float> get_fitness_factor_inheritance_sd() {
-            return this->fitness_factor_inheritance_sd_;
+        std::vector<float> get_fitness_trait_inheritance_sd() {
+            return this->fitness_trait_inheritance_sd_;
         }
 
         /**
@@ -1101,14 +1100,14 @@ class Species {
          * @return              the fitness score for the organism in the given
          *                      environment
          */
-        float calc_fitness(const Organism& organism, const FitnessFactors environment) const {
-            const FitnessFactors& genotype = organism.genotype();
-            const FitnessFactorType * g = genotype;
-            const FitnessFactorType * e = environment;
+        float calc_fitness(const Organism& organism, const FitnessTraits environment_optima) const {
+            const FitnessTraits& fitness_traits = organism.get_heritable_fitness_traits();
+            const FitnessTraitType * g = fitness_traits;
+            const FitnessTraitType * e = environment_optima;
             std::vector<float>::const_iterator s = this->selection_weights_.begin();
             float weighted_distance = 0.0;
             float diff = 0.0;
-            for (unsigned i = 0; i < this->num_fitness_factors_; ++i, ++g, ++e, ++s) {
+            for (unsigned i = 0; i < this->num_fitness_traits_; ++i, ++g, ++e, ++s) {
                 diff = *e - *g;
                 weighted_distance += (diff * diff) * *s; // each distance weighted by selection strength
             }
@@ -1199,7 +1198,7 @@ class Species {
          */
         Organism new_organism(CellIndexType cell_index) {
             Organism    org(this,
-                            this->default_genotypic_fitness_factors_,
+                            this->default_heritable_fitness_traits_,
                             this->get_random_sex());
             org.set_cell_index(cell_index);
             return org;
@@ -1208,29 +1207,24 @@ class Species {
         /**
          * Returns an offspring produced by two organisms.
          *
-         * Genotypic fitness factors of the offspring are random mosaic
-         * composed of factors selected with uniform random probability from
-         * either male or female genotype of corresponding elements, with
-         * random mutation of values. Genealogies are linked in with parental
-         * nodes as ancestors: haploid node of offspring takes female's haploid
-         * node as ancestor, whereas in diploid loci, each of the two nodes at
-         * each loci selects one node at random from the male, and one from
-         * the female parent. Sex is assigned randomly.
+         * Fitness traits are inherited as the mid-parent value for a trait plus
+         * a random error. Genealogies are inherited by selecting an allele from
+         * each parent for each locus.
          *
          * @param female    female parent
          * @param male      male parent
          * @return          offspring
          */
-        Organism new_organism(const Organism& female, const Organism& male, CellIndexType cell_index, bool evolve_fitness_factors) {
+        Organism new_organism(const Organism& female, const Organism& male, CellIndexType cell_index, bool evolve_fitness_components) {
             Organism organism(this, this->get_random_sex());
-            if (evolve_fitness_factors) {
-                organism.inherit_genotypic_fitness_factors(female,
+            if (evolve_fitness_components) {
+                organism.inherit_heritable_fitness_traits(female,
                                                            male,
-                                                           this->num_fitness_factors_,
-                                                           this->fitness_factor_inheritance_sd_,
+                                                           this->num_fitness_traits_,
+                                                           this->fitness_trait_inheritance_sd_,
                                                            this->rng_);
             } else {
-                organism.set_fitness_factors(this->default_genotypic_fitness_factors_);
+                organism.set_heritable_fitness_traits(this->default_heritable_fitness_traits_);
             }
             organism.inherit_genealogies(female, male, this->rng_, cell_index);
             return organism;
@@ -1246,11 +1240,11 @@ class Species {
         /** unique identifier for this species */
         std::string                         label_;
         /** number of active fitness factors */
-        unsigned                            num_fitness_factors_;
+        unsigned                            num_fitness_traits_;
         /** weighting of the least-squares distance between organism trait value and environmental optimum */
         std::vector<float>                  selection_weights_;
         /** variance in the inheritance equation */
-        std::vector<float>                  fitness_factor_inheritance_sd_;
+        std::vector<float>                  fitness_trait_inheritance_sd_;
         /** mean number of offspring per female */
         PopulationCountType                 mean_reproductive_rate_;
         /** landscape migration potential for this species */
@@ -1260,7 +1254,7 @@ class Species {
         /** probability of movement of each organism */
         float                               movement_probability_;
         /** genotype for organisms created de novo */
-        FitnessFactors                      default_genotypic_fitness_factors_;
+        FitnessTraits                       default_heritable_fitness_traits_;
         /** source of random numbers of various distributions */
         RandomNumberGenerator&              rng_;
         /** tracks the number of labels assigned to organisms of this species */

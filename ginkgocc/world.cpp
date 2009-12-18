@@ -44,7 +44,7 @@ World::World()
     : species_(),
       rng_(),
       landscape_(species_, rng_),
-      num_fitness_factors_(1),
+      num_fitness_traits_(1),
       generations_to_run_(0),
       current_generation_(0),
       log_frequency_(10),
@@ -60,7 +60,7 @@ World::World(unsigned long seed)
     : species_(),
       rng_(seed),
       landscape_(species_, rng_),
-      num_fitness_factors_(1),
+      num_fitness_traits_(1),
       generations_to_run_(0),
       current_generation_(0),
       log_frequency_(10),
@@ -87,13 +87,13 @@ World::~World() {
 
 // Creates a new landscape.
 void World::generate_landscape(CellIndexType size_x, CellIndexType size_y) {
-    this->landscape_.generate(size_x, size_y, this->num_fitness_factors_);
+    this->landscape_.generate(size_x, size_y, this->num_fitness_traits_);
 }
 
 // Adds a new species definition to this world.
 Species& World::new_species(const std::string& label) {
     Species* sp = new Species(label,
-                              this->num_fitness_factors_,
+                              this->num_fitness_traits_,
                               this->rng_);
     this->species_.insert(std::make_pair(std::string(label), sp));
     std::vector<MovementCountType> default_movement_costs(this->landscape_.size(), 1);
@@ -297,7 +297,7 @@ void World::process_world_settings() {
             std::ostringstream msg;
             msg << "[Generation " << this->current_generation_ << "] Setting environmental variable " <<  ei->first <<  ": \"" <<  ei->second <<  "\"";
             this->log_info(msg.str());
-            asciigrid::AsciiGrid<FitnessFactorType> grid(ei->second);
+            asciigrid::AsciiGrid<FitnessTraitType> grid(ei->second);
             this->landscape_.set_environment(ei->first, grid.get_cell_values());
         }
     }
@@ -426,7 +426,7 @@ void World::write_traits(Species * sp_ptr,
     // write data
     this->write_nexus_header(sp_ptr, organisms, out);
     out << "BEGIN CHARACTERS;\n";
-    unsigned int nchar = this->num_fitness_factors_ + 1;
+    unsigned int nchar = this->num_fitness_traits_ + 1;
     out << "    DIMENSIONS NCHAR=" << nchar << ";\n";
     out << "    FORMAT DATATYPE=CONTINUOUS ITEMS=(STATES);\n";
 
@@ -441,7 +441,7 @@ void World::write_traits(Species * sp_ptr,
         }
     }
     out << "        " << std::setw(max_label_len) << std::setfill(' ') << "" << "    ";
-    for (unsigned int i=0; i < this->num_fitness_factors_; ++i) {
+    for (unsigned int i=0; i < this->num_fitness_traits_; ++i) {
         out << " " << std::setw(9) << std::setfill(' ') << "[Factor_" << std::setw(2) << std::setfill('0') << i << "]";
     }
     out << " " << std::setw(12) << std::setfill(' ') << "[Fitness]";
@@ -453,8 +453,8 @@ void World::write_traits(Species * sp_ptr,
             oi != organisms.end();
             ++oi) {
         out << "        " << std::setw(max_label_len) << sp_ptr->get_organism_label(**oi) << "    ";
-        for (unsigned int i=0; i < this->num_fitness_factors_; ++i) {
-            out << " " << std::setw(12) << std::setfill(' ') << (**oi).get_fitness_factor(i);
+        for (unsigned int i=0; i < this->num_fitness_traits_; ++i) {
+            out << " " << std::setw(12) << std::setfill(' ') << (**oi).get_heritable_fitness_trait(i);
         }
         out << " " << std::setw(12) << std::setfill(' ') << (**oi).get_fitness();
         out << "\n";
@@ -673,7 +673,7 @@ void World::log_configuration() {
     out << "*** WORLD ***" << std::endl;
     out << "Label: " << this->label_ << std::endl;
     out << "Random seed: " << this->rng_.get_seed() << std::endl;
-    out << "Fitness factors: " << this->num_fitness_factors_ << std::endl;
+    out << "Fitness factors: " << this->num_fitness_traits_ << std::endl;
     out << "Generations to run: " << this->generations_to_run_ << std::endl;
     out << "Output directory: " << this->output_dir_ << std::endl;
     out << "Replicate ID: " << this->replicate_id_ << std::endl;
@@ -724,7 +724,7 @@ void World::log_configuration() {
         Species& lineage = *spi->second;
         out << std::endl;
         out << "\"" << lineage.get_label() << "\"" << std::endl;
-        out << "     Fitness factors: " << lineage.get_num_fitness_factors() << std::endl;
+        out << "     Fitness factors: " << lineage.get_num_fitness_traits() << std::endl;
         out << "     Selection weights: ";
         std::vector<float> sw = lineage.get_selection_weights();
         for (std::vector<float>::iterator swi = sw.begin(); swi != sw.end(); ++swi) {
@@ -735,8 +735,8 @@ void World::log_configuration() {
         }
         out << std::endl;
         out << "     Initial genotypic fitness factors: ";
-        std::vector<FitnessFactorType> g = lineage.get_default_genotypic_fitness_factors();
-        for (std::vector<FitnessFactorType>::iterator gi = g.begin(); gi != g.end(); ++gi) {
+        std::vector<FitnessTraitType> g = lineage.get_default_heritable_fitness_traits();
+        for (std::vector<FitnessTraitType>::iterator gi = g.begin(); gi != g.end(); ++gi) {
             if ((gi - g.begin()) > 0) {
                 out << " ";
             }

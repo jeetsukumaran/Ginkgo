@@ -46,7 +46,7 @@ class Cell {
          * @param index     the index of this cell on the Landscape
          * @param index     the x geographic coordinate of this cell
          * @param index     the y geographic coordinate of this cell
-         * @param num_fitness_factors
+         * @param num_fitness_traits
          *                  the number of factors to be considered for fitness
          * @species         reference to the World species pool
          * @rng             reference to the World random number generator
@@ -54,7 +54,7 @@ class Cell {
         Cell(CellIndexType index,
              CellIndexType x,
              CellIndexType y,
-             unsigned num_fitness_factors,
+             unsigned num_fitness_traits,
              Landscape& landscape,
              const SpeciesByLabel& species,
              RandomNumberGenerator& rng);
@@ -117,8 +117,8 @@ class Cell {
          *
          * @return  environmental fitness factor value
          */
-        FitnessFactorType get_environment_factor(unsigned idx) const {
-            assert(idx < this->num_fitness_factors_);
+        FitnessTraitType get_environment_factor(unsigned idx) const {
+            assert(idx < this->num_fitness_traits_);
             return this->environment_[idx];
         }
 
@@ -128,9 +128,9 @@ class Cell {
          * @param  idx      the the environmental fitness factor to set
          * @param  value    the value to set it to
          */
-        void set_environment_factor(unsigned idx, FitnessFactorType e) {
-//            std::cout << "idx=" << idx << ", num fitness factors = " << this->num_fitness_factors_ << std::endl;
-            assert(idx < this->num_fitness_factors_);
+        void set_environment_factor(unsigned idx, FitnessTraitType e) {
+//            std::cout << "idx=" << idx << ", num fitness factors = " << this->num_fitness_traits_ << std::endl;
+            assert(idx < this->num_fitness_traits_);
             this->environment_[idx] = e;
         }
 
@@ -139,8 +139,8 @@ class Cell {
          *
          * @return  number of active environmental fitness factors
          */
-        unsigned get_num_fitness_factors() const {
-            return this->num_fitness_factors_;
+        unsigned get_num_fitness_traits() const {
+            return this->num_fitness_traits_;
         }
 
         // --- basic biotics ---
@@ -241,7 +241,7 @@ class Cell {
          * generated, parents removed from cell's population, and offspring
          * are inserted.
          */
-        void reproduction(bool evolve_fitness_factors=true);
+        void reproduction(bool evolve_fitness_components=true);
 
         /**
          * Shuffles organisms around using brownian motion; organisms that
@@ -320,9 +320,9 @@ class Cell {
         /** maximum number of individual organisms that can occupy this cell */
         PopulationCountType                    carrying_capacity_;
         /** number of active fitness factors */
-        unsigned                               num_fitness_factors_;
+        unsigned                               num_fitness_traits_;
         /** vector of environmental fitness factor components in this cell */
-        FitnessFactors                         environment_;
+        FitnessTraits                         environment_;
         /** collection of organisms occupying this cell */
         OrganismVector                         organisms_;
         /** reference to Landscape in which this cell is located */

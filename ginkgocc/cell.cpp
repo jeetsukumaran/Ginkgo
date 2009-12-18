@@ -42,7 +42,7 @@ OrganismVector Cell::previous_gen;                       // scratch space to hol
 Cell::Cell(CellIndexType index,
            CellIndexType x,
            CellIndexType y,
-           unsigned num_fitness_factors,
+           unsigned num_fitness_traits,
            Landscape& landscape,
            const SpeciesByLabel& species,
            RandomNumberGenerator& rng)
@@ -50,12 +50,12 @@ Cell::Cell(CellIndexType index,
           x_(x),
           y_(y),
           carrying_capacity_(0),
-          num_fitness_factors_(num_fitness_factors),
+          num_fitness_traits_(num_fitness_traits),
           landscape_(landscape),
           species_(species),
           rng_(rng) {
     memset(this->environment_, 0,
-    MAX_FITNESS_FACTORS*sizeof(FitnessFactorType));
+    MAX_FITNESS_TRAITS*sizeof(FitnessTraitType));
 }
 
 // --- basic biotics ---
@@ -77,10 +77,10 @@ void Cell::generate_new_population(Species * sp,
     if (ancestral_generations == 0) {
         ancestral_generations = ancestral_pop_size * 10;
     }
-    Cell temp_cell(this->index_, this->x_, this->y_, this->num_fitness_factors_, this->landscape_, this->species_, this->rng_);
+    Cell temp_cell(this->index_, this->x_, this->y_, this->num_fitness_traits_, this->landscape_, this->species_, this->rng_);
     temp_cell.generate_new_organisms(sp, ancestral_pop_size);
     for (GenerationCountType g = 0; g != ancestral_generations; ++g) {
-        temp_cell.reproduction(false); // reproduce without evolving traits
+        temp_cell.reproduction(false); // reproduce without evolving fitness component traits
         // std::random_shuffle(temp_cell.organisms_.begin(), temp_cell.organisms_.end(), rp);
         if (temp_cell.organisms_.size() > ancestral_pop_size) {
             temp_cell.organisms_.erase(temp_cell.organisms_.begin() + ancestral_pop_size, temp_cell.organisms_.end());
@@ -98,7 +98,7 @@ void Cell::generate_new_population(Species * sp,
 
 // --- primary biogeographical and evolutionary processes ---
 
-void Cell::reproduction(bool evolve_fitness_factors) {
+void Cell::reproduction(bool evolve_fitness_components) {
 
 	Cell::previous_gen.clear();
 	Cell::previous_gen.swap(this->organisms_);
@@ -123,7 +123,7 @@ void Cell::reproduction(bool evolve_fitness_factors) {
                 for (unsigned n = 0; n <= num_offspring; ++n) {
                     const Organism* male = this->rng_.select(breeding_male_ptrs);
                     const Organism* female = *fptr;
-                    this->organisms_.push_back(sp->new_organism(*female, *male, this->index_, evolve_fitness_factors));
+                    this->organisms_.push_back(sp->new_organism(*female, *male, this->index_, evolve_fitness_components));
                 } // for each offspring
             } // for each female
         } // if females > 0 and males > 0
