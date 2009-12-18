@@ -734,7 +734,7 @@ void World::log_configuration() {
             out << *swi;
         }
         out << std::endl;
-        out << "     Initial genotypic fitness trait values: ";
+        out << "     Default heritable fitness trait values: ";
         std::vector<FitnessTraitType> g = lineage.get_default_heritable_fitness_traits();
         for (std::vector<FitnessTraitType>::iterator gi = g.begin(); gi != g.end(); ++gi) {
             if ((gi - g.begin()) > 0) {

@@ -144,7 +144,7 @@ void ConfigurationFile::process_lineage(XmlElementType& lineage_node, World& wor
     Species& lineage = world.new_species(lineage_id);
 
     // genotypic fitness factor
-    XmlElementType gtf_node = this->get_child_node(lineage_node, "heritableFitnessTraitDefaults", false);
+    XmlElementType gtf_node = this->get_child_node(lineage_node, "fitnessTraitDefaultValues", false);
     if (!gtf_node.isEmpty()) {
         std::vector<FitnessTraitType> gff = this->get_element_vector<FitnessTraitType>(gtf_node);
         if (gff.size() != lineage.get_num_fitness_traits()) {
