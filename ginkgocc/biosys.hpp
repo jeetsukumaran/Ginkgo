@@ -1100,10 +1100,10 @@ class Species {
          * @return              the fitness score for the organism in the given
          *                      environment
          */
-        float calc_fitness(const Organism& organism, const FitnessTraits environment_optima) const {
+        float calc_fitness(const Organism& organism, const FitnessTraits fitness_trait_optimum_optima) const {
             const FitnessTraits& fitness_traits = organism.get_heritable_fitness_traits();
             const FitnessTraitType * g = fitness_traits;
-            const FitnessTraitType * e = environment_optima;
+            const FitnessTraitType * e = fitness_trait_optimum_optima;
             std::vector<float>::const_iterator s = this->selection_weights_.begin();
             float weighted_distance = 0.0;
             float diff = 0.0;

@@ -117,9 +117,9 @@ class Cell {
          *
          * @return  environmental fitness factor value
          */
-        FitnessTraitType get_environment_factor(unsigned idx) const {
+        FitnessTraitType get_fitness_trait_optimum(unsigned idx) const {
             assert(idx < this->num_fitness_traits_);
-            return this->environment_[idx];
+            return this->fitness_trait_optimum_[idx];
         }
 
         /**
@@ -128,10 +128,10 @@ class Cell {
          * @param  idx      the the environmental fitness factor to set
          * @param  value    the value to set it to
          */
-        void set_environment_factor(unsigned idx, FitnessTraitType e) {
+        void set_fitness_trait_optimum(unsigned idx, FitnessTraitType e) {
 //            std::cout << "idx=" << idx << ", num fitness factors = " << this->num_fitness_traits_ << std::endl;
             assert(idx < this->num_fitness_traits_);
-            this->environment_[idx] = e;
+            this->fitness_trait_optimum_[idx] = e;
         }
 
         /**
@@ -322,7 +322,7 @@ class Cell {
         /** number of active fitness factors */
         unsigned                               num_fitness_traits_;
         /** vector of environmental fitness factor components in this cell */
-        FitnessTraits                         environment_;
+        FitnessTraits                         fitness_trait_optimum_;
         /** collection of organisms occupying this cell */
         OrganismVector                         organisms_;
         /** reference to Landscape in which this cell is located */

@@ -101,7 +101,7 @@ class Landscape {
         void set_environment(unsigned index, std::vector<FitnessTraitType> cell_environments) {
             assert(cell_environments.size() >= this->cells_.size());
             for (CellIndexType i = 0; i < this->cells_.size(); ++i) {
-                (*this->cells_[i]).set_environment_factor(index, cell_environments[i]);
+                (*this->cells_[i]).set_fitness_trait_optimum(index, cell_environments[i]);
             }
         }
 

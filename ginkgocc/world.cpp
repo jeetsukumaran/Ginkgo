@@ -290,9 +290,9 @@ void World::process_world_settings() {
         asciigrid::AsciiGrid<PopulationCountType> grid(wi->second.carrying_capacity);
         this->landscape_.set_carrying_capacities(grid.get_cell_values());
     }
-    if (wi->second.environments.size() != 0) {
-        for (std::map<unsigned, std::string>::iterator ei = wi->second.environments.begin();
-                 ei != wi->second.environments.end();
+    if (wi->second.fitness_trait_optima.size() != 0) {
+        for (std::map<unsigned, std::string>::iterator ei = wi->second.fitness_trait_optima.begin();
+                 ei != wi->second.fitness_trait_optima.end();
                  ++ei) {
             std::ostringstream msg;
             msg << "[Generation " << this->current_generation_ << "] Setting environmental variable " <<  ei->first <<  ": \"" <<  ei->second <<  "\"";
@@ -442,7 +442,7 @@ void World::write_traits(Species * sp_ptr,
     }
     out << "        " << std::setw(max_label_len) << std::setfill(' ') << "" << "    ";
     for (unsigned int i=0; i < this->num_fitness_traits_; ++i) {
-        out << " " << std::setw(9) << std::setfill(' ') << "[Factor_" << std::setw(2) << std::setfill('0') << i << "]";
+        out << " " << std::setw(10) << std::setfill(' ') << "[Trait_" << std::setw(2) << std::setfill('0') << i << "]";
     }
     out << " " << std::setw(12) << std::setfill(' ') << "[Fitness]";
     out << std::endl;
@@ -673,7 +673,7 @@ void World::log_configuration() {
     out << "*** WORLD ***" << std::endl;
     out << "Label: " << this->label_ << std::endl;
     out << "Random seed: " << this->rng_.get_seed() << std::endl;
-    out << "Fitness factors: " << this->num_fitness_traits_ << std::endl;
+    out << "Fitness traits: " << this->num_fitness_traits_ << std::endl;
     out << "Generations to run: " << this->generations_to_run_ << std::endl;
     out << "Output directory: " << this->output_dir_ << std::endl;
     out << "Replicate ID: " << this->replicate_id_ << std::endl;
@@ -724,7 +724,7 @@ void World::log_configuration() {
         Species& lineage = *spi->second;
         out << std::endl;
         out << "\"" << lineage.get_label() << "\"" << std::endl;
-        out << "     Fitness factors: " << lineage.get_num_fitness_traits() << std::endl;
+        out << "     Fitness traits: " << lineage.get_num_fitness_traits() << std::endl;
         out << "     Selection weights: ";
         std::vector<float> sw = lineage.get_selection_weights();
         for (std::vector<float>::iterator swi = sw.begin(); swi != sw.end(); ++swi) {
@@ -734,7 +734,7 @@ void World::log_configuration() {
             out << *swi;
         }
         out << std::endl;
-        out << "     Initial genotypic fitness factors: ";
+        out << "     Initial genotypic fitness trait values: ";
         std::vector<FitnessTraitType> g = lineage.get_default_heritable_fitness_traits();
         for (std::vector<FitnessTraitType>::iterator gi = g.begin(); gi != g.end(); ++gi) {
             if ((gi - g.begin()) > 0) {
@@ -757,11 +757,11 @@ void World::log_configuration() {
         if (wi->second.carrying_capacity.size() != 0) {
             out << "    Carrying-capacity: \"" << wi->second.carrying_capacity << "\"" << std::endl;
         }
-        if (wi->second.environments.size() != 0) {
-            for (std::map<unsigned, std::string>::iterator ei = wi->second.environments.begin();
-                     ei != wi->second.environments.end();
+        if (wi->second.fitness_trait_optima.size() != 0) {
+            for (std::map<unsigned, std::string>::iterator ei = wi->second.fitness_trait_optima.begin();
+                     ei != wi->second.fitness_trait_optima.end();
                      ++ei) {
-                out << "    Environment factor #" << (ei->first + 1) << ": \"" << ei->second << "\"" << std::endl;
+                out << "    Fitness trait #" << (ei->first + 1) << " optima: \"" << ei->second << "\"" << std::endl;
             }
         }
         if (wi->second.movement_costs.size() != 0) {

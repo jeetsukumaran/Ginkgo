@@ -231,7 +231,7 @@ void ConfigurationFile::process_environments(World& world) {
                         throw ConfigurationError(msg.str());
                     }
                     std::string gridfile = this->get_validated_grid_path<FitnessTraitType>(this->get_element_scalar<std::string>(sub_node), world);
-                    world_settings.environments.insert(std::make_pair(eidx, gridfile));
+                    world_settings.fitness_trait_optima.insert(std::make_pair(eidx, gridfile));
                 } else if (node_name == "movementCosts") {
                     std::string lineage_id = this->get_attribute<std::string>(sub_node, "lineage");
                     if (not world.has_species(lineage_id)) {

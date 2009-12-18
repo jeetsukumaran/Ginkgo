@@ -138,7 +138,7 @@ struct WorldSettings {
      * Environmental regimes that need to be changed/set (expressed as factor
      * indexes mapped to ESRI ASCII Grid file paths).
      */
-    std::map<unsigned, std::string>         environments;
+    std::map<unsigned, std::string>         fitness_trait_optima;
 
     /**
      * Movement costs that need to be changed/set. (expressed as species labels

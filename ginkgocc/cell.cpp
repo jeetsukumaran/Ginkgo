@@ -54,7 +54,7 @@ Cell::Cell(CellIndexType index,
           landscape_(landscape),
           species_(species),
           rng_(rng) {
-    memset(this->environment_, 0,
+    memset(this->fitness_trait_optimum_, 0,
     MAX_FITNESS_TRAITS*sizeof(FitnessTraitType));
 }
 
@@ -170,7 +170,7 @@ void Cell::survival() {
     for (OrganismVector::iterator og = this->organisms_.begin(); og != this->organisms_.end(); ++og) {
         assert(!og->is_expired());
         Species& sp = og->species();
-        float fitness = sp.calc_fitness(*og, this->environment_);
+        float fitness = sp.calc_fitness(*og, this->fitness_trait_optimum_);
         og->set_fitness(fitness);
         if (this->rng_.uniform_01() > fitness) {
             og->set_expired(true);
