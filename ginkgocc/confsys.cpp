@@ -144,7 +144,7 @@ void ConfigurationFile::process_lineage(XmlElementType& lineage_node, World& wor
     Species& lineage = world.new_species(lineage_id);
 
     // genotypic fitness factor
-    XmlElementType gtf_node = this->get_child_node(lineage_node, "genotypicFitness", false);
+    XmlElementType gtf_node = this->get_child_node(lineage_node, "heritableFitnessTraitDefaults", false);
     if (!gtf_node.isEmpty()) {
         std::vector<FitnessTraitType> gff = this->get_element_vector<FitnessTraitType>(gtf_node);
         if (gff.size() != lineage.get_num_fitness_traits()) {
@@ -158,7 +158,7 @@ void ConfigurationFile::process_lineage(XmlElementType& lineage_node, World& wor
     }
 
     // selection weights
-    XmlElementType sw_node = this->get_child_node(lineage_node, "selectionWeights", false);
+    XmlElementType sw_node = this->get_child_node(lineage_node, "fitnessTraitSelectionWeights", false);
     if (!sw_node.isEmpty()) {
         std::vector<float> sw = this->get_element_vector<float>(sw_node);
         if (sw.size() != lineage.get_num_fitness_traits()) {
@@ -172,7 +172,7 @@ void ConfigurationFile::process_lineage(XmlElementType& lineage_node, World& wor
     }
 
     // fitness sd
-    XmlElementType fsd_node = this->get_child_node(lineage_node, "fitnessInheritanceStdDev", false);
+    XmlElementType fsd_node = this->get_child_node(lineage_node, "fitnessTraitInheritanceStdDev", false);
     if (!fsd_node.isEmpty()) {
         std::vector<float> sd = this->get_element_vector<float>(fsd_node);
         if (sd.size() != lineage.get_num_fitness_traits()) {
