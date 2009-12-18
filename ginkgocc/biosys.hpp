@@ -746,7 +746,7 @@ class Organism {
 //                std::cout << ", M=" << male.genotypic_fitness_factors_[i];
 //                std::cout << ", sd=" << fitness_factor_inheritance_sd.at(i);
 //                std::cout << ", Offspring=" << ff_value << std::endl;
-//                this->genotypic_fitness_factors_[i] = ff_value;
+                this->genotypic_fitness_factors_[i] = ff_value;
             }
         }
 
