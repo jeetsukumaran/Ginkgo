@@ -322,20 +322,16 @@ void ConfigurationFile::process_samplings(World& world) {
         for (int i = 0; i < samplings.nChildNode(); ++i) {
             XmlElementType snode = samplings.getChildNode(i);
             std::string node_name = snode.getName();
-            if (node_name == "occurrence") {
+            if (node_name == "sample") {
+
                 GenerationCountType gen = this->get_attribute<GenerationCountType>(snode, "gen");
                 std::string lineage_id = this->get_attribute<std::string>(snode, "lineage");
                 if (not world.has_species(lineage_id)) {
                     throw ConfigurationError("occurrence sample: lineage \"" + lineage_id + "\" not defined");
                 }
                 world.add_occurrence_sampling(gen, world.get_species_ptr(lineage_id));
-            } else if (node_name == "tree") {
+
                 SamplingRegime world_sampling_regime;
-                GenerationCountType gen = this->get_attribute<GenerationCountType>(snode, "gen");
-                std::string lineage_id = this->get_attribute<std::string>(snode, "lineage");
-                if (not world.has_species(lineage_id)) {
-                    throw ConfigurationError("tree sample: lineage \"" + lineage_id + "\" not defined");
-                }
                 world_sampling_regime.species_ptr = world.get_species_ptr(lineage_id);
                 std::string label = this->get_attribute<std::string>(snode, "label", "");
                 if (label.size() > 0) {

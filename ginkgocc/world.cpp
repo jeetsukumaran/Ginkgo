@@ -243,11 +243,11 @@ void World::run() {
         // clear output filename stems
         this->output_filenames_.clear();
 
-        // build trees requested in this generation
-        this->process_tree_samplings();
-
         // save occurrence data requested in this generation
         this->process_occurrence_samplings();
+
+        // build trees requested in this generation
+        this->process_tree_samplings();
 
         // process world changes
         this->process_world_settings();
