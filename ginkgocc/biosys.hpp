@@ -742,7 +742,11 @@ class Organism {
                             //          0.00001
                             // EXTINCT: 0.0001
 //                FitnessFactorType ff_value = rng.select(female.genotypic_fitness_factors_[i], male.genotypic_fitness_factors_[i]);
-                this->genotypic_fitness_factors_[i] = ff_value;
+//                std::cout << "F=" << female.genotypic_fitness_factors_[i];
+//                std::cout << ", M=" << male.genotypic_fitness_factors_[i];
+//                std::cout << ", sd=" << fitness_factor_inheritance_sd.at(i);
+//                std::cout << ", Offspring=" << ff_value << std::endl;
+//                this->genotypic_fitness_factors_[i] = ff_value;
             }
         }
 

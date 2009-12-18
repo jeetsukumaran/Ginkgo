@@ -164,11 +164,25 @@ void ConfigurationFile::process_lineage(XmlElementType& lineage_node, World& wor
         if (sw.size() != lineage.get_num_fitness_factors()) {
             std::ostringstream msg;
             msg << "expecting " << lineage.get_num_fitness_factors();
-            msg << " default selection weights, but found ";
+            msg << " selection weights, but found ";
             msg << sw.size() << " instead";
             throw ConfigurationError(msg.str());
         }
         lineage.set_selection_weights(sw);
+    }
+
+    // fitness sd
+    XmlElementType fsd_node = this->get_child_node(lineage_node, "fitnessInheritanceStdDev", false);
+    if (!fsd_node.isEmpty()) {
+        std::vector<float> sd = this->get_element_vector<float>(fsd_node);
+        if (sd.size() != lineage.get_num_fitness_factors()) {
+            std::ostringstream msg;
+            msg << "expecting " << lineage.get_num_fitness_factors();
+            msg << " fitness inheritance standard deviations, but found ";
+            msg << sd.size() << " instead";
+            throw ConfigurationError(msg.str());
+        }
+        lineage.set_fitness_factor_inheritance_sd(sd);
     }
 
     lineage.set_mean_reproductive_rate(this->get_child_node_scalar<unsigned>(lineage_node, "fecundity", 16));
