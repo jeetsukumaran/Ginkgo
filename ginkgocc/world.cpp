@@ -429,15 +429,34 @@ void World::write_traits(Species * sp_ptr,
     unsigned int nchar = this->num_fitness_factors_ + 1;
     out << "    DIMENSIONS NCHAR=" << nchar << ";\n";
     out << "    FORMAT DATATYPE=CONTINUOUS ITEMS=(STATES);\n";
-    out << "    MATRIX\n";
+
+    // the things I do for OCD-driven tight formatting ...
+    long max_label_len = 0;
     for (std::vector<const Organism *>::const_iterator oi = organisms.begin();
             oi != organisms.end();
             ++oi) {
-        out << "        " << sp_ptr->get_organism_label(**oi) << "    ";
-        for (unsigned int i=0; i < this->num_fitness_factors_; ++i) {
-            out << "    " << (**oi).get_fitness_factor(i);
+        long sz = sp_ptr->get_organism_label(**oi).size();
+        if (sz > max_label_len) {
+            max_label_len = sz;
         }
-        out << "    " << (**oi).get_fitness();
+    }
+    out << "        " << std::setw(max_label_len) << std::setfill(' ') << "" << "    ";
+    for (unsigned int i=0; i < this->num_fitness_factors_; ++i) {
+        out << " " << std::setw(9) << std::setfill(' ') << "[Factor_" << std::setw(2) << std::setfill('0') << i << "]";
+    }
+    out << " " << std::setw(12) << std::setfill(' ') << "[Fitness]";
+    out << std::endl;
+
+    out << "    MATRIX\n";
+
+    for (std::vector<const Organism *>::const_iterator oi = organisms.begin();
+            oi != organisms.end();
+            ++oi) {
+        out << "        " << std::setw(max_label_len) << sp_ptr->get_organism_label(**oi) << "    ";
+        for (unsigned int i=0; i < this->num_fitness_factors_; ++i) {
+            out << " " << std::setw(12) << std::setfill(' ') << (**oi).get_fitness_factor(i);
+        }
+        out << " " << std::setw(12) << std::setfill(' ') << (**oi).get_fitness();
         out << "\n";
     }
     out << ";\n";
