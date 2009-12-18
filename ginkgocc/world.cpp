@@ -442,7 +442,7 @@ void World::write_traits(Species * sp_ptr,
     }
     out << "        " << std::setw(max_label_len) << std::setfill(' ') << "" << "    ";
     for (unsigned int i=0; i < this->num_fitness_traits_; ++i) {
-        out << " " << std::setw(10) << std::setfill(' ') << "[Trait_" << std::setw(2) << std::setfill('0') << i << "]";
+        out << " " << std::setw(9) << std::setfill(' ') << "[Trait_" << std::setw(2) << std::setfill('0') << i << "]";
     }
     out << " " << std::setw(12) << std::setfill(' ') << "[Fitness]";
     out << std::endl;
