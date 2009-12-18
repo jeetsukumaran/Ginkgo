@@ -45,6 +45,7 @@ Species::Species(const std::string& label,
       organism_label_index_(0) {
     this->mean_reproductive_rate_ = 6;
     this->selection_weights_.assign(this->num_fitness_factors_, 1);
+    this->fitness_factor_inheritance_sd_.assign(this->num_fitness_factors_, 0);
     memset(this->default_genotypic_fitness_factors_, 0,
         MAX_FITNESS_FACTORS*sizeof(FitnessFactorType));
     this->movement_capacity_ = 1;

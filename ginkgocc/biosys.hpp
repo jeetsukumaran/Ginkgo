@@ -730,11 +730,13 @@ class Organism {
         void inherit_genotypic_fitness_factors(const Organism& female,
                                                const Organism& male,
                                                unsigned num_fitness_factors,
+                                               const std::vector<float>& fitness_factor_inheritance_sd,
                                                RandomNumberGenerator& rng) {
             assert(num_fitness_factors <= MAX_FITNESS_FACTORS);
             for (unsigned i = 0; i < num_fitness_factors; ++i) {
                 FitnessFactorType ff_value = static_cast<FitnessFactorType>(female.genotypic_fitness_factors_[i] + male.genotypic_fitness_factors_[i])/2
-                            + rng.normal(0, 0.00001);
+                            + rng.normal(0, fitness_factor_inheritance_sd.at(i));
+//                            + rng.normal(0, 0.00001);
                             // OK:      0.0000001
                             //          0.000001
                             //          0.00001
@@ -1034,6 +1036,37 @@ class Species {
             return v;
         }
 
+
+        /**
+         * Sets the strengths of individual fitness factors on the fitness as
+         * calculated for this species.
+         *
+         * Each element in the vector is a coefficient for the fitness function
+         * calculated using the corresponding elements of the environmental and
+         * genotypic fitness factor vectors.
+         *
+         * @param  variances    vector of coefficients to the multivariate
+         *                      fitness function
+         */
+        void set_fitness_factor_inheritance_sd(const std::vector<float>& variances) {
+            this->fitness_factor_inheritance_sd_ = variances;
+        }
+
+        /**
+         * Gets the strengths of individual fitness factors on the fitness as
+         * calculated for this species.
+         *
+         * Each element in the vector is a coefficient for the fitness function
+         * calculated using the corresponding elements of the environmental and
+         * genotypic fitness factor vectors.
+         *
+         * @param  variances    vector of coefficients to the multivariate
+         *                      fitness function
+         */
+        std::vector<float> get_fitness_factor_inheritance_sd() {
+            return this->fitness_factor_inheritance_sd_;
+        }
+
         /**
          * Returns the fitness for a particular organism in a particular
          * environment.
@@ -1185,6 +1218,7 @@ class Species {
             organism.inherit_genotypic_fitness_factors(female,
                                                        male,
                                                        this->num_fitness_factors_,
+                                                       this->fitness_factor_inheritance_sd_,
                                                        this->rng_);
             organism.inherit_genealogies(female, male, this->rng_, cell_index);
             return organism;
@@ -1201,8 +1235,10 @@ class Species {
         std::string                         label_;
         /** number of active fitness factors */
         unsigned                            num_fitness_factors_;
-        /** scaling factor for fitness coefficients, for finer resolution of fitness levels */
+        /** weighting of the least-squares distance between organism trait value and environmental optimum */
         std::vector<float>                  selection_weights_;
+        /** variance in the inheritance equation */
+        std::vector<float>                  fitness_factor_inheritance_sd_;
         /** mean number of offspring per female */
         PopulationCountType                 mean_reproductive_rate_;
         /** landscape migration potential for this species */
