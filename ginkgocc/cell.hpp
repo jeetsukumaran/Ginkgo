@@ -241,7 +241,7 @@ class Cell {
          * generated, parents removed from cell's population, and offspring
          * are inserted.
          */
-        void reproduction();
+        void reproduction(bool evolve_fitness_factors=true);
 
         /**
          * Shuffles organisms around using brownian motion; organisms that

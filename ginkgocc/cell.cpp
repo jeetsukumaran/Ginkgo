@@ -80,7 +80,7 @@ void Cell::generate_new_population(Species * sp,
     Cell temp_cell(this->index_, this->x_, this->y_, this->num_fitness_factors_, this->landscape_, this->species_, this->rng_);
     temp_cell.generate_new_organisms(sp, ancestral_pop_size);
     for (GenerationCountType g = 0; g != ancestral_generations; ++g) {
-        temp_cell.reproduction();
+        temp_cell.reproduction(false); // reproduce without evolving traits
         // std::random_shuffle(temp_cell.organisms_.begin(), temp_cell.organisms_.end(), rp);
         if (temp_cell.organisms_.size() > ancestral_pop_size) {
             temp_cell.organisms_.erase(temp_cell.organisms_.begin() + ancestral_pop_size, temp_cell.organisms_.end());
@@ -98,7 +98,7 @@ void Cell::generate_new_population(Species * sp,
 
 // --- primary biogeographical and evolutionary processes ---
 
-void Cell::reproduction() {
+void Cell::reproduction(bool evolve_fitness_factors) {
 
 	Cell::previous_gen.clear();
 	Cell::previous_gen.swap(this->organisms_);
@@ -123,7 +123,7 @@ void Cell::reproduction() {
                 for (unsigned n = 0; n <= num_offspring; ++n) {
                     const Organism* male = this->rng_.select(breeding_male_ptrs);
                     const Organism* female = *fptr;
-                    this->organisms_.push_back(sp->new_organism(*female, *male, this->index_));
+                    this->organisms_.push_back(sp->new_organism(*female, *male, this->index_, evolve_fitness_factors));
                 } // for each offspring
             } // for each female
         } // if females > 0 and males > 0

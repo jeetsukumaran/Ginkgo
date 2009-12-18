@@ -643,6 +643,10 @@ class Organism {
             return this->genotypic_fitness_factors_[idx];
         }
 
+        void set_fitness_factors(const FitnessFactors& new_genotype) {
+            memcpy(this->genotypic_fitness_factors_, new_genotype, MAX_FITNESS_FACTORS*sizeof(FitnessFactorType));
+        }
+
         /**
          * Returns the fitness score of this organism.
          * @return  a floating-point value [0, 1] representing the
@@ -1217,13 +1221,17 @@ class Species {
          * @param male      male parent
          * @return          offspring
          */
-        Organism new_organism(const Organism& female, const Organism& male, CellIndexType cell_index) {
+        Organism new_organism(const Organism& female, const Organism& male, CellIndexType cell_index, bool evolve_fitness_factors) {
             Organism organism(this, this->get_random_sex());
-            organism.inherit_genotypic_fitness_factors(female,
-                                                       male,
-                                                       this->num_fitness_factors_,
-                                                       this->fitness_factor_inheritance_sd_,
-                                                       this->rng_);
+            if (evolve_fitness_factors) {
+                organism.inherit_genotypic_fitness_factors(female,
+                                                           male,
+                                                           this->num_fitness_factors_,
+                                                           this->fitness_factor_inheritance_sd_,
+                                                           this->rng_);
+            } else {
+                organism.set_fitness_factors(this->default_genotypic_fitness_factors_);
+            }
             organism.inherit_genealogies(female, male, this->rng_, cell_index);
             return organism;
         }
