@@ -113,6 +113,7 @@ void ConfigurationFile::process_world(World& world) {
         throw ConfigurationError(s.str());
     }
     world.set_num_fitness_traits(fitness_dim);
+    world.set_global_selection_strength(this->get_attribute<float>(world_node, "global_selection_strength", DEFAULT_GLOBAL_SELECTION_STRENGTH));
     world.set_allow_multifurcations(this->get_attribute_bool(world_node, "multifurcating_trees", true));
     world.set_produce_final_output(this->get_attribute_bool(world_node, "final_output", false));
     world.set_produce_full_complement_diploid_trees(this->get_attribute_bool(world_node, "full_complement_diploid_trees", false));

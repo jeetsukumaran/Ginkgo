@@ -277,6 +277,22 @@ class World {
         }
 
         /**
+         * Returns number of active fitness factors.
+         * @return number of active fitness factors
+         */
+        float get_global_selection_strength() const {
+            return this->global_selection_strength_;
+        }
+
+        /**
+         * Sets number of active fitness factors.
+         * @param global_selection_strength number of active fitness factors
+         */
+        void set_global_selection_strength(float global_selection_strength) {
+            this->global_selection_strength_ = global_selection_strength;
+        }
+
+        /**
          * Sets the total number of generations to run.
          * @param ngens     number of generations to run
          */
@@ -720,6 +736,8 @@ class World {
         Landscape                               landscape_;
         /** The number of dimensions to the fitness function. */
         unsigned                                num_fitness_traits_;
+        /** The global strength of selection. */
+        float                                   global_selection_strength_;
         /** Tracks the total number of generations to run. */
         GenerationCountType                     generations_to_run_;
         /** Tracks the number of generations that have been run. */

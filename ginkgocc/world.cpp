@@ -45,6 +45,7 @@ World::World()
       rng_(),
       landscape_(species_, rng_),
       num_fitness_traits_(1),
+      global_selection_strength_(DEFAULT_GLOBAL_SELECTION_STRENGTH),
       generations_to_run_(0),
       current_generation_(0),
       log_frequency_(10),
@@ -61,6 +62,7 @@ World::World(unsigned long seed)
       rng_(seed),
       landscape_(species_, rng_),
       num_fitness_traits_(1),
+      global_selection_strength_(DEFAULT_GLOBAL_SELECTION_STRENGTH),
       generations_to_run_(0),
       current_generation_(0),
       log_frequency_(10),
@@ -714,6 +716,12 @@ void World::log_configuration() {
 
     out << "Default carrying capacity: " << std::endl;
     this->landscape_.debug_dump_carrying_capacity(out);
+
+    out << std::endl;
+    out << "Global selection strength: " << this->global_selection_strength_ << std::endl;
+    if (this->global_selection_strength_ <= 0) {
+        out << "WARNING: GLOBAL SELECTION STRENGTH IS 0: ENVIRONMENT HAS NO EFFECT!" << std::end;
+    }
 
     out << std::endl;
     out << "*** LINEAGES ***" << std::endl;

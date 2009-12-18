@@ -43,6 +43,12 @@ typedef float                   FitnessTraitType;
 //! actual number may be less than this.
 typedef FitnessTraitType        FitnessTraits[MAX_FITNESS_TRAITS];
 
+//! The global selection strength: the weighted least-squares distance of
+//! a trait and its environmental optimum will be multiplied by this;
+//! a value of 0 means no selection, while higher numbers increase the strength
+//! of the selection.
+const float GLOBAL_SELECTION_STRENGTH = 0.1;
+
 //! The units for referencing cells on the landscape.
 typedef unsigned int            CellIndexType;
 
