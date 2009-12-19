@@ -457,7 +457,7 @@ void World::write_traits(Species * sp_ptr,
             ++oi) {
         out << "        " << std::setw(max_label_len) << sp_ptr->get_organism_label(**oi) << "    ";
         for (unsigned int i=0; i < this->num_fitness_traits_; ++i) {
-            out << " " << std::setw(12) << std::setfill(' ') << (**oi).get_heritable_fitness_trait(i);
+            out << " " << std::setw(12) << std::setfill(' ') << (**oi).get_fitness_trait_genotype(i);
         }
         out << " " << std::setw(12) << std::setfill(' ') << (**oi).get_fitness();
         out << "\n";
@@ -745,7 +745,7 @@ void World::log_configuration() {
         }
         out << std::endl;
         out << "     Default heritable fitness trait values: ";
-        std::vector<FitnessTraitType> g = lineage.get_default_heritable_fitness_traits();
+        std::vector<FitnessTraitType> g = lineage.get_default_fitness_trait_genotypes();
         for (std::vector<FitnessTraitType>::iterator gi = g.begin(); gi != g.end(); ++gi) {
             if ((gi - g.begin()) > 0) {
                 out << " ";

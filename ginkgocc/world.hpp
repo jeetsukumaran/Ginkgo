@@ -435,7 +435,7 @@ class World {
          */
         void set_species_default_genotype(const std::string& species_label, const FitnessTraits& genotype) {
             assert(this->species_.find(species_label) != this->species_.end());
-            this->species_[species_label]->set_default_heritable_fitness_traits(genotype);
+            this->species_[species_label]->set_default_fitness_trait_genotypes(genotype);
         }
 
         /**
@@ -447,7 +447,7 @@ class World {
          *                      organism of the given species
          */
         void set_species_default_genotype(Species * species_ptr, const FitnessTraits& genotype) {
-            species_ptr->set_default_heritable_fitness_traits(genotype);
+            species_ptr->set_default_fitness_trait_genotypes(genotype);
         }
 
         // --- setup, initialization and seeding ---
