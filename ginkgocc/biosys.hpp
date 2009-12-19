@@ -843,12 +843,14 @@ class Species {
         /**
          * Constructor.
          *
-         * @param label                 identifier string for this species
-         * @param num_fitness_traits   number of factors in fitness function
-         * @param rng                   random number generator
+         * @param label                     identifier string for this species
+         * @param num_fitness_traits        number of factors in fitness function
+         * @param global_selection_strength strength of selection
+         * @param rng                       random number generator
          */
         Species(const std::string& label,
                 unsigned num_fitness_traits,
+                float global_selection_strength,
                 RandomNumberGenerator& rng);
 
         /**
@@ -984,7 +986,19 @@ class Species {
          *                      fitness function
          */
         void set_selection_weights(const std::vector<float>& strengths) {
-            this->selection_weights_ = strengths;
+            float sum = 0;
+            for (std::vector<float>::const_iterator i = strengths.begin();
+                    i != strengths.end();
+                    ++i) {
+                sum += *i;
+            }
+            this->selection_weights_.clear();
+            this->selection_weights_.reserve(strengths.size());
+            for (std::vector<float>::const_iterator i = strengths.begin();
+                    i != strengths.end();
+                    ++i) {
+                this->selection_weights_.push_back(*i / sum);
+            }
         }
 
         /**
@@ -1111,6 +1125,7 @@ class Species {
                 diff = *e - *g;
                 weighted_distance += (diff * diff) * *s; // each distance weighted by selection strength
             }
+            weighted_distance = this->global_selection_strength_ * weighted_distance;
             float fitness = exp(-weighted_distance);
             return fitness;
         }
@@ -1255,6 +1270,8 @@ class Species {
         float                               movement_probability_;
         /** genotype for organisms created de novo */
         FitnessTraits                       default_heritable_fitness_traits_;
+        /** global selection strength */
+        float                               global_selection_strength_;
         /** source of random numbers of various distributions */
         RandomNumberGenerator&              rng_;
         /** tracks the number of labels assigned to organisms of this species */

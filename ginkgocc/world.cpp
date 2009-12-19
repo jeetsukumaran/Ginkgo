@@ -96,6 +96,7 @@ void World::generate_landscape(CellIndexType size_x, CellIndexType size_y) {
 Species& World::new_species(const std::string& label) {
     Species* sp = new Species(label,
                               this->num_fitness_traits_,
+                              this->global_selection_strength_,
                               this->rng_);
     this->species_.insert(std::make_pair(std::string(label), sp));
     std::vector<MovementCountType> default_movement_costs(this->landscape_.size(), 1);
@@ -720,7 +721,7 @@ void World::log_configuration() {
     out << std::endl;
     out << "Global selection strength: " << this->global_selection_strength_ << std::endl;
     if (this->global_selection_strength_ <= 0) {
-        out << "WARNING: GLOBAL SELECTION STRENGTH IS 0: ENVIRONMENT HAS NO EFFECT!" << std::end;
+        out << "WARNING: GLOBAL SELECTION STRENGTH IS 0: ENVIRONMENT HAS NO EFFECT!" << std::endl;
     }
 
     out << std::endl;
@@ -733,7 +734,8 @@ void World::log_configuration() {
         out << std::endl;
         out << "\"" << lineage.get_label() << "\"" << std::endl;
         out << "     Number of fitness traits: " << lineage.get_num_fitness_traits() << std::endl;
-        out << "     Selection weights: ";
+        out << "    Global selection strength: " << this->global_selection_strength_ << std::endl;
+        out << " Normalized selection weights: ";
         std::vector<float> sw = lineage.get_selection_weights();
         for (std::vector<float>::iterator swi = sw.begin(); swi != sw.end(); ++swi) {
             if ((swi - sw.begin()) > 0) {

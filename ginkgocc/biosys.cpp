@@ -38,9 +38,11 @@ Species& Organism::species() const {
 
 Species::Species(const std::string& label,
                  unsigned num_fitness_traits,
+                 float global_selection_strength,
                  RandomNumberGenerator& rng)
     : label_(label),
       num_fitness_traits_(num_fitness_traits),
+      global_selection_strength_(global_selection_strength),
       rng_(rng),
       organism_label_index_(0) {
     this->mean_reproductive_rate_ = 6;
