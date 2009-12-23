@@ -13,3 +13,4 @@ config.h.in
 configure
 db_build/
 debug/
+tags
