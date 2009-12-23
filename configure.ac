@@ -40,8 +40,6 @@ USER_CXXFLAGS="$CXXFLAGS"
 AC_PROG_CXX
 CXXFLAGS="$USER_CXXFLAGS"
 
-
-
 AC_PROG_INSTALL
 # Checks for libraries.
 
@@ -63,11 +61,9 @@ AC_FUNC_STRTOD
 AC_CHECK_FUNCS([floor memmove memset pow sqrt strchr strdup strtol])
 
 
-
 #--------------------------------------------------------------------------------------------------#
 #  Set CXXFLAGS                                                                                    #
 #--------------------------------------------------------------------------------------------------#
-
 
 # Check for debugging mode.
 AC_ARG_ENABLE(debugging,
@@ -95,6 +91,16 @@ if test "$enable_asserts" = yes; then
 	   *** NOTE: compiling with assertions on (NDEBUG not defined)
 	   ])
 fi
+
+# Check for mini mode.
+AC_ARG_ENABLE(mini,
+	AC_HELP_STRING([--enable-mini],[build mini version, landscape size limited to 255 cells]), , [enable_mini=no])
+if test "$enable_mini" = yes; then
+	AC_MSG_NOTICE([
+	   *** NOTE: MINI mode: landscape limited to 255 cells
+	   ])
+fi
+
 
 # Compile openMP multithreaded version
 #AC_ARG_ENABLE(openmp,
@@ -150,6 +156,10 @@ if test  "$enable_memcheck" = yes; then
 	CXXFLAGS="$CXXFLAGS -DMEMCHECK"
 fi
 
+if test  "$enable_mini" = yes; then
+	CXXFLAGS="$CXXFLAGS -DMINI"
+fi
+
 if test "$CC" = "icc" -o "$CC" = "icc" ; then
 #	Intel C compiler for Linux
 	if test "$enable_debugging" = no; then
@@ -182,7 +192,7 @@ elif test "x$GCC" = "xyes" ; then
 	case "$build_os" in
 	 	darwin*) CXXFLAGS="$CXXFLAGS" ;;
 	 	*) CXXFLAGS="$CXXFLAGS -fsigned-char";;
-	esac	
+	esac
 fi
 
 #single precision
@@ -203,7 +213,7 @@ CXXFLAGS="$CXXFLAGS $CXXFLAGS_OPTIM_SPEED -DMARKUP_STDCONV"
 
 
 ################################################################################
-#	By default, use the bundled ncl code from source, 
+#	By default, use the bundled ncl code from source,
 #		but let the --with-ncl argument override this.
 ################################################################################
 #NCL_INC_DIR="/usr/local/include"

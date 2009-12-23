@@ -20,6 +20,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include <fstream>
+#include <stdexcept>
 
 #if !defined(GINKGO_DEFS_H)
 #define GINKGO_DEFS_H
@@ -50,7 +51,11 @@ typedef FitnessTraitType        FitnessTraits[MAX_FITNESS_TRAITS];
 const float DEFAULT_GLOBAL_SELECTION_STRENGTH = 1.0;
 
 //! The units for referencing cells on the landscape.
-typedef unsigned int            CellIndexType;
+#if defined(MINI)
+    typedef unsigned int           CellIndexType;
+#else
+    typedef unsigned char          CellIndexType;
+#endif
 
 //! The carrying capacity type.
 typedef unsigned int            PopulationCountType;
@@ -60,6 +65,15 @@ typedef int                     MovementCountType;
 
 //! Numbers of generations.
 typedef unsigned int            GenerationCountType;
+
+/**
+ * Landscape size too large error.
+ */
+class LandscapeSizeError : public std::runtime_error {
+    public:
+        LandscapeSizeError(const char * msg) : std::runtime_error(msg) {}
+        LandscapeSizeError(const std::string& msg) : std::runtime_error(msg.c_str()) {}
+};
 
 } // ginkgo namespace
 

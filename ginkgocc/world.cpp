@@ -26,6 +26,7 @@
 #include <ctime>
 #include <fstream>
 #include <iomanip>
+#include <climits>
 
 #include "asciigrid.hpp"
 #include "world.hpp"
@@ -89,6 +90,12 @@ World::~World() {
 
 // Creates a new landscape.
 void World::generate_landscape(CellIndexType size_x, CellIndexType size_y) {
+    if ((size_x * size_y) > UCHAR_MAX) {
+//        throw LandscapeSizeError("Maximum landscape size is " +  UCHAR_MAX  + "cells, but requested " + size_x + " x " + size_y + " = "  + (size_x*size_y) + " cells")
+        std::ostringstream msg;
+        msg << "Maximum landscape size allowed is " <<  UCHAR_MAX << ", but requested landscape has " << size_x << " x " << size_y << " = "  << (size_x*size_y) << " cells";
+        throw LandscapeSizeError(msg.str());
+    }
     this->landscape_.generate(size_x, size_y, this->num_fitness_traits_);
 }
 
@@ -670,6 +677,11 @@ void World::log_configuration() {
 #if defined(MEMCHECK)
     out << "!!! RUNNING MEMORY CHECKS !!!" << std::endl;
     out << "Memory log: " << this->get_output_filename_stem() + ".mem.log" << std::endl;
+#endif
+
+#if defined(MINI)
+    out << "!!! RUNNING MINI MOD !!!" << std::endl;
+    out << "Maximum landscape size: " << UCHAR_MAX << " cells" << std::endl;
 #endif
 
     out << std::endl;
