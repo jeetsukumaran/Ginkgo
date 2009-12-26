@@ -148,6 +148,7 @@ void Cell::migration() {
             MovementCountType movement_cost = 0;
             while (movement > 0) {
                 CellIndexType dest_idx = this->landscape_.random_neighbor(curr_idx);
+                assert(dest_idx < this->landscape_.size());
                 movement_cost = sp.movement_cost(dest_idx);
                 if ( movement >= movement_cost) {
                     movement -= movement_cost;

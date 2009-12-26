@@ -970,6 +970,7 @@ class Species {
          * @return      value to be deducted from organism's movement capacity
          */
         MovementCountType movement_cost(CellIndexType i) {
+//            std::cout << i << ", " << this->movement_costs_.size() << std::endl;
             assert( i < this->movement_costs_.size() );
             return this->movement_costs_[i];
         }

@@ -21,6 +21,7 @@
 
 #include <fstream>
 #include <stdexcept>
+#include <climits>
 
 #if !defined(GINKGO_DEFS_H)
 #define GINKGO_DEFS_H
@@ -52,10 +53,13 @@ const float DEFAULT_GLOBAL_SELECTION_STRENGTH = 1.0;
 
 //! The units for referencing cells on the landscape.
 #if defined(MINI)
-    typedef unsigned int           CellIndexType;
+    typedef unsigned short          CellIndexType;
+    const unsigned int MAX_LANDSCAPE_SIZE = static_cast<unsigned int>(USHRT_MAX);
 #else
-    typedef unsigned char          CellIndexType;
+    typedef unsigned int           CellIndexType;
+    const unsigned int MAX_LANDSCAPE_SIZE = static_cast<unsigned int>(UINT_MAX);
 #endif
+
 
 //! The carrying capacity type.
 typedef unsigned int            PopulationCountType;

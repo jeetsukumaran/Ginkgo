@@ -240,7 +240,7 @@ class Landscape {
             return this->size_y_;
         }
 
-        /**
+        /**miii
          * Returns a Cell object that is adjacent to the cell of the given
          * vector index when considered within the geospatial framework.
          *
@@ -251,28 +251,18 @@ class Landscape {
         CellIndexType random_neighbor(CellIndexType i) {
             static long x = 0;
             static long y = 0;
-
             x = this->index_to_x(i) + this->rng_.uniform_int(-1, 1); // to reflect: % this->size_x_;
             y = this->index_to_y(i) + this->rng_.uniform_int(-1, 1); // to reflect: % this->size_y_;
             if (x < 0) {
-                x = 1;
-            } else if (static_cast<CellIndexType>(x) >= this->size_x_) {
-                x = this->size_x_ - 2;
+                x = 0;
+            } else if (x > this->max_x_) {
+                x = this->max_x_;
             }
             if (y < 0) {
-                y = 1;
-            } else if (static_cast<CellIndexType>(y) >= this->size_y_) {
-                y = this->size_y_ - 2;
+                y = 0;
+            } else if (y > this->max_y_) {
+                y = this->max_y_;
             }
-
-            // special case: size_x or size_y == 1
-            if (x >= this->size_x_) {
-                x = this->size_x_ - 1;
-            }
-            if (y >= this->size_y_) {
-                y = this->size_y_ - 1;
-            }
-
             return this->xy_to_index(x, y);
         }
 
@@ -313,6 +303,12 @@ class Landscape {
         CellIndexType                   size_y_;
         /** Total number of cells in this Landscape. */
         CellIndexType                   size_;
+        /** Maximum x-coordinate. */
+        CellIndexType                   max_x_;
+        /** Maximum y-coordinate. */
+        CellIndexType                   max_y_;
+        /** Maximum cell index. */
+        CellIndexType                   max_size_;
         /** Collection of cells in this Landscape. */
         std::vector<Cell*>              cells_;
         /** Collection migration events. */

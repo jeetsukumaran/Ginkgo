@@ -33,7 +33,13 @@ using namespace ginkgo;
 // --- lifecycle and assignment ---
 
 Landscape::Landscape(const SpeciesByLabel& species, RandomNumberGenerator& rng)
-    : species_(species),
+    : size_x_(0),
+      size_y_(0),
+      size_(0),
+      max_x_(0),
+      max_y_(0),
+      max_size_(0),
+      species_(species),
       rng_(rng) {
     this->size_x_ = 0;
     this->size_y_ = 0;
@@ -54,7 +60,10 @@ Landscape::~Landscape() {
 void Landscape::generate(CellIndexType size_x, CellIndexType size_y, unsigned num_fitness_traits) {
     this->size_x_ = size_x;
     this->size_y_ = size_y;
+    this->max_x_ = this->size_x_ - 1;
+    this->max_y_ = this->size_y_ - 1;
     this->size_ = size_x * size_y;
+    this->max_size_ = this->size_ - 1;
     this->cells_.reserve(this->size_);
     for (CellIndexType y = 0, index = 0; y < size_y; ++y) {
         for (CellIndexType x = 0; x < size_x; ++x, ++index) {
@@ -69,7 +78,6 @@ void Landscape::generate(CellIndexType size_x, CellIndexType size_y, unsigned nu
 void Landscape::clear_migrants() {
     this->migrants_.clear();
 }
-
 
 void Landscape::process_migrants() {
     for (MigrationEvents::iterator m = this->migrants_.begin();

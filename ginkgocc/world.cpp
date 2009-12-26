@@ -26,7 +26,6 @@
 #include <ctime>
 #include <fstream>
 #include <iomanip>
-#include <climits>
 
 #include "asciigrid.hpp"
 #include "world.hpp"
@@ -93,7 +92,7 @@ void World::generate_landscape(CellIndexType size_x, CellIndexType size_y) {
     if ((size_x * size_y) > UCHAR_MAX) {
 //        throw LandscapeSizeError("Maximum landscape size is " +  UCHAR_MAX  + "cells, but requested " + size_x + " x " + size_y + " = "  + (size_x*size_y) + " cells")
         std::ostringstream msg;
-        msg << "Maximum landscape size allowed is " <<  UCHAR_MAX << ", but requested landscape has " << size_x << " x " << size_y << " = "  << (size_x*size_y) << " cells";
+        msg << "Maximum landscape size allowed is " <<  MAX_LANDSCAPE_SIZE << ", but requested landscape has " << size_x << " x " << size_y << " = "  << (size_x*size_y) << " cells";
         throw LandscapeSizeError(msg.str());
     }
     this->landscape_.generate(size_x, size_y, this->num_fitness_traits_);
@@ -681,13 +680,14 @@ void World::log_configuration() {
 
 #if defined(MINI)
     out << "!!! RUNNING MINI MOD !!!" << std::endl;
-    out << "Maximum landscape size: " << UCHAR_MAX << " cells" << std::endl;
+    out << "Landscape size limited to " << MAX_LANDSCAPE_SIZE << " cells" << std::endl;
 #endif
 
     out << std::endl;
     out << "*** WORLD ***" << std::endl;
     out << "Label: " << this->label_ << std::endl;
     out << "Random seed: " << this->rng_.get_seed() << std::endl;
+    out << "Maximum landscape size: " << MAX_LANDSCAPE_SIZE << " cells" << std::endl;
     out << "Number of fitness traits: " << this->num_fitness_traits_ << std::endl;
     out << "Generations to run: " << this->generations_to_run_ << std::endl;
     out << "Output directory: " << this->output_dir_ << std::endl;
@@ -718,6 +718,7 @@ void World::log_configuration() {
     out << "Columns (Y-dimension): " << this->landscape_.size_y() << std::endl;
     out << "Minumum cell index: 0" << std::endl;
     out << "Maximum cell index: " << this->landscape_.size()-1 << std::endl;
+    out << "Landscape cell index limit: " << MAX_LANDSCAPE_SIZE << std::endl;
 
     out << std::endl;
 
