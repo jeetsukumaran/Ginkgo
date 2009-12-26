@@ -263,7 +263,9 @@ class Landscape {
             } else if (y > this->max_y_) {
                 y = this->max_y_;
             }
-            return this->xy_to_index(x, y);
+            CellIndexType k = this->xy_to_index(x, y);
+            assert(k <= this->max_size_);
+            return k;
         }
 
         // --- migration and movement ---
