@@ -1,3 +1,10 @@
+# svn crud
+.svn*
+
+# OS X / Darwin
+.DS_Store*
+
+# Latex
 *.aux
 *.bbl
 *.blg
@@ -7,3 +14,18 @@
 *.snm
 *.toc
 *.synctex.gz
+
+# Editor Project Files
+*.bbprojectd
+*.kpf
+
+# Python
+*.pyc
+*.egg-info*
+build/*
+dist/*
+setup.cfg
+setuptools-*.egg
+
+*.pdf
+
