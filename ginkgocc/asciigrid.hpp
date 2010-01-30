@@ -547,6 +547,13 @@ void AsciiGrid<T>::parse_cell_values_() {
         }
         this->src_ >> cell_value;
     }
+    if (this->cell_values_.size() != (this->ncols_ * this->nrows_)) {
+        std::ostringstream msg;
+        msg << "grid declared to have " << this->ncols_ << " columns and " << this->nrows_ << " rows: ";
+        msg << "expecting " << (this->ncols_ * this->nrows_) << " cells of grid data, ";
+        msg << "but instead found " << this->cell_values_.size();
+        throw AsciiGridFormatValueError(msg.str());
+    }
     this->is_cell_values_loaded_ = true;
 //
 //    std::cout << std::setfill(' '); // reset
