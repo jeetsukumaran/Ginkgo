@@ -806,6 +806,13 @@ void World::log_configuration() {
                 out << "    Movement costs for lineage \"" << mi->first->get_label() << "\": \"" << mi->second << "\"" << std::endl;
             }
         }
+        if (wi->second.movement_probabilities.size() != 0) {
+            for (std::map<Species *, std::string>::iterator mi = wi->second.movement_probabilities.begin();
+                     mi != wi->second.movement_probabilities.end();
+                     ++mi) {
+                out << "    Movement probablities for lineage \"" << mi->first->get_label() << "\": \"" << mi->second << "\"" << std::endl;
+            }
+        }
     }
 
     out << std::endl;
