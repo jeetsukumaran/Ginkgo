@@ -107,6 +107,8 @@ Species& World::new_species(const std::string& label) {
     this->species_.insert(std::make_pair(std::string(label), sp));
     std::vector<MovementCountType> default_movement_costs(this->landscape_.size(), 1);
     sp->set_movement_costs(default_movement_costs);
+    std::vector<float> default_movement_probabilities(this->landscape_.size(), 1.0);
+    sp->set_movement_probabilities(default_movement_probabilities);
     return *sp;
 }
 
@@ -319,6 +321,17 @@ void World::process_world_settings() {
             this->log_info(msg.str());
             asciigrid::AsciiGrid<MovementCountType> grid(mi->second);
             this->set_species_movement_costs(mi->first, grid.get_cell_values());
+        }
+    }
+    if (wi->second.movement_probabilities.size() != 0) {
+        for (std::map<Species *, std::string>::iterator mi = wi->second.movement_probabilities.begin();
+                 mi != wi->second.movement_probabilities.end();
+                 ++mi) {
+            std::ostringstream msg;
+            msg << "[Generation " << this->current_generation_ << "] Setting movement probabilities for species " <<  mi->first->get_label() <<  ": \"" <<  mi->second <<  "\"";
+            this->log_info(msg.str());
+            asciigrid::AsciiGrid<float> grid(mi->second);
+            this->set_species_movement_probabilities(mi->first, grid.get_cell_values());
         }
     }
 }
@@ -767,7 +780,6 @@ void World::log_configuration() {
         }
         out << std::endl;
         out << "     Fecundity: " <<  lineage.get_mean_reproductive_rate() << std::endl;
-        out << "     Movement probability: " << lineage.get_movement_probability() << std::endl;
         out << "     Movement capacity: " << lineage.get_movement_capacity() << std::endl;
     }
 

@@ -932,21 +932,24 @@ class Species {
         }
 
         /**
-         * Sets the probability of movement of an organism.
+         * Sets the cell-specific probability of movement of an organism of
+         * this lineage on the landscape.
          *
-         * @param movement_probability probability of movement
+         * @param movement_probabilities probability of movement
          */
-        void set_movement_probability(float movement_probability) {
-            this->movement_probability_ = movement_probability;
+        void set_movement_probabilities(const std::vector<float>& movement_probabilities) {
+            this->movement_probabilities_ = movement_probabilities;
         }
 
         /**
-         * Gets the probability of movement of an organism.
+         * Gets the probability of movement of an organism of this species in
+         * a particular cell on the landscape.
          *
-         * @param movement_probability probability of movement
+         * @param movement_probabilities probability of movement
          */
-        float get_movement_probability() {
-            return this->movement_probability_;
+        float movement_probability(CellIndexType i) {
+            assert( i < this->movement_probabilities_.size() );
+            return this->movement_probabilities_[i];
         }
 
         /**
@@ -1267,8 +1270,8 @@ class Species {
         std::vector<MovementCountType>      movement_costs_;
         /** movement potential of each organism at the start of each round */
         MovementCountType                   movement_capacity_;
-        /** probability of movement of each organism */
-        float                               movement_probability_;
+        /** cell- and lineage-specific probability of movement of each organism */
+        std::vector<float>                  movement_probabilities_;
         /** genotype for organisms created de novo */
         FitnessTraits                       default_fitness_trait_genotypes_;
         /** global selection strength */

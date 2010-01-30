@@ -146,6 +146,12 @@ struct WorldSettings {
      */
     std::map<Species *, std::string>        movement_costs;
 
+    /**
+     * Movement probabiities that need to be changed/set. (expressed as species labels
+     * mapped to ESRI ASCII Grid file paths).
+     */
+    std::map<Species *, std::string>        movement_probabilities;
+
 }; // WorldSettings
 
 /**
@@ -397,6 +403,31 @@ class World {
         void set_species_movement_costs(Species * species_ptr, const std::vector<MovementCountType>& costs) {
             assert(costs.size() == static_cast<CellIndexType>(this->landscape_.size()));
             species_ptr->set_movement_costs(costs);
+        }
+
+        /**
+         * Set the probs for moving out of cells on the landscape for
+         * a particular species.
+         *
+         * @param species_label  label of the Species object
+         * @param probs         vector of probs for moving out of a cell
+         */
+        void set_species_movement_probabilities(const std::string& species_label, const std::vector<float>& probs) {
+            assert(this->species_.find(species_label) != this->species_.end());
+            assert(probs.size() == static_cast<CellIndexType>(this->landscape_.size()));
+            this->species_[species_label]->set_movement_probabilities(probs);
+        }
+
+        /**
+         * Set the probs for moving out of cells on the landscape for
+         * a particular species.
+         *
+         * @param species_ptr   pointer to species object
+         * @param probs         vector of probs for moving out of a cell
+         */
+        void set_species_movement_probabilities(Species * species_ptr, const std::vector<float>& probs) {
+            assert(probs.size() == static_cast<CellIndexType>(this->landscape_.size()));
+            species_ptr->set_movement_probabilities(probs);
         }
 
         /**

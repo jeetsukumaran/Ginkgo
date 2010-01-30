@@ -187,7 +187,6 @@ void ConfigurationFile::process_lineage(XmlElementType& lineage_node, World& wor
     }
 
     lineage.set_mean_reproductive_rate(this->get_child_node_scalar<unsigned>(lineage_node, "fecundity", 16));
-    lineage.set_movement_probability(this->get_child_node_scalar<float>(lineage_node, "movementProbability", 1.0));
     lineage.set_movement_capacity(this->get_child_node_scalar<MovementCountType>(lineage_node, "movementCapacity", 1));
 
     // seed populations
@@ -241,6 +240,14 @@ void ConfigurationFile::process_environments(World& world) {
                     Species * lineage = world.get_species_ptr(lineage_id);
                     std::string gridfile = this->get_validated_grid_path<MovementCountType>(this->get_element_scalar<std::string>(sub_node), world);
                     world_settings.movement_costs.insert(std::make_pair(lineage, gridfile));
+                } else if (node_name == "movementProbablities") {
+                    std::string lineage_id = this->get_attribute<std::string>(sub_node, "lineage");
+                    if (not world.has_species(lineage_id)) {
+                        throw ConfigurationError("movement probabilities: lineage \"" + lineage_id + "\" not defined");
+                    }
+                    Species * lineage = world.get_species_ptr(lineage_id);
+                    std::string gridfile = this->get_validated_grid_path<float>(this->get_element_scalar<std::string>(sub_node), world);
+                    world_settings.movement_probabilities.insert(std::make_pair(lineage, gridfile));
                 }
             }
             world.add_world_settings(gen, world_settings);

@@ -142,7 +142,7 @@ void Cell::migration() {
         assert(!og->is_expired());
         Species& sp = og->species();
 
-        if (this->rng_.uniform_01() <= sp.get_movement_probability()) {
+        if (this->rng_.uniform_01() <= sp.movement_probability(this->index_)) {
             MovementCountType movement = sp.get_movement_capacity();
             CellIndexType curr_idx = this->index_;
             MovementCountType movement_cost = 0;
