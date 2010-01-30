@@ -16,25 +16,25 @@
 
 \lstnewenvironment{ginkgoxml}[1][]{
 \lstset{basicstyle=\scriptsize\ttfamily,
-		identifierstyle=\color{black}, 
-		commentstyle=\color{white},		
-		stringstyle=\ttfamily, 
+		identifierstyle=\color{black},
+		commentstyle=\color{white},
+		stringstyle=\ttfamily,
 		showstringspaces=false,
 		classoffset=0,
-		morekeywords={xml, ginkgo, world, biota, samples, lineage, fitnessTraitRelativeSelectionWeights, fitnessTraitDefaultGenotypes, fitnessTraitInheritanceStdDev, fecundity, seedPopulation, seedPopulations, ancestralPopulationSize, ancestralGenerations, movementCapacity, movementProbability, occurrence, environments, fitnessTraitOptima, carryingCapacity, movementCosts, environmentFactor, dispersals, dispersal, probability, environment, sample, individualsPerCell, cells}, keywordstyle=\color{xmlelem}\bfseries,
-		classoffset=1,		
+		morekeywords={xml, ginkgo, world, biota, samples, lineage, fitnessTraitRelativeSelectionWeights, fitnessTraitDefaultGenotypes, fitnessTraitInheritanceStdDev, fecundity, seedPopulation, seedPopulations, ancestralPopulationSize, ancestralGenerations, movementCapacity,  occurrence, environments, fitnessTraitOptima, carryingCapacity, movementCosts, movementProbabilities, environmentFactor, dispersals, dispersal, probability, environment, sample, individualsPerCell, cells}, keywordstyle=\color{xmlelem}\bfseries,
+		classoffset=1,
 		morekeywords={version, label, x_range, y_range, num_gens, num_fitness_traits, global_selection_strength, random_seed, log_frequency, multifurcating_trees, final_output, full_complement_diploid_trees, default_cell_carrying_capacity, lineage, x, y, gen, size, from_x, from_y, to_x, to_y, trait}, keywordstyle=\color{xmlattr},
-		classoffset=0,		
+		classoffset=0,
 }
 }
 {}
 
 \lstnewenvironment{shell}[1][]{
 \lstset{basicstyle=\scriptsize\ttfamily,
-		identifierstyle=\color{black}, 
-		commentstyle=\color{white},		
-		stringstyle=\ttfamily, 
-		showstringspaces=false,	
+		identifierstyle=\color{black},
+		commentstyle=\color{white},
+		stringstyle=\ttfamily,
+		showstringspaces=false,
 }
 }
 {}
@@ -50,7 +50,7 @@
 \date{}                                           % Activate to display a given date or no date
 
 \setlength{\parindent}{0in}
-\setlength{\parskip}{.1in} 
+\setlength{\parskip}{.1in}
 
 \begin{document}
 \maketitle
@@ -65,12 +65,12 @@ Specific elements will be described and explained in subsequent sections.
 <?xml version="1.0"?>
 <ginkgo>
     <world label="ginkgo_run"
-           x_range = "40" 
-           y_range = "50" 
-           num_gens = "20001" 
-           num_fitness_traits = "5" 
-           global_selection_strength="1.0"               
-           default_cell_carrying_capacity = "100"       
+           x_range = "40"
+           y_range = "50"
+           num_gens = "20001"
+           num_fitness_traits = "5"
+           global_selection_strength="1.0"
+           default_cell_carrying_capacity = "100"
            random_seed = "2718281828"
            log_frequency= "10"
            multifurcating_trees = "True"
@@ -83,7 +83,7 @@ Specific elements will be described and explained in subsequent sections.
                 </fitnessTraitRelativeSelectionWeights>
                 <fitnessTraitDefaultGenotypes>
                 	0 0 0 0 0
-                </fitnessTraitDefaultGenotypes>            
+                </fitnessTraitDefaultGenotypes>
                 <fitnessTraitInheritanceStdDev>
                 	0.7071068 0.7071068 0.7071068 0.7071068 0.7071068
                 </fitnessTraitInheritanceStdDev>
@@ -95,15 +95,14 @@ Specific elements will be described and explained in subsequent sections.
                     </seedPopulation>
                 </seedPopulations>
                 <movementCapacity>10</movementCapacity>
-                <movementProbability>0.75</movementProbability>
-            </lineage>            
+            </lineage>
             <lineage id="Zy">
                 <fitnessTraitRelativeSelectionWeights>
                 	1 1 1 1 1
                 </fitnessTraitRelativeSelectionWeights>
                 <fitnessTraitDefaultGenotypes>
                 	0 0 0 0 0
-                </fitnessTraitDefaultGenotypes>            
+                </fitnessTraitDefaultGenotypes>
                 <fitnessTraitInheritanceStdDev>
                 	0.7071068 0.7071068 0.7071068 0.7071068 0.7071068
                 </fitnessTraitInheritanceStdDev>
@@ -114,20 +113,21 @@ Specific elements will be described and explained in subsequent sections.
                     </seedPopulation>
                 </seedPopulations>
                 <movementCapacity>6</movementCapacity>
-                <movementProbability>0.001</movementProbability>            
-            </lineage>            
+            </lineage>
         </biota>
         <environments>
             <environment gen="0">
                 <carryingCapacity>cc.grd</carryingCapacity>
-                <movementCosts lineage="Zx">mov.grd</movementCosts>
-                <movementCosts lineage="Zy">mov.grd</movementCosts>
+                <movementProbabilities lineage="Zx">movp_zx.grd</movementCosts>                
+                <movementCosts lineage="Zx">movc_zx.grd</movementCosts>
+                <movementProbabilities lineage="Zy">movp_zy.grd</movementCosts>                
+                <movementCosts lineage="Zy">movc_zy.grd</movementCosts>
                 <fitnessTraitOptima trait="0">env0.grd</environmentFactor>
             </environment>
             <environment gen="10000">
                 <fitnessTraitOptima trait="0">env2.grd</environmentFactor>
-            </environment>              
-        </environments>        
+            </environment>
+        </environments>
         <dispersals>
             <dispersal gen="100" from_x="0" from_y="10" to_x="25" to_y="10">
                 <lineage>Zx</lineage>
@@ -136,48 +136,48 @@ Specific elements will be described and explained in subsequent sections.
             <dispersal gen="100" from_x="0" from_y="10" to_x="25" to_y="10">
                 <lineage>Zy</lineage>
                 <probability>1.0</probability>
-            </dispersal>            
+            </dispersal>
             <dispersal gen="1500" from_x="0" from_y="10" to_x="25" to_y="10">
                 <lineage>Zx</lineage>
                 <probability>1.0</probability>
             </dispersal>
-        </dispersals>                
+        </dispersals>
         <samples>
             <sample label="check" lineage="Zx" gen="1" />
-            <sample label="check" lineage="Zy" gen="1" />          
+            <sample label="check" lineage="Zy" gen="1" />
             <sample label="final" lineage="Zx" gen="10000" >
                 <individualsPerCell>20</individualsPerCell>
-                <cells>                    
-                    10,0  14,0   10,9   14,9     30,0  34,0  30,9  34,9     
+                <cells>
+                    10,0  14,0   10,9   14,9     30,0  34,0  30,9  34,9
                     10,20 14,20  10,29  14,29    30,20 34,20 30,9  34,29
-                    10,40 14,40  10,49  14,49    30,40 34,40 30,49 34,49               
+                    10,40 14,40  10,49  14,49    30,40 34,40 30,49 34,49
                 </cells>
-            </sample>            
+            </sample>
             <sample label="final1" lineage="Zy" gen="10000" >
                 <individualsPerCell>20</individualsPerCell>
                 <cells>
-                    10,0  14,0   10,9   14,9     30,0  34,0  30,9  34,9     
+                    10,0  14,0   10,9   14,9     30,0  34,0  30,9  34,9
                     10,20 14,20  10,29  14,29    30,20 34,20 30,9  34,29
-                    10,40 14,40  10,49  14,49    30,40 34,40 30,49 34,49                
+                    10,40 14,40  10,49  14,49    30,40 34,40 30,49 34,49
                 </cells>
-            </sample>                           
+            </sample>
             <sample label="final1" lineage="Zx" gen="20000" >
                 <individualsPerCell>20</individualsPerCell>
                 <cells>
-                    10,0  14,0   10,9   14,9     30,0  34,0  30,9  34,9     
+                    10,0  14,0   10,9   14,9     30,0  34,0  30,9  34,9
                     10,20 14,20  10,29  14,29    30,20 34,20 30,9  34,29
-                    10,40 14,40  10,49  14,49    30,40 34,40 30,49 34,49               
+                    10,40 14,40  10,49  14,49    30,40 34,40 30,49 34,49
                 </cells>
-            </sample>          
+            </sample>
             <sample label="final2" lineage="Zy" gen="20000" >
                 <individualsPerCell>20</individualsPerCell>
                 <cells>
-                    10,0  14,0   10,9   14,9     30,0  34,0  30,9  34,9     
+                    10,0  14,0   10,9   14,9     30,0  34,0  30,9  34,9
                     10,20 14,20  10,29  14,29    30,20 34,20 30,9  34,29
-                    10,40 14,40  10,49  14,49    30,40 34,40 30,49 34,49               
+                    10,40 14,40  10,49  14,49    30,40 34,40 30,49 34,49
                 </cells>
-            </sample>                        
-        </samples> 
+            </sample>
+        </samples>
     </world>
 </ginkgo>
 \end{ginkgoxml}
@@ -193,18 +193,18 @@ Its attributes and child elements essentially make up the core of the simulation
 \begin{description}
 
 	\item[\xmlattr{label}] This defines a common prefix for all output files from a run of this simulation. If the ``\verb=-i='' command-line option is passed to the Ginkgo invocation, the identifier given by the ``\verb=-i='' will be appended to the end of the string given by ``\verb=label=''.
-	
+
 	For example, if the following was passed to Ginkgo using the command ``\verb=ginkgo example.xml='',
 
 	\begin{ginkgoxml}
 <?xml version="1.0"?>
 <ginkgo>
-    <world label="ginkgo_run" ...> 
+    <world label="ginkgo_run" ...>
 	.
 	.
-	.	           
+	.
     </world>
-</ginkgo>	
+</ginkgo>
 	\end{ginkgoxml}
 
 then all output files (logs, trees, etc.) would be prefixed by ``\verb=ginkgo_run='':
@@ -228,7 +228,7 @@ ginkgo_run_r01.out.log
 ginkgo_run_G100_Pseudozoon_r01.diploid1.tre
 ginkgo_run_G100_Pseudozoon_r01.haploid.tre
 ginkgo_run_G100_Pseudozoon_r01.traits.nex
-ginkgo_run_G100_Pseudozoon_occurrences_r01.grd	
+ginkgo_run_G100_Pseudozoon_occurrences_r01.grd
 \end{shell}
 
 This combination of an optional replicate identifier in the Ginkgo invocation and simulation schema label allows you to run multiple realizations of the same simulation regime, but maintain distinct sets of output files for each realization in the same directory.
@@ -236,9 +236,9 @@ This combination of an optional replicate identifier in the Ginkgo invocation an
 	\item[\xmlattr{x\_range}] This requires a \textbf{positive non-zero integer} argument, and defines the landscape dimension in terms of numbers of columns.
 
 	\item[\xmlattr{y\_range}] This requires a \textbf{positive non-zero integer} argument, and defines the landscape dimension in terms of numbers of rows.
-	
-	\item[\xmlattr{num\_gens}] This requires a \textbf{positive non-zero integer} argument, and defines the number of generations of cycles that the simulation will run.	
-		
+
+	\item[\xmlattr{num\_gens}] This requires a \textbf{positive non-zero integer} argument, and defines the number of generations of cycles that the simulation will run.
+
 \end{description}
 
 \subsection{Optional Attributes}
@@ -249,7 +249,7 @@ This combination of an optional replicate identifier in the Ginkgo invocation an
 	\item[\xmlattr{random\_seed}] Seed for pseudo-random number generator. Command-line specified seed (using the ``{\tt -z}'' flag) overrides this, and if neither are specified, then defaults to system time.
 	\item[\xmlattr{log\_frequency}] Non-zero positive integer specifying frequency of log output in terms of numbers of generations. Defaults to 10.
 	\item[\xmlattr{multifurcating\_trees}] If ``True'', then multifurcating trees are preserved. If ``False'', then multifurcating trees are converted into bifurcating trees by arbitrarily resolving the polytomies with new edges of length 0. Defaults to ``True'' (i.e., preserve polytomies).
-	\item[\xmlattr{final\_output}] By default, at the end of the simulation Ginkgo samples and reports the genealogies, traits and occurrences of \textit{every} organism of \textit{every} lineage in \textit{every} cell.  Setting \xmlattr{final\_output} to ``False'' suppresses the automatic reporting of the full results. For large simulations, you may prefer to restrict the output to your own custom fine-tuned sampling regime. 
+	\item[\xmlattr{final\_output}] By default, at the end of the simulation Ginkgo samples and reports the genealogies, traits and occurrences of \textit{every} organism of \textit{every} lineage in \textit{every} cell.  Setting \xmlattr{final\_output} to ``False'' suppresses the automatic reporting of the full results. For large simulations, you may prefer to restrict the output to your own custom fine-tuned sampling regime.
 	\item[\xmlattr{full\_complement\_diploid\_trees}]	By default, the genealogies for the diploid locii are built by randomly sampling one of the alleles of the diploid complement for each organism (and saved with the ``{\tt .diploid1.tre}'' extension). By setting this attribute to ``True'', you can ask that Ginkgo produce a file (which will be saved with the ``{\tt .diploid2.tre}''  extension) where \textit{both} alleles are sampled.
 \end{description}
 
@@ -275,12 +275,12 @@ If not provided, then this vector defaults to equal-weighting on all environment
 
 \subsubsection{The \xmlelem{fitnessTraitDefaultGenotypes} Element}
 
-The traits of organisms evolve under the specified selection pressures once the simulation begins, but the initial values for the traits for the first generation of organisms of each lineage are specified by the \xmlelem{fitnessTraitDefaultGenotypes} element, the contents of which should be a space-delimited list of numeric values. 
+The traits of organisms evolve under the specified selection pressures once the simulation begins, but the initial values for the traits for the first generation of organisms of each lineage are specified by the \xmlelem{fitnessTraitDefaultGenotypes} element, the contents of which should be a space-delimited list of numeric values.
 If not given, this defaults to ``$0 \ 0 \ 0 \ \dots \ q$'', where $q$ is the number of traits or dimensions in the simulation.
 
 \subsubsection{The \xmlelem{fitnessTraitInheritanceStdDev} Element}
 
-The trait value of each offspring is given by the mean of the corresponding trait of each of its parents, plus a normally-distributed error with mean 0 and a standard deviation given by the \xmlelem{fitnessTraitInheritanceStdDev} element. 
+The trait value of each offspring is given by the mean of the corresponding trait of each of its parents, plus a normally-distributed error with mean 0 and a standard deviation given by the \xmlelem{fitnessTraitInheritanceStdDev} element.
 If not specified this defaults to 0.7071068 for each trait (i.e., $\sqrt{\frac{1}{2}}$).
 Values lower than this means that the variation in the trait value tends to reduce over time, while values lower than this means that the variation in the trait value tends to increase over time.
 
@@ -292,7 +292,7 @@ For example, you may wish to introduce 100 individuals into a cell at $(0,0$), d
 
 \begin{ginkgoxml}
 <seedPopulation x="0" y="0" size="100">
-	<ancestralPopulationSize>1000</ancestralPopulationSize> 
+	<ancestralPopulationSize>1000</ancestralPopulationSize>
 	<ancestralGenerations>10000</ancestralGenerations>
 </seedPopulation>
 \end{ginkgoxml}
@@ -302,9 +302,6 @@ The \xmlelem{ancestralPopulationSize} element specifies the ancestral population
 
 \subsubsection{The \xmlelem{movementCapacity} Element}
 This element defines the potential movement of organisms in the ``local'' movement framework. Its contents should be a numeric value which defines the total cell entry costs that an organism is capable of ``paying'' during each round of the dispersal phase. If not specified, this defaults to 1.
-
-\subsubsection{The \xmlelem{movementProbability} Element}
-This element defines the probability that an organism will actually move during the migration phase. If not specified, this defaults to to 1.0.
 
 
 \section{The \xmlelem{environments} Element}
@@ -320,9 +317,15 @@ Three classes of child elements are available to configure the landscape setting
 
 The \xmlelem{carryingCapacity} element determines the maximum number of organisms that can occupy each cell on the landscape. It requires a path to an ESRI AsciiGrid format file of the same dimensions of the landscape, with the grid values being positive integers specifying the carrying capacity of the corresponding cell. If not given for a particular generation, then the previous setting is retained.
 
+
+\subsection{The \xmlelem{movementProbabilities} Element}
+
+The \xmlelem{movementProbabilities} element determines the per-lineage per-cell probability that an organism occupying a particular cell will move. It has one attribute, \xmlattr{lineage}, which specifies the lineage (by identifier) to which the probabilities apply, and its content should be the path to an ESRI AsciiGrid format file of the same dimensions of the landscape, with the grid values being real values specifying the probability of movement for an organism in each cell.
+
 \subsection{The \xmlelem{movementCosts} Element}
 
-The \xmlelem{movementCosts} element determines the ``entry costs'' per cell for a particular lineage. It has one attribute, \xmlattr{lineage}, which specifies the lineage (by identifier) to which the costs apply, and its content should be the path to an ESRI AsciiGrid format file of the same dimensions of the landscape, with the grid values being positive integers specifying the entry costs for each cell.
+The \xmlelem{movementCosts} element determines the ``entry costs'' per cell for a particular lineage. It has one attribute, \xmlattr{lineage}, which specifies the lineage (by identifier) to which the costs apply, and its content should be the path to an ESRI AsciiGrid format file of the same dimensions of the landscape, with the grid values being positive integers specifying the entry costs for each cell. Note that the movement costs only get used if an organism attempts to move, i.e., the probability of movement (see the ``\xmlelem{movementProbabilities}'' element, above) must be sufficient so as movement to be initiated.
+
 
 \subsection{The \xmlelem{fitnessTraitOptima} Element}
 
@@ -335,15 +338,15 @@ The \xmlelem{samples} element describes the sampling regime of the simulation as
 Each \xmlelem{sample} element has three attributes: \xmlattr{gen} specifies the 0-based index of the simulation generatio that the sample is to be taken, \xmlattr{lineage} specifies the lineage of the organisms to be sampled, while \xmlattr{label} provides a suffix to be appended to the end of the files generated by this sampling.
 Note that if you specify multiple samples of the \textit{same} lineage during the \textit{same} generation (perhaps sampling different cells), explicit specification of different \xmlattr{label} identifiers is required to avoid the output files of the second sample overwriting those of the first.
 
-Each sampling results in at least 3 files: 
+Each sampling results in at least 3 files:
 \begin{enumerate}
 	\item A genealogy of the haploid loci of the sampled organisms.
 	\item The genealogies of the diploid loci of the sampled organisms, with one allele picked at random from the diploid complement at each locus of each sampled organism.
 	\item A character data matrix summarizing the fitness trait values of the sampled organisms, as well as the overall fitness of the organism in its residence cell.
-	\item A grid summarizing the occurrence of organisms of the specified lineage in each cell (i.e., the number of organisms in each cell of the specified lineage). 
+	\item A grid summarizing the occurrence of organisms of the specified lineage in each cell (i.e., the number of organisms in each cell of the specified lineage).
 \end{enumerate}
 
-By default, a sample directive results in every organism of the specified lineage in every cell being sampled. 
+By default, a sample directive results in every organism of the specified lineage in every cell being sampled.
 This behavior can be modified by the \xmlelem{individualsPerCell} element, which specifies the maximum number of organisms to be (randomly) sampled from each cell, or the \xmlelem{cells} element, which specifies a subset of cells to be sampled.
 The \xmlelem{cells} element requires a space-delimited list of $X,Y$ coordinates of the cells to be sampled, which each coordinate being separated by a comma. Note that the coordinates are 0-based, with the upper-left corner cell having a coordinate of $(0,0)$.
 
