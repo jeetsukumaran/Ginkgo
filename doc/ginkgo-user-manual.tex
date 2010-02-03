@@ -21,7 +21,7 @@
 		stringstyle=\ttfamily,
 		showstringspaces=false,
 		classoffset=0,
-		morekeywords={xml, ginkgo, world, biota, samples, lineage, fitnessTraitRelativeSelectionWeights, fitnessTraitDefaultGenotypes, fitnessTraitInheritanceStdDev, fecundity, seedPopulation, seedPopulations, ancestralPopulationSize, ancestralGenerations, movementCapacity,  occurrence, environments, fitnessTraitOptima, carryingCapacity, movementCosts, movementProbabilities, environmentFactor, dispersals, dispersal, probability, environment, sample, individualsPerCell, cells}, keywordstyle=\color{xmlelem}\bfseries,
+		morekeywords={xml, ginkgo, world, biota, samples, lineage, fitnessTraitRelativeSelectionWeights, fitnessTraitDefaultGenotypes, fitnessTraitInheritanceStdDev, fecundity, seedPopulation, seedPopulations, ancestralPopulationSize, ancestralGenerations, movementCapacity,  occurrence, environments, fitnessTraitOptima, carryingCapacity, movementCosts, movementProbabilities, dispersals, dispersal, probability, environment, sample, individualsPerCell, cells}, keywordstyle=\color{xmlelem}\bfseries,
 		classoffset=1,
 		morekeywords={version, label, x_range, y_range, num_gens, num_fitness_traits, global_selection_strength, random_seed, log_frequency, multifurcating_trees, final_output, full_complement_diploid_trees, default_cell_carrying_capacity, lineage, x, y, gen, size, from_x, from_y, to_x, to_y, trait}, keywordstyle=\color{xmlattr},
 		classoffset=0,
@@ -118,14 +118,14 @@ Specific elements will be described and explained in subsequent sections.
         <environments>
             <environment gen="0">
                 <carryingCapacity>cc.grd</carryingCapacity>
-                <movementProbabilities lineage="Zx">movp_zx.grd</movementCosts>                
+                <movementProbabilities lineage="Zx">movp_zx.grd</movementCosts>
                 <movementCosts lineage="Zx">movc_zx.grd</movementCosts>
-                <movementProbabilities lineage="Zy">movp_zy.grd</movementCosts>                
+                <movementProbabilities lineage="Zy">movp_zy.grd</movementCosts>
                 <movementCosts lineage="Zy">movc_zy.grd</movementCosts>
-                <fitnessTraitOptima trait="0">env0.grd</environmentFactor>
+                <fitnessTraitOptima trait="0">env0.grd</fitnessTraitOptima>
             </environment>
             <environment gen="10000">
-                <fitnessTraitOptima trait="0">env2.grd</environmentFactor>
+                <fitnessTraitOptima trait="0">env2.grd</fitnessTraitOptima>
             </environment>
         </environments>
         <dispersals>
