@@ -47,36 +47,44 @@ class EnvironmentGrid(object):
         s.write(">%s</%s>" % (self.grid_filepath, self.type_name))
         return s.getvalue()
 
+class CarryingCapacityGrid(EnvironmentGrid):
+
+    def __init__(self, grid_filepath):
+        EnvironmentGrid.__init__(self,
+                "carrying_capacity",
+                attribute_dict={},
+                grid_filepath=grid_filepath)
+
+class MovementProbabilitiesGrid(EnvironmentGrid):
+
+    def __init__(self, lineage, grid_filepath):
+        EnvironmentGrid.__init__(self,
+                "movementProbabilities",
+                attribute_dict={'lineage': lineage},
+                grid_filepath=grid_filepath)
+
+class MovementCostsGrid(EnvironmentGrid):
+
+    def __init__(self, lineage, grid_filepath):
+        EnvironmentGrid.__init__(self,
+                "movementCosts",
+                attribute_dict={'lineage': lineage},
+                grid_filepath=grid_filepath)
+
+class FitnessTraitOptimaGrid(EnvironmentGrid):
+
+    def __init__(self, trait, grid_filepath):
+        EnvironmentGrid.__init__(self,
+                "fitnessTraitOptima",
+                attribute_dict={'trait': trait},
+                grid_filepath=grid_filepath)
+
 class Environment(object):
 
     def __init__(self, gen, indent_level=0):
         self.gen = gen
         self.grids = []
         self.indent_level = indent_level
-
-    def add_grid(self, type_name, attribute_dict, grid_filepath):
-        self.grids.append(EnvironmentGrid(type_name, attribute_dict, grid_filepath))
-        return self.grids[-1]
-
-    def set_carrying_capacity_grid(self, grid_filepath):
-        return self.add_grid("carrying_capacity",
-                attribute_dict={},
-                grid_filepath=grid_filepath)
-
-    def set_movement_probabilities_grid(self, lineage, grid_filepath):
-        return self.add_grid("movementProbabilities",
-                attribute_dict={'lineage': lineage},
-                grid_filepath=grid_filepath)
-
-    def set_movement_costs_grid(self, lineage, grid_filepath):
-        return self.add_grid("movementCosts",
-                attribute_dict={'lineage': lineage},
-                grid_filepath=grid_filepath)
-
-    def set_fitness_trait_optima_grid(self, trait, grid_filepath):
-        return self.add_grid("fitnessTraitOptima",
-                attribute_dict={"trait": trait},
-                grid_filepath=grid_filepath)
 
     def __str__(self):
         if len(self.grids) == 0:
@@ -93,15 +101,35 @@ class Environment(object):
 def Sample(object):
 
     def __init__(self, lineage, gen, **kwargs):
-
         self.lineage = lineage
         self.gen = gen
         self.label = kwargs.get('label', None)
-        self.
+        self.individuals_per_cell = kwargs.get('individuals_per_cell', None)
+        self.cells = kwargs.get('cells', None)
+        self.indent_level = kwargs.get('indent_level', 0)
+
+    def __str__(self):
+        top_indent = (self.indent_level * INDENT_SIZE) * ' '
+        if self.label:
+            label = ' label="%s"' % label
+        else:
+            label = ''
+        parts.append('%s<sample gen="%d" lineage=%s%s>' % (top_indent, self.gen, self.lineage, label))
+        sub_indent = ((self.indent_level + 1) * INDENT_SIZE) * ' '
+        if self.individuals_per_cells:
+            parts.append('%s<individualsPerCell>%s</individualsPerCell>' % (sub_indent, self.individuals_per_cells))
+        if self.cells:
+            parts.append('%s<cells>' % sub_indent)
+            sub_sub_indent = ((self.indent_level + 2) * INDENT_SIZE) * ' '
+            for c in self.cells:
+                parts.append('%s%s,%s' % (sub_sub_indent, c[0], c[1]))
+            parts.append('%s</cells>' % sub_indent)
+        parts.append('%s</sample>' % top_indent)
+        return "\n".join(parts)
 
 e = Environment(0)
-e.set_carrying_capacity_grid('cc.grd')
-e.set_movement_probabilities_grid('Zx', 'movp_zx.grd')
-e.set_movement_costs_grid('Zx', 'movp_zx.grd')
-e.set_fitness_trait_optima_grid('1', 'movp_zx.grd')
+e.grids.append(CarryingCapacityGrid('cc.grd'))
+e.grids.append(MovementProbabilitiesGrid('Zx', 'movp_zx.grd'))
+e.grids.append(MovementCostsGrid('Zx', 'movp_zx.grd'))
+e.grids.append(FitnessTraitOptimaGrid('1', 'movp_zx.grd'))
 print(e)
