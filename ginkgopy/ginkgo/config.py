@@ -90,6 +90,15 @@ class Environment(object):
         parts.append('%s</environment>' % top_indent)
         return "\n".join(parts)
 
+def Sample(object):
+
+    def __init__(self, lineage, gen, **kwargs):
+
+        self.lineage = lineage
+        self.gen = gen
+        self.label = kwargs.get('label', None)
+        self.
+
 e = Environment(0)
 e.set_carrying_capacity_grid('cc.grd')
 e.set_movement_probabilities_grid('Zx', 'movp_zx.grd')

@@ -10,12 +10,12 @@
 ## it under the terms of the GNU General Public License as published by
 ## the Free Software Foundation; either version 3 of the License, or
 ## (at your option) any later version.
-## 
+##
 ## This program is distributed in the hope that it will be useful,
 ## but WITHOUT ANY WARRANTY; without even the implied warranty of
 ## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ## GNU General Public License for more details.
-## 
+##
 ## You should have received a copy of the GNU General Public License along
 ## with this program. If not, see <http:##www.gnu.org#licenses#>.
 ##
@@ -29,39 +29,38 @@ import ez_setup
 ez_setup.use_setuptools()
 from setuptools import setup
 from setuptools import find_packages
-from ginkgopy import PACKAGE_VERSION
+from ginkgo import PACKAGE_VERSION
 
 import sys
 import os
 import subprocess
 
 script_names = []
-setup(name='GinkgoPy',
-      version=PACKAGE_VERSION,     
+setup(name='Ginkgo',
+      version=PACKAGE_VERSION,
       author='Jeet Sukumaran and Mark T. Holder',
       author_email='jeet@ku.edu and mtholder@ku.edu',
-      url='http://sourceforge.net/projects/dendropy/',
+      url='',
       description="""\
-GINKGO Biogeographical Evolution Simulator Post-Processing Library""",
+A library to faciliate setting up runs and processing results of the GINKGO Biogeographical Evolution Simulator""",
       license='GPL 3+',
-      packages=['ginkgopy'],
-      package_dir={'ginkgopy': 'ginkgopy'},
+      packages=['ginkgo'],
+      package_dir={'ginkgo': 'ginkgo'},
       package_data={
         "" : ['doc/*'],
-        "ginkgopy" : ["tests/data/*"]
+        "ginkgo" : ["tests/data/*"]
       },
       scripts = [('scripts/%s' % i) for i in script_names],
-      test_suite = "ginkgopy.tests",
-      include_package_data=True,         
+      test_suite = "ginkgo.tests",
+      include_package_data=True,
       zip_safe=True,
       install_requires=[
           # -*- Extra requirements: -*-
       ],
       entry_points="""
       # -*- Entry points: -*-
-      """,      
-      long_description="""\
-A Python library for processing GINKGO output""",
+      """,
+      long_description=open('README.txt', 'rU').read(),
       classifiers = [
             "Environment :: Console",
             "Intended Audience :: Developers",
@@ -72,5 +71,5 @@ A Python library for processing GINKGO output""",
             "Programming Language :: Python",
             "Topic :: Scientific/Engineering :: Bio-Informatics",
             ],
-      keywords='phylogenetics evolution biology biogeography',      
+      keywords='phylogenetics evolution biology biogeography',
       )

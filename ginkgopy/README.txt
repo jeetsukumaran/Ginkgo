@@ -1,6 +1,11 @@
 Ginkgo Post-Processing Python Library
 ======================================
 
+This library provides functions and classes to help set up runs and analyze results of the `Ginkgo Biogeographical Simulator <http://github.com/jeetsukumaran/Ginkgo>`_.
+
+Copyright and License
+=====================
+
 (C) 2008 Jeet Sukumaran and Mark T. Holder.
 
 The code is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 3 of the License, or (at your option) any later version.
