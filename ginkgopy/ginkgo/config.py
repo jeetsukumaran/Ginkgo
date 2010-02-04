@@ -29,6 +29,128 @@ from cStringIO import StringIO
 
 INDENT_SIZE = 4
 
+class World(object):
+
+    def __init__(self, x_range, y_range, num_gens, **kwargs):
+        self.x_range = x_range
+        self.y_range = y_range
+        self.num_gens = num_gens
+        self.label = kwargs.get("label", None)
+        self.num_fitness_traits = kwargs.get("num_fitness_traits", None)
+        self.global_selection_strength = kwargs.get("global_selection_strength", None)
+        self.default_cell_carrying_capacity = kwargs.get("default_cell_carrying_capacity", None)
+        self.random_seed = kwargs.get("random_seed", None)
+        self.log_frequency = kwargs.get("log_frequency", None)
+        self.multifurcating_trees = kwargs.get("multifurcating_trees", None)
+        self.final_output = kwargs.get("final_output", None)
+        self.full_complement_diploid_trees = kwargs.get("full_complement_diploid_trees", None)
+        self.lineages = []
+        self.environments = []
+        self.samples = []
+        self._child_elements = [self.lineages, self.environments, self.samples]
+
+    def __str__(self):
+        s = StringIO()
+        s.write('<?xml version="1.0"?>\n')
+        s.write('<ginkgo>\n')
+        indent = (INDENT_SIZE * ' ')
+        parts = []
+        parts.append('world')
+        if self.label:
+            parts.append('label="%s"' % self.label)
+        if self.num_fitness_traits:
+            parts.append('num_fitness_traits="%s"' % self.num_fitness_traits)
+        if self.global_selection_strength:
+            parts.append('global_selection_strength="%s"' % self.num_fitness_traits)
+        if self.default_cell_carrying_capacity:
+            parts.append('default_cell_carrying_capacity="%s"' % self.num_fitness_traits)
+        if self.random_seed:
+            parts.append('random_seed="%s"' % self.num_fitness_traits)
+        if self.log_frequency:
+            parts.append('log_frequency="%s"' % self.num_fitness_traits)
+        if self.multifurcating_trees:
+            parts.append('multifurcating_trees="%s"' % self.num_fitness_traits)
+        if self.final_output:
+            parts.append('final_output="%s"' % self.num_fitness_traits)
+        if self.full_complement_diploid_trees:
+            parts.append('full_complement_diploid_trees="%s"' % self.num_fitness_traits)
+        sep = "\n%s" % (indent * 2)
+        world_elem = sep.join(parts)
+        s.write('%s<%s>\n' % (indent, world_elem))
+        sub_indent = indent * 2
+        if self.lineages:
+            s.write('%s<biota>\n' % sub_indent)
+            for lineage in self.lineages:
+                s.write(str(lineage))
+            s.write('%s</biota>\n' % sub_indent)
+        if self.environments:
+            s.write('%s<environments>\n' % sub_indent)
+            for environment in self.environments:
+                s.write(str(environment))
+            s.write('%s</environments>\n' % sub_indent)
+        if self.samples:
+            s.write('%s<samples>\n' % sub_indent)
+            for sample in self.samples:
+                s.write(str(sample))
+            s.write('%s</samples>\n' % sub_indent)
+        s.write('%s</world>\n' % indent)
+        s.write('</ginkgo>\n')
+        return s.getvalue()
+
+class SeedPopulation(object):
+
+    def __init__(self, x, y, size, ancestral_size, ancestral_generations, indent_level=5):
+        self.x = x
+        self.y = y
+        self.size = size
+        self.ancestral_size = ancestral_size
+        self.ancestral_generations = ancestral_generations
+        self.indent_level = indent_level
+
+    def __str__(self):
+        parts = []
+        top_indent = (self.indent_level * INDENT_SIZE) * ' '
+        parts.append('%s<seedPopulation x="%s" y="%s" size="%s">' % (top_indent, self.x, self.y, self.size))
+        sub_indent = ((self.indent_level + 1) * INDENT_SIZE) * ' '
+        parts.append('%s<ancestralPopulationSize>%s</ancestralPopulationSize>' % (sub_indent, self.ancestral_size))
+        parts.append('%s<ancestralGenerations>%s</ancestralGenerations>' % (sub_indent, self.ancestral_generations))
+        parts.append('%s</seedPopulation>\n' % top_indent)
+        return "\n".join(parts)
+
+class Lineage(object):
+
+    def __init__(self, lineage_id, **kwargs):
+        self.lineage_id = lineage_id
+        self.fitness_trait_relative_selection_weights = kwargs.get("fitness_trait_relative_selection_weights", None)
+        self.fitness_trait_default_genotypes = kwargs.get("fitness_trait_default_genotypes", None)
+        self.fecundity = kwargs.get("fecundity", None)
+        self.movement_capacity = kwargs.get("movement_capacity", None)
+        self.seed_populations = kwargs.get("seed_populations", [])
+        self.indent_level = kwargs.get('indent_level', 3)
+
+    def __str__(self):
+        top_indent = (self.indent_level * INDENT_SIZE) * ' '
+        s = StringIO()
+        s.write('%s<lineage id="%s">\n' % (top_indent, self.lineage_id))
+        sub_indent = ((self.indent_level + 1) * INDENT_SIZE) * ' '
+        if self.fitness_trait_relative_selection_weights:
+            s.write('%s<fitness_trait_relative_selection_weights>%s</fitness_trait_relative_selection_weights>\n' %
+                    (sub_indent, (" ".join([str(x) for x in self.fitness_trait_relative_selection_weights]))))
+        if self.fitness_trait_default_genotypes:
+            s.write('%s<fitness_trait_default_genotypes>%s</fitness_trait_default_genotypes>\n' %
+                    (sub_indent, (" ".join([str(x) for x in self.fitness_trait_default_genotypes]))))
+        if self.fecundity:
+            s.write('%s<fecundity>%s</fecundity>\n' % (sub_indent, self.fecundity))
+        if self.movement_capacity:
+            s.write('%s<movement_capacity>%s</movement_capacity>\n' % (sub_indent, self.movement_capacity))
+        if self.seed_populations:
+            s.write('%s<seedPopulations>\n' % (sub_indent))
+            for seed_pop in self.seed_populations:
+                s.write(str(seed_pop))
+            s.write('%s</seedPopulations>\n' % (sub_indent))
+        s.write('%s</lineage>\n' % (top_indent))
+        return s.getvalue()
+
 class EnvironmentGrid(object):
 
     def __init__(self, type_name, attribute_dict, grid_filepath):
@@ -81,7 +203,7 @@ class FitnessTraitOptimaGrid(EnvironmentGrid):
 
 class Environment(object):
 
-    def __init__(self, gen, indent_level=0):
+    def __init__(self, gen, indent_level=3):
         self.gen = gen
         self.grids = []
         self.indent_level = indent_level
@@ -106,7 +228,7 @@ def Sample(object):
         self.label = kwargs.get('label', None)
         self.individuals_per_cell = kwargs.get('individuals_per_cell', None)
         self.cells = kwargs.get('cells', None)
-        self.indent_level = kwargs.get('indent_level', 0)
+        self.indent_level = kwargs.get('indent_level', 3)
 
     def __str__(self):
         top_indent = (self.indent_level * INDENT_SIZE) * ' '
@@ -127,9 +249,37 @@ def Sample(object):
         parts.append('%s</sample>' % top_indent)
         return "\n".join(parts)
 
-e = Environment(0)
-e.grids.append(CarryingCapacityGrid('cc.grd'))
-e.grids.append(MovementProbabilitiesGrid('Zx', 'movp_zx.grd'))
-e.grids.append(MovementCostsGrid('Zx', 'movp_zx.grd'))
-e.grids.append(FitnessTraitOptimaGrid('1', 'movp_zx.grd'))
-print(e)
+
+if __name__ == "__main__":
+    num_fitness_traits = 1
+    w = World(
+            x_range=10,
+            y_range=10,
+            num_gens=20000,
+            label="ginkgo_run",
+            num_fitness_traits=num_fitness_traits,
+            global_selection_strength=1.0,
+            default_cell_carrying_capacity=100,
+            log_frequency=1000,
+            multifurcating_trees=True,
+            final_output=False,
+            full_complement_diploid_trees=False)
+    seed_pop = SeedPopulation(x=0, y=0, size=100, ancestral_size=100, ancestral_generations=1000)
+    s1 = Lineage("Zx",
+            fitness_trait_relative_selection_weights=[1]*num_fitness_traits,
+            fitness_trait_default_genotypes=[0]*num_fitness_traits,
+            fecundity=16,
+            movement_capacity=1,
+            seed_populations=[seed_pop])
+    w.lineages.append(s1)
+    e0 = Environment(0)
+    e0.grids.append(CarryingCapacityGrid('cc.grd'))
+    e0.grids.append(MovementProbabilitiesGrid('Zx', 'movp_zx.grd'))
+    e0.grids.append(MovementCostsGrid('Zx', 'movp_zx.grd'))
+    e0.grids.append(FitnessTraitOptimaGrid('1', 'movp_zx.grd'))
+    e1 = Environment(0)
+    e1.grids.append(CarryingCapacityGrid('cc.grd'))
+    e1.grids.append(MovementProbabilitiesGrid('Zx', 'movp_zx.grd'))
+    e1.grids.append(MovementCostsGrid('Zx', 'movp_zx.grd'))
+    e1.grids.append(FitnessTraitOptimaGrid('1', 'movp_zx.grd'))
+    print(str(w))
