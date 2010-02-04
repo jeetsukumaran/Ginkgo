@@ -220,10 +220,10 @@ class Environment(object):
         parts.append('%s</environment>' % top_indent)
         return "\n".join(parts)
 
-def Sample(object):
+class Sample(object):
 
-    def __init__(self, lineage, gen, **kwargs):
-        self.lineage = lineage
+    def __init__(self, lineage_id, gen, **kwargs):
+        self.lineage_id = lineage_id
         self.gen = gen
         self.label = kwargs.get('label', None)
         self.individuals_per_cell = kwargs.get('individuals_per_cell', None)
@@ -236,19 +236,19 @@ def Sample(object):
             label = ' label="%s"' % label
         else:
             label = ''
-        parts.append('%s<sample gen="%d" lineage=%s%s>' % (top_indent, self.gen, self.lineage, label))
+        parts = []
+        parts.append('%s<sample gen="%d" lineage=%s%s>' % (top_indent, self.gen, self.lineage_id, label))
         sub_indent = ((self.indent_level + 1) * INDENT_SIZE) * ' '
-        if self.individuals_per_cells:
-            parts.append('%s<individualsPerCell>%s</individualsPerCell>' % (sub_indent, self.individuals_per_cells))
+        if self.individuals_per_cell:
+            parts.append('%s<individualsPerCell>%s</individualsPerCell>' % (sub_indent, self.individuals_per_cell))
         if self.cells:
             parts.append('%s<cells>' % sub_indent)
             sub_sub_indent = ((self.indent_level + 2) * INDENT_SIZE) * ' '
             for c in self.cells:
                 parts.append('%s%s,%s' % (sub_sub_indent, c[0], c[1]))
             parts.append('%s</cells>' % sub_indent)
-        parts.append('%s</sample>' % top_indent)
+        parts.append('%s</sample>\n' % top_indent)
         return "\n".join(parts)
-
 
 if __name__ == "__main__":
     num_fitness_traits = 1
@@ -282,4 +282,12 @@ if __name__ == "__main__":
     e1.grids.append(MovementProbabilitiesGrid('Zx', 'movp_zx.grd'))
     e1.grids.append(MovementCostsGrid('Zx', 'movp_zx.grd'))
     e1.grids.append(FitnessTraitOptimaGrid('1', 'movp_zx.grd'))
+
+    cells = [(1,1),(2,1),(3,1),(4,1),
+             (1,2),(2,2),(3,2),(4,2)]
+    for t in xrange(10):
+        gen = (t + 10) * 1000
+        s = Sample(lineage_id="Zx", gen=gen, individuals_per_cell=10, cells=cells)
+        w.samples.append(s)
+
     print(str(w))
