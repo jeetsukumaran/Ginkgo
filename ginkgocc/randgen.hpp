@@ -8,12 +8,12 @@
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation; either version 3 of the License, or
 // (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU General Public License along
 // with this program. If not, see <http://www.gnu.org/licenses/>.
 //
@@ -22,59 +22,61 @@
 #if !defined(GINKGO_RANDOM_H)
 #define GINKGO_RANDOM_H
 
+#include <vector>
+
 namespace ginkgo {
 
 /**
- * Encapsulates generation of random number from various distribution and 
+ * Encapsulates generation of random number from various distribution and
  * various ranges.
  */
 class RandomNumberGenerator {
 
     public:
-    
+
         /** Constructs a RNG seeded with current time. */
         RandomNumberGenerator();
-        
+
         /** Constructs a RNG seeded with current time. */
-        
+
         /** Constructs a RNG seeded with given seed. */
         RandomNumberGenerator(unsigned long seed);
-        
+
         /** Returns current seed. */
-        unsigned long get_seed() const;        
-        
+        unsigned long get_seed() const;
+
         /** Explicitly sets the RNG seed. */
-        void set_seed(unsigned long seed);                
- 
+        void set_seed(unsigned long seed);
+
         /**
          * Returns a uniform random real variate in [0,1).
          * @return   uniform random real variate in [0,1)
          */
         float uniform_01();
-        
+
         /**
          * Returns a uniform random integer in [a, b].
          * @param   lower-bound of range
          * @param   upper-bound of range
          * @return  uniform random integer in [a, b]
-         */        
+         */
         long  uniform_int(int a, int b);
-        
+
         /**
          * Returns Gaussian random variate with mean of 0 and standard
          * deviation of 1.
          * @return   random variate with mean of 0 and standard deviation of 1
-         */          
-        float standard_normal(); 
-        
+         */
+        float standard_normal();
+
         /**
-         * Returns Gaussian random variate with mean of <code>mean</code> and 
+         * Returns Gaussian random variate with mean of <code>mean</code> and
          * standard deviation of <code>sd</code>.
-         * @return   random variate with mean of <code>mean</code> and standard 
+         * @return   random variate with mean of <code>mean</code> and standard
          *           deviation of <code>sd</code>
-         */        
+         */
         float normal(float mean, float sd);
-        
+
         /**
          * Returns a Poisson-distributed random variate with given rate.
          * @param   rate    rate for the Poisson process
@@ -82,7 +84,18 @@ class RandomNumberGenerator {
          *                  rate
          */
         unsigned int poisson(float rate);
-        
+
+        /**
+         * Returns an index value with probability equal to a vector of weights
+         * passed as an argument. For example, given {2.0, 2.0, 3.0, 3.0}, this
+         * will return:
+         *       0 with probability 0.2
+         *       1 with probability 0.2
+         *       2 with probability 0.3
+         *       3 with probability 0.3
+         */
+        unsigned int weighted_index(const std::vector<float>& weights);
+
         /**
          * Returns an element selected with uniform random probability from
          * given universe of elements.
@@ -93,7 +106,7 @@ class RandomNumberGenerator {
         inline typename T::value_type& select(T& collection) {
             return collection[this->uniform_int(0, collection.size()-1)];
         }
-        
+
         /**
          * Returns one of two arguments passed to it.
          * @param   a   the first candidate to be returned
@@ -101,15 +114,15 @@ class RandomNumberGenerator {
          * @return      either <code>a</code> or <code>b</code>, selected at
          *              random
          */
-        template <typename T>        
+        template <typename T>
         inline T& select(T& a, T& b) {
             if (this->uniform_01() < 0.5) {
                 return a;
             } else {
                 return b;
             }
-        }        
-        
+        }
+
     private:
         /** random number generator seed */
         unsigned long seed_;                    //! seed for the underlying rng
@@ -118,9 +131,9 @@ class RandomNumberGenerator {
 /**
  * Random function used as function object by STL algorithm.
  */
-class RandomPointer {     
-    public:     
-        RandomPointer(RandomNumberGenerator& rng);            
+class RandomPointer {
+    public:
+        RandomPointer(RandomNumberGenerator& rng);
         std::ptrdiff_t operator() (std::ptrdiff_t max);
     private:
         RandomNumberGenerator&  rng_;
