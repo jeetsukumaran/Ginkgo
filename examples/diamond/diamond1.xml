@@ -1,0 +1,171 @@
+<?xml version="1.0"?>
+<ginkgo>
+    <world label="colonizer_comp"
+           x_range = "25"
+           y_range = "25"
+           num_gens = "20001"
+           num_fitness_traits = "5"
+           global_selection_strength="1.0"
+           default_cell_carrying_capacity = "100"
+           log_frequency= "10"
+           multifurcating_trees = "True"
+           final_output = "True"
+           full_complement_diploid_trees = "False">
+        <biota>
+            <lineage id="Supertramp">
+                <fitnessTraitRelativeSelectionWeights>
+                	1 1 1 1 1
+                </fitnessTraitRelativeSelectionWeights>
+                <fitnessTraitDefaultGenotypes>
+                	1.0 -1.0 1.0 -1.0 1.0
+                </fitnessTraitDefaultGenotypes>
+                <fecundity>20</fecundity>
+                <seedPopulations>
+                    <seedPopulation x="5" y="5" size="30">
+                        <ancestralPopulationSize>100</ancestralPopulationSize>
+                        <ancestralGenerations>10000</ancestralGenerations>
+                    </seedPopulation>
+                </seedPopulations>
+                <movementCapacity>5</movementCapacity>
+            </lineage>
+            <lineage id="LateColonizer">
+                <fitnessTraitRelativeSelectionWeights>
+                	0.1 0.1 0.1 0.1 0.1
+                </fitnessTraitRelativeSelectionWeights>
+                <fitnessTraitDefaultGenotypes>
+                	0.0 0.0 0.0 0.0 0.0
+                </fitnessTraitDefaultGenotypes>
+                <seedPopulations>
+                    <seedPopulation x="19" y="19" size="30">
+                        <ancestralPopulationSize>100</ancestralPopulationSize>
+                        <ancestralGenerations>10000</ancestralGenerations>
+                    </seedPopulation>
+                </seedPopulations>
+                <movementCapacity>6</movementCapacity>
+            </lineage>
+        </biota>
+        <environments>
+            <environment gen="0">
+                <carryingCapacity>cc.grd</carryingCapacity>
+                <movementCosts lineage="Supertramp">mov.grd</movementCosts>
+                <movementCosts lineage="LateColonizer">mov.grd</movementCosts>
+            </environment>
+        </environments>
+        <samples>
+            <sample label="check" lineage="Supertramp" gen="1" />
+            <sample label="check" lineage="LateColonizer" gen="1" />
+            <sample lineage="Supertramp" gen="10" >
+                <individualsPerCell>20</individualsPerCell>
+                <cells>
+                    5,5  6,5  7,5  8,5  9,5    15,5  16,5  17,5  18,5  19,5
+                    5,6  6,6  7,6  8,6  9,6    15,6  16,6  17,6  18,6  19,6
+                    5,7  6,7  7,7  8,7  9,7    15,7  16,7  17,7  18,7  19,7
+                    5,8  6,8  7,8  8,8  9,8    15,8  16,8  17,8  18,8  19,8
+                    5,9  6,9  7,9  8,9  9,9    15,9  16,9  17,9  18,9  19,9
+
+                    5,15 6,15 7,15 8,15 9,15   15,15 16,15 17,15 18,15 19,15
+                    5,16 6,16 7,16 8,16 9,16   15,16 16,16 17,16 18,16 19,16
+                    5,17 6,17 7,17 8,17 9,17   15,17 16,17 17,17 18,17 19,17
+                    5,18 6,18 7,18 8,18 9,18   15,18 16,18 17,18 18,18 19,18
+                    5,19 6,19 7,19 8,19 9,19   15,19 16,19 17,19 18,19 19,19
+                </cells>
+            </sample>
+            <sample lineage="Supertramp" gen="100" >
+                <individualsPerCell>20</individualsPerCell>
+                <cells>
+                    5,5  6,5  7,5  8,5  9,5    15,5  16,5  17,5  18,5  19,5
+                    5,6  6,6  7,6  8,6  9,6    15,6  16,6  17,6  18,6  19,6
+                    5,7  6,7  7,7  8,7  9,7    15,7  16,7  17,7  18,7  19,7
+                    5,8  6,8  7,8  8,8  9,8    15,8  16,8  17,8  18,8  19,8
+                    5,9  6,9  7,9  8,9  9,9    15,9  16,9  17,9  18,9  19,9
+
+                    5,15 6,15 7,15 8,15 9,15   15,15 16,15 17,15 18,15 19,15
+                    5,16 6,16 7,16 8,16 9,16   15,16 16,16 17,16 18,16 19,16
+                    5,17 6,17 7,17 8,17 9,17   15,17 16,17 17,17 18,17 19,17
+                    5,18 6,18 7,18 8,18 9,18   15,18 16,18 17,18 18,18 19,18
+                    5,19 6,19 7,19 8,19 9,19   15,19 16,19 17,19 18,19 19,19
+                </cells>
+            </sample>
+            <sample lineage="Supertramp" gen="500" >
+                <individualsPerCell>20</individualsPerCell>
+                <cells>
+                    5,5  6,5  7,5  8,5  9,5    15,5  16,5  17,5  18,5  19,5
+                    5,6  6,6  7,6  8,6  9,6    15,6  16,6  17,6  18,6  19,6
+                    5,7  6,7  7,7  8,7  9,7    15,7  16,7  17,7  18,7  19,7
+                    5,8  6,8  7,8  8,8  9,8    15,8  16,8  17,8  18,8  19,8
+                    5,9  6,9  7,9  8,9  9,9    15,9  16,9  17,9  18,9  19,9
+
+                    5,15 6,15 7,15 8,15 9,15   15,15 16,15 17,15 18,15 19,15
+                    5,16 6,16 7,16 8,16 9,16   15,16 16,16 17,16 18,16 19,16
+                    5,17 6,17 7,17 8,17 9,17   15,17 16,17 17,17 18,17 19,17
+                    5,18 6,18 7,18 8,18 9,18   15,18 16,18 17,18 18,18 19,18
+                    5,19 6,19 7,19 8,19 9,19   15,19 16,19 17,19 18,19 19,19
+                </cells>
+            </sample>
+            <sample lineage="Supertramp" gen="1000" >
+                <individualsPerCell>20</individualsPerCell>
+                <cells>
+                    5,5  6,5  7,5  8,5  9,5    15,5  16,5  17,5  18,5  19,5
+                    5,6  6,6  7,6  8,6  9,6    15,6  16,6  17,6  18,6  19,6
+                    5,7  6,7  7,7  8,7  9,7    15,7  16,7  17,7  18,7  19,7
+                    5,8  6,8  7,8  8,8  9,8    15,8  16,8  17,8  18,8  19,8
+                    5,9  6,9  7,9  8,9  9,9    15,9  16,9  17,9  18,9  19,9
+
+                    5,15 6,15 7,15 8,15 9,15   15,15 16,15 17,15 18,15 19,15
+                    5,16 6,16 7,16 8,16 9,16   15,16 16,16 17,16 18,16 19,16
+                    5,17 6,17 7,17 8,17 9,17   15,17 16,17 17,17 18,17 19,17
+                    5,18 6,18 7,18 8,18 9,18   15,18 16,18 17,18 18,18 19,18
+                    5,19 6,19 7,19 8,19 9,19   15,19 16,19 17,19 18,19 19,19
+                </cells>
+            </sample>
+            <sample lineage="Supertramp" gen="5000" >
+                <individualsPerCell>20</individualsPerCell>
+                <cells>
+                    5,5  6,5  7,5  8,5  9,5    15,5  16,5  17,5  18,5  19,5
+                    5,6  6,6  7,6  8,6  9,6    15,6  16,6  17,6  18,6  19,6
+                    5,7  6,7  7,7  8,7  9,7    15,7  16,7  17,7  18,7  19,7
+                    5,8  6,8  7,8  8,8  9,8    15,8  16,8  17,8  18,8  19,8
+                    5,9  6,9  7,9  8,9  9,9    15,9  16,9  17,9  18,9  19,9
+
+                    5,15 6,15 7,15 8,15 9,15   15,15 16,15 17,15 18,15 19,15
+                    5,16 6,16 7,16 8,16 9,16   15,16 16,16 17,16 18,16 19,16
+                    5,17 6,17 7,17 8,17 9,17   15,17 16,17 17,17 18,17 19,17
+                    5,18 6,18 7,18 8,18 9,18   15,18 16,18 17,18 18,18 19,18
+                    5,19 6,19 7,19 8,19 9,19   15,19 16,19 17,19 18,19 19,19
+                </cells>
+            </sample>
+            <sample lineage="Supertramp" gen="10000" >
+                <individualsPerCell>20</individualsPerCell>
+                <cells>
+                    5,5  6,5  7,5  8,5  9,5    15,5  16,5  17,5  18,5  19,5
+                    5,6  6,6  7,6  8,6  9,6    15,6  16,6  17,6  18,6  19,6
+                    5,7  6,7  7,7  8,7  9,7    15,7  16,7  17,7  18,7  19,7
+                    5,8  6,8  7,8  8,8  9,8    15,8  16,8  17,8  18,8  19,8
+                    5,9  6,9  7,9  8,9  9,9    15,9  16,9  17,9  18,9  19,9
+
+                    5,15 6,15 7,15 8,15 9,15   15,15 16,15 17,15 18,15 19,15
+                    5,16 6,16 7,16 8,16 9,16   15,16 16,16 17,16 18,16 19,16
+                    5,17 6,17 7,17 8,17 9,17   15,17 16,17 17,17 18,17 19,17
+                    5,18 6,18 7,18 8,18 9,18   15,18 16,18 17,18 18,18 19,18
+                    5,19 6,19 7,19 8,19 9,19   15,19 16,19 17,19 18,19 19,19
+                </cells>
+            </sample>
+            <sample lineage="Supertramp" gen="20000" >
+                <individualsPerCell>20</individualsPerCell>
+                <cells>
+                    5,5  6,5  7,5  8,5  9,5    15,5  16,5  17,5  18,5  19,5
+                    5,6  6,6  7,6  8,6  9,6    15,6  16,6  17,6  18,6  19,6
+                    5,7  6,7  7,7  8,7  9,7    15,7  16,7  17,7  18,7  19,7
+                    5,8  6,8  7,8  8,8  9,8    15,8  16,8  17,8  18,8  19,8
+                    5,9  6,9  7,9  8,9  9,9    15,9  16,9  17,9  18,9  19,9
+
+                    5,15 6,15 7,15 8,15 9,15   15,15 16,15 17,15 18,15 19,15
+                    5,16 6,16 7,16 8,16 9,16   15,16 16,16 17,16 18,16 19,16
+                    5,17 6,17 7,17 8,17 9,17   15,17 16,17 17,17 18,17 19,17
+                    5,18 6,18 7,18 8,18 9,18   15,18 16,18 17,18 18,18 19,18
+                    5,19 6,19 7,19 8,19 9,19   15,19 16,19 17,19 18,19 19,19
+                </cells>
+            </sample>
+        </samples>
+    </world>
+</ginkgo>
