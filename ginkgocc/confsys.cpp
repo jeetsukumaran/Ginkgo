@@ -361,41 +361,44 @@ void ConfigurationFile::process_samplings(World& world) {
                 GenerationCountType gen = this->get_attribute<GenerationCountType>(snode, "gen");
                 std::string lineage_id = this->get_attribute<std::string>(snode, "lineage");
                 if (not world.has_species(lineage_id)) {
-                    throw ConfigurationError("occurrence sample: lineage \"" + lineage_id + "\" not defined");
+                    throw ConfigurationError("sample: lineage \"" + lineage_id + "\" not defined");
                 }
                 world.add_occurrence_sampling(gen, world.get_species_ptr(lineage_id));
 
-                SamplingRegime world_sampling_regime;
-                world_sampling_regime.species_ptr = world.get_species_ptr(lineage_id);
-                std::string label = this->get_attribute<std::string>(snode, "label", "");
-                if (label.size() > 0) {
-                    world_sampling_regime.label = label;
-                }
-                world_sampling_regime.num_organisms_per_cell = this->get_child_node_scalar<PopulationCountType>(snode, "individualsPerCell", 0);
-                XmlElementType cells_node = snode.getChildNode("cells");
-                if (!cells_node.isEmpty()) {
-                    std::ostringstream raw;
-                    for (int i = 0; i < cells_node.nText(); ++i) {
-                        raw << cells_node.getText(i);
+                bool write_trees = this->get_attribute_bool(snode, "trees", true);
+                if (write_trees) {
+                    SamplingRegime world_sampling_regime;
+                    world_sampling_regime.species_ptr = world.get_species_ptr(lineage_id);
+                    std::string label = this->get_attribute<std::string>(snode, "label", "");
+                    if (label.size() > 0) {
+                        world_sampling_regime.label = label;
                     }
-                    std::string cells_desc = raw.str();
-                    if (cells_desc.size() > 0) {
-                        std::vector<std::string> cells_vec = textutil::split_on_any(cells_desc, " \r\n\t", 0, false);
-                        for (std::vector<std::string>::iterator ci = cells_vec.begin(); ci != cells_vec.end(); ++ci) {
-                            std::vector<std::string> xy = textutil::split(*ci, ",", 0, false);
-                            if (xy.size() < 2) {
-                                throw ConfigurationError("tree sample cell position: missing coordinate");
-                            } else if (xy.size() > 2) {
-                                throw ConfigurationError("tree sample cell position: too many coordinates");
+                    world_sampling_regime.num_organisms_per_cell = this->get_child_node_scalar<PopulationCountType>(snode, "individualsPerCell", 0);
+                    XmlElementType cells_node = snode.getChildNode("cells");
+                    if (!cells_node.isEmpty()) {
+                        std::ostringstream raw;
+                        for (int i = 0; i < cells_node.nText(); ++i) {
+                            raw << cells_node.getText(i);
+                        }
+                        std::string cells_desc = raw.str();
+                        if (cells_desc.size() > 0) {
+                            std::vector<std::string> cells_vec = textutil::split_on_any(cells_desc, " \r\n\t", 0, false);
+                            for (std::vector<std::string>::iterator ci = cells_vec.begin(); ci != cells_vec.end(); ++ci) {
+                                std::vector<std::string> xy = textutil::split(*ci, ",", 0, false);
+                                if (xy.size() < 2) {
+                                    throw ConfigurationError("sample cell position: missing coordinate");
+                                } else if (xy.size() > 2) {
+                                    throw ConfigurationError("sample cell position: too many coordinates");
+                                }
+                                CellIndexType x = convert::to_scalar<CellIndexType>(xy[0]);
+                                CellIndexType y = convert::to_scalar<CellIndexType>(xy[1]);
+                                CellIndexType cell_index = this->get_validated_cell_index(x, y, world, "sampling coordinate");
+                                world_sampling_regime.cell_indexes.insert(cell_index);
                             }
-                            CellIndexType x = convert::to_scalar<CellIndexType>(xy[0]);
-                            CellIndexType y = convert::to_scalar<CellIndexType>(xy[1]);
-                            CellIndexType cell_index = this->get_validated_cell_index(x, y, world, "sampling coordinate");
-                            world_sampling_regime.cell_indexes.insert(cell_index);
                         }
                     }
+                    world.add_tree_sampling(gen, world_sampling_regime);
                 }
-                world.add_tree_sampling(gen, world_sampling_regime);
             }
         }
     }

@@ -94,7 +94,7 @@ struct SamplingRegime {
         PopulationCountType         num_organisms_per_cell;
         /** List of cell indexes to be sampled. */
         std::set<CellIndexType>     cell_indexes;
-        /** Label prefix for tree(s) / tree file(s). */
+        /** Label prefix for file(s). */
         std::string                 label;
 };
 
