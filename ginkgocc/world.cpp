@@ -657,7 +657,7 @@ std::string World::compose_output_filename(const std::string& species_label,
         const std::string& extension) {
     std::ostringstream f;
     f << this->get_output_filename_stem();
-    f << "_G" << this->current_generation_;
+    f << "_G" << std::setw(8) << std::setfill('0') <<  this->current_generation_;
     f << "_" << species_label;
     if (additional.size() > 0) {
         f << "_" << additional;
