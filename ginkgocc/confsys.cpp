@@ -188,18 +188,18 @@ void ConfigurationFile::process_lineage(XmlElementType& lineage_node, World& wor
 
     lineage.set_mean_reproductive_rate(this->get_child_node_scalar<unsigned>(lineage_node, "fecundity", 16));
 
-    XmlElementType mc_node = this->get_child_node(lineage_node, "movementCapacity", false);
-    if (!mc_node.isEmpty()) {
-        XmlElementType fixed_mc_node = mc_node.getChildNode("fixed");
-        if (!fixed_mc_node.isEmpty()) {
-            std::cout << "Hello, world!" << std::endl;
-        } else {
-            std::cout << "Goodbye, world!" << std::endl;
-        }
-        exit(1);
-    }
+//    XmlElementType mc_node = this->get_child_node(lineage_node, "movementCapacity", false);
+//    if (!mc_node.isEmpty()) {
+//        XmlElementType fixed_mc_node = mc_node.getChildNode("fixed");
+//        if (!fixed_mc_node.isEmpty()) {
+//            std::cout << "Hello, world!" << std::endl;
+//        } else {
+//            std::cout << "Goodbye, world!" << std::endl;
+//        }
+//        exit(1);
+//    }
 
-//    lineage.set_movement_capacity(this->get_child_node_scalar<MovementCountType>(lineage_node, "movementCapacity", 1));
+    lineage.set_movement_capacity(this->get_child_node_scalar<MovementCountType>(lineage_node, "movementCapacity", 1));
 
     // seed populations
     XmlElementType seed_pops = lineage_node.getChildNode("seedPopulations");
