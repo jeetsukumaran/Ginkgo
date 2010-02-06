@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <ginkgo>
-    <world label="colonizer_comp"
+    <world label="comps"
            x_range = "25"
            y_range = "25"
            num_gens = "20001"
@@ -14,10 +14,10 @@
         <biota>
             <lineage id="Supertramp">
                 <fitnessTraitRelativeSelectionWeights>
-                	1 1
+                	9  1
                 </fitnessTraitRelativeSelectionWeights>
                 <fitnessTraitDefaultGenotypes>
-                	3.0 -3.0
+                	0 -5.0
                 </fitnessTraitDefaultGenotypes>
                 <fecundity>20</fecundity>
                 <seedPopulations>
@@ -33,7 +33,7 @@
                 	999 1
                 </fitnessTraitRelativeSelectionWeights>
                 <fitnessTraitDefaultGenotypes>
-                	0.0 1.0
+                	0.0 0.0
                 </fitnessTraitDefaultGenotypes>
                 <seedPopulations>
                     <seedPopulation x="19" y="19" size="30">
@@ -50,7 +50,7 @@
                 <movementCosts lineage="Supertramp">mov.grd</movementCosts>
                 <movementCosts lineage="LateColonizer">mov.grd</movementCosts>
                 <fitnessTraitOptima trait="0">env0.grd</fitnessTraitOptima>
-                <fitnessTraitOptima trait="1">env0.grd</fitnessTraitOptima>
+                <fitnessTraitOptima trait="1">env_rnd.grd</fitnessTraitOptima>
             </environment>
         </environments>
         <samples>
@@ -64,7 +64,9 @@
             <sample lineage="LateColonizer" gen="50" trees="False" />
             <sample lineage="Supertramp" gen="100" trees="False" />
             <sample lineage="LateColonizer" gen="100" trees="False" />
-            <sample lineage="Supertramp" gen="250" trees="False" />
+            <sample lineage="Supertramp" gen="250"  >
+                <individualsPerCell>10</individualsPerCell>
+            </sample>
             <sample lineage="LateColonizer" gen="250" trees="False" />
             <sample lineage="Supertramp" gen="500" trees="False" />
             <sample lineage="LateColonizer" gen="500" trees="False" />
