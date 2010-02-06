@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <ginkgo>
-    <world label="comps"
+    <world label="diamond-null"
            x_range = "25"
            y_range = "25"
            num_gens = "20001"
@@ -14,29 +14,29 @@
         <biota>
             <lineage id="Supertramp">
                 <fitnessTraitRelativeSelectionWeights>
-                	9  1
+                   1 1
                 </fitnessTraitRelativeSelectionWeights>
                 <fitnessTraitDefaultGenotypes>
-                	0 -5.0
+                	0.0 0.0
                 </fitnessTraitDefaultGenotypes>
-                <fecundity>20</fecundity>
+                <fecundity>10</fecundity>
                 <seedPopulations>
                     <seedPopulation x="5" y="5" size="30">
                         <ancestralPopulationSize>100</ancestralPopulationSize>
                         <ancestralGenerations>1</ancestralGenerations>
                     </seedPopulation>
                 </seedPopulations>
-                <movementCapacity>20</movementCapacity>
+                <movementCapacity>30</movementCapacity>
             </lineage>
             <lineage id="LateColonizer">
                 <fitnessTraitRelativeSelectionWeights>
-                	999 1
+                	1 1
                 </fitnessTraitRelativeSelectionWeights>
                 <fitnessTraitDefaultGenotypes>
                 	0.0 0.0
                 </fitnessTraitDefaultGenotypes>
                 <seedPopulations>
-                    <seedPopulation x="19" y="19" size="30">
+                    <seedPopulation x="5" y="19" size="30">
                         <ancestralPopulationSize>100</ancestralPopulationSize>
                         <ancestralGenerations>1</ancestralGenerations>
                     </seedPopulation>
@@ -50,7 +50,7 @@
                 <movementCosts lineage="Supertramp">mov.grd</movementCosts>
                 <movementCosts lineage="LateColonizer">mov.grd</movementCosts>
                 <fitnessTraitOptima trait="0">env0.grd</fitnessTraitOptima>
-                <fitnessTraitOptima trait="1">env_rnd.grd</fitnessTraitOptima>
+                <fitnessTraitOptima trait="1">env0.grd</fitnessTraitOptima>
             </environment>
         </environments>
         <samples>
