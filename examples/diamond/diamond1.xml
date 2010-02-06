@@ -38,7 +38,7 @@
                 <seedPopulations>
                     <seedPopulation x="19" y="19" size="30">
                         <ancestralPopulationSize>100</ancestralPopulationSize>
-                        <ancestralGenerations>10000</ancestralGenerations>
+                        <ancestralGenerations>1</ancestralGenerations>
                     </seedPopulation>
                 </seedPopulations>
                 <movementCapacity>10</movementCapacity>
