@@ -89,7 +89,7 @@ World::~World() {
 
 // Creates a new landscape.
 void World::generate_landscape(CellIndexType size_x, CellIndexType size_y) {
-    if ((size_x * size_y) > UCHAR_MAX) {
+    if ((size_x * size_y) > MAX_LANDSCAPE_SIZE) {
 //        throw LandscapeSizeError("Maximum landscape size is " +  UCHAR_MAX  + "cells, but requested " + size_x + " x " + size_y + " = "  + (size_x*size_y) + " cells")
         std::ostringstream msg;
         msg << "Maximum landscape size allowed is " <<  MAX_LANDSCAPE_SIZE << ", but requested landscape has " << size_x << " x " << size_y << " = "  << (size_x*size_y) << " cells";
