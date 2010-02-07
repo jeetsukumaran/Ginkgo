@@ -732,6 +732,11 @@ void World::log_configuration() {
     out << "Minumum cell index: 0" << std::endl;
     out << "Maximum cell index: " << this->landscape_.size()-1 << std::endl;
     out << "Landscape cell index limit: " << MAX_LANDSCAPE_SIZE << std::endl;
+    if (this->landscape_.get_origin_upper_left()) {
+        out << "Landscape grid origin: upper-left" << std::endl;
+    } else {
+        out << "Landscape grid origin: lower-left" << std::endl;
+    }
 
     out << std::endl;
 

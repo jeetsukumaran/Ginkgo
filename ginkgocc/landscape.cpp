@@ -67,11 +67,11 @@ void Landscape::generate(CellIndexType size_x, CellIndexType size_y, unsigned nu
     this->size_ = size_x * size_y;
     this->max_size_ = this->size_ - 1;
     this->cells_.reserve(this->size_);
-    for (CellIndexType y = 0, index = 0; y < size_y; ++y) {
-        for (CellIndexType x = 0; x < size_x; ++x, ++index) {
-            Cell* cell = new Cell(index, x, y, num_fitness_traits, *this, this->species_, this->rng_);
-            this->cells_.push_back(cell);
-        }
+    for (CellIndexType i = 0; i < this->size_; ++i) {
+        CellIndexType x = this->index_to_x(i);
+        CellIndexType y = this->index_to_y(i);
+        Cell* cell = new Cell(i, x, y, num_fitness_traits, *this, this->species_, this->rng_);
+        this->cells_.push_back(cell);
     }
 }
 

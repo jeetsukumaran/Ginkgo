@@ -248,7 +248,21 @@ class Landscape {
             return this->size_y_;
         }
 
-        /**miii
+        /**
+         * Sets the origin location.
+         */
+        void set_origin_upper_left(bool val) {
+            this->origin_upper_left_ = val;
+        }
+
+        /**
+         * Gets the origin location.
+         */
+        bool get_origin_upper_left() {
+            return this->origin_upper_left_;
+        }
+
+        /**
          * Returns a Cell object that is adjacent to the cell of the given
          * vector index when considered within the geospatial framework.
          *
