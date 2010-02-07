@@ -210,10 +210,30 @@ void ConfigurationFile::process_lineage(XmlElementType& lineage_node, World& wor
         XmlElementType pop_node = seed_pops.getChildNode("seedPopulation", i);
         std::ostringstream item_desc;
         item_desc << "seed population " << i+1 << " for lineage \"" << lineage_id << "\"";
-        CellIndexType cell_index = this->get_validated_cell_index(this->get_attribute<CellIndexType>(pop_node, "x"),
+        bool has_x =  this->has_attribute(pop_node, "x");
+        bool has_y =  this->has_attribute(pop_node, "y");
+        bool has_index=  this->has_attribute(pop_node, "cell");
+        CellIndexType cell_index = 0;
+        if ( (has_x or has_y) and has_index ) {
+            throw ConfigurationError("seed population: cannot specify both cell using both coordinates ('x', 'y') and index ('cell')");
+        } else if (has_index) {
+            cell_index = this->get_attribute<CellIndexType>(pop_node, "cell");
+            if (cell_index >= world.landscape().size()) {
+                std::ostringstream msg;
+                msg << "seed population: maximum cell index is " << world.landscape().size() - 1;
+                msg << " (0-based indexing), but cell index of " << cell_index << " specified";
+                throw ConfigurationError(msg.str());
+            }
+        } else if (has_x and has_y) {
+            cell_index = this->get_validated_cell_index(this->get_attribute<CellIndexType>(pop_node, "x"),
                                                                   this->get_attribute<CellIndexType>(pop_node, "y"),
                                                                   world,
                                                                   item_desc.str().c_str());
+        } else if ((has_x and !has_y) or (has_y and !has_x)) {
+            throw ConfigurationError("seed population: incomplete target cell specification");
+        } else {
+            throw ConfigurationError("seed population: must specify target cell either by coordinates ('x', 'y') or index ('cell')");
+        }
         PopulationCountType size = this->get_attribute<PopulationCountType>(pop_node, "size");
         PopulationCountType ancestral_pop_size = this->get_child_node_scalar<PopulationCountType>(pop_node, "ancestralPopulationSize");
         GenerationCountType ancestral_generations = this->get_child_node_scalar<GenerationCountType>(pop_node, "ancestralGenerations");
@@ -406,7 +426,7 @@ void ConfigurationFile::process_samplings(World& world) {
                                 ++ci) {
                             if (*ci >= world.landscape().size()) {
                                 std::ostringstream msg;
-                                msg << "maximum cell index is " << world.landscape().size() - 1;
+                                msg << "sample cell position: maximum cell index is " << world.landscape().size() - 1;
                                 msg << " (0-based indexing), but cell index of " << *ci << " specified";
                                 throw ConfigurationError(msg.str());
                             }

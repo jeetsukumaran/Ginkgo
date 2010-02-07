@@ -162,6 +162,11 @@ class ConfigurationFile {
 
         void open(const char *fpath);
 
+        bool has_attribute(XmlElementType& xml, const char * attr_name) const {
+            const char * attr_value = xml.getAttribute(attr_name);
+            return attr_value != NULL;
+        }
+
         template <typename T>
         T get_attribute(XmlElementType& xml, const char * attr_name) const {
             const char * attr_value = xml.getAttribute(attr_name);
