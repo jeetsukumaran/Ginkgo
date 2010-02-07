@@ -374,11 +374,14 @@ void ConfigurationFile::process_samplings(World& world) {
                         world_sampling_regime.label = label;
                     }
                     world_sampling_regime.num_organisms_per_cell = this->get_child_node_scalar<PopulationCountType>(snode, "individualsPerCell", 0);
-                    XmlElementType cells_node = snode.getChildNode("cells");
-                    if (!cells_node.isEmpty()) {
+                    XmlElementType cell_xy_node = snode.getChildNode("cellCoordinates");
+                    XmlElementType cell_index_node = snode.getChildNode("cellIndexes");
+                    if (!cell_xy_node.isEmpty() and !cell_index_node.isEmpty()) {
+                        throw ConfigurationError("sample: cannot specify cells using both coordinates and indexes");
+                    } else if (!cell_xy_node.isEmpty()) {
                         std::ostringstream raw;
-                        for (int i = 0; i < cells_node.nText(); ++i) {
-                            raw << cells_node.getText(i);
+                        for (int i = 0; i < cell_xy_node.nText(); ++i) {
+                            raw << cell_xy_node.getText(i);
                         }
                         std::string cells_desc = raw.str();
                         if (cells_desc.size() > 0) {
@@ -395,6 +398,19 @@ void ConfigurationFile::process_samplings(World& world) {
                                 CellIndexType cell_index = this->get_validated_cell_index(x, y, world, "sampling coordinate");
                                 world_sampling_regime.cell_indexes.insert(cell_index);
                             }
+                        }
+                    } else if (!cell_index_node.isEmpty()) {
+                        std::vector<CellIndexType> cell_indexes = this->get_element_vector<CellIndexType>(cell_index_node);
+                        for (std::vector<CellIndexType>::iterator ci = cell_indexes.begin();
+                                ci != cell_indexes.end();
+                                ++ci) {
+                            if (*ci >= world.landscape().size()) {
+                                std::ostringstream msg;
+                                msg << "maximum cell index is " << world.landscape().size() - 1;
+                                msg << " (0-based indexing), but cell index of " << *ci << " specified";
+                                throw ConfigurationError(msg.str());
+                            }
+                            world_sampling_regime.cell_indexes.insert(*ci);
                         }
                     }
                     world.add_tree_sampling(gen, world_sampling_regime);
