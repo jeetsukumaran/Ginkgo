@@ -412,7 +412,7 @@ void World::save_occurrences(Species * species_ptr ) {
     this->landscape_.count_organisms(species_ptr, counts);
     std::ofstream occs;
     this->open_ofstream(occs,
-        this->compose_output_filename(species_ptr->get_label(), "occurrences", "grd"));
+        this->compose_output_filename(species_ptr->get_label(), "occurrences", "asc"));
     asciigrid::write_grid(counts, this->landscape_.size_x(), this->landscape_.size_y(), occs);
 }
 
