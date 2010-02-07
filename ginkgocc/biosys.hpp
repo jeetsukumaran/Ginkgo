@@ -1152,9 +1152,13 @@ class Species {
          * @param   y       y-coordiante of organism's location
          * @return          OTU label
          */
-        std::string compose_organism_label(CellIndexType x, CellIndexType y) {
+        std::string compose_organism_label(CellIndexType i, CellIndexType x, CellIndexType y) {
             std::ostringstream label_ostr;
-            label_ostr << this->label_ << "_x" << x << "_y" << y << "_" << this->organism_label_index_++;
+            label_ostr << this->label_;
+            label_ostr << "_i" << i;
+            label_ostr << "_x" << x;
+            label_ostr << "_y" << y;
+            label_ostr << "_" << this->organism_label_index_++;
             return label_ostr.str();
         }
 
@@ -1182,8 +1186,8 @@ class Species {
          * @param   y           y-coordinate of organism's location
          * @return              unique label for organism
          */
-         const std::string& set_organism_label(const Organism& organism, CellIndexType x, CellIndexType y) {
-            this->organism_labels_[&organism] = this->compose_organism_label(x, y);
+         const std::string& set_organism_label(const Organism& organism, CellIndexType i, CellIndexType x, CellIndexType y) {
+            this->organism_labels_[&organism] = this->compose_organism_label(i, x, y);
             std::map<const Organism *, std::string>::const_iterator ol = this->organism_labels_.find(&organism);
             return ol->second;
          }

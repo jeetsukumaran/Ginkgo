@@ -223,10 +223,10 @@ void Cell::sample_organisms(Species * sp_ptr,
     available_organisms.reserve(this->organisms_.size());
     for (OrganismVector::const_iterator og = this->organisms_.begin(); og != this->organisms_.end(); ++og) {
         if (sp_ptr == NULL) {
-            (*og).species().set_organism_label(*og, this->x_, this->y_);
+            (*og).species().set_organism_label(*og, this->index_, this->x_, this->y_);
             available_organisms.push_back(&(*og));
         } else if (&og->species() == sp_ptr) {
-            sp_ptr->set_organism_label(*og, this->x_, this->y_);
+            sp_ptr->set_organism_label(*og, this->index_, this->x_, this->y_);
             available_organisms.push_back(&(*og));
         }
     }
