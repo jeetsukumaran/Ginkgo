@@ -866,7 +866,7 @@ void World::log_configuration() {
         } else {
             out << " from each cell, from following cells: ";
             for (std::set<CellIndexType>::iterator ci = sr.cell_indexes.begin(); ci != sr.cell_indexes.end(); ++ci) {
-                out << this->landscape_.index_to_x(*ci) << "," << this->landscape_.index_to_y(*ci) << " ";
+                out << *ci << " (" << this->landscape_.index_to_x(*ci) << "," << this->landscape_.index_to_y(*ci) << ") ";
             }
         }
         out << std::endl;
