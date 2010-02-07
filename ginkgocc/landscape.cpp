@@ -24,6 +24,7 @@
 #include <iostream>
 #include <iomanip>
 #include "textutil.hpp"
+#include "ginkgo_defs.hpp"
 
 using namespace ginkgo;
 
@@ -40,7 +41,8 @@ Landscape::Landscape(const SpeciesByLabel& species, RandomNumberGenerator& rng)
       max_y_(0),
       max_size_(0),
       species_(species),
-      rng_(rng) {
+      rng_(rng),
+      origin_upper_left_(GRID_ORIGIN_DEFAULT_UPPER_LEFT) {
     this->size_x_ = 0;
     this->size_y_ = 0;
     this->size_ = 0;

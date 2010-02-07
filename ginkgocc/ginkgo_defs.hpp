@@ -79,6 +79,9 @@ class LandscapeSizeError : public std::runtime_error {
         LandscapeSizeError(const std::string& msg) : std::runtime_error(msg.c_str()) {}
 };
 
+//! Landscape grid orientation: is (0,0) the upper-left? If not, it will be the lower-left
+const bool GRID_ORIGIN_DEFAULT_UPPER_LEFT = true;
+
 } // ginkgo namespace
 
 #endif

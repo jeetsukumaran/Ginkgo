@@ -197,7 +197,11 @@ class Landscape {
          *                  index
          */
         CellIndexType index_to_y(CellIndexType index) const {
-            return static_cast<CellIndexType>(index / this->size_x_);
+            if (this->origin_upper_left_) {
+                return static_cast<CellIndexType>(index / this->size_x_);
+            } else {
+                return this->size_y_ - static_cast<CellIndexType>(index / this->size_x_);
+            }
         }
 
         /**
@@ -208,7 +212,11 @@ class Landscape {
          * @return      index of element in vector
          */
         CellIndexType xy_to_index(CellIndexType x, CellIndexType y) const {
-            return (y * this->size_x_) + x;
+            if (this->origin_upper_left_) {
+                return (y * this->size_x_) + x;
+            } else {
+                return ((this->size_y_ - y) * this->size_x_) + x;
+            }
         }
 
         /**
@@ -319,6 +327,8 @@ class Landscape {
         const SpeciesByLabel&           species_;
         /** Reference to RandomNumberGenerator of the World. */
         RandomNumberGenerator&          rng_;
+        /** (0,0) is at upper-left? */
+        bool                            origin_upper_left_;
 };
 // Landscape
 //////////////////////////////////////////////////////////////////////////////
