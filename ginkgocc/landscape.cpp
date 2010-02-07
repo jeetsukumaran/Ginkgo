@@ -136,8 +136,14 @@ void Landscape::debug_dump_cell_xy(std::ostream& out) {
             ci != this->cells_.end();
             ++ci, ++i) {
         CellIndexType x = this->index_to_x(i);
+        CellIndexType y = this->index_to_y(i);
         if (x == 0) {
             out << std::endl;
+            if ( (y > 0) && ((y % 5) == 0) ) {
+                out << std::endl;
+            }
+        } else if ( (x % 5) == 0 ) {
+            out << "  ";
         }
         out << std::setfill('0') << std::setw(max_width_x) << (*ci)->get_x();
         out << ",";
@@ -155,8 +161,14 @@ void Landscape::debug_dump_cell_indexes(std::ostream& out) {
             ci != this->cells_.end();
             ++ci, ++i) {
         CellIndexType x = this->index_to_x(i);
+        CellIndexType y = this->index_to_y(i);
         if (x == 0) {
             out << std::endl;
+            if ( (y > 0) && ((y % 5) == 0) ) {
+                out << std::endl;
+            }
+        } else if ( (x % 5) == 0 ) {
+            out << "  ";
         }
         out << std::setfill('0') << std::setw(max_width) << i;
         out << " ";
@@ -172,8 +184,14 @@ void Landscape::debug_dump_carrying_capacity(std::ostream& out) {
             ci != this->cells_.end();
             ++ci, ++i) {
         CellIndexType x = this->index_to_x(i);
+        CellIndexType y = this->index_to_y(i);
         if (x == 0) {
             out << std::endl;
+            if ( (y > 0) && ((y % 5) == 0) ) {
+                out << std::endl;
+            }
+        } else if ( (x % 5) == 0 ) {
+            out << "  ";
         }
         out << this->cells_[i]->get_carrying_capacity() << " ";
     }
