@@ -58,16 +58,16 @@ World& configure_world(World& world, const std::string& conf_fpath) {
 
 namespace confsys_detail {
 
-long factorial(unsigned long num) {
-    unsigned long result = 1;
-    for (int i = 1; i <= abs(num); ++i) {
-        result *= i;
-    }
-    return result;
+double log_poisson_pdf(unsigned long k, long double mean) {
+    double lp = 0.0;
+    for (unsigned long i = 1 ; i <= k ; ++i)
+        lp -= log((double)i);
+    lp += ((double)k)*log(mean) - mean;
+    return lp;
 }
 
-float poisson_pdf(unsigned long k, float mean) {
-    return (pow(mean, k) * exp(-1.0 * mean))/(factorial(k));
+double poisson_pdf(unsigned long k, long double mean) {
+    return exp(log_poisson_pdf(k, mean));
 }
 
 ///////////////////////////////////////////////////////////////////////////////
