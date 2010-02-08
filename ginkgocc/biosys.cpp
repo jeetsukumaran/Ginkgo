@@ -42,6 +42,8 @@ Species::Species(const std::string& label,
                  RandomNumberGenerator& rng)
     : label_(label),
       num_fitness_traits_(num_fitness_traits),
+      is_fixed_movement_capacity_(true),
+      movement_capacity_(1),
       global_selection_strength_(global_selection_strength),
       rng_(rng),
       organism_label_index_(0) {

@@ -919,7 +919,11 @@ class Species {
          * @return the movement potential of an organism
          */
         MovementCountType get_movement_capacity() const {
-            return this->movement_capacity_;
+            if (this->is_fixed_movement_capacity_) {
+                return this->movement_capacity_;
+            } else {
+                return static_cast<MovementCountType>(this->rng_.weighted_index_choice(this->movement_capacity_probabilities_));
+            }
         }
 
         /**
@@ -928,11 +932,9 @@ class Species {
          *
          * @param moves the movement potential of an organism
          */
-        void set_movement_capacity_fixed(MovementCountType ) {
-
-
-
-
+        void set_movement_capacity_fixed(MovementCountType moves) {
+            this->is_fixed_movement_capacity_ = true;
+            this->movement_capacity_ = moves;
         }
 
         /**
@@ -944,11 +946,9 @@ class Species {
          *
          * @param probs vector of probablities
          */
-        void set_movement_capacity_probabilities(const std::vector<float>& ) {
-
-
-
-
+        void set_movement_capacity_probabilities(const std::vector<float>& probs) {
+            this->is_fixed_movement_capacity_ = false;
+            this->movement_capacity_probabilities_ = probs;
         }
 
         /**
@@ -1292,8 +1292,12 @@ class Species {
         PopulationCountType                 mean_reproductive_rate_;
         /** landscape migration potential for this species */
         std::vector<MovementCountType>      movement_costs_;
+        /** is movement capacity fixed or variable? */
+        bool                                is_fixed_movement_capacity_;
         /** movement potential of each organism at the start of each round */
         MovementCountType                   movement_capacity_;
+        /** variable movement-capacity assignment: vector of probabilities associated with each movement capacity */
+        std::vector<float>                  movement_capacity_probabilities_;
         /** cell- and lineage-specific probability of movement of each organism */
         std::vector<float>                  movement_probabilities_;
         /** genotype for organisms created de novo */

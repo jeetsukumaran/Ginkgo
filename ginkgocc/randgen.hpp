@@ -94,7 +94,7 @@ class RandomNumberGenerator {
          *       2 with probability 0.3
          *       3 with probability 0.3
          */
-        unsigned int weighted_index(const std::vector<float>& weights);
+        unsigned int weighted_index_choice(const std::vector<float>& weights);
 
         /**
          * Returns an element selected with uniform random probability from

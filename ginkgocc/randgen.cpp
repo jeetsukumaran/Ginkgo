@@ -119,7 +119,7 @@ unsigned int RandomNumberGenerator::poisson(float rate) {
 }
 
 //! Returns index according to probability given by weights.
-unsigned int RandomNumberGenerator::weighted_index(const std::vector<float>& weights) {
+unsigned int RandomNumberGenerator::weighted_index_choice(const std::vector<float>& weights) {
     float sum = 0.0;
     for (std::vector<float>::const_iterator i = weights.begin();
             i != weights.end();
