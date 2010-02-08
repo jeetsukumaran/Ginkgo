@@ -785,7 +785,18 @@ void World::log_configuration() {
         }
         out << std::endl;
         out << "     Fecundity: " <<  lineage.get_mean_reproductive_rate() << std::endl;
-        out << "     Movement capacity: " << lineage.get_movement_capacity() << std::endl;
+        if (lineage.is_fixed_movement_capacity()) {
+            out << "     Movement capacity (fixed): " << lineage.get_movement_capacity() << std::endl;
+        } else {
+            out << "     Movement capacity (variable): ";
+            const std::vector<float>& mc_probs = lineage.movement_capacity_probabilities();
+            for (unsigned int i = 0; i < mc_probs.size(); ++i) {
+                if (i > 0) {
+                    out << ", ";
+                }
+                out << i << " (p=" << mc_probs[i] << ")";
+            }
+        }
     }
 
     out << std::endl;

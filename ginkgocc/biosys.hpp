@@ -926,6 +926,14 @@ class Species {
             }
         }
 
+        bool is_fixed_movement_capacity() {
+            return this->is_fixed_movement_capacity_;
+        }
+
+        const std::vector<float>& movement_capacity_probabilities() {
+            return this->movement_capacity_probabilities_;
+        }
+
         /**
          * Sets the movement currency or potential for an organism as a fixed
          * value.
