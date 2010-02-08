@@ -225,7 +225,7 @@ void ConfigurationFile::process_lineage(XmlElementType& lineage_node, World& wor
             lineage.set_movement_capacity_probabilities(mov_probs);
         }
         if (x == 0 or x > 1) {
-            throw ConfigurationError("movementCapacity for '" + lineage_id + "': must specify exactly one of 'fixed', 'probabilities', 'poisson'");
+            throw ConfigurationError("movementCapacity for '" + lineage_id + "': requires '<fixed>', '<probabilities>', or '<poisson>' subelement");
         }
     } else {
         lineage.set_movement_capacity_fixed(1);
