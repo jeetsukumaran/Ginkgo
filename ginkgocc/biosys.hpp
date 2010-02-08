@@ -923,12 +923,32 @@ class Species {
         }
 
         /**
-         * Sets the movement currency or potential for an organism.
+         * Sets the movement currency or potential for an organism as a fixed
+         * value.
          *
          * @param moves the movement potential of an organism
          */
-        void set_movement_capacity(MovementCountType moves) {
-            this->movement_capacity_ = moves;
+        void set_movement_capacity_fixed(MovementCountType ) {
+
+
+
+
+        }
+
+        /**
+         * Sets the movement currency or potential for an organism by specifying
+         * the probability of different capacities.
+         * For example, given a vector of {0.1, 0.1, 0.2, 0.2, 0.4}, this means
+         * that movement capacity of 0 with 0.1 probability, 1 with 0.2
+         * probability, 2 with 0.2 probability, and 3 with 0.4 probability.
+         *
+         * @param probs vector of probablities
+         */
+        void set_movement_capacity_probabilities(const std::vector<float>& ) {
+
+
+
+
         }
 
         /**

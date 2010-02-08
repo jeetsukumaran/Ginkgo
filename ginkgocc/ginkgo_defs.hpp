@@ -82,6 +82,9 @@ class LandscapeSizeError : public std::runtime_error {
 //! Landscape grid orientation: is (0,0) the upper-left? If not, it will be the lower-left
 const bool GRID_ORIGIN_DEFAULT_UPPER_LEFT = true;
 
+//! for vector of potential movement credits/capacity probabilities
+const MovementCountType MAX_MOVEMENT_COUNT = 100;
+
 } // ginkgo namespace
 
 #endif

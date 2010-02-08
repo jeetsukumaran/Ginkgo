@@ -58,6 +58,17 @@ World& configure_world(World& world, const std::string& conf_fpath) {
 
 namespace confsys_detail {
 
+long factorial(unsigned long num) {
+    unsigned long result = 1;
+    for (int i = 1; i <= abs(num); ++i) {
+        result *= i;
+    }
+    return result;
+}
+
+float poisson_pdf(unsigned long k, float mean) {
+    return (pow(mean, k) * exp(-1.0 * mean))/(factorial(k));
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 // ConfigurationFile
@@ -188,18 +199,39 @@ void ConfigurationFile::process_lineage(XmlElementType& lineage_node, World& wor
 
     lineage.set_mean_reproductive_rate(this->get_child_node_scalar<unsigned>(lineage_node, "fecundity", 16));
 
-//    XmlElementType mc_node = this->get_child_node(lineage_node, "movementCapacity", false);
-//    if (!mc_node.isEmpty()) {
-//        XmlElementType fixed_mc_node = mc_node.getChildNode("fixed");
-//        if (!fixed_mc_node.isEmpty()) {
-//            std::cout << "Hello, world!" << std::endl;
-//        } else {
-//            std::cout << "Goodbye, world!" << std::endl;
-//        }
-//        exit(1);
-//    }
+    XmlElementType mc_node = this->get_child_node(lineage_node, "movementCapacity", false);
+    if (!mc_node.isEmpty()) {
+        XmlElementType mc_fixed_node = mc_node.getChildNode("fixed");
+        XmlElementType mc_probabilities_node = mc_node.getChildNode("probabilities");
+        XmlElementType mc_poisson_node = mc_node.getChildNode("poisson");
+        int x = 0;
+        if (!mc_fixed_node.isEmpty()) {
+            x += 1;
+            lineage.set_movement_capacity_fixed(this->get_element_scalar<MovementCountType>(mc_fixed_node));
+        }
+        if (!mc_probabilities_node.isEmpty()) {
+            x += 1;
+            std::vector<float> mov_probs = this->get_element_vector<float>(mc_probabilities_node);
+            lineage.set_movement_capacity_probabilities(mov_probs);
+        }
+        if (!mc_poisson_node.isEmpty()) {
+            x += 1;
+            int poisson_mean = this->get_element_scalar<MovementCountType>(mc_poisson_node);
+            std::vector<float> mov_probs;
+            mov_probs.reserve(MAX_MOVEMENT_COUNT+1);
+            for (MovementCountType i = 0; i <= MAX_MOVEMENT_COUNT; ++i) {
+                mov_probs.push_back(poisson_pdf(i, poisson_mean));
+            }
+            lineage.set_movement_capacity_probabilities(mov_probs);
+        }
+        if (x == 0 or x > 1) {
+            throw ConfigurationError("movementCapacity for '" + lineage_id + "': must specify exactly one of 'fixed', 'probabilities', 'poisson'");
+        }
+    } else {
+        lineage.set_movement_capacity_fixed(1);
+    }
 
-    lineage.set_movement_capacity(this->get_child_node_scalar<MovementCountType>(lineage_node, "movementCapacity", 1));
+//    lineage.set_movement_capacity(this->get_child_node_scalar<MovementCountType>(lineage_node, "movementCapacity", 1));
 
     // seed populations
     XmlElementType seed_pops = lineage_node.getChildNode("seedPopulations");
