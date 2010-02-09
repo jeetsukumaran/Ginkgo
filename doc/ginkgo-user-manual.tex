@@ -23,7 +23,7 @@
 		classoffset=0,
 		morekeywords={xml, ginkgo, world, biota, samples, lineage, fitnessTraitRelativeSelectionWeights, fitnessTraitDefaultGenotypes, fitnessTraitInheritanceStdDev, fecundity, seedPopulation, seedPopulations, ancestralPopulationSize, ancestralGenerations, movementCapacity,  occurrence, environments, fitnessTraitOptima, carryingCapacity, movementCosts, movementProbabilities, dispersals, dispersal, probability, environment, sample, individualsPerCell, cellCoordinates, cellIndexes}, keywordstyle=\color{xmlelem}\bfseries,
 		classoffset=1,
-		morekeywords={version, label, x_range, y_range, num_gens, num_fitness_traits, global_selection_strength, random_seed, log_frequency, multifurcating_trees, final_output, full_complement_diploid_trees, default_cell_carrying_capacity, lineage, x, y, cell, gen, size, from_x, from_y, to_x, to_y, trait, poisson, fixed}, keywordstyle=\color{xmlattr},
+		morekeywords={version, label, x_range, y_range, num_gens, num_fitness_traits, global_selection_strength, random_seed, log_frequency, multifurcating_trees, final_output, full_complement_diploid_trees, default_cell_carrying_capacity, lineage, x, y, cell, gen, size, from_x, from_y, to_x, to_y, trait, distribution}, keywordstyle=\color{xmlattr},
 		classoffset=0,
 }
 }
@@ -94,9 +94,7 @@ Specific elements will be described and explained in subsequent sections.
                         <ancestralGenerations>1000</ancestralGenerations>
                     </seedPopulation>
                 </seedPopulations>
-                <movementCapacity>
-                    <poisson>10</poisson>
-                </movementCapacity>
+                <movementCapacity distribution="poisson">30</movementCapacity>
             </lineage>
             <lineage id="Zy">
                 <fitnessTraitRelativeSelectionWeights>
@@ -114,9 +112,7 @@ Specific elements will be described and explained in subsequent sections.
                         <ancestralGenerations>1000</ancestralGenerations>
                     </seedPopulation>
                 </seedPopulations>
-                <movementCapacity>
-                    <fixed>10</fixed>
-                </movementCapacity>
+                <movementCapacity distribution="constant">10</movementCapacity>
             </lineage>
         </biota>
         <environments>
@@ -321,7 +317,7 @@ The \xmlattr{x} and \xmlattr{y} attributes specify the X- and Y-coordinate of th
 The \xmlelem{ancestralPopulationSize} element specifies the ancestral population size, while the \xmlelem{ancestralGenerations} element specifies the number of generations that the ancestral population has been evolving under a Wright-Fisher model.
 
 \subsubsection{The \xmlelem{movementCapacity} Element}
-This element defines the potential movement of organisms of this lineage in the ``local'' movement framework. It can either be a fixed value (i.e., every organism gets the same value), specified as a non-negative integer given as a ``\xmlelem{fixed}'' element, or a Poisson-distributed value, with the mean specified by a ``\xmlelem{poisson}'' element.
+This element defines the potential movement of organisms of this lineage in the ``local'' movement framework. It can be a constant value (i.e., every organism gets the same value), specified by setting the attribute \xmlattr{distributed} to ``constant'' and the contents of the element to the value, or a Poisson-distributed value, specified by setting the attribute \xmlattr{distributed} to ``poisson'' and the contents of the element to the mean of the distribution.
 
 \section{The \xmlelem{environments} Element}
 
