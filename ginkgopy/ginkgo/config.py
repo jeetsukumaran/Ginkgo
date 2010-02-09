@@ -124,9 +124,24 @@ class Lineage(object):
         self.fitness_trait_relative_selection_weights = kwargs.get("fitness_trait_relative_selection_weights", None)
         self.fitness_trait_default_genotypes = kwargs.get("fitness_trait_default_genotypes", None)
         self.fecundity = kwargs.get("fecundity", None)
+        self.__movement_capacity = None
         self.movement_capacity = kwargs.get("movement_capacity", None)
         self.seed_populations = kwargs.get("seed_populations", [])
         self.indent_level = kwargs.get('indent_level', 3)
+
+    def _set_movement_capacity(self, val):
+        if not (isinstance(val, list) or isinstance(val, tuple))\
+                or len(val) != 2 \
+                or not isinstance(val[0], str):
+            raise ValueError("Expecting tuple of (<dist>, <val>) for movement capacity, " \
+                           + "where <dist> is string specifying the distribution ('constant' or 'poisson'), " \
+                           + "and <val> is either the fixed movement capacity value or the mean of the Poisson")
+        self.__movement_capacity = val
+
+    def _get_movement_capacity(self):
+        return self.__movement_capacity
+
+    movement_capacity = property(_get_movement_capacity, _set_movement_capacity)
 
     def __str__(self):
         top_indent = (self.indent_level * INDENT_SIZE) * ' '
@@ -142,7 +157,8 @@ class Lineage(object):
         if self.fecundity:
             s.write('%s<fecundity>%s</fecundity>\n' % (sub_indent, self.fecundity))
         if self.movement_capacity:
-            s.write('%s<movement_capacity>%s</movement_capacity>\n' % (sub_indent, self.movement_capacity))
+            s.write('%s<movementCapacity distribution="%s">%s</movementCapacity>\n' \
+                    % (sub_indent, self.movement_capacity[0], self.movement_capacity[1]))
         if self.seed_populations:
             s.write('%s<seedPopulations>\n' % (sub_indent))
             for seed_pop in self.seed_populations:
@@ -269,7 +285,7 @@ if __name__ == "__main__":
             fitness_trait_relative_selection_weights=[1]*num_fitness_traits,
             fitness_trait_default_genotypes=[0]*num_fitness_traits,
             fecundity=16,
-            movement_capacity=1,
+            movement_capacity=("poisson", 10),
             seed_populations=[seed_pop])
     w.lineages.append(s1)
     e0 = Environment(0)

@@ -42,6 +42,7 @@ def georeference_taxa(taxon_set):
     labels.
     """
     for taxon in taxon_set:
+        taxon.cell_index = int(re.match(".* i([\d]+) .*", taxon.label).groups(1)[0])
         taxon.x = int(re.match(".* x([\d]+) .*", taxon.label).groups(1)[0])
         taxon.y = int(re.match(".* y([\d]+) .*", taxon.label).groups(1)[0])
 
