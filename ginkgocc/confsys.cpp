@@ -201,37 +201,26 @@ void ConfigurationFile::process_lineage(XmlElementType& lineage_node, World& wor
 
     XmlElementType mc_node = this->get_child_node(lineage_node, "movementCapacity", false);
     if (!mc_node.isEmpty()) {
-        XmlElementType mc_fixed_node = mc_node.getChildNode("fixed");
-        XmlElementType mc_probabilities_node = mc_node.getChildNode("probabilities");
-        XmlElementType mc_poisson_node = mc_node.getChildNode("poisson");
-        int x = 0;
-        if (!mc_fixed_node.isEmpty()) {
-            x += 1;
-            lineage.set_movement_capacity_fixed(this->get_element_scalar<MovementCountType>(mc_fixed_node));
-        }
-        if (!mc_probabilities_node.isEmpty()) {
-            x += 1;
-            std::vector<float> mov_probs = this->get_element_vector<float>(mc_probabilities_node);
+        std::string dist = this->get_attribute<std::string>(mc_node, "distribution");
+        if (dist == "constant") {
+            lineage.set_movement_capacity_fixed(this->get_element_scalar<MovementCountType>(mc_node));
+        } else if (dist == "user") {
+            std::vector<float> mov_probs = this->get_element_vector<float>(mc_node);
             lineage.set_movement_capacity_probabilities(mov_probs);
-        }
-        if (!mc_poisson_node.isEmpty()) {
-            x += 1;
-            int poisson_mean = this->get_element_scalar<MovementCountType>(mc_poisson_node);
+        } else if (dist == "poisson") {
+            int poisson_mean = this->get_element_scalar<MovementCountType>(mc_node);
             std::vector<float> mov_probs;
             mov_probs.reserve(MAX_MOVEMENT_COUNT+1);
             for (MovementCountType i = 0; i <= MAX_MOVEMENT_COUNT; ++i) {
                 mov_probs.push_back(poisson_pdf(i, poisson_mean));
             }
             lineage.set_movement_capacity_probabilities(mov_probs);
-        }
-        if (x == 0 or x > 1) {
-            throw ConfigurationError("movementCapacity for '" + lineage_id + "': requires '<fixed>', '<probabilities>', or '<poisson>' subelement");
+        } else {
+            throw ConfigurationError("movementCapacity for '" + lineage_id + "': 'distribution' attribute must be one of: 'constant', 'poisson', or 'user'");
         }
     } else {
         lineage.set_movement_capacity_fixed(1);
     }
-
-//    lineage.set_movement_capacity(this->get_child_node_scalar<MovementCountType>(lineage_node, "movementCapacity", 1));
 
     // seed populations
     XmlElementType seed_pops = lineage_node.getChildNode("seedPopulations");
