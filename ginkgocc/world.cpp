@@ -451,6 +451,11 @@ void World::write_traits(Species * sp_ptr,
     unsigned int nchar = this->num_fitness_traits_ + 1;
     out << "    DIMENSIONS NCHAR=" << nchar << ";\n";
     out << "    FORMAT DATATYPE=CONTINUOUS ITEMS=(STATES);\n";
+    out << "    CHARLABELS";
+    for (unsigned int i=0; i < this->num_fitness_traits_; ++i) {
+        out << " Trait_" << std::setw(2) << std::setfill('0') << i;
+    }
+    out << " Fitness;\n";
 
     // the things I do for OCD-driven tight formatting ...
     long max_label_len = 0;
@@ -474,9 +479,9 @@ void World::write_traits(Species * sp_ptr,
     for (std::vector<const Organism *>::const_iterator oi = organisms.begin();
             oi != organisms.end();
             ++oi) {
-        out << "        " << std::setw(max_label_len) << sp_ptr->get_organism_label(**oi) << "    ";
+        out << "        " << std::left << std::setw(max_label_len) << sp_ptr->get_organism_label(**oi) << "    ";
         for (unsigned int i=0; i < this->num_fitness_traits_; ++i) {
-            out << " " << std::setw(12) << std::setfill(' ') << (**oi).get_fitness_trait_genotype(i);
+            out << " " << std::right << std::setw(12) << std::setfill(' ') << (**oi).get_fitness_trait_genotype(i);
         }
         out << " " << std::setw(12) << std::setfill(' ') << (**oi).get_fitness();
         out << "\n";
