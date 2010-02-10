@@ -243,7 +243,8 @@ class Sample(object):
         self.gen = gen
         self.label = kwargs.get('label', None)
         self.individuals_per_cell = kwargs.get('individuals_per_cell', None)
-        self.cells = kwargs.get('cells', None)
+        self.cell_coordinates = kwargs.get('cell_coordinates', None)
+        self.cell_indexes = kwargs.get('cell_indexes', None)
         self.indent_level = kwargs.get('indent_level', 3)
 
     def __str__(self):
@@ -257,12 +258,27 @@ class Sample(object):
         sub_indent = ((self.indent_level + 1) * INDENT_SIZE) * ' '
         if self.individuals_per_cell:
             parts.append('%s<individualsPerCell>%s</individualsPerCell>' % (sub_indent, self.individuals_per_cell))
-        if self.cells:
-            parts.append('%s<cells>' % sub_indent)
+        if self.cell_indexes:
+            parts.append('%s<cellIndexes>' % sub_indent)
             sub_sub_indent = ((self.indent_level + 2) * INDENT_SIZE) * ' '
-            for c in self.cells:
-                parts.append('%s%s,%s' % (sub_sub_indent, c[0], c[1]))
-            parts.append('%s</cells>' % sub_indent)
+            if isinstance(self.cell_indexes, str):
+                rows = self.cell_indexes.split('\n')
+                for r in rows:
+                    parts.append('%s%s' % (sub_sub_indent, r))
+            else:
+                parts.append('%s%s' % (sub_sub_indent, " ".join([str(s) for s in self.cell_indexes])))
+            parts.append('%s</cellIndexes>' % sub_indent)
+        elif self.cell_coordinates:
+            parts.append('%s<cellCoordinates>' % sub_indent)
+            sub_sub_indent = ((self.indent_level + 2) * INDENT_SIZE) * ' '
+            if isinstance(self.cell_coordinates, str):
+                rows = self.cell_coordinates.split('\n')
+                for r in rows:
+                    parts.append('%s%s' % (sub_sub_indent, r))
+            else:
+                for c in self.cell_coordinates:
+                    parts.append('%s%s,%s' % (sub_sub_indent, c[0], c[1]))
+            parts.append('%s</cellCoordinates>' % sub_indent)
         parts.append('%s</sample>\n' % top_indent)
         return "\n".join(parts)
 
