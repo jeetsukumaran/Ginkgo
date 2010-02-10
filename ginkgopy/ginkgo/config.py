@@ -246,40 +246,46 @@ class Sample(object):
         self.cell_coordinates = kwargs.get('cell_coordinates', None)
         self.cell_indexes = kwargs.get('cell_indexes', None)
         self.indent_level = kwargs.get('indent_level', 3)
+        self.build_trees = kwargs.get('build_trees', True)
 
     def __str__(self):
         top_indent = (self.indent_level * INDENT_SIZE) * ' '
         if self.label:
-            label = ' label="%s"' % label
+            label = ' label="%s"' % self.label
         else:
             label = ''
         parts = []
-        parts.append('%s<sample gen="%d" lineage=%s%s>' % (top_indent, self.gen, self.lineage_id, label))
-        sub_indent = ((self.indent_level + 1) * INDENT_SIZE) * ' '
-        if self.individuals_per_cell:
-            parts.append('%s<individualsPerCell>%s</individualsPerCell>' % (sub_indent, self.individuals_per_cell))
-        if self.cell_indexes:
-            parts.append('%s<cellIndexes>' % sub_indent)
-            sub_sub_indent = ((self.indent_level + 2) * INDENT_SIZE) * ' '
-            if isinstance(self.cell_indexes, str):
-                rows = self.cell_indexes.split('\n')
-                for r in rows:
-                    parts.append('%s%s' % (sub_sub_indent, r))
-            else:
-                parts.append('%s%s' % (sub_sub_indent, " ".join([str(s) for s in self.cell_indexes])))
-            parts.append('%s</cellIndexes>' % sub_indent)
-        elif self.cell_coordinates:
-            parts.append('%s<cellCoordinates>' % sub_indent)
-            sub_sub_indent = ((self.indent_level + 2) * INDENT_SIZE) * ' '
-            if isinstance(self.cell_coordinates, str):
-                rows = self.cell_coordinates.split('\n')
-                for r in rows:
-                    parts.append('%s%s' % (sub_sub_indent, r))
-            else:
-                for c in self.cell_coordinates:
-                    parts.append('%s%s,%s' % (sub_sub_indent, c[0], c[1]))
-            parts.append('%s</cellCoordinates>' % sub_indent)
-        parts.append('%s</sample>\n' % top_indent)
+        if self.build_trees:
+            close = '>'
+        else:
+            close = ' trees="False" />\n'
+        parts.append('%s<sample gen="%d" lineage=%s%s%s' % (top_indent, self.gen, self.lineage_id, label, close))
+        if self.build_trees:
+            sub_indent = ((self.indent_level + 1) * INDENT_SIZE) * ' '
+            if self.individuals_per_cell:
+                parts.append('%s<individualsPerCell>%s</individualsPerCell>' % (sub_indent, self.individuals_per_cell))
+            if self.cell_indexes:
+                parts.append('%s<cellIndexes>' % sub_indent)
+                sub_sub_indent = ((self.indent_level + 2) * INDENT_SIZE) * ' '
+                if isinstance(self.cell_indexes, str):
+                    rows = self.cell_indexes.split('\n')
+                    for r in rows:
+                        parts.append('%s%s' % (sub_sub_indent, r))
+                else:
+                    parts.append('%s%s' % (sub_sub_indent, " ".join([str(s) for s in self.cell_indexes])))
+                parts.append('%s</cellIndexes>' % sub_indent)
+            elif self.cell_coordinates:
+                parts.append('%s<cellCoordinates>' % sub_indent)
+                sub_sub_indent = ((self.indent_level + 2) * INDENT_SIZE) * ' '
+                if isinstance(self.cell_coordinates, str):
+                    rows = self.cell_coordinates.split('\n')
+                    for r in rows:
+                        parts.append('%s%s' % (sub_sub_indent, r))
+                else:
+                    for c in self.cell_coordinates:
+                        parts.append('%s%s,%s' % (sub_sub_indent, c[0], c[1]))
+                parts.append('%s</cellCoordinates>' % sub_indent)
+            parts.append('%s</sample>\n' % top_indent)
         return "\n".join(parts)
 
 if __name__ == "__main__":
