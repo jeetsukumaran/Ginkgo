@@ -233,7 +233,7 @@ class Environment(object):
         sub_indent = ((self.indent_level + 1) * INDENT_SIZE) * ' '
         for grid in self.grids:
             parts.append('%s%s' % (sub_indent, str(grid)))
-        parts.append('%s</environment>' % top_indent)
+        parts.append('%s</environment>\n' % top_indent)
         return "\n".join(parts)
 
 class Sample(object):
