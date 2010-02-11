@@ -56,6 +56,9 @@ class World(object):
         indent = (INDENT_SIZE * ' ')
         parts = []
         parts.append('world')
+        parts.append('x_range="%s"' % self.x_range)
+        parts.append('y_range="%s"' % self.y_range)
+        parts.append('num_gens="%s"' % self.num_gens)
         if self.label:
             parts.append('label="%s"' % self.label)
         if self.num_fitness_traits:
