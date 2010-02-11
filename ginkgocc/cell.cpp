@@ -117,6 +117,7 @@ void Cell::reproduction(bool evolve_fitness_components) {
             Cell::breeding_female_ptrs,
             Cell::breeding_male_ptrs);
         if ( (Cell::breeding_female_ptrs.size() > 0) and (Cell::breeding_male_ptrs.size() > 0)) {
+            this->organisms_.reserve(Cell::breeding_female_ptrs.size() * num_offspring);
             for (std::vector<const Organism*>::iterator fptr = Cell::breeding_female_ptrs.begin();
                     fptr != Cell::breeding_female_ptrs.end();
                     ++fptr) {
