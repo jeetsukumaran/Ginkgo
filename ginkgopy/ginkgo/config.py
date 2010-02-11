@@ -66,7 +66,7 @@ class World(object):
         if self.global_selection_strength:
             parts.append('global_selection_strength="%s"' % self.num_fitness_traits)
         if self.default_cell_carrying_capacity:
-            parts.append('default_cell_carrying_capacity="%s"' % self.num_fitness_traits)
+            parts.append('default_cell_carrying_capacity="%s"' % self.default_cell_carrying_capacity)
         if self.random_seed:
             parts.append('random_seed="%s"' % self.num_fitness_traits)
         if self.log_frequency:
