@@ -24,9 +24,24 @@
 #include "../biosys.hpp"
 
 int main(int, char* []) {
-    ginkgo::Organism o(NULL, ginkgo::Organism::Male);
-    assert(!o.is_expired());
-    assert(!o.is_female());
-    assert(o.is_male());
-    return 1;
+
+    ginkgo::Organism m(NULL, ginkgo::Organism::Male);
+    assert(!m.is_expired());
+    assert(!m.is_female());
+    assert(m.is_male());
+    m.set_expired();
+    assert(m.is_expired());
+    assert(!m.is_female());
+    assert(m.is_male());
+
+    ginkgo::Organism f(NULL, ginkgo::Organism::Female);
+    assert(!f.is_expired());
+    assert(f.is_female());
+    assert(!f.is_male());
+    f.set_expired();
+    assert(f.is_expired());
+    assert(f.is_female());
+    assert(!f.is_male());
+
+    return 0;
 }
