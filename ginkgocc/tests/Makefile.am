@@ -13,6 +13,7 @@ dist_ginkgotests_SCRIPTS = ginkgo_tests.py \
 ginkgotests_PROGRAMS = test_cmdopt \
                test_tree_from_parent_indexes \
                test_tree_from_genealogies \
+               test_organism_states \
                test_textutil \
                test_asciigrid \
                test_filesys \
@@ -37,6 +38,10 @@ test_tree_from_genealogies_SOURCES = \
     ../biosys.cpp \
     ../tree.cpp \
     ../memcheck.cpp
+
+test_organism_states_SOURCES = \
+    test_organism_states.cpp \
+    ../biosys.cpp
 
 test_textutil_SOURCES = \
     test_textutil.cpp \
