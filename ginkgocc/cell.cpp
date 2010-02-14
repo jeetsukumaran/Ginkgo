@@ -161,7 +161,7 @@ void Cell::migration() {
 
             if (curr_idx != this->index_) {
                 this->landscape_.add_migrant(*og, curr_idx);
-                og->set_expired(true);
+                og->set_expired();
             }
         }
     }
@@ -175,7 +175,7 @@ void Cell::survival() {
         float fitness = sp.calc_fitness(*og, this->fitness_trait_optimum_);
         og->set_fitness(fitness);
         if (this->rng_.uniform_01() > fitness) {
-            og->set_expired(true);
+            og->set_expired();
         }
     }
     this->purge_expired_organisms();

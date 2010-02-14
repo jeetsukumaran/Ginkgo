@@ -465,10 +465,15 @@ class DiploidMarker {
 class Organism {
     public:
 
-        /** Flags indicating gender for sexual reproduction */
-        enum Sex {
-            Male,
-            Female
+        /** Organism status */
+        enum Status {
+            // bits:
+            // 0: 0/1 = alive/expired
+            // 1: 0/1 = female/male
+            Female = 0,     // 00 = alive, female
+            Expired = 1,    // 01 = expired, female
+            Male = 2,       // 10 = alive, male
+            ExpiredMale = 3 // 11 = expired, male
         };
 
         // --- lifecycle and assignment ---
@@ -485,11 +490,10 @@ class Organism {
          */
         Organism(Species * species,
                  const FitnessTraits& fitness_traits,
-                 Organism::Sex new_sex)
+                 Organism::Status status)
                 : species_(species),
-                  sex_(new_sex),
                   fitness_(-1),
-                  expired_(false) {
+                  state_flags_(status) {
             memcpy(this->fitness_trait_genotypes_, fitness_traits, MAX_FITNESS_TRAITS*sizeof(FitnessTraitType));
         }
 
@@ -502,11 +506,10 @@ class Organism {
          * @param sex               gender of this organism
          */
         Organism(Species * species,
-                 Organism::Sex new_sex)
+                 Organism::Status status)
                 : species_(species),
-                  sex_(new_sex),
                   fitness_(-1),
-                  expired_(false) {
+                  state_flags_(status) {
         }
 
         /**
@@ -530,9 +533,8 @@ class Organism {
             }
             this->species_ = ind.species_;
             memcpy(this->fitness_trait_genotypes_, ind.fitness_trait_genotypes_, MAX_FITNESS_TRAITS*sizeof(FitnessTraitType));
-            this->sex_ = ind.sex_;
+            this->state_flags_ = ind.state_flags_;
             this->fitness_ = ind.fitness_;
-            this->expired_ = ind.expired_;
             this->neutral_haploid_marker_ = ind.neutral_haploid_marker_;
             for (unsigned i = 0; i < NUM_NEUTRAL_DIPLOID_loci; ++i) {
                 this->neutral_diploid_markers_[i] = ind.neutral_diploid_markers_[i];
@@ -556,19 +558,14 @@ class Organism {
             memcpy(o2.fitness_trait_genotypes_, t_fitness_trait_genotypes, MAX_FITNESS_TRAITS*sizeof(FitnessTraitType));
 
             // sex
-            Organism::Sex t_sex = this->sex_;
-            this->sex_ = o2.sex_;
-            o2.sex_ = t_sex;
+            int t_state_flags = this->state_flags_;
+            this->state_flags_ = o2.state_flags_;
+            o2.state_flags_ = t_state_flags;
 
             // fitness
             float t_fitness = this->fitness_;
             this->fitness_ = o2.fitness_;
             o2.fitness_ = t_fitness;
-
-            // expired
-            bool t_expired = this->expired_;
-            this->expired_ = o2.expired_;
-            o2.expired_ = t_expired;
 
             // neutral haploid markers
             this->neutral_haploid_marker_.swap(o2.neutral_haploid_marker_);
@@ -675,17 +672,15 @@ class Organism {
          *          false</code> otherwise
          */
         bool is_expired() const {
-            return this->expired_;
+            return this->state_flags_ & Organism::Expired;
         }
 
         /**
-         * Specifies whether or not the organism needs to be removed from
+         * Specifies that the organism needs to be removed from
          * the simulation by a higher-power.
-         * @param val  <code>true</code> if organism should be removed, </code>
-         *             false</code> otherwise
          */
-        void set_expired(bool val) {
-            this->expired_ = val;
+        void set_expired() {
+            this->state_flags_ |= Organism::Expired;
         }
 
         // --- meta info ---
@@ -704,7 +699,7 @@ class Organism {
          * @return  <code>true</code> if this organism is male
          */
         bool is_male() const {
-            return this->sex_ == Organism::Male;
+            return this->state_flags_ & Organism::Male;
         }
 
         /**
@@ -713,7 +708,7 @@ class Organism {
          * @return  <code>true</code> if this organism is female
          */
         bool is_female() const {
-            return this->sex_ == Organism::Female;
+            return !this->is_male();
         }
 
         // --- inheritance ---
@@ -791,7 +786,7 @@ class Organism {
         Species *               species_;
 
         /** values of inheritable component of fitness */
-        FitnessTraits          fitness_trait_genotypes_;
+        FitnessTraits           fitness_trait_genotypes_;
 
         /** genealogy inherited through female alone */
         HaploidMarker           neutral_haploid_marker_;
@@ -799,14 +794,11 @@ class Organism {
         /** diploid genealogies */
         DiploidMarker           neutral_diploid_markers_[NUM_NEUTRAL_DIPLOID_loci];
 
-        /** for reproduction */
-        Organism::Sex           sex_;
-
         /** to cache pre-calculated fitness values */
         float                   fitness_;
 
-        /** flag organism to be removed */
-        bool                    expired_;
+        /** alive/expired, female/male */
+        int                     state_flags_;
 };
 // Organism
 ///////////////////////////////////////////////////////////////////////////////
@@ -1235,7 +1227,7 @@ class Species {
          *
          * @return      Organism::Male or Organism::Female
          */
-        Organism::Sex get_random_sex(float female_threshold=0.5) const {
+        Organism::Status get_random_sex(float female_threshold=0.5) const {
             if (this->rng_.uniform_01() < female_threshold) {
                 return Organism::Male;
             } else {

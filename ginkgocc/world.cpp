@@ -365,7 +365,7 @@ void World::process_dispersal_events() {
                     ++num_females;
                 }
                 this->landscape_.add_migrant(*og, de.destination);
-                og->set_expired(true);
+                og->set_expired();
             }
         }
         msg << " " << num_females << " females and " << num_males << " males.";
