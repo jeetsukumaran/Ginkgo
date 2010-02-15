@@ -22,6 +22,7 @@
 #include "cmdopt.hpp"
 #include "textutil.hpp"
 #include "filesys.hpp"
+#include <cstring>
 
 namespace ginkgo {
 

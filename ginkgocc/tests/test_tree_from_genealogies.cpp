@@ -214,7 +214,7 @@ std::string build_tree3() {
     return s.str();
 }
 
-int main(int, char *) {
+int main(int, char * []) {
 
     std::string expected1 = "((((a:1, b:1):1, (c:1, d:1):1):1, e:3):1, f:4):1";
     std::string expected2 = "((((a:1, b:1):1, (c:1, d:1):1):1, e:3):1, f:4):9999";

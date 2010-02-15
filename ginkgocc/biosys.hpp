@@ -36,6 +36,7 @@
 #include <sstream>
 #include <map>
 #include <utility>
+#include <cstring>
 
 #include "ginkgo_defs.hpp"
 #include "randgen.hpp"

@@ -184,7 +184,7 @@ void run_internal_tests() {
     std::cout << "Grid 3 (round-trip): PASS" << std::endl;
 }
 
-int main(int, char *) {
+int main(int, char * []) {
     run_internal_tests();
 //    if (argc == 1) {
 //        run_internal_tests();
