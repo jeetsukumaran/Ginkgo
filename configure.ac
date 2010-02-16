@@ -101,6 +101,16 @@ if test "$enable_mini" = yes; then
 	   ])
 fi
 
+# program name decorator
+PROGRAMTAG=""
+AC_ARG_WITH([programtag],
+	AC_HELP_STRING([--with-programtag],[decorate program name with tag]), , [with_programtag=""])
+if test "$with_programtag" != ""; then
+	AC_MSG_NOTICE([
+	   *** NOTE: using tag "$with_programtag"
+	   ])
+   PROGRAMTAG="$with_programtag"
+fi
 
 # Compile openMP multithreaded version
 #AC_ARG_ENABLE(openmp,
@@ -211,7 +221,6 @@ fi
 AC_LANG(C++)
 CXXFLAGS="$CXXFLAGS $CXXFLAGS_OPTIM_SPEED -DMARKUP_STDCONV"
 
-
 ################################################################################
 #	By default, use the bundled ncl code from source,
 #		but let the --with-ncl argument override this.
@@ -247,9 +256,9 @@ LIBS="$LIBS"
 AC_SUBST([CPPFLAGS])
 AC_SUBST([LDFLAGS])
 
-
 # Variables to substitute in Makefile:
 AC_SUBST(CPPFLAGS)
+AC_SUBST(PROGRAMTAG)
 
 AC_CONFIG_FILES([
 	Makefile 			\
