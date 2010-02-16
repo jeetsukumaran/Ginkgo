@@ -252,6 +252,13 @@ CXXFLAGS="$CXXFLAGS $CXXFLAGS_OPTIM_SPEED -DMARKUP_STDCONV"
 #	AC_MSG_ERROR([NCL is a prerequisite for building Garli. Expecting a directory called $NCL_LIB_DIR, verify that the argument to --with-ncl is correct.])
 #fi
 
+vcs_revision_desc="$(git symbolic-ref HEAD 2> /dev/null | cut -b 12-)/$(git log --pretty=format:'%h, %ad' -1)"
+if test -n "${vcs_revision_desc}" ; then
+    AC_DEFINE_UNQUOTED(VCS_REVISION_DESC,"${vcs_revision_desc}", [VCS revision info])
+else
+    AC_DEFINE(VCS_REVISION_DESC, "", [VCS revision info])
+fi
+
 LIBS="$LIBS"
 AC_SUBST([CPPFLAGS])
 AC_SUBST([LDFLAGS])
