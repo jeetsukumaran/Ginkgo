@@ -103,13 +103,29 @@ fi
 
 # program name decorator
 PROGRAMTAG=""
-AC_ARG_WITH([programtag],
-	AC_HELP_STRING([--with-programtag],[decorate program name with tag]), , [with_programtag=""])
-if test "$with_programtag" != ""; then
+revision_tag="$(git symbolic-ref HEAD 2> /dev/null | cut -b 12-)-$(git log --pretty=format:'%h' -1)"
+AC_ARG_ENABLE(revisionlabel,
+	AC_HELP_STRING([--enable-revisionlabel],[add revision identifier to program name]), , [enable_revisionlabel=])
+if test -n "$enable_revisionlabel"; then
+    if test -n "$revision_tag"; then
+        AC_MSG_NOTICE([
+           *** NOTE: adding revision label to program name: "$revision_tag"
+           ])
+        PROGRAMTAG="-$revision_tag"
+    else
+        AC_MSG_NOTICE([
+           *** NOTE: revision information not available
+           ])
+    fi
+fi
+
+AC_ARG_WITH([desclabel],
+	AC_HELP_STRING([--with-desclabel],[decorate program name with tag]), , [with_desclabel=""])
+if test -n "$with_desclabel"; then
 	AC_MSG_NOTICE([
-	   *** NOTE: using tag "$with_programtag"
+	   *** NOTE: adding tag to program name: "$with_desclabel"
 	   ])
-   PROGRAMTAG="$with_programtag"
+   PROGRAMTAG="${PROGRAMTAG}${with_desclabel}"
 fi
 
 # Compile openMP multithreaded version
@@ -252,7 +268,7 @@ CXXFLAGS="$CXXFLAGS $CXXFLAGS_OPTIM_SPEED -DMARKUP_STDCONV"
 #	AC_MSG_ERROR([NCL is a prerequisite for building Garli. Expecting a directory called $NCL_LIB_DIR, verify that the argument to --with-ncl is correct.])
 #fi
 
-vcs_revision_desc="$(git symbolic-ref HEAD 2> /dev/null | cut -b 12-)/$(git log --pretty=format:'%h, %ad' -1)"
+vcs_revision_desc="$(git symbolic-ref HEAD 2> /dev/null | cut -b 12-)-$(git log --pretty=format:'%h, %ad' -1)"
 if test -n "${vcs_revision_desc}" ; then
     AC_DEFINE_UNQUOTED(VCS_REVISION_DESC,"${vcs_revision_desc}", [VCS revision info])
 else
