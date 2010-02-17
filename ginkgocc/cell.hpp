@@ -213,8 +213,8 @@ class Cell {
          * @param organism  the organism to be copied into this cell's
          *                  vector of organisms
          */
-        void insert_organism(const Organism& organism) {
-            this->organisms_.push_back(organism);
+        void add_organism(const Organism& organism) {
+            this->populations_.add(organism);
         }
 
         //** Removes organisms flagged for removal from this cell's population */
