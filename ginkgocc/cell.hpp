@@ -146,21 +146,12 @@ class Cell {
         // --- basic biotics ---
 
         /**
-         * Returns direct handle to the organisms of this cell.
-         *
-         * @return  vector of organisms that occupy this cell.
-         */
-        OrganismVector& organisms() {
-            return this->organisms_;
-        }
-
-        /**
          * Returns the number of organisms that occupy this cell.
          *
          * @return  number of organisms that occupy this cell.
          */
         PopulationCountType num_organisms() const {
-            return static_cast<PopulationCountType>(this->organisms_.size());
+            return this->populations_.size();
         }
 
         /**

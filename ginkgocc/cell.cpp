@@ -115,7 +115,7 @@ void Cell::reproduction(bool evolve_fitness_components) {
             this->species_populations_[sp].swap(next_gen);
 
             // TODO: check if this is neccessary
-            this->species_populations_[sp].shuffle()
+            this->species_populations_[sp].shuffle(this->rng_)
 
         } else {
             this->species_populations_[sp].clear();
