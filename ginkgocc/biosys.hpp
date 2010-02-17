@@ -1391,6 +1391,11 @@ class BreedingPopulation {
             std::random_shuffle(males_.begin(), males_.end(), rp);
         }
 
+        void swap(BreedingPopulation& other) {
+            this->females_.swap(other.females_);
+            this->males_.swap(other.males_);
+        }
+
         /**
          * Removes all individuals marked for expiration.
          */
@@ -1425,7 +1430,7 @@ class BreedingPopulations {
          * Constructor, takes reference to species pool map and rng.
          */
         BreedingPopulations(const SpeciesByLabel& species_pool, RandomNumberGenerator& rng):
-                rng_(rng) {
+                rng_ptr_(&rng) {
             for (SpeciesByLabel::const_iterator spi = species_pool.begin();
                     spi != species_pool.end();
                     ++spi) {
@@ -1500,7 +1505,7 @@ class BreedingPopulations {
          */
         std::vector<const Organism *> sample_organism_ptrs(PopulationCountType num_organisms) {
             std::vector<const Organism *> source = this->organism_ptrs();
-            RandomPointer rp(this->rng_);
+            RandomPointer rp(*(this->rng_ptr_));
             std::random_shuffle(source.begin(), source.end(), rp);
             if (num_organisms <= source.size()) {
                 std::vector<const Organism *> samples;
@@ -1520,7 +1525,7 @@ class BreedingPopulations {
                 return;
             }
             std::vector<const Organism *> source = this->organism_ptrs();
-            RandomPointer rp(this->rng_);
+            RandomPointer rp(*(this->rng_ptr_));
             std::random_shuffle(source.begin(), source.end(), rp);
             std::map< const Species *, BreedingPopulation > new_pop;
             for (std::vector<const Organism *>::const_iterator oi = source.begin();
@@ -1535,7 +1540,7 @@ class BreedingPopulations {
         /** the breeding pools */
         std::map<const Species *, BreedingPopulation >    species_populations_;
         /** random number genereator */
-        RandomNumberGenerator&                            rng_;
+        RandomNumberGenerator *                           rng_ptr_;
 
 };
 
