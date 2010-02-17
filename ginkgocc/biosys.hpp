@@ -1391,6 +1391,19 @@ class BreedingPopulation {
             std::random_shuffle(males_.begin(), males_.end(), rp);
         }
 
+        /**
+         * Removes all individuals marked for expiration.
+         */
+        void purge_expired_organisms() {
+            OrganismVector::iterator end_unexpired_females = std::remove_if(this->females_.begin(),
+                this->females_.end(),
+                std::mem_fun_ref(&Organism::is_expired));
+            this->females_.erase(end_unexpired_females, this->females_.end());
+            OrganismVector::iterator end_unexpired_males = std::remove_if(this->males_.begin(),
+                this->males_.end(),
+                std::mem_fun_ref(&Organism::is_expired));
+            this->males_.erase(end_unexpired_males, this->males_.end());
+        }
 
     private:
         /** all females in the population */
@@ -1432,7 +1445,7 @@ class BreedingPopulations {
         /**
          * Adds an organism to the mix.
          */
-        void add(Organism& organism) {
+        void add(const Organism& organism) {
             this->species_populations_[organism.species_ptr()].add(organism);
         }
 
@@ -1447,6 +1460,17 @@ class BreedingPopulations {
                 s += (*spi).second.size();
             }
             return s;
+        }
+
+        /**
+         * Removes all individuals marked for expiration.
+         */
+        void purge_expired_organisms() {
+            for (std::map<const Species *, BreedingPopulation >::iterator spi = this->species_populations_.begin();
+                    spi != this->species_populations_.end();
+                    ++spi) {
+                (*spi).second.purge_expired_organisms();
+            }
         }
 
         /**
