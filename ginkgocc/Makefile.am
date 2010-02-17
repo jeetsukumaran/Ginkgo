@@ -3,12 +3,12 @@ AM_LDFLAGS  = @LDFLAGS@
 
 bindir = ${prefix}/@PACKAGE@/bin
 
-bin_PROGRAMS = ginkgo@PROGRAMTAG@
+bin_PROGRAMS = ginkgo@PROGRAMLABEL@
 
 noinst_HEADERS = \
 	ginkgo_defs.hpp
 
-ginkgo@PROGRAMTAG@_SOURCES = \
+ginkgo@PROGRAMLABEL@_SOURCES = \
     ginkgo.cpp \
     randgen.cpp \
     biosys.cpp \

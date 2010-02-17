@@ -102,30 +102,27 @@ if test "$enable_mini" = yes; then
 fi
 
 # program name decorator
-PROGRAMTAG=""
-revision_tag="$(git symbolic-ref HEAD 2> /dev/null | cut -b 12-)-$(git log --pretty=format:'%h' -1)"
-AC_ARG_ENABLE(revisionlabel,
-	AC_HELP_STRING([--enable-revisionlabel],[add revision identifier to program name]), , [enable_revisionlabel=])
-if test -n "$enable_revisionlabel"; then
-    if test -n "$revision_tag"; then
-        AC_MSG_NOTICE([
-           *** NOTE: adding revision label to program name: "$revision_tag"
-           ])
-        PROGRAMTAG="-$revision_tag"
-    else
-        AC_MSG_NOTICE([
-           *** NOTE: revision information not available
-           ])
-    fi
-fi
 
-AC_ARG_WITH([desclabel],
-	AC_HELP_STRING([--with-desclabel],[decorate program name with tag]), , [with_desclabel=""])
-if test -n "$with_desclabel"; then
+PROGRAMLABEL=""
+AC_ARG_WITH([label],
+	AC_HELP_STRING([--with-label],[decorate program name with label]), , [with_label=""])
+if test -n "$with_label"; then
 	AC_MSG_NOTICE([
-	   *** NOTE: adding tag to program name: "$with_desclabel"
+	   *** NOTE: adding "$with_label" to program name
 	   ])
-   PROGRAMTAG="${PROGRAMTAG}${with_desclabel}"
+   PROGRAMLABEL="${with_label}"
+fi
+AC_SUBST(PROGRAMLABEL)
+
+AC_ARG_WITH([desc],
+	AC_HELP_STRING([--with-desc],[add this to program self-description, typically VCS info or revision name]), , [with_desc=""])
+if test -n "$with_desc"; then
+	AC_MSG_NOTICE([
+	   *** NOTE: adding "$with_desc" to program description
+	   ])
+   AC_DEFINE_UNQUOTED(PROG_DESC,"${with_desc}", [program self-description, typically VCS info or revision name])
+else
+   AC_DEFINE(PROG_DESC, "", [program self-description, typically VCS info or revision name])
 fi
 
 # Compile openMP multithreaded version
@@ -268,20 +265,18 @@ CXXFLAGS="$CXXFLAGS $CXXFLAGS_OPTIM_SPEED -DMARKUP_STDCONV"
 #	AC_MSG_ERROR([NCL is a prerequisite for building Garli. Expecting a directory called $NCL_LIB_DIR, verify that the argument to --with-ncl is correct.])
 #fi
 
-vcs_revision_desc="$(git symbolic-ref HEAD 2> /dev/null | cut -b 12-)-$(git log --pretty=format:'%h, %ad' -1)"
-if test -n "${vcs_revision_desc}" ; then
-    AC_DEFINE_UNQUOTED(VCS_REVISION_DESC,"${vcs_revision_desc}", [VCS revision info])
-else
-    AC_DEFINE(VCS_REVISION_DESC, "", [VCS revision info])
-fi
+#vcs_revision_desc="$(git symbolic-ref HEAD 2> /dev/null | cut -b 12-)-$(git log --pretty=format:'%h, %ad' -1)"
+#if test -n "${vcs_revision_desc}" ; then
+#    AC_DEFINE_UNQUOTED(VCS_REVISION_DESC,"${vcs_revision_desc}", [VCS revision info])
+#else
+#    AC_DEFINE(VCS_REVISION_DESC, "", [VCS revision info])
+#fi
 
 LIBS="$LIBS"
-AC_SUBST([CPPFLAGS])
 AC_SUBST([LDFLAGS])
 
 # Variables to substitute in Makefile:
 AC_SUBST(CPPFLAGS)
-AC_SUBST(PROGRAMTAG)
 
 AC_CONFIG_FILES([
 	Makefile 			\

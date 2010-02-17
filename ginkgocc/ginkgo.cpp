@@ -46,8 +46,8 @@ int main(int argc, char* argv[]) {
     unsigned long log_freq = 10;
     std::string program_name = PACKAGE_STRING;
 
-    if (strcmp(VCS_REVISION_DESC, "") != 0) {
-        program_name = program_name + " (revision: " + VCS_REVISION_DESC + ")";
+    if (strcmp(PROG_DESC, "") != 0) {
+        program_name = program_name + " (" + PROG_DESC + ")";
     }
 
     ginkgo::OptionParser parser = ginkgo::OptionParser(
