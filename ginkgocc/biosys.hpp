@@ -1430,7 +1430,7 @@ class BreedingPopulations {
                     spi != species_pool.end();
                     ++spi) {
                 BreedingPopulation pop;
-                this->species_populations_.insert(std::make_pair(*spi, pop));
+                this->species_populations_.insert(std::make_pair((*spi).second, pop));
             }
         }
 
@@ -1495,7 +1495,7 @@ class BreedingPopulations {
          * @param   num_organisms   number of organisms
          */
         std::vector<const Organism *> sample_organism_ptrs(PopulationCountType num_organisms) {
-            const std::vector<const Organism *>& source = this->organism_ptrs();
+            std::vector<const Organism *> source = this->organism_ptrs();
             RandomPointer rp(this->rng_);
             std::random_shuffle(source.begin(), source.end(), rp);
             if (num_organisms <= source.size()) {
@@ -1515,7 +1515,7 @@ class BreedingPopulations {
             if (num_organisms <= this->size()) {
                 return;
             }
-            const std::vector<const Organism *>& source = this->organism_ptrs();
+            std::vector<const Organism *> source = this->organism_ptrs();
             RandomPointer rp(this->rng_);
             std::random_shuffle(source.begin(), source.end(), rp);
             std::map< const Species *, BreedingPopulation > new_pop;

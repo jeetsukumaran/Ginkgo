@@ -52,7 +52,7 @@ Cell::Cell(CellIndexType index,
           num_fitness_traits_(num_fitness_traits),
           landscape_(landscape),
           species_(species),
-          populations_(species),
+          populations_(species, rng),
           rng_(rng) {
     memset(this->fitness_trait_optimum_, 0,
     MAX_FITNESS_TRAITS*sizeof(FitnessTraitType));
@@ -85,10 +85,10 @@ void Cell::generate_new_population(Species * sp,
     temp_cell.generate_new_organisms(sp, ancestral_pop_size);
     for (GenerationCountType g = 0; g != ancestral_generations; ++g) {
         temp_cell.reproduction(false); // reproduce without evolving fitness component traits
-        temp_cell.retain(ancestral_pop_size);
+        temp_cell.populations_.retain(ancestral_pop_size);
         // std::random_shuffle(temp_cell.organisms_.begin(), temp_cell.organisms_.end(), rp);
     }
-    temp_cell.retain(final_pop_size);
+    temp_cell.populations_.retain(final_pop_size);
     this->populations_ = temp_cell.populations_;
 }
 
@@ -98,7 +98,7 @@ void Cell::reproduction(bool evolve_fitness_components) {
 
     for (SpeciesByLabel::const_iterator spi = this->species_.begin(); spi != this->species_.end(); ++spi) {
         Species * sp = spi->second;
-        BreedingPopulation pop = this->species_populations_[sp];
+        BreedingPopulation pop = this->populations_[sp];
         OrganismVector& females = pop.females();
         OrganismVector& males = pop.males();
         if ( (females.size() > 0) and (males.size() > 0)) {
@@ -109,16 +109,16 @@ void Cell::reproduction(bool evolve_fitness_components) {
                     ++fi) {
                 for (unsigned n = 0; n <= num_offspring; ++n) {
                     const Organism* male = this->rng_.select_ptr(males);
-                    next_gen.add(sp->new_organism(*female, *male, this->index_, evolve_fitness_components));
+                    next_gen.add(sp->new_organism(*fi, *male, this->index_, evolve_fitness_components));
                 } // for each offspring
             } // for each female
-            this->species_populations_[sp].swap(next_gen);
+            this->populations_[sp].swap(next_gen);
 
             // TODO: check if this is neccessary
-            this->species_populations_[sp].shuffle(this->rng_)
+            this->populations_[sp].shuffle(this->rng_);
 
         } else {
-            this->species_populations_[sp].clear();
+            this->populations_[sp].clear();
         } // if females == 0 or males == 0
     }  // for each species
 }
@@ -200,7 +200,7 @@ void Cell::competition() {
 // --- for trees etc ---
 
 void Cell::sample_organisms(Species * sp_ptr,
-//    std::vector<const Organism *>& samples, PopulationCountType num_organisms) {
+    std::vector<const Organism *>& samples, PopulationCountType num_organisms) {
 //    std::vector<const Organism *> available_organisms;
 //    available_organisms.reserve(this->organisms_.size());
 //    for (OrganismVector::const_iterator og = this->organisms_.begin(); og != this->organisms_.end(); ++og) {
