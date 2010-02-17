@@ -1442,6 +1442,10 @@ class BreedingPopulations {
             return this->species_populations_[sp];
         }
 
+//        const BreedingPopulations& operator=(const BreedingPopulations bp) {
+//            return *this;
+//        }
+
         /**
          * Adds an organism to the mix.
          */
@@ -1529,7 +1533,7 @@ class BreedingPopulations {
 
     private:
         /** the breeding pools */
-        std::map<const Species *, BreedingPopulation >   species_populations_;
+        std::map<const Species *, BreedingPopulation >    species_populations_;
         /** random number genereator */
         RandomNumberGenerator&                            rng_;
 
