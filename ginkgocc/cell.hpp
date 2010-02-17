@@ -154,6 +154,7 @@ class Cell {
             return this->populations_.size();
         }
 
+
         /**
          * Gets the number of male and female organisms of a particular lineage
          * that occupy this cell.
