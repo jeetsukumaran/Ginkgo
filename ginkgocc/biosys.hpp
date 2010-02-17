@@ -1411,15 +1411,13 @@ class BreedingPopulations {
         /**
          * Constructor, takes reference to species pool map and rng.
          */
-        BreedingPopulations(const SpeciesByLabel& species, RandomNumberGenerator& rng):
-            species_(species),
-            rng_(rng) {
-            for (SpeciesByLabel::const_iterator spi = this->species_.begin();
-                    spi != this->species_.end();
+        BreedingPopulations(const SpeciesByLabel& species_pool, RandomNumberGenerator& rng):
+                rng_(rng) {
+            for (SpeciesByLabel::const_iterator spi = species_pool.begin();
+                    spi != species_pool.end();
                     ++spi) {
-                Species * sp = spi->second;
                 BreedingPopulation pop;
-                this->species_populations_.insert(std::make_pair(sp, pop));
+                this->species_populations_.insert(std::make_pair(*spi, pop));
             }
         }
 
@@ -1427,7 +1425,7 @@ class BreedingPopulations {
          * Returns a reference to the breeding population referenced by the
          * Species pointer 'sp'. Behavior is similar to [] of std::map.
          */
-        BreedingPopulation& operator[](Species * sp) {
+        BreedingPopulation& operator[](const Species * sp) {
             return this->species_populations_[sp];
         }
 
@@ -1443,10 +1441,10 @@ class BreedingPopulations {
          */
         PopulationCountType size() const {
             PopulationCountType s = 0;
-            for (SpeciesByLabel::const_iterator spi = this->species_.begin();
-                    spi != this->species_.end();
+            for (std::map<const Species *, BreedingPopulation >::const_iterator spi = this->species_populations_.begin();
+                    spi != this->species_populations_.end();
                     ++spi) {
-                s += this->species_populations_[spi->second].size();
+                s += (*spi).second.size();
             }
             return s;
         }
@@ -1457,10 +1455,12 @@ class BreedingPopulations {
         std::vector<const Organism *> organism_ptrs() {
             std::vector<const Organism *> optrs;
             optrs.reserve(this->size());
-            for (SpeciesByLabel::const_iterator spi = this->species_.begin();
-                    spi != this->species_.end();
+            for (std::map<const Species *, BreedingPopulation >::iterator spi = this->species_populations_.begin();
+                    spi != this->species_populations_.end();
                     ++spi) {
-                const std::vector<const Organism *>& poptrs = this->species_populations_[spi->second].organism_ptrs();
+//                const Species * sp = (*spi).first;
+                BreedingPopulation& bp = (*spi).second;
+                const std::vector<const Organism *>& poptrs = bp.organism_ptrs();
                 std::copy(poptrs.begin(), poptrs.end(), std::back_inserter(optrs));
             }
             return optrs;
@@ -1494,7 +1494,7 @@ class BreedingPopulations {
             const std::vector<const Organism *>& source = this->organism_ptrs();
             RandomPointer rp(this->rng_);
             std::random_shuffle(source.begin(), source.end(), rp);
-            std::map< Species *, BreedingPopulation > new_pop;
+            std::map< const Species *, BreedingPopulation > new_pop;
             for (std::vector<const Organism *>::const_iterator oi = source.begin();
                     oi <= source.end();
                     ++oi) {
@@ -1504,12 +1504,10 @@ class BreedingPopulations {
         }
 
     private:
-        /** reference to pool of species in the World */
-        const SpeciesByLabel&                       species_;
         /** the breeding pools */
-        std::map< Species *, BreedingPopulation >   species_populations_;
+        std::map<const Species *, BreedingPopulation >   species_populations_;
         /** random number genereator */
-        RandomNumberGenerator&                      rng_;
+        RandomNumberGenerator&                            rng_;
 
 };
 
