@@ -283,28 +283,6 @@ class Cell {
             std::vector<const Organism *>& samples, PopulationCountType num_organisms);
 
     private:
-
-        // --- supporting methods ---
-
-        /**
-         * Given a species index, extracts pointers to male and female
-         * organisms of the specified species (or any species, if none specified)
-         * within this cell.
-         *
-         * @param sp_ptr            pointer to Species object; if not NULL,
-         *                          only organisms of this species will be sampled
-         * @param organisms         vector of organisms (source)
-         * @param female_ptrs       pointers to organisms in source vector
-         *                          that are females of the specified species
-         * @param male_ptrs         pointers to organisms in source vector
-         *                          that are males of the specified species
-         */
-        void extract_breeding_groups(Species * sp_ptr,
-            const OrganismVector& organisms,
-            std::vector<const Organism *>& female_ptrs,
-            std::vector<const Organism *>& male_ptrs) const;
-
-    private:
         /** Copy constructor, disabled by private scoping and no definition */
         Cell(const Cell&);
         /** Assignment, disabled by private scoping and no definition */
@@ -322,23 +300,21 @@ class Cell {
         /** number of active fitness factors */
         unsigned                               num_fitness_traits_;
         /** vector of environmental fitness factor components in this cell */
-        FitnessTraits                         fitness_trait_optimum_;
-        /** collection of organisms occupying this cell */
-        OrganismVector                         organisms_;
+        FitnessTraits                          fitness_trait_optimum_;
         /** reference to Landscape in which this cell is located */
         Landscape&                             landscape_;
         /** reference to pool of species in the World of this cell */
         const SpeciesByLabel&                  species_;
+        /** breeding populations of this cell */
+        BreedingPopulations                    populations_;
         /** reference to random number generator of the World of this cell */
         RandomNumberGenerator&                 rng_;
 
     private:
-        /** scratch space to sort females of a species for reproduction */
-        static std::vector<const Organism *>   breeding_female_ptrs;
-        /** scratch space to sort males of a species for reproduction */
-        static std::vector<const Organism *>   breeding_male_ptrs;
-        /** scratch space to parents while compose next generation */
-        static OrganismVector                  previous_gen;
+        /** scratch space to female offpsring while composing next generation */
+        static OrganismVector                  next_gen_females;
+        /** scratch space to male offpsring while composing next generation */
+        static OrganismVector                  next_gen_males;
 
 };
 // Cell

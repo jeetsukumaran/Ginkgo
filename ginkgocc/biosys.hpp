@@ -777,6 +777,10 @@ class Organism {
             }
         }
 
+        Species * species_ptr() {
+            return this->species_;
+        }
+
     private:
 
         /**
@@ -1315,6 +1319,200 @@ class Species {
 };
 // Species
 ///////////////////////////////////////////////////////////////////////////////
+
+///////////////////////////////////////////////////////////////////////////////
+// Breeding Population
+/**
+ * Manages a breeding pool.
+ */
+class BreedingPopulation {
+
+    public:
+
+        /**
+         * Adds a new organism to this breeding population.
+         */
+        void add(const Organism& organism) {
+            if (organism.is_male()) {
+                this->males_.push_back(organism);
+            } else {
+                this->females_.push_back(organism);
+            }
+        }
+
+        /**
+         * Returns total number of individuals in this population.
+         */
+        const std::size_type size() {
+            return this->males_.size() + this->females_.size();
+        }
+
+        /**
+         * Returns reference to females.
+         */
+        OrganismVector& females() {
+            return this->females_;
+        }
+
+        /**
+         * Returns reference to males.
+         */
+        OrganismVector& males() {
+            return this->males_;
+        }
+
+        /**
+         * Returns pointers to all organisms.
+         */
+        std::vector<const Organism *> organism_ptrs() {
+            std::vector<const Organism *> optrs;
+            optrs.reserve(this->size());
+            for (OrganismVector::const_iterator ov = this->females_.begin();
+                    ov != this->females_.end();
+                    ++ov) {
+                optrs.push_back(ov);
+            }
+            for (OrganismVector::const_iterator ov = this->males_.begin();
+                    ov != this->males_.end();
+                    ++ov) {
+                optrs.push_back(ov);
+            }
+            return optrs;
+        }
+
+        void clear() {
+            this->females_.clear();
+            this->males_.clear();
+        }
+
+        void shuffle() {
+            RandomPointer rp(this->rng_);
+            std::random_shuffle(females_.begin(), females_.end(), rp);
+            std::random_shuffle(males_.begin(), males_.end(), rp);
+        }
+
+
+    private:
+        /** all females in the population */
+        OrganismVector      females_;
+        /** all males in the population */
+        OrganismVector      males_;
+};
+
+///////////////////////////////////////////////////////////////////////////////
+// Breeding Population
+/**
+ * Manages multiple breeding pools.
+ */
+class BreedingPopulations {
+
+    public:
+
+        /**
+         * Constructor, takes reference to species pool map and rng.
+         */
+        BreedingPopulations(const SpeciesByLabel& species, RandomNumberGenerator& rng):
+            species_(species),
+            rng_(rng) {
+            for (SpeciesByLabel::const_iterator spi = this->species_.begin();
+                    spi != this->species_.end();
+                    ++spi) {
+                Species * sp = spi->second;
+                BreedingPopulation pop;
+                this->species_populations_.insert(std::make_pair(sp, pop));
+            }
+        }
+
+        /**
+         * Returns a reference to the breeding population referenced by the
+         * Species pointer 'sp'. Behavior is similar to [] of std::map.
+         */
+        BreedingPopulation& operator[](const Species * sp) {
+            return this->species_populations_[sp];
+        }
+
+        /**
+         * Adds an organism to the mix.
+         */
+        void add(const Organism& organism) {
+            this->species_populations_[organism.species_ptr()].add(organism);
+        }
+
+        /**
+         * Returns total number of individuals across all populations.
+         */
+        const std::size_type size() {
+            std::size_type s = 0;
+            for (SpeciesByLabel::const_iterator spi = this->species_.begin();
+                    spi != this->species_.end();
+                    ++spi) {
+                Species * sp = spi->second;
+                s += this->species_populations_[sp].size();
+            }
+            return s;
+        }
+
+        /**
+         * Returns pointers to all organisms across all species.
+         */
+        std::vector<const Organism *> organism_ptrs() {
+            std::vector<const Organism *> optrs;
+            optrs.reserve(this->size());
+            for (SpeciesByLabel::const_iterator spi = this->species_.begin();
+                    spi != this->species_.end();
+                    ++spi) {
+                std::vector<const Organism *>& poptrs = this->species_populations_[sp].organism_ptrs();
+                std::copy(poptrs.begin(), poptrs.end(), std::back_inserter(optrs));
+            }
+            return optrs;
+        }
+
+        /**
+         * Selects pointers to random organisms across all species.
+         * @param   num_organisms   number of organisms
+         */
+        std::vector<const Organism *> sample_organism_ptrs(PopulationCountType num_organisms) {
+            std::vector<const Organism *>& source = this->organism_ptrs();
+            RandomPointer rp(this->rng_);
+            std::random_shuffle(source.begin(), source.end(), rp);
+            if (num_organisms <= source.size()) {
+                std::vector<const Organism *> samples;
+                std::copy(source.begin(), source.begin() + num_organisms, std::back_inserter(samples));
+                return samples;
+            } else {
+                return source;
+            }
+        }
+
+        /**
+         * Removes random organisms such that the total number of organisms is equal to num_organisms.
+         * @param   num_organisms   number of organisms to retain
+         */
+        void retain(PopulationCountType num_organisms) {
+            if (num_organisms <= this->size()) {
+                return;
+            }
+            std::vector<const Organism *>& source = this->organism_ptrs();
+            RandomPointer rp(this->rng_);
+            std::random_shuffle(source.begin(), source.end(), rp);
+            std::map< Species *, BreedingPopulation > new_pop;
+            for (std::vector<const Organism *>::iterator oi = source.begin();
+                    oi <= source.end();
+                    ++oi;) {
+                new_pop.add(**oi);
+            }
+            this->species_populations = new_pop;
+        }
+
+    private:
+        /** reference to pool of species in the World */
+        const SpeciesByLabel&                       species_;
+        /** the breeding pools */
+        std::map< Species *, BreedingPopulation >   species_populations_;
+        /** random number genereator */
+        RandomNumberGenerator&                      rng_;
+
+};
 
 } // ginkgo namespace
 

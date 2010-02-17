@@ -108,6 +108,17 @@ class RandomNumberGenerator {
         }
 
         /**
+         * Returns a pointer to element selected with uniform random probability from
+         * given universe of elements.
+         * @param   collection  universe of elements from which to sample
+         * @return              pointer to random element from collection
+         */
+        template <typename T>
+        inline typename T::value_type* select_ptr(T& collection) {
+            return &collection[this->uniform_int(0, collection.size()-1)];
+        }
+
+        /**
          * Returns one of two arguments passed to it.
          * @param   a   the first candidate to be returned
          * @param   b   the second candidate to be returned
