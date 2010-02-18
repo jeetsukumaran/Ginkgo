@@ -1348,6 +1348,11 @@ class BreedingPopulation {
             return this->males_.size() + this->females_.size();
         }
 
+        void num_organisms(PopulationCountType& num_females, PopulationCountType& num_males) const {
+            num_females = this->females_.size();
+            num_males = this->males_.size();
+        }
+
         /**
          * Returns reference to females.
          */
@@ -1537,6 +1542,15 @@ class BreedingPopulations {
          */
         BreedingPopulation& operator[](const Species * sp) {
             return this->species_populations_[sp];
+        }
+
+        /**
+         * Returns a reference to the breeding population referenced by the
+         * Species pointer 'sp'. Behavior is similar to [] of std::map.
+         */
+        const BreedingPopulation& operator[](const Species * sp) const {
+            std::map<const Species *, BreedingPopulation >::const_iterator bpi = this->species_populations_.find(sp);
+            return bpi->second;
         }
 
 //        const BreedingPopulations& operator=(const BreedingPopulations bp) {

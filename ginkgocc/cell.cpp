@@ -221,17 +221,14 @@ void Cell::sample_organisms(Species * sp_ptr,
 }
 
 void Cell::num_organisms(Species * species_ptr, PopulationCountType& num_females, PopulationCountType& num_males) const {
-/// TODO !!! ///
+    this->populations_[species_ptr].num_organisms(num_females, num_males);
 }
 
 PopulationCountType Cell::num_organisms(Species * sp_ptr) const {
-    PopulationCountType  count = 0;
-//    for (OrganismVector::const_iterator og = this->organisms_.begin(); og != this->organisms_.end(); ++og) {
-//        if (&og->species() == sp_ptr) {
-//            ++count;
-//        }
-//    }
-    return count;
+    PopulationCountType num_females = 0;
+    PopulationCountType num_males = 0;
+    this->num_organisms(sp_ptr, num_females, num_males);
+    return num_females + num_males;
 }
 
 // Cell
