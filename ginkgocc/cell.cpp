@@ -210,26 +210,14 @@ void Cell::competition() {
 
 void Cell::sample_organisms(Species * sp_ptr,
     std::vector<const Organism *>& samples, PopulationCountType num_organisms) {
-//    std::vector<const Organism *> available_organisms;
-//    available_organisms.reserve(this->organisms_.size());
-//    for (OrganismVector::const_iterator og = this->organisms_.begin(); og != this->organisms_.end(); ++og) {
-//        if (sp_ptr == NULL) {
-//            (*og).species().set_organism_label(*og, this->index_, this->x_, this->y_);
-//            available_organisms.push_back(&(*og));
-//        } else if (&og->species() == sp_ptr) {
-//            sp_ptr->set_organism_label(*og, this->index_, this->x_, this->y_);
-//            available_organisms.push_back(&(*og));
-//        }
-//    }
-//    if (num_organisms == 0 or num_organisms >= available_organisms.size()) {
-//        samples.reserve(samples.size() + available_organisms.size());
-//        std::copy(available_organisms.begin(), available_organisms.end(), std::back_inserter(samples));
-//    } else {
-//        samples.reserve(samples.size() + num_organisms);
-//        RandomPointer rp(this->rng_);
-//        std::random_shuffle(available_organisms.begin(), available_organisms.end(), rp);
-//        std::copy(available_organisms.begin(), available_organisms.begin() + num_organisms, std::back_inserter(samples));
-//    }
+    std::vector<const Organism *> s = this->populations_[sp_ptr].sample_organism_ptrs(num_organisms);
+    if (s.size() > num_organisms) {
+        RandomPointer rp(this->rng_);
+        std::random_shuffle(s.begin(), s.end(), rp);
+        samples.insert(samples.end(), s.begin(), s.begin() + num_organisms);
+    } else {
+        samples.insert(samples.end(), s.begin(), s.end());
+    }
 }
 
 void Cell::num_organisms(Species * species_ptr, PopulationCountType& num_females, PopulationCountType& num_males) const {

@@ -1381,6 +1381,21 @@ class BreedingPopulation {
             return optrs;
         }
 
+        /**
+         * Selects pointers to random organisms across all species.
+         * @param   num_organisms   number of organisms
+         */
+        std::vector<const Organism *> sample_organism_ptrs(PopulationCountType num_organisms) {
+            std::vector<const Organism *> source = this->organism_ptrs();
+            if (num_organisms <= source.size()) {
+                std::vector<const Organism *> samples;
+                samples.insert(samples.end(), source.begin(), source.begin() + num_organisms);
+                return samples;
+            } else {
+                return source;
+            }
+        }
+
         void clear() {
             this->females_.clear();
             this->males_.clear();
@@ -1571,7 +1586,7 @@ class BreedingPopulations {
 //                const Species * sp = (*spi).first;
                 BreedingPopulation& bp = (*spi).second;
                 const std::vector<const Organism *>& poptrs = bp.organism_ptrs();
-                std::copy(poptrs.begin(), poptrs.end(), std::back_inserter(optrs));
+                optrs.insert(optrs.end(), poptrs.begin(), poptrs.end());
             }
             return optrs;
         }
@@ -1586,7 +1601,7 @@ class BreedingPopulations {
             std::random_shuffle(source.begin(), source.end(), rp);
             if (num_organisms <= source.size()) {
                 std::vector<const Organism *> samples;
-                std::copy(source.begin(), source.begin() + num_organisms, std::back_inserter(samples));
+                samples.insert(samples.end(), source.begin(), source.begin() + num_organisms);
                 return samples;
             } else {
                 return source;
