@@ -26,6 +26,7 @@
 #include "tree.hpp"
 #include "cmdopt.hpp"
 #include "filesys.hpp"
+#include "randgen.hpp"
 #include <iostream>
 #include <cstdlib>
 #include <vector>
@@ -75,7 +76,7 @@ int main(int argc, char* argv[]) {
         exit(1);
     }
 
-    ginkgo::World world;
+    ginkgo::World world(ginkgo::RandomNumberGenerator::get_instance());
     world.set_replicate_id(replicate_id);
     world.set_output_dir(output_dir);
 

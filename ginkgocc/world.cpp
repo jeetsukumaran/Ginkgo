@@ -40,27 +40,10 @@
 using namespace ginkgo;
 
 // constructor
-World::World()
+World::World(RandomNumberGenerator& rng)
     : species_(),
-      rng_(),
-      landscape_(species_, rng_),
-      num_fitness_traits_(1),
-      global_selection_strength_(DEFAULT_GLOBAL_SELECTION_STRENGTH),
-      generations_to_run_(0),
-      current_generation_(0),
-      log_frequency_(10),
-      is_log_to_screen_(true),
-      allow_multifurcations_(true),
-      is_produce_final_output_(true),
-      is_produce_full_complement_diploid_trees_(false) {
-    this->current_generation_ = 0;
-}
-
-// constructor
-World::World(unsigned long seed)
-    : species_(),
-      rng_(seed),
-      landscape_(species_, rng_),
+      rng_(rng),
+      landscape_(species_, rng),
       num_fitness_traits_(1),
       global_selection_strength_(DEFAULT_GLOBAL_SELECTION_STRENGTH),
       generations_to_run_(0),

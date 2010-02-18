@@ -26,6 +26,9 @@
 
 namespace ginkgo {
 
+///////////////////////////////////////////////////////////////////////////////
+// RandomNumberGenerator
+
 /**
  * Encapsulates generation of random number from various distribution and
  * various ranges.
@@ -33,14 +36,6 @@ namespace ginkgo {
 class RandomNumberGenerator {
 
     public:
-
-        /** Constructs a RNG seeded with current time. */
-        RandomNumberGenerator();
-
-        /** Constructs a RNG seeded with current time. */
-
-        /** Constructs a RNG seeded with given seed. */
-        RandomNumberGenerator(unsigned long seed);
 
         /** Returns current seed. */
         unsigned long get_seed() const;
@@ -137,8 +132,27 @@ class RandomNumberGenerator {
     private:
         /** random number generator seed */
         unsigned long seed_;                    //! seed for the underlying rng
+
+
+    ///////////////////////////////////////////////////////////////////////////
+    // Singleton infrastructure
+
+    public:
+        static RandomNumberGenerator& get_instance() {
+            return RandomNumberGenerator::instance_;
+        }
+
+    private:
+        static RandomNumberGenerator instance_;
+        RandomNumberGenerator() {}
+        ~RandomNumberGenerator() {}
+        RandomNumberGenerator(const RandomNumberGenerator &);
+        RandomNumberGenerator & operator=(const RandomNumberGenerator &);
+
 };
 
+///////////////////////////////////////////////////////////////////////////////
+// RandomPointer
 /**
  * Random function used as function object by STL algorithm.
  */
@@ -150,6 +164,9 @@ class RandomPointer {
         RandomNumberGenerator&  rng_;
 };
 
+
 } // ginkgo namespace
+
+
 
 #endif

@@ -408,7 +408,7 @@ class DiploidMarker {
          * @param rng   RandomNumberGenerator object
          * @return      random allele from pair in locus
          */
-        GenealogyNode * random_node(RandomNumberGenerator rng) const {
+        GenealogyNode * random_node(RandomNumberGenerator& rng) const {
             return rng.select(this->allele1_, this->allele2_);
         }
 

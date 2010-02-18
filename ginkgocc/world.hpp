@@ -164,15 +164,10 @@ class World {
         // --- lifecycle --
 
         /**
-         * Default constructor.
-         */
-        World();
-
-        /**
          * Constructs a World with a given RNG seed.
-         * @param seed  seed for the random number generator
+         * @param rng  global random number generator
          */
-        World(unsigned long seed);
+        World(RandomNumberGenerator& rng);
 
         /**
          * Destructor, destroys Species and frees memory allocated to Species
@@ -762,7 +757,7 @@ class World {
         /** Collection of pointers to the Species objects of this World. */
         SpeciesByLabel                          species_;
         /** The RandomNumberGenerator that is used by all objects of this World. */
-        RandomNumberGenerator                   rng_;
+        RandomNumberGenerator&                  rng_;
         /** The geospatial framework of this World. */
         Landscape                               landscape_;
         /** The number of dimensions to the fitness function. */

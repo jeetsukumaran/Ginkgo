@@ -30,16 +30,6 @@ namespace ginkgo {
 ///////////////////////////////////////////////////////////////////////////////
 // RandomNumberGenerator
 
-//! seeds using time
-RandomNumberGenerator::RandomNumberGenerator() {
-    this->set_seed(time(0));
-}
-
-//! seeds using given seed
-RandomNumberGenerator::RandomNumberGenerator(unsigned long seed) {
-    this->set_seed(seed);
-}
-
 //! returns current seed
 unsigned long RandomNumberGenerator::get_seed() const {
     return this->seed_;
@@ -136,6 +126,11 @@ unsigned int RandomNumberGenerator::weighted_index_choice(const std::vector<floa
     }
     return (len-1);
 }
+
+///////////////////////////////////////////////////////////////////////////////
+// The global instance of the RNG
+
+RandomNumberGenerator RandomNumberGenerator::instance_;
 
 ///////////////////////////////////////////////////////////////////////////////
 // RandomPointer
