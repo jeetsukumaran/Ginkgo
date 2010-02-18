@@ -129,7 +129,6 @@ void Cell::migration() {
         BreedingPopulation& pop = this->populations_[sp];
         for (BreedingPopulation::iterator oi = pop.begin(); oi != pop.end(); ++oi) {
             Organism& og = *oi;
-            assert(!og.is_expired());
             if (this->rng_.uniform_01() <= sp->movement_probability(this->index_)) {
                 MovementCountType movement = sp->get_movement_capacity();
                 CellIndexType curr_idx = this->index_;
@@ -156,16 +155,21 @@ void Cell::migration() {
 }
 
 void Cell::survival() {
-//    for (OrganismVector::iterator og = this->organisms_.begin(); og != this->organisms_.end(); ++og) {
-//        assert(!og->is_expired());
-//        Species& sp = og->species();
-//        float fitness = sp.calc_fitness(*og, this->fitness_trait_optimum_);
-//        og->set_fitness(fitness);
-//        if (this->rng_.uniform_01() > fitness) {
-//            og->set_expired();
-//        }
-//    }
-//    this->purge_expired_organisms();
+    for (SpeciesByLabel::const_iterator spi = this->species_.begin();
+            spi != this->species_.end();
+            ++spi) {
+        Species * sp = spi->second;
+        BreedingPopulation& pop = this->populations_[sp];
+        for (BreedingPopulation::iterator oi = pop.begin(); oi != pop.end(); ++oi) {
+            Organism& og = *oi;
+            float fitness = sp->calc_fitness(og, this->fitness_trait_optimum_);
+            og.set_fitness(fitness);
+            if (this->rng_.uniform_01() > fitness) {
+                og.set_expired();
+            }
+        }
+    }
+    this->purge_expired_organisms();
 }
 
 void Cell::competition() {
