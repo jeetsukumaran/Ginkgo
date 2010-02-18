@@ -27,6 +27,7 @@
 #include <algorithm>
 #include <cassert>
 #include <vector>
+#include <iterator>
 #include <string>
 #include <cmath>
 #include <iomanip>
@@ -1409,6 +1410,82 @@ class BreedingPopulation {
                 std::mem_fun_ref(&Organism::is_expired));
             this->males_.erase(end_unexpired_males, this->males_.end());
         }
+
+        ///////////////////////////////////////////////////////////////////////
+        // iterators
+
+        class iterator
+        {
+            public:
+                typedef iterator self_type;
+                typedef Organism value_type;
+                typedef Organism& reference;
+                typedef Organism* pointer;
+                typedef std::forward_iterator_tag iterator_category;
+                typedef int difference_type;
+                iterator(OrganismVector::iterator f_begin,
+                         OrganismVector::iterator f_end,
+                         OrganismVector::iterator m_begin,
+                         OrganismVector::iterator m_end)
+                        : f_current_(f_begin),
+                          f_end_(f_end),
+                          m_current_(m_begin),
+                          m_end_(m_end) {  }
+                self_type operator++() {
+                    self_type i = *this;
+                    if (this->f_current_ != this->f_end_) {
+                        ++(this->f_current_);
+                    } else {
+                        ++(this->m_current_);
+                    }
+                    return *this;
+                }
+                self_type operator++(int) {
+                    ++(*this);
+                    return *this;
+                }
+                reference operator*() {
+                    if (f_current_ != f_end_) {
+                       return *(this->f_current_);
+                    } else {
+                       return *(this->m_current_);
+                    }
+                }
+                pointer operator->() {
+                    if (f_current_ != f_end_) {
+                        return &(*(this->f_current_));
+                    } else {
+                        return &(*(this->m_current_));
+                    }
+                }
+                bool operator==(const self_type& rhs) {
+                    return this->f_current_ == rhs.f_current_
+                        && this->f_end_ == rhs.f_end_
+                        && this->m_current_ == rhs.m_current_
+                        && this->m_end_ == rhs.m_end_;
+                }
+                bool operator!=(const self_type& rhs) {
+                    return !(*this == rhs);
+                }
+            private:
+                OrganismVector::iterator       f_current_;
+                OrganismVector::iterator       f_end_;
+                OrganismVector::iterator       m_current_;
+                OrganismVector::iterator       m_end_;
+        };
+
+        iterator begin()
+        {
+            return iterator(this->females_.begin(), this->females_.end(), this->males_.begin(), this->males_.end());
+        }
+
+        iterator end()
+        {
+            return iterator(this->females_.end(), this->females_.end(), this->males_.end(), this->males_.end());
+        }
+
+        // iterators
+        ///////////////////////////////////////////////////////////////////////
 
     private:
         /** all females in the population */

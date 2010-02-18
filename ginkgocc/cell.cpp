@@ -67,10 +67,6 @@ void Cell::generate_new_organisms(Species * sp, PopulationCountType num) {
     }
 }
 
-//-----------------------------------------------------------------------------
-// BOOKMARK -------------------------------------------------------------------
-//-----------------------------------------------------------------------------
-
 void Cell::generate_new_population(Species * sp,
         PopulationCountType final_pop_size,
         PopulationCountType ancestral_pop_size,
@@ -114,8 +110,10 @@ void Cell::reproduction(bool evolve_fitness_components) {
             } // for each female
             this->populations_[sp].swap(next_gen);
 
+            // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
             // TODO: check if this is neccessary
             this->populations_[sp].shuffle(this->rng_);
+            // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
         } else {
             this->populations_[sp].clear();
@@ -124,6 +122,12 @@ void Cell::reproduction(bool evolve_fitness_components) {
 }
 
 void Cell::migration() {
+    for (SpeciesByLabel::const_iterator spi = this->species_.begin();
+            spi != this->species_.end();
+            ++spi) {
+        Species * sp = spi->second;
+        BreedingPopulation& pop = this->populations_[sp];
+    }
 //
 //    for (OrganismVector::iterator og = this->organisms_.begin(); og != this->organisms_.end(); ++og) {
 //        assert(!og->is_expired());
