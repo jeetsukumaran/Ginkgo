@@ -248,8 +248,9 @@ class Cell {
          * Each organism in this cell is tested for survival given the
          * environment of the current cell, with the probability of survival
          * proportional to the fitness score of the organism.
+         * @returns number of individuals remaining
          */
-        void survival();
+        PopulationCountType survival();
 
         /**
          * If the carrying capacity of the cell is exceeded, the organisms of

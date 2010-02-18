@@ -154,7 +154,8 @@ void Cell::migration() {
     this->purge_expired_organisms();
 }
 
-void Cell::survival() {
+PopulationCountType Cell::survival() {
+    PopulationCountType num_survivors = 0;
     for (SpeciesByLabel::const_iterator spi = this->species_.begin();
             spi != this->species_.end();
             ++spi) {
@@ -166,40 +167,43 @@ void Cell::survival() {
             og.set_fitness(fitness);
             if (this->rng_.uniform_01() > fitness) {
                 og.set_expired();
+            } else {
+                ++num_survivors;
             }
         }
     }
     this->purge_expired_organisms();
+    return num_survivors;
 }
 
 void Cell::competition() {
-//    // NOTE: ASSUMES THAT FITNESS HAS BEEN CALCULATED FOR THE ORGANISM IN THIS CELL!
-//    // This would have been done during the survival phase.
-//    if (this->organisms_.size() > this->carrying_capacity_) {
-//
-//        // build set of organisms sorted by fitness
-//        std::multiset<Organism *, CompareOrganismFitness> optrs;
-//        for (OrganismVector::iterator oi = this->organisms_.begin();
-//                oi != this->organisms_.end();
-//                ++oi) {
-//            optrs.insert( &(*oi) );
-//        }
-//        assert(optrs.size() == this->organisms_.size());
-//
-//        // find winners
-//        OrganismVector winners;
-//        winners.reserve(this->carrying_capacity_);
-//        unsigned long count = 0;
-//        for (std::multiset<Organism *, CompareOrganismFitness>::iterator opi = optrs.begin();
-//                count < this->carrying_capacity_;
-//                ++opi, ++count) {
-//            winners.push_back(**opi);
-//        }
-//
-//        this->organisms_.swap(winners);
-//    }
-//    assert(this->organisms_.size() <= this->carrying_capacity_);
+    // NOTE: ASSUMES THAT FITNESS HAS BEEN CALCULATED FOR THE ORGANISM IN THIS CELL!
+    // This would have been done during the survival phase.
+    if (this->populations_.size() > this->carrying_capacity_) {
 
+        // build set of organisms sorted by fitness
+        std::multiset<Organism *, CompareOrganismFitness> optrs;
+        for (SpeciesByLabel::const_iterator spi = this->species_.begin();
+                spi != this->species_.end();
+                ++spi) {
+            Species * sp = spi->second;
+            BreedingPopulation& pop = this->populations_[sp];
+            for (BreedingPopulation::iterator oi = pop.begin(); oi != pop.end(); ++oi) {
+                optrs.insert( &(*oi) );
+            }
+        }
+        assert(optrs.size() == this->populations_.size());
+
+        // find winners
+        BreedingPopulations winners(this->species_, this->rng_);
+        PopulationCountType count = 0;
+        for (std::multiset<Organism *, CompareOrganismFitness>::iterator opi = optrs.begin();
+                count < this->carrying_capacity_;
+                ++opi, ++count) {
+            winners.add(**opi);
+        }
+    }
+    assert(this->populations_.size() <= this->carrying_capacity_);
 }
 
 // --- for trees etc ---
