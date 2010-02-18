@@ -202,6 +202,7 @@ void Cell::competition() {
                 ++opi, ++count) {
             winners.add(**opi);
         }
+        this->populations_ = winners;
     }
     assert(this->populations_.size() <= this->carrying_capacity_);
 }
