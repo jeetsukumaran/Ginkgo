@@ -127,35 +127,32 @@ void Cell::migration() {
             ++spi) {
         Species * sp = spi->second;
         BreedingPopulation& pop = this->populations_[sp];
+        for (BreedingPopulation::iterator oi = pop.begin(); oi != pop.end(); ++oi) {
+            Organism& og = *oi;
+            assert(!og.is_expired());
+            if (this->rng_.uniform_01() <= sp->movement_probability(this->index_)) {
+                MovementCountType movement = sp->get_movement_capacity();
+                CellIndexType curr_idx = this->index_;
+                MovementCountType movement_cost = 0;
+                while (movement > 0) {
+                    CellIndexType dest_idx = this->landscape_.random_neighbor(curr_idx);
+                    assert(dest_idx < this->landscape_.size());
+                    movement_cost = sp->movement_cost(dest_idx);
+                    if ( movement >= movement_cost) {
+                        movement -= movement_cost;
+                        curr_idx = dest_idx;
+                    } else {
+                        movement -= sp->movement_cost(curr_idx);
+                    }
+                }
+                if (curr_idx != this->index_) {
+                    this->landscape_.add_migrant(og, curr_idx);
+                    og.set_expired();
+                }
+            }
+        }
     }
-//
-//    for (OrganismVector::iterator og = this->organisms_.begin(); og != this->organisms_.end(); ++og) {
-//        assert(!og->is_expired());
-//        Species& sp = og->species();
-//
-//        if (this->rng_.uniform_01() <= sp.movement_probability(this->index_)) {
-//            MovementCountType movement = sp.get_movement_capacity();
-//            CellIndexType curr_idx = this->index_;
-//            MovementCountType movement_cost = 0;
-//            while (movement > 0) {
-//                CellIndexType dest_idx = this->landscape_.random_neighbor(curr_idx);
-//                assert(dest_idx < this->landscape_.size());
-//                movement_cost = sp.movement_cost(dest_idx);
-//                if ( movement >= movement_cost) {
-//                    movement -= movement_cost;
-//                    curr_idx = dest_idx;
-//                } else {
-//                    movement -= sp.movement_cost(curr_idx);
-//                }
-//            }
-//
-//            if (curr_idx != this->index_) {
-//                this->landscape_.add_migrant(*og, curr_idx);
-//                og->set_expired();
-//            }
-//        }
-//    }
-//    this->purge_expired_organisms();
+    this->purge_expired_organisms();
 }
 
 void Cell::survival() {
