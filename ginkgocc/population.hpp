@@ -19,8 +19,8 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#if !defined(GINKGO_BIOSYS_H)
-#define GINKGO_BIOSYS_H
+#if !defined(GINKGO_POPULATION_H)
+#define GINKGO_POPULATION_H
 
 #include <vector>
 #include <iterator>
