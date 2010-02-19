@@ -802,21 +802,15 @@ class Organism {
 ///////////////////////////////////////////////////////////////////////////////
 
 ///////////////////////////////////////////////////////////////////////////////
-// CompareOrganismFitness
+// compare_organism_fitness
 /**
- * Serves as function object in Organism sorting / set insertion etc.
+ * Serves as key for Organism sorting / set insertion etc.; if fitnesses are
+ * equal, then returns random order.
  */
-class CompareOrganismFitness {
+bool compare_organism_fitness(const Organism * o1, const Organism * o2);
+typedef bool(*CompareOrganismFitnessFuncPtrType)(const Organism *, const Organism *);
 
-    public:
-        CompareOrganismFitness() {}
-        bool operator()(Organism * o1, Organism * o2) {
-            assert(o1->get_fitness() >= 0);
-            assert(o2->get_fitness() >= 0);
-            return (o1->get_fitness() < o2->get_fitness());
-        }
-};
-// CompareOrganismFitness
+// compare_organism_fitness
 ///////////////////////////////////////////////////////////////////////////////
 
 ///////////////////////////////////////////////////////////////////////////////

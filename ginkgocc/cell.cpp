@@ -181,8 +181,10 @@ void Cell::competition() {
     // This would have been done during the survival phase.
     if (this->populations_.size() > this->carrying_capacity_) {
 
+        CompareOrganismFitnessFuncPtrType comp_fitness_fptr = &compare_organism_fitness;
+
         // build set of organisms sorted by fitness
-        std::multiset<Organism *, CompareOrganismFitness> optrs;
+        std::multiset<Organism *, CompareOrganismFitnessFuncPtrType> optrs(comp_fitness_fptr);
         for (SpeciesByLabel::const_iterator spi = this->species_.begin();
                 spi != this->species_.end();
                 ++spi) {
@@ -197,7 +199,7 @@ void Cell::competition() {
         // find winners
         BreedingPopulations winners(this->species_, this->rng_);
         PopulationCountType count = 0;
-        for (std::multiset<Organism *, CompareOrganismFitness>::iterator opi = optrs.begin();
+        for (std::multiset<Organism *, CompareOrganismFitnessFuncPtrType>::iterator opi = optrs.begin();
                 count < this->carrying_capacity_;
                 ++opi, ++count) {
             winners.add(**opi);

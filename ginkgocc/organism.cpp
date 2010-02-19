@@ -21,10 +21,24 @@
 
 #include "organism.hpp"
 
-using namespace ginkgo;
+namespace ginkgo
+{
 
-///////////////////////////////////////////////////////////////////////////////
-// Specialization of std::swap when dealing with Organisms (for efficiency)
+// key for sets/maps: sorts by fitness, or random if equal fitness
+bool compare_organism_fitness(const Organism * o1, const Organism * o2) {
+    float f1 = o1->get_fitness();
+    float f2 = o2->get_fitness();
+    assert(f1 >= 0);
+    assert(f2 >= 0);
+    if (f1 == f2) {
+        RandomNumberGenerator& rng = RandomNumberGenerator::get_instance();
+        return rng.uniform_01() < 0.5;
+    } else {
+        return f1 < f2;
+    }
+}
+
+} // namespace ginkgo
 
 namespace std
 {
