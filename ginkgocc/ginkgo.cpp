@@ -21,7 +21,9 @@
 
 #include "ginkgo_defs.hpp"
 #include "confsys.hpp"
-#include "biosys.hpp"
+#include "organism.hpp"
+#include "population.hpp"
+#include "species.hpp"
 #include "world.hpp"
 #include "tree.hpp"
 #include "cmdopt.hpp"

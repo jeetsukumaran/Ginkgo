@@ -29,19 +29,25 @@ test_cmdopt_SOURCES = \
 test_tree_from_parent_indexes_SOURCES = \
     test_tree_from_parent_indexes.cpp \
     ../textutil.cpp \
-    ../biosys.cpp \
+    ../organism.cpp \
+    ../species.cpp \
+    ../population.cpp \
     ../tree.cpp \
     ../memcheck.cpp
 
 test_tree_from_genealogies_SOURCES = \
     test_tree_from_genealogies.cpp \
-    ../biosys.cpp \
+    ../organism.cpp \
+    ../species.cpp \
+    ../population.cpp \
     ../tree.cpp \
     ../memcheck.cpp
 
 test_organism_states_SOURCES = \
     test_organism_states.cpp \
-    ../biosys.cpp
+    ../organism.cpp \
+    ../species.cpp \
+    ../population.cpp
 
 test_textutil_SOURCES = \
     test_textutil.cpp \
@@ -65,7 +71,9 @@ test_world_log_SOURCES = \
     test_world_log.cpp \
     ../world.cpp \
     ../randgen.cpp \
-    ../biosys.cpp \
+    ../organism.cpp \
+    ../species.cpp \
+    ../population.cpp \
     ../landscape.cpp \
     ../cell.cpp \
     ../cmdopt.cpp \

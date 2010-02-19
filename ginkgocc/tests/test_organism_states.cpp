@@ -21,7 +21,9 @@
 
 #include <iostream>
 #include <cassert>
-#include "../biosys.hpp"
+#include "../organism.hpp"
+#include "../population.hpp"
+#include "../species.hpp"
 
 int main(int, char* []) {
 

@@ -22,7 +22,9 @@
 #if !defined(GINKGO_CELL_H)
 #define GINKGO_CELL_H
 
-#include "biosys.hpp"
+#include "organism.hpp"
+#include "population.hpp"
+#include "species.hpp"
 #include <iostream>
 
 namespace ginkgo {

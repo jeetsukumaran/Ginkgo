@@ -11,7 +11,9 @@ noinst_HEADERS = \
 ginkgo@PROGRAMLABEL@_SOURCES = \
     ginkgo.cpp \
     randgen.cpp \
-    biosys.cpp \
+    organism.cpp \
+    species.cpp \
+    population.cpp \
     landscape.cpp \
     cell.cpp \
     world.cpp \

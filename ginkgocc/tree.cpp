@@ -8,12 +8,12 @@
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation; either version 3 of the License, or
 // (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU General Public License along
 // with this program. If not, see <http://www.gnu.org/licenses/>.
 //
@@ -23,7 +23,9 @@
 #include <map>
 #include <utility>
 #include <vector>
-#include "biosys.hpp"
+#include "organism.hpp"
+#include "population.hpp"
+#include "species.hpp"
 #include "tree.hpp"
 
 namespace ginkgo {
@@ -33,41 +35,41 @@ namespace ginkgo {
 
 Path::Path(Tree * tree_ptr)
     : tree_ptr_(tree_ptr) { }
-      
+
 void Path::add_node(GenealogyNode * node) {
     this->path_nodes_.push_back(node);
     this->tree_ptr_->set_node_path(node, this);
 }
 
 void Path::add_split_after_node(GenealogyNode * node, Path * other_child_path) {
-    std::vector<GenealogyNode *>::iterator node_loc = std::find(this->path_nodes_.begin(), this->path_nodes_.end(), node);    
-    assert(node_loc !=  this->path_nodes_.end());    
+    std::vector<GenealogyNode *>::iterator node_loc = std::find(this->path_nodes_.begin(), this->path_nodes_.end(), node);
+    assert(node_loc !=  this->path_nodes_.end());
     if ((node_loc == this->path_nodes_.begin())
         && (this->tree_ptr_->is_allow_multifurcations())
         && (this->child_paths_.size() > 0)) {
         // inserting below a tip node => adding a new branch to an existing split
         // if we are allowing multifurcations we simply including the incoming branch
         // in the set of child branches
-        this->child_paths_.push_back(other_child_path);        
+        this->child_paths_.push_back(other_child_path);
     } else {
         // inserting below a tip node would result in a branch length of 0
-        // so if we are disallowing multifurcations we process the split over here 
+        // so if we are disallowing multifurcations we process the split over here
         Path * new_child_path = this->tree_ptr_->add_new_path();
         new_child_path->path_nodes_.reserve( new_child_path->path_nodes_.size() + (node_loc - this->path_nodes_.begin()) );
         for (std::vector<GenealogyNode *>::iterator i = this->path_nodes_.begin(); i < node_loc; ++i) {
             new_child_path->add_node(*i);
             assert(this->tree_ptr_->get_node_path(*i) == new_child_path);
         }
-        this->path_nodes_.erase(this->path_nodes_.begin(), node_loc);   
+        this->path_nodes_.erase(this->path_nodes_.begin(), node_loc);
         new_child_path->child_paths_.swap(this->child_paths_);
-        this->child_paths_.push_back(new_child_path);    
+        this->child_paths_.push_back(new_child_path);
         this->child_paths_.push_back(other_child_path);
     }
 }
 
 void Path::write_newick(std::ostream& out) {
     if (this->child_paths_.size() == 0) {
-        out << this->tree_ptr_->get_node_label(this->path_nodes_.front()) << ":" << this->size();            
+        out << this->tree_ptr_->get_node_label(this->path_nodes_.front()) << ":" << this->size();
     } else {
         out << "(";
         for (std::vector<Path *>::iterator pi = this->child_paths_.begin(); pi != this->child_paths_.end(); ++pi) {
@@ -79,7 +81,7 @@ void Path::write_newick(std::ostream& out) {
         out << ")";
         if (this->path_nodes_.size() > 0) {
             this->tree_ptr_->write_node_cell_xy(this->path_nodes_.front(), out);
-        }            
+        }
         out << ":" << this->size();
     }
 }
@@ -87,7 +89,7 @@ void Path::write_newick(std::ostream& out) {
 ///////////////////////////////////////////////////////////////////////////////
 // Tree
 
-Tree::Tree(Landscape * landscape_ptr, bool allow_multifurcations) 
+Tree::Tree(Landscape * landscape_ptr, bool allow_multifurcations)
     : landscape_ptr_(landscape_ptr),
       allow_multifurcations_(allow_multifurcations) {
 }
@@ -97,7 +99,7 @@ void Tree::add_leaf(GenealogyNode* node, const std::string * label) {
         this->node_labels_map_.insert(std::make_pair(node, *label));
     }
     if (this->paths_list_.size() == 0) {
-        Path * first_path = this->add_new_path();   
+        Path * first_path = this->add_new_path();
         while (node != NULL) {
             first_path->add_node(node);
             this->store_node_cell_index(node);
@@ -107,7 +109,7 @@ void Tree::add_leaf(GenealogyNode* node, const std::string * label) {
         Path * new_node_path = this->add_new_path();
         bool coalesced = false;
         while (node != NULL) {
-            std::map<GenealogyNode *, Path *>::iterator npi = this->node_path_map_.find(node);            
+            std::map<GenealogyNode *, Path *>::iterator npi = this->node_path_map_.find(node);
             if (npi != this->node_path_map_.end()) {
                 npi->second->add_split_after_node(node, new_node_path);
                 coalesced = true;
@@ -116,7 +118,7 @@ void Tree::add_leaf(GenealogyNode* node, const std::string * label) {
                 new_node_path->add_node(node);
                 this->store_node_cell_index(node);
                 node = node->get_parent();
-            }            
+            }
         }
         if (!coalesced) {
             throw TreeStructureMultipleRootError("failure to coalesce to single ancestor in sample");
@@ -147,20 +149,20 @@ void Tree::write_node_cell_xy(GenealogyNode * node, std::ostream& out) {
         return;
     } else {
         if (this->landscape_ptr_ != NULL) {
-            CellIndexType cell_index = ci->second;         
-            CellIndexType x = this->landscape_ptr_->index_to_x(cell_index);        
+            CellIndexType cell_index = ci->second;
+            CellIndexType x = this->landscape_ptr_->index_to_x(cell_index);
             CellIndexType y = this->landscape_ptr_->index_to_y(cell_index);
             out << "x" << x << "_" << "y" << y;
         } else {
             return;
         }
-    }        
+    }
 }
 
 void Tree::store_node_cell_index(GenealogyNode * node) {
     if (node != NULL) {
         this->node_cell_indexes_map_.insert(std::make_pair(node, node->get_cell_index()));
-    }        
+    }
 }
 
 Path * Tree::add_new_path() {
@@ -172,8 +174,8 @@ std::string& Tree::get_node_label(GenealogyNode * node) {
     std::map<GenealogyNode *, std::string>::iterator pni = this->node_labels_map_.find(node);
     assert(pni != this->node_labels_map_.end());
     return pni->second;
-}        
-   
+}
+
 bool Tree::is_allow_multifurcations() {
     return this->allow_multifurcations_;
 }

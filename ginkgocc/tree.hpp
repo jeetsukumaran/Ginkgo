@@ -8,12 +8,12 @@
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation; either version 3 of the License, or
 // (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU General Public License along
 // with this program. If not, see <http://www.gnu.org/licenses/>.
 //
@@ -22,8 +22,6 @@
 #if !defined(GINKGO_TREE_H)
 #define GINKGO_TREE_H
 
-#include "biosys.hpp"
-#include "landscape.hpp"
 #include <functional>
 #include <iterator>
 #include <vector>
@@ -34,6 +32,10 @@
 #include <iostream>
 #include <algorithm>
 #include <stdexcept>
+#include "organism.hpp"
+#include "population.hpp"
+#include "species.hpp"
+#include "landscape.hpp"
 
 namespace ginkgo {
 
@@ -103,33 +105,33 @@ class Path {
 };
 
 /**
- * Encapsulates the building of trees from a collection of GenealogyNode 
+ * Encapsulates the building of trees from a collection of GenealogyNode
  * objects.
  */
 class Tree {
 
     public:
-    
+
         /**
          * Constructor.
-         * @param landscape               needed to convert cell indices to x, 
+         * @param landscape               needed to convert cell indices to x,
          *                                y coordinates.
-         * @param allow_multifurcations   true to allow polytomies, false to 
+         * @param allow_multifurcations   true to allow polytomies, false to
          *                                arbitrarily resolve with branch length 0
          */
         Tree(Landscape* landscape_ptr=NULL, bool allow_multifurcations=true);
-        
+
         /**
-         * Adds a node (and its lineage to the original ancestor) to the tree 
-         * if is not already there, and returns index of the node in the 
+         * Adds a node (and its lineage to the original ancestor) to the tree
+         * if is not already there, and returns index of the node in the
          * parent array structure representing the tree.
          *
          * @param  node     pointer to GenealogyNode to be added to the tree
-         * @param  label    pointer to std::string reprensting the label for 
+         * @param  label    pointer to std::string reprensting the label for
          *                  this node (required if it is a leaf node)
-         * @return          index of the node in the parent array (or -1 if node 
-         *                  was a null node, as would be the case if a node 
-         *                  without a parent passed its parent pointer to be 
+         * @return          index of the node in the parent array (or -1 if node
+         *                  was a null node, as would be the case if a node
+         *                  without a parent passed its parent pointer to be
          *                  inserted into the array)
          */
         void add_leaf(GenealogyNode* node, const std::string * label=NULL);
@@ -137,11 +139,11 @@ class Tree {
         /**
          * Writes newick string representing the tree structure to the given
          * output stream.
-         * 
+         *
          * @param out   output stream to which to write the tree
          */
         void write_newick_tree(std::ostream& out);
-                      
+
         Path * get_node_path(GenealogyNode * node);
         void set_node_path(GenealogyNode * node, Path * path);
         void write_node_cell_xy(GenealogyNode * node, std::ostream& out);
@@ -149,24 +151,24 @@ class Tree {
         Path * add_new_path();
         std::string& get_node_label(GenealogyNode * node);
         bool is_allow_multifurcations();
-        
-    private:    
+
+    private:
         /** Maps node indexes to their corresponding label. */
         std::map<GenealogyNode *, std::string>      node_labels_map_;
         /** Tracks path of nodes. */
         std::map<GenealogyNode *, Path *>           node_path_map_;
         /** Tracks indexes of nodes. */
-        std::map<GenealogyNode *, CellIndexType>    node_cell_indexes_map_;        
+        std::map<GenealogyNode *, CellIndexType>    node_cell_indexes_map_;
         /** Landscape from which the nodes are derived. */
-        Landscape *                                 landscape_ptr_;       
-        /** Paths, with [0] being main path */        
+        Landscape *                                 landscape_ptr_;
+        /** Paths, with [0] being main path */
         std::list<Path>                             paths_list_;
         /** Allow polytomies? Otherwise branch length of 0 will be used to represent polytomies. */
         bool                                        allow_multifurcations_;
-        
+
 };
 
 
 } // namespace ginkgo
 
-#endif 
+#endif
