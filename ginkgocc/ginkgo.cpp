@@ -47,14 +47,14 @@ int main(int argc, char* argv[]) {
     bool validate_config_only = false;
     unsigned long rand_seed = 0;
     unsigned long log_freq = 10;
-    std::string program_name = PACKAGE_STRING;
+    std::string program_identity = PACKAGE_STRING;
 
     if (strcmp(PROG_DESC, "") != 0) {
-        program_name = program_name + " (" + PROG_DESC + ")";
+        program_identity = program_identity + " (" + PROG_DESC + ")";
     }
 
     ginkgo::OptionParser parser = ginkgo::OptionParser(
-             program_name.c_str(),
+             program_identity.c_str(),
             "Ginkgo Biogeographical Evolution Simulator",
             "%prog [options] <CONFIGURATION-FILEPATH>");
 
@@ -74,7 +74,8 @@ int main(int argc, char* argv[]) {
     std::vector<std::string> args = parser.get_args();
 
     if (args.size() == 0) {
-        parser.write_usage(std::cout);
+        std::cerr << program_identity << std::endl << std::endl;
+        parser.write_usage(std::cerr);
         exit(1);
     }
 
@@ -84,10 +85,12 @@ int main(int argc, char* argv[]) {
 
     ginkgo::confsys::configure_world(world, args[0]);
     if (validate_config_only) {
+        std::cout << program_identity << std::endl;
         std::cout << "World configured using: \"" + args[0] + "\"" << "." << std::endl;
         std::cout << "Configuration file validates." << std:: endl;
     } else {
         world.open_logs();
+        world.log_info("Running: " + program_identity);
         world.log_info("World configured using: \"" + args[0] + "\"");
 
         std::ostringstream seed_info;
