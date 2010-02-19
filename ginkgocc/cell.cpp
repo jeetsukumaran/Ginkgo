@@ -112,7 +112,7 @@ void Cell::reproduction(bool evolve_fitness_components) {
 
             // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
             // TODO: check if this is neccessary
-            this->populations_[sp].shuffle(this->rng_);
+            //this->populations_[sp].shuffle(this->rng_);
             // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
         } else {
