@@ -22,20 +22,9 @@
 #if !defined(GINKGO_BIOSYS_H)
 #define GINKGO_BIOSYS_H
 
-#include <algorithm>
-#include <cassert>
 #include <vector>
 #include <iterator>
-#include <string>
-#include <cmath>
-#include <iomanip>
-#include <fstream>
-#include <stdexcept>
-#include <iostream>
-#include <sstream>
 #include <map>
-#include <utility>
-#include <cstring>
 
 #include "ginkgo_defs.hpp"
 #include "randgen.hpp"
@@ -52,17 +41,6 @@ namespace ginkgo {
 class BreedingPopulation {
 
     public:
-
-        /**
-         * Adds a new organism to this breeding population.
-         */
-        void add(const Organism& organism) {
-            if (organism.is_male()) {
-                this->males_.push_back(organism);
-            } else {
-                this->females_.push_back(organism);
-            }
-        }
 
         /**
          * Returns total number of individuals in this population.
@@ -91,71 +69,49 @@ class BreedingPopulation {
         }
 
         /**
+         * Adds a new organism to this breeding population.
+         */
+        void add(const Organism& organism) {
+            if (organism.is_male()) {
+                this->males_.push_back(organism);
+            } else {
+                this->females_.push_back(organism);
+            }
+        }
+
+        /**
          * Returns pointers to all organisms.
          */
-        std::vector<const Organism *> organism_ptrs() {
-            std::vector<const Organism *> optrs;
-            optrs.reserve(this->size());
-            for (OrganismVector::const_iterator ov = this->females_.begin();
-                    ov != this->females_.end();
-                    ++ov) {
-                optrs.push_back(&*(ov));
-            }
-            for (OrganismVector::const_iterator ov = this->males_.begin();
-                    ov != this->males_.end();
-                    ++ov) {
-                optrs.push_back(&*(ov));
-            }
-            return optrs;
-        }
+        std::vector<const Organism *> organism_ptrs();
 
         /**
          * Selects pointers to random organisms across all species.
          * @param   num_organisms   number of organisms
          */
-        std::vector<const Organism *> sample_organism_ptrs(PopulationCountType num_organisms) {
-            std::vector<const Organism *> source = this->organism_ptrs();
-            if (num_organisms <= source.size()) {
-                std::vector<const Organism *> samples;
-                samples.insert(samples.end(), source.begin(), source.begin() + num_organisms);
-                return samples;
-            } else {
-                return source;
-            }
-        }
+        std::vector<const Organism *> sample_organism_ptrs(PopulationCountType num_organisms);
 
-        void clear() {
-            this->females_.clear();
-            this->males_.clear();
-        }
+        /**
+         * Removes all organisms from population.
+         */
+        void clear();
 
-        void shuffle(RandomNumberGenerator& rng) {
-            RandomPointer rp(rng);
-            std::random_shuffle(females_.begin(), females_.end(), rp);
-            std::random_shuffle(males_.begin(), males_.end(), rp);
-        }
+        /**
+         * Randomizes order of male and female organism vectors.
+         */
+        void shuffle(RandomNumberGenerator& rng);
 
-        void swap(BreedingPopulation& other) {
-            this->females_.swap(other.females_);
-            this->males_.swap(other.males_);
-        }
+        /**
+         * Exchanges breeding vectors.
+         */
+        void swap(BreedingPopulation& other);
 
         /**
          * Removes all individuals marked for expiration.
          */
-        void purge_expired_organisms() {
-            OrganismVector::iterator end_unexpired_females = std::remove_if(this->females_.begin(),
-                this->females_.end(),
-                std::mem_fun_ref(&Organism::is_expired));
-            this->females_.erase(end_unexpired_females, this->females_.end());
-            OrganismVector::iterator end_unexpired_males = std::remove_if(this->males_.begin(),
-                this->males_.end(),
-                std::mem_fun_ref(&Organism::is_expired));
-            this->males_.erase(end_unexpired_males, this->males_.end());
-        }
+        void purge_expired_organisms();
 
         ///////////////////////////////////////////////////////////////////////
-        // iterators
+        // iteration support
 
         class iterator
         {
@@ -227,7 +183,7 @@ class BreedingPopulation {
             return iterator(this->females_.end(), this->females_.end(), this->males_.end(), this->males_.end());
         }
 
-        // iterators
+        // iteration support
         ///////////////////////////////////////////////////////////////////////
 
     private:
@@ -238,7 +194,7 @@ class BreedingPopulation {
 };
 
 ///////////////////////////////////////////////////////////////////////////////
-// Breeding Population
+// BreedingPopulations
 /**
  * Manages multiple breeding pools.
  */
@@ -249,15 +205,7 @@ class BreedingPopulations {
         /**
          * Constructor, takes reference to species pool map and rng.
          */
-        BreedingPopulations(const SpeciesByLabel& species_pool, RandomNumberGenerator& rng):
-                rng_ptr_(&rng) {
-            for (SpeciesByLabel::const_iterator spi = species_pool.begin();
-                    spi != species_pool.end();
-                    ++spi) {
-                BreedingPopulation pop;
-                this->species_populations_.insert(std::make_pair((*spi).second, pop));
-            }
-        }
+        BreedingPopulations(const SpeciesByLabel& species_pool, RandomNumberGenerator& rng);
 
         /**
          * Returns a reference to the breeding population referenced by the
@@ -275,10 +223,6 @@ class BreedingPopulations {
             std::map<const Species *, BreedingPopulation >::const_iterator bpi = this->species_populations_.find(sp);
             return bpi->second;
         }
-
-//        const BreedingPopulations& operator=(const BreedingPopulations bp) {
-//            return *this;
-//        }
 
         /**
          * Adds an organism to the mix.
@@ -303,67 +247,24 @@ class BreedingPopulations {
         /**
          * Removes all individuals marked for expiration.
          */
-        void purge_expired_organisms() {
-            for (std::map<const Species *, BreedingPopulation >::iterator spi = this->species_populations_.begin();
-                    spi != this->species_populations_.end();
-                    ++spi) {
-                (*spi).second.purge_expired_organisms();
-            }
-        }
+        void purge_expired_organisms();
 
         /**
          * Returns pointers to all organisms across all species.
          */
-        std::vector<const Organism *> organism_ptrs() {
-            std::vector<const Organism *> optrs;
-            optrs.reserve(this->size());
-            for (std::map<const Species *, BreedingPopulation >::iterator spi = this->species_populations_.begin();
-                    spi != this->species_populations_.end();
-                    ++spi) {
-//                const Species * sp = (*spi).first;
-                BreedingPopulation& bp = (*spi).second;
-                const std::vector<const Organism *>& poptrs = bp.organism_ptrs();
-                optrs.insert(optrs.end(), poptrs.begin(), poptrs.end());
-            }
-            return optrs;
-        }
+        std::vector<const Organism *> organism_ptrs();
 
         /**
          * Selects pointers to random organisms across all species.
          * @param   num_organisms   number of organisms
          */
-        std::vector<const Organism *> sample_organism_ptrs(PopulationCountType num_organisms) {
-            std::vector<const Organism *> source = this->organism_ptrs();
-            RandomPointer rp(*(this->rng_ptr_));
-            std::random_shuffle(source.begin(), source.end(), rp);
-            if (num_organisms <= source.size()) {
-                std::vector<const Organism *> samples;
-                samples.insert(samples.end(), source.begin(), source.begin() + num_organisms);
-                return samples;
-            } else {
-                return source;
-            }
-        }
+        std::vector<const Organism *> sample_organism_ptrs(PopulationCountType num_organisms);
 
         /**
          * Removes random organisms such that the total number of organisms is equal to num_organisms.
          * @param   num_organisms   number of organisms to retain
          */
-        void retain(PopulationCountType num_organisms) {
-            if (num_organisms <= this->size()) {
-                return;
-            }
-            std::vector<const Organism *> source = this->organism_ptrs();
-            RandomPointer rp(*(this->rng_ptr_));
-            std::random_shuffle(source.begin(), source.end(), rp);
-            std::map< const Species *, BreedingPopulation > new_pop;
-            for (std::vector<const Organism *>::const_iterator oi = source.begin();
-                    oi <= source.end();
-                    ++oi) {
-                new_pop[(**oi).species_ptr()].add(**oi);
-            }
-            this->species_populations_ = new_pop;
-        }
+        void retain(PopulationCountType num_organisms);
 
     private:
         /** the breeding pools */

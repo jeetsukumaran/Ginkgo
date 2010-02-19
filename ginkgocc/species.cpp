@@ -21,7 +21,7 @@
 
 #include "organism.hpp"
 #include "species.hpp"
-#include "cell.hpp"
+#include "randgen.hpp"
 
 using namespace ginkgo;
 
