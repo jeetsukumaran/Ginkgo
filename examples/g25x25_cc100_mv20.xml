@@ -1,0 +1,41 @@
+<?xml version="1.0"?>
+<ginkgo>
+    <world
+        x_range="25"
+        y_range="25"
+        num_gens="250000"
+        label="run"
+        num_fitness_traits="1"
+        global_selection_strength="1"
+        default_cell_carrying_capacity="100"
+        log_frequency="1"
+        multifurcating_trees="1">
+        <biota>
+            <lineage id="Zx">
+                <fitness_trait_relative_selection_weights>1</fitness_trait_relative_selection_weights>
+                <fitness_trait_default_genotypes>0</fitness_trait_default_genotypes>
+                <fecundity>16</fecundity>
+                <movementCapacity distribution="constant">20</movementCapacity>
+                <seedPopulations>
+                    <seedPopulation x="0" y="0" size="100">
+                        <ancestralPopulationSize>100</ancestralPopulationSize>
+                        <ancestralGenerations>1</ancestralGenerations>
+                    </seedPopulation>
+                </seedPopulations>
+            </lineage>
+        </biota>
+        <environments>
+            <environment gen="0">
+                <movementCosts lineage="Zx">g25x25_mv1.asc</movementCosts>
+            </environment>
+        </environments>
+        <samples>
+            <sample gen="1" lineage=Zx label="e1" trees="False" />
+            <sample gen="10" lineage=Zx label="e1" trees="False" />
+            <sample gen="100" lineage=Zx label="e1" trees="False" />
+            <sample gen="1000" lineage=Zx label="e1" trees="False" />
+            <sample gen="1500" lineage=Zx label="e1" trees="False" />
+            <sample gen="2000" lineage=Zx label="e1" trees="False" />
+        </samples>
+    </world>
+</ginkgo>
