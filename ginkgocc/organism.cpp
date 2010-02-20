@@ -24,6 +24,35 @@
 namespace ginkgo
 {
 
+// singleton instance
+OrganismMemoryManager OrganismMemoryManager::instance_;
+
+// allocate a new Organism slot
+Organism* OrganismMemoryManager::allocate(){
+ 	if (this->free_organism_ptrs_.empty()) {
+ 		this->organism_pool_.push_back(std::vector<Organism>());
+ 		std::vector<Organism> & last_pool_element = *(this->organism_pool_.rbegin());
+ 		last_pool_element.resize(1000);
+ 		for (std::vector<Organism>::iterator i = last_pool_element.begin();
+                i != last_pool_element.end();
+ 		        ++i) {
+ 			this->free_organism_ptrs_.push(&(*i));
+        }
+ 		return this->allocate();
+ 	}
+ 	else {
+ 		Organism* n = this->free_organism_ptrs_.top();
+ 		this->free_organism_ptrs_.pop();
+ 		return n;
+ 	}
+}
+
+// return Organism slot to pool
+void OrganismMemoryManager::free(Organism *org) {
+	org->clear();
+	this->free_organism_ptrs_.push(org);
+}
+
 // key for sets/maps: sorts by fitness, or random if equal fitness
 bool compare_organism_fitness(const Organism * o1, const Organism * o2) {
     float f1 = o1->get_fitness();

@@ -36,6 +36,8 @@
 #include <map>
 #include <utility>
 #include <cstring>
+#include <stack>
+#include <list>
 
 #include "ginkgo_defs.hpp"
 #include "randgen.hpp"
@@ -470,7 +472,9 @@ class Organism {
             ExpiredMale = 3 // 11 = expired, male
         };
 
-        // --- lifecycle and assignment ---
+        Organism()
+            : fitness_(-1),
+              state_flags_(0) {  }
 
         /**
          * Constructor instantiates a new organism with species, identity,
@@ -515,6 +519,9 @@ class Organism {
 
         /** Destructor. */
         ~Organism() { }
+
+        /** For memory management */
+        void clear() { }
 
         /**
          * Assignment.
@@ -800,6 +807,31 @@ class Organism {
 };
 // Organism
 ///////////////////////////////////////////////////////////////////////////////
+
+///////////////////////////////////////////////////////////////////////////////
+// OrganismMemoryManager
+class OrganismMemoryManager  {
+
+    public:
+        static OrganismMemoryManager& get_instance() {
+            return OrganismMemoryManager::instance_;
+        }
+        Organism* allocate();
+        void free(Organism* org);
+
+    private:
+        static OrganismMemoryManager instance_;
+        OrganismMemoryManager() { }
+        OrganismMemoryManager(const OrganismMemoryManager&);
+        const OrganismMemoryManager& operator=(const OrganismMemoryManager&);
+
+    private:
+        std::list< std::vector<Organism> > organism_pool_;
+        std::stack<Organism *> free_organism_ptrs_;
+};
+// OrganismMemoryManager
+///////////////////////////////////////////////////////////////////////////////
+
 
 ///////////////////////////////////////////////////////////////////////////////
 // compare_organism_fitness
