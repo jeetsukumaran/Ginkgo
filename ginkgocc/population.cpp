@@ -28,6 +28,26 @@ using namespace ginkgo;
 ///////////////////////////////////////////////////////////////////////////////
 // BreedingPopulation
 
+// local helper function
+void purge_expired_organisms_(std::vector<Organism>& organisms) {
+	std::vector<Organism *> to_keep_ptrs;
+	to_keep_ptrs.reserve(organisms.size());
+	for (OrganismVector::iterator i = organisms.begin(); i != organisms.end(); ++i) {
+		Organism & org = *i;
+		if (!i->is_expired()) {
+			to_keep_ptrs.push_back(&org);
+		}
+	}
+	std::vector<Organism> to_keep;
+	to_keep.reserve(to_keep_ptrs.size());
+	for (std::vector<Organism *>::const_iterator i = to_keep_ptrs.begin(); i != to_keep_ptrs.end(); ++i) {
+		Organism * orgPtr = *i;
+		to_keep.push_back(*orgPtr);
+	}
+	organisms.clear();
+	to_keep.swap(organisms);
+}
+
 // Returns pointers to all organisms.
 std::vector<const Organism *> BreedingPopulation::organism_ptrs() {
     std::vector<const Organism *> optrs;
@@ -75,14 +95,8 @@ void BreedingPopulation::swap(BreedingPopulation& other) {
 
 // Removes all individuals marked for expiration.
 void BreedingPopulation::purge_expired_organisms() {
-    OrganismVector::iterator end_unexpired_females = std::remove_if(this->females_.begin(),
-        this->females_.end(),
-        std::mem_fun_ref(&Organism::is_expired));
-    this->females_.erase(end_unexpired_females, this->females_.end());
-    OrganismVector::iterator end_unexpired_males = std::remove_if(this->males_.begin(),
-        this->males_.end(),
-        std::mem_fun_ref(&Organism::is_expired));
-    this->males_.erase(end_unexpired_males, this->males_.end());
+    purge_expired_organisms_(this->females_);
+    purge_expired_organisms_(this->males_);
 }
 
 // BreedingPopulation
@@ -91,6 +105,7 @@ void BreedingPopulation::purge_expired_organisms() {
 ///////////////////////////////////////////////////////////////////////////////
 // BreedingPopulations
 
+// constructor
 BreedingPopulations::BreedingPopulations(const SpeciesByLabel& species_pool, RandomNumberGenerator& rng):
         rng_ptr_(&rng) {
     for (SpeciesByLabel::const_iterator spi = species_pool.begin();
@@ -101,6 +116,7 @@ BreedingPopulations::BreedingPopulations(const SpeciesByLabel& species_pool, Ran
     }
 }
 
+// removes organisms flagged for expiration
 void BreedingPopulations::purge_expired_organisms() {
     for (std::map<const Species *, BreedingPopulation >::iterator spi = this->species_populations_.begin();
             spi != this->species_populations_.end();
@@ -109,6 +125,8 @@ void BreedingPopulations::purge_expired_organisms() {
     }
 }
 
+
+// returns pointers to all organisms
 std::vector<const Organism *> BreedingPopulations::organism_ptrs() {
     std::vector<const Organism *> optrs;
     optrs.reserve(this->size());
@@ -122,6 +140,7 @@ std::vector<const Organism *> BreedingPopulations::organism_ptrs() {
     return optrs;
 }
 
+// returns random sample of pointers to organisms
 std::vector<const Organism *> BreedingPopulations::sample_organism_ptrs(PopulationCountType num_organisms) {
     std::vector<const Organism *> source = this->organism_ptrs();
     RandomPointer rp(*(this->rng_ptr_));
@@ -135,6 +154,7 @@ std::vector<const Organism *> BreedingPopulations::sample_organism_ptrs(Populati
     }
 }
 
+// removes all but specified number of organisms randomly
 void BreedingPopulations::retain(PopulationCountType num_organisms) {
     if (num_organisms <= this->size()) {
         return;
