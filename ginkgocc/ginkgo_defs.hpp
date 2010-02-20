@@ -30,6 +30,10 @@
 
 namespace ginkgo {
 
+//! Organism memory manager default block size
+const unsigned long ORGANISM_MEMORY_MANAGER_DEFAULT_BLOCK_SIZE = 1000;
+
+
 //! The maximum number of fitness factors in the system. A "fitness factor"
 //! represents an environmental variable and a corresponding genotypic variable
 //! that together contribute to the fitness of an individual organism.
@@ -59,7 +63,6 @@ const float DEFAULT_GLOBAL_SELECTION_STRENGTH = 1.0;
     typedef unsigned int           CellIndexType;
     const unsigned int MAX_LANDSCAPE_SIZE = static_cast<unsigned int>(UINT_MAX);
 #endif
-
 
 //! The carrying capacity type.
 typedef unsigned int            PopulationCountType;

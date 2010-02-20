@@ -32,7 +32,7 @@ Organism* OrganismMemoryManager::allocate(){
  	if (this->free_organism_ptrs_.empty()) {
  		this->organism_pool_.push_back(std::vector<Organism>());
  		std::vector<Organism> & last_pool_element = *(this->organism_pool_.rbegin());
- 		last_pool_element.resize(1000);
+ 		last_pool_element.resize(this->block_size_);
  		for (std::vector<Organism>::iterator i = last_pool_element.begin();
                 i != last_pool_element.end();
  		        ++i) {

@@ -811,23 +811,30 @@ class Organism {
 ///////////////////////////////////////////////////////////////////////////////
 // OrganismMemoryManager
 class OrganismMemoryManager  {
-
     public:
         static OrganismMemoryManager& get_instance() {
             return OrganismMemoryManager::instance_;
         }
         Organism* allocate();
         void free(Organism* org);
-
+        void set_block_size(unsigned long block_size) {
+            assert(block_size >= 1);
+            this->block_size_ = block_size;
+        }
+        unsigned long get_block_size() {
+            return this->block_size_;
+        }
     private:
         static OrganismMemoryManager instance_;
-        OrganismMemoryManager() { }
+        OrganismMemoryManager() :
+            block_size_(ORGANISM_MEMORY_MANAGER_DEFAULT_BLOCK_SIZE) { }
         OrganismMemoryManager(const OrganismMemoryManager&);
         const OrganismMemoryManager& operator=(const OrganismMemoryManager&);
 
     private:
         std::list< std::vector<Organism> > organism_pool_;
         std::stack<Organism *> free_organism_ptrs_;
+        unsigned long block_size_;
 };
 // OrganismMemoryManager
 ///////////////////////////////////////////////////////////////////////////////
