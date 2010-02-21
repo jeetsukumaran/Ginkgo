@@ -217,6 +217,7 @@ void Cell::competition() {
         // mark remaining individuals for expiration
         while (opi != organism_fitness_map.end())  {
             (*opi)->set_expired();
+            ++opi;
         }
 
         // expire
