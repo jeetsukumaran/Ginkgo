@@ -229,9 +229,10 @@ class HaploidMarker {
         }
 
         void clear() {
-            if (this->allele_) {
+            if (this->allele_ != NULL) {
                 this->allele_->decrement_count();
             }
+            this->allele_ = NULL;
         }
 
     private:
@@ -339,9 +340,11 @@ class DiploidMarker {
 			if (this->allele1_ != NULL) {
                 this->allele1_->decrement_count();
             }
+            this->allele1_ = NULL;
             if (this->allele2_ != NULL) {
                 this->allele2_->decrement_count();
             }
+            this->allele2_ = NULL;
         }
 
     private:
