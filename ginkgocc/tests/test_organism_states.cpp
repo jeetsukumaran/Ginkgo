@@ -27,7 +27,8 @@
 
 int main(int, char* []) {
 
-    ginkgo::Organism m(NULL, ginkgo::Organism::Male);
+    ginkgo::Organism m;
+    m.init(ginkgo::Organism::Male);
     assert(!m.is_expired());
     assert(!m.is_female());
     assert(m.is_male());
@@ -36,7 +37,8 @@ int main(int, char* []) {
     assert(!m.is_female());
     assert(m.is_male());
 
-    ginkgo::Organism f(NULL, ginkgo::Organism::Female);
+    ginkgo::Organism f;
+    f.init(ginkgo::Organism::Female);
     assert(!f.is_expired());
     assert(f.is_female());
     assert(!f.is_male());

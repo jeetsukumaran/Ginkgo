@@ -518,6 +518,9 @@ class Organism {
             return *this;
         }
 
+        /**
+         * Initialize with given fitness and status (M/F).
+         */
         void init(Species * species,
                  const FitnessTraits& fitness_traits,
                  Organism::Status status) {
@@ -527,8 +530,20 @@ class Organism {
             memcpy(this->fitness_trait_genotypes_, fitness_traits, MAX_FITNESS_TRAITS*sizeof(FitnessTraitType));
         }
 
+        /**
+         * Initialize with given fitness and status (M/F).
+         */
         void init(Species * species, Organism::Status status) {
             this->species_ = species;
+            this->fitness_ = -1;
+            this->state_flags_ = status;
+        }
+
+        /**
+         * Mainly for use in tests ...
+         */
+        void init(Organism::Status status) {
+            this->species_ = NULL;
             this->fitness_ = -1;
             this->state_flags_ = status;
         }
