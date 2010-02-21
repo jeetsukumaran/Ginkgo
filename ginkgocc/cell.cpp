@@ -259,7 +259,11 @@ void Cell::competition() {
 void Cell::sample_organisms(Species * sp_ptr,
         std::vector<const Organism *>& samples,
         PopulationCountType num_organisms) {
+    assert(sp_ptr);
     OrganismPointers s = this->populations_[sp_ptr].sample_organism_ptrs(num_organisms, this->rng_);
+    for (OrganismPointers::iterator og = s.begin(); og != s.end(); ++og) {
+        sp_ptr->set_organism_label(*og, this->index_, this->x_, this->y_);
+    }
     samples.insert(samples.end(), s.begin(), s.end());
 }
 
