@@ -200,56 +200,79 @@ void Cell::competition() {
             BreedingPopulation& pop = this->populations_[sp];
             for (BreedingPopulation::iterator oi = pop.begin(); oi != pop.end(); ++oi) {
                 organism_fitness_map.insert(*oi);
+
+                // we set the organism's expired flag here, and unset it if
+                // it is in the top K organisms later; we do it this way
+                // b/c of the failure in the original approach noted below
+                (*oi)->set_expired();
+
             }
         }
         assert(organism_fitness_map.size() == this->populations_.size());
 
-        std::multiset<Organism *, CompareOrganismFitnessFuncPtrType>::iterator opi = organism_fitness_map.begin();
-        PopulationCountType retained = 0;
-
-        // --FOR DEBUGGING-- //
-        PopulationCountType original_size = this->populations_.size();
-        PopulationCountType removed = 0;
-        // --FOR DEBUGGING-- //
-
-        // advance past the top K individuals, where K == carrying capacity
-        while ( (retained < (this->carrying_capacity_-1) ) && opi != organism_fitness_map.end() ) {
-            ++retained;
-            ++opi;
+        // alternate approach: "rescue" the top K individuals from expiration
+        unsigned long count = 0;
+        for (std::multiset<Organism *, CompareOrganismFitnessFuncPtrType>::iterator opi = organism_fitness_map.begin();
+                count < this->carrying_capacity_;
+                ++opi, ++count) {
+            (*opi)->set_unexpired();
         }
-
-        // mark remaining individuals for expiration
-        while (opi != organism_fitness_map.end())  {
-            (*opi)->set_expired();
-            ++opi;
-
-            // --FOR DEBUGGING-- //
-            ++removed;
-            // --FOR DEBUGGING-- //
-
-        }
-        assert(retained+removed == original_size);
-
-        // expire
         this->purge_expired_organisms();
 
-        // --FOR DEBUGGING-- //
-        if (!(this->populations_.size() <= this->carrying_capacity_)) {
-            std::cout << " Original: " << original_size << std::endl;
-            std::cout << " Capacity: " << this->carrying_capacity_ << std::endl;
-            std::cout << " Retained: " << retained << std::endl;
-            std::cout << "  Removed: " << removed << std::endl;
-            std::cout << "Remaining: " << this->populations_.size() << std::endl;
-            OrganismPointers orgs = this->populations_.get_organism_ptrs();
-            unsigned long expired = 0;
-            for (OrganismPointers::iterator oi = orgs.begin(); oi != orgs.end(); ++oi) {
-                if ((*oi)->is_expired()) {
-                    ++expired;
-                }
-            }
-            std::cout << expired << " expired organisms still in population" << std::endl;
-        }
-        // --FOR DEBUGGING-- //
+/******************************************************************************
+Original Approach
+------------------
+Following does not work if many organisms have the same fitness. Specifically,
+the "opi != organism_fitness_map.end()" seems to evaluate to True even if it
+has not actually reached the end.
+******************************************************************************/
+
+//        std::multiset<Organism *, CompareOrganismFitnessFuncPtrType>::iterator opi = organism_fitness_map.begin();
+//        PopulationCountType retained = 0;
+//
+//        // --FOR DEBUGGING-- //
+//        PopulationCountType original_size = this->populations_.size();
+//        PopulationCountType removed = 0;
+//        // --FOR DEBUGGING-- //
+//
+//        // advance past the top K individuals, where K == carrying capacity
+//        while ( (retained < (this->carrying_capacity_-1) ) && opi != organism_fitness_map.end() ) {
+//            ++retained;
+//            ++opi;
+//        }
+//
+//        // mark remaining individuals for expiration
+//        while (opi != organism_fitness_map.end())  {
+//            (*opi)->set_expired();
+//            ++opi;
+//
+//            // --FOR DEBUGGING-- //
+//            ++removed;
+//            // --FOR DEBUGGING-- //
+//
+//        }
+//        assert(retained+removed == original_size);
+//
+//        // expire
+//        this->purge_expired_organisms();
+//
+//        // --FOR DEBUGGING-- //
+//        if (!(this->populations_.size() <= this->carrying_capacity_)) {
+//            std::cout << " Original: " << original_size << std::endl;
+//            std::cout << " Capacity: " << this->carrying_capacity_ << std::endl;
+//            std::cout << " Retained: " << retained << std::endl;
+//            std::cout << "  Removed: " << removed << std::endl;
+//            std::cout << "Remaining: " << this->populations_.size() << std::endl;
+//            OrganismPointers orgs = this->populations_.get_organism_ptrs();
+//            unsigned long expired = 0;
+//            for (OrganismPointers::iterator oi = orgs.begin(); oi != orgs.end(); ++oi) {
+//                if ((*oi)->is_expired()) {
+//                    ++expired;
+//                }
+//            }
+//            std::cout << expired << " expired organisms still in population" << std::endl;
+//        }
+//        // --FOR DEBUGGING-- //
     }
     assert(this->populations_.size() <= this->carrying_capacity_);
 }
