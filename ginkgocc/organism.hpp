@@ -705,6 +705,13 @@ class Organism {
             this->state_flags_ |= Organism::Expired;
         }
 
+        /**
+         * Specifies that the organism should be retain.
+         */
+        void set_unexpired() {
+            this->state_flags_ &= ~Organism::Expired;
+        }
+
         // --- meta info ---
 
         /**

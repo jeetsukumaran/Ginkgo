@@ -36,6 +36,10 @@ int main(int, char* []) {
     assert(m.is_expired());
     assert(!m.is_female());
     assert(m.is_male());
+    m.set_unexpired();
+    assert(!m.is_expired());
+    assert(!m.is_female());
+    assert(m.is_male());
 
     ginkgo::Organism f;
     f.init(ginkgo::Organism::Female);
@@ -44,6 +48,10 @@ int main(int, char* []) {
     assert(!f.is_male());
     f.set_expired();
     assert(f.is_expired());
+    assert(f.is_female());
+    assert(!f.is_male());
+    f.set_unexpired();
+    assert(!f.is_expired());
     assert(f.is_female());
     assert(!f.is_male());
 
