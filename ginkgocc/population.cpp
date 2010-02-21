@@ -25,51 +25,57 @@
 
 using namespace ginkgo;
 
+// local helper functions
+
+void purge_expired_organisms_(OrganismPointers& organism_ptrs) {
+	OrganismMemoryManager& organism_memory_manager = OrganismMemoryManager::get_instance();
+	std::vector<Organism *> to_keep_ptrs;
+	to_keep_ptrs.reserve(organism_ptrs.size());
+	for (OrganismPointers::iterator i = organism_ptrs.begin(); i != organism_ptrs.end(); ++i) {
+		Organism * org = *i;
+		if (org->is_expired()) {
+            organism_memory_manager.deallocate(org);
+		} else {
+			to_keep_ptrs.push_back(org);
+		}
+	}
+	organism_ptrs.clear();
+	to_keep_ptrs.swap(organism_ptrs);
+}
+
+void deallocate_and_clear_organisms_(OrganismPointers& organism_ptrs) {
+	OrganismMemoryManager& organism_memory_manager = OrganismMemoryManager::get_instance();
+    for (OrganismPointers::iterator oi = organism_ptrs.begin();
+            oi != organism_ptrs.end();
+            ++oi) {
+        organism_memory_manager.deallocate(*oi);
+    }
+    organism_ptrs.clear();
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // BreedingPopulation
 
-// local helper function
-void purge_expired_organisms_(std::vector<Organism>& organisms) {
-	std::vector<Organism *> to_keep_ptrs;
-	to_keep_ptrs.reserve(organisms.size());
-	for (OrganismVector::iterator i = organisms.begin(); i != organisms.end(); ++i) {
-		Organism & org = *i;
-		if (!i->is_expired()) {
-			to_keep_ptrs.push_back(&org);
-		}
-	}
-	std::vector<Organism> to_keep;
-	to_keep.reserve(to_keep_ptrs.size());
-	for (std::vector<Organism *>::const_iterator i = to_keep_ptrs.begin(); i != to_keep_ptrs.end(); ++i) {
-		Organism * orgPtr = *i;
-		to_keep.push_back(*orgPtr);
-	}
-	organisms.clear();
-	to_keep.swap(organisms);
+// Returns pointers to all organisms.
+OrganismPointers BreedingPopulation::get_organism_ptrs() {
+    OrganismPointers o;
+    return this->get_organism_ptrs(o);
 }
 
-// Returns pointers to all organisms.
-std::vector<const Organism *> BreedingPopulation::organism_ptrs() {
-    std::vector<const Organism *> optrs;
-    optrs.reserve(this->size());
-    for (OrganismVector::const_iterator ov = this->females_.begin();
-            ov != this->females_.end();
-            ++ov) {
-        optrs.push_back(&*(ov));
-    }
-    for (OrganismVector::const_iterator ov = this->males_.begin();
-            ov != this->males_.end();
-            ++ov) {
-        optrs.push_back(&*(ov));
-    }
+OrganismPointers& BreedingPopulation::get_organism_ptrs(OrganismPointers& optrs) {
+    optrs.reserve(optrs.size() + this->females_.size() + this->males_.size());
+    optrs.insert(optrs.end(), this->females_.begin(), this->females_.end());
+    optrs.insert(optrs.end(), this->males_.begin(), this->males_.end());
     return optrs;
 }
 
-// Selects pointers to random organisms across all species.
-std::vector<const Organism *> BreedingPopulation::sample_organism_ptrs(PopulationCountType num_organisms) {
-    std::vector<const Organism *> source = this->organism_ptrs();
+OrganismPointers BreedingPopulation::sample_organism_ptrs(PopulationCountType num_organisms, RandomNumberGenerator& rng) {
+    OrganismPointers source;
+    this->get_organism_ptrs(source);
     if (num_organisms <= source.size()) {
-        std::vector<const Organism *> samples;
+        OrganismPointers samples;
+        RandomPointer rp(rng);
+        std::random_shuffle(source.begin(), source.end(), rp);
         samples.insert(samples.end(), source.begin(), source.begin() + num_organisms);
         return samples;
     } else {
@@ -78,8 +84,8 @@ std::vector<const Organism *> BreedingPopulation::sample_organism_ptrs(Populatio
 }
 
 void BreedingPopulation::clear() {
-    this->females_.clear();
-    this->males_.clear();
+    deallocate_and_clear_organisms_(this->females_);
+    deallocate_and_clear_organisms_(this->males_);
 }
 
 void BreedingPopulation::shuffle(RandomNumberGenerator& rng) {
@@ -125,28 +131,32 @@ void BreedingPopulations::purge_expired_organisms() {
     }
 }
 
-
 // returns pointers to all organisms
-std::vector<const Organism *> BreedingPopulations::organism_ptrs() {
-    std::vector<const Organism *> optrs;
-    optrs.reserve(this->size());
+OrganismPointers BreedingPopulations::get_organism_ptrs() {
+    OrganismPointers o;
+    return this->get_organism_ptrs(o);
+}
+
+OrganismPointers& BreedingPopulations::get_organism_ptrs(OrganismPointers& optrs) {
+    optrs.reserve(optrs.size() + this->size());
     for (std::map<const Species *, BreedingPopulation >::iterator spi = this->species_populations_.begin();
             spi != this->species_populations_.end();
             ++spi) {
         BreedingPopulation& bp = (*spi).second;
-        const std::vector<const Organism *>& poptrs = bp.organism_ptrs();
+        const OrganismPointers& poptrs = bp.get_organism_ptrs();
         optrs.insert(optrs.end(), poptrs.begin(), poptrs.end());
     }
     return optrs;
 }
 
 // returns random sample of pointers to organisms
-std::vector<const Organism *> BreedingPopulations::sample_organism_ptrs(PopulationCountType num_organisms) {
-    std::vector<const Organism *> source = this->organism_ptrs();
+OrganismPointers BreedingPopulations::sample_organism_ptrs(PopulationCountType num_organisms) {
+    OrganismPointers source;
+    this->get_organism_ptrs(source);
     RandomPointer rp(*(this->rng_ptr_));
     std::random_shuffle(source.begin(), source.end(), rp);
     if (num_organisms <= source.size()) {
-        std::vector<const Organism *> samples;
+        OrganismPointers samples;
         samples.insert(samples.end(), source.begin(), source.begin() + num_organisms);
         return samples;
     } else {
@@ -156,19 +166,17 @@ std::vector<const Organism *> BreedingPopulations::sample_organism_ptrs(Populati
 
 // removes all but specified number of organisms randomly
 void BreedingPopulations::retain(PopulationCountType num_organisms) {
-    if (num_organisms <= this->size()) {
+    long surplus = this->size() - num_organisms;
+    if (surplus <= 0 ) {
         return;
     }
-    std::vector<const Organism *> source = this->organism_ptrs();
-    RandomPointer rp(*(this->rng_ptr_));
-    std::random_shuffle(source.begin(), source.end(), rp);
-    std::map< const Species *, BreedingPopulation > new_pop;
-    for (std::vector<const Organism *>::const_iterator oi = source.begin();
-            oi <= source.end();
-            ++oi) {
-        new_pop[(**oi).species_ptr()].add(**oi);
+    OrganismPointers to_remove = this->sample_organism_ptrs(surplus);
+    for (OrganismPointers::iterator i = to_remove.begin();
+            i != to_remove.end();
+            ++i) {
+        (*i)->set_expired();
     }
-    this->species_populations_ = new_pop;
+    this->purge_expired_organisms();
 }
 
 // BreedingPopulations

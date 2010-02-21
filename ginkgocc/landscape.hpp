@@ -41,7 +41,7 @@ class Landscape {
     public:
 
         /** To store information on a single migration event: organism, dest */
-        typedef std::pair<Organism, CellIndexType>   MigrationEvent;
+        typedef std::pair<Organism *, CellIndexType>   MigrationEvent;
         /** To store collection of single migration events */
         typedef std::vector<MigrationEvent>          MigrationEvents;
 
@@ -303,8 +303,8 @@ class Landscape {
          * @param   organism    reference to organism that will be moved
          * @param   dest_cell   vector index of destination cell
          */
-        void add_migrant(const Organism& organism, CellIndexType dest_cell) {
-            this->migrants_.push_back(std::make_pair(organism, dest_cell));
+        void add_migrant(Organism * organism_ptr, CellIndexType dest_cell) {
+            this->migrants_.push_back(std::make_pair(organism_ptr, dest_cell));
         }
 
         /** Clear the collection of migration events. */

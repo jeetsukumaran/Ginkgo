@@ -348,8 +348,8 @@ class Species {
          * @return              the fitness score for the organism in the given
          *                      environment
          */
-        float calc_fitness(const Organism& organism, const FitnessTraits fitness_trait_optimum_optima) const {
-            const FitnessTraits& fitness_traits = organism.get_fitness_trait_genotypes();
+        float calc_fitness(const Organism * organism_ptr, const FitnessTraits fitness_trait_optimum_optima) const {
+            const FitnessTraits& fitness_traits = organism_ptr->get_fitness_trait_genotypes();
             const FitnessTraitType * g = fitness_traits;
             const FitnessTraitType * e = fitness_trait_optimum_optima;
             std::vector<float>::const_iterator s = this->selection_weights_.begin();
@@ -395,11 +395,11 @@ class Species {
         /**
          * Returns a label for the given organism.
          *
-         * @param   organism    organism to be labelled
-         * @return              unique label for organism
+         * @param   organism_ptr    pointer to organism to be labelled
+         * @return                  unique label for organism
          */
-         const std::string& get_organism_label(const Organism& organism) {
-            std::map<const Organism *, std::string>::const_iterator ol = this->organism_labels_.find(&organism);
+         const std::string& get_organism_label(const Organism * organism_ptr) {
+            std::map<const Organism *, std::string>::const_iterator ol = this->organism_labels_.find(organism_ptr);
             if (ol == this->organism_labels_.end()) {
                 throw std::runtime_error("label requested, but not assigned to organism");
             } else {
@@ -411,24 +411,24 @@ class Species {
          * Returns a label for the given organism, creating a new one if
          * it has not already been assigned.
          *
-         * @param   organism    organism to be labelled
+         * @param   organism_ptr    pointer to organism to be labelled
          * @param   x           x-coordinate of organism's location
          * @param   y           y-coordinate of organism's location
          * @return              unique label for organism
          */
-         const std::string& set_organism_label(const Organism& organism, CellIndexType i, CellIndexType x, CellIndexType y) {
-            this->organism_labels_[&organism] = this->compose_organism_label(i, x, y);
-            std::map<const Organism *, std::string>::const_iterator ol = this->organism_labels_.find(&organism);
+         const std::string& set_organism_label(const Organism * organism_ptr, CellIndexType i, CellIndexType x, CellIndexType y) {
+            this->organism_labels_[organism_ptr] = this->compose_organism_label(i, x, y);
+            std::map<const Organism *, std::string>::const_iterator ol = this->organism_labels_.find(organism_ptr);
             return ol->second;
          }
 
         /**
          * Erases a label assigned to an organism.
          *
-         * @param       organism label mapping to be erased
+         * @param       organism_ptr label mapping to be erased
          */
-         void erase_organism_label(const Organism& organism) {
-            this->organism_labels_.erase(&organism);
+         void erase_organism_label(const Organism * organism_ptr) {
+            this->organism_labels_.erase(organism_ptr);
          }
 
         /**
@@ -449,12 +449,13 @@ class Species {
          *
          * @return  a default Organism object.
          */
-        Organism new_organism(CellIndexType cell_index) {
-            Organism    org(this,
-                            this->default_fitness_trait_genotypes_,
-                            this->get_random_sex());
-            org.set_cell_index(cell_index);
-            return org;
+        Organism * new_organism(CellIndexType cell_index) {
+            Organism * organism_ptr = this->organism_memory_manager_.allocate();
+            organism_ptr->init(this,
+                    this->default_fitness_trait_genotypes_,
+                    this->get_random_sex());
+            organism_ptr->set_cell_index(cell_index);
+            return organism_ptr;
         }
 
         /**
@@ -468,19 +469,22 @@ class Species {
          * @param male      male parent
          * @return          offspring
          */
-        Organism new_organism(const Organism& female, const Organism& male, CellIndexType cell_index, bool evolve_fitness_components) {
-            Organism organism(this, this->get_random_sex());
+        Organism * new_organism(const Organism* female_ptr, const Organism* male_ptr, CellIndexType cell_index, bool evolve_fitness_components) {
+            Organism * organism_ptr = this->organism_memory_manager_.allocate();
+            organism_ptr->init(this, this->get_random_sex());
             if (evolve_fitness_components) {
-                organism.inherit_fitness_trait_genotypes(female,
-                                                           male,
-                                                           this->num_fitness_traits_,
-                                                           this->fitness_trait_inheritance_sd_,
-                                                           this->rng_);
+                organism_ptr->inherit_fitness_trait_genotypes(
+                    *female_ptr,
+                    *male_ptr,
+                     this->num_fitness_traits_,
+                     this->fitness_trait_inheritance_sd_,
+                     this->rng_
+                );
             } else {
-                organism.set_fitness_trait_genotypes(this->default_fitness_trait_genotypes_);
+                organism_ptr->set_fitness_trait_genotypes(this->default_fitness_trait_genotypes_);
             }
-            organism.inherit_genealogies(female, male, this->rng_, cell_index);
-            return organism;
+            organism_ptr->inherit_genealogies(*female_ptr, *male_ptr, this->rng_, cell_index);
+            return organism_ptr;
         }
 
     private:
@@ -520,6 +524,8 @@ class Species {
         unsigned long                       organism_label_index_;
         /** tracks the organism to label assignment */
         std::map<const Organism *, std::string>   organism_labels_;
+        /** memory pool */
+        OrganismMemoryManager&              organism_memory_manager_;
 
 };
 // Species

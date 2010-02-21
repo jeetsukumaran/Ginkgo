@@ -140,6 +140,8 @@ void World::add_world_settings(GenerationCountType generation, const WorldSettin
 }
 
 void World::add_dispersal_event(GenerationCountType generation, const DispersalEvent& dispersal_event) {
+    this->log_error("Stochastic dispersal currently disabled");
+    exit(1);
     this->dispersal_events_.insert(std::make_pair(generation, dispersal_event));
 }
 
@@ -320,42 +322,44 @@ void World::process_world_settings() {
 }
 
 void World::process_dispersal_events() {
-    typedef std::multimap<GenerationCountType, DispersalEvent> gen_disp_t;
-    typedef std::pair<gen_disp_t::iterator, gen_disp_t::iterator> gen_disp_iter_pair_t;
-    gen_disp_iter_pair_t this_gen_dispersals = this->dispersal_events_.equal_range(this->current_generation_);
-    for (gen_disp_t::iterator di = this_gen_dispersals.first; di != this_gen_dispersals.second; ++di) {
-        DispersalEvent& de = di->second;
-        std::ostringstream msg;
-        msg << "[Generation " << this->current_generation_ << "] Dispersal";
-        if (de.species_ptr != NULL) {
-            msg << " of " << de.species_ptr->get_label();
-        }
-        msg << " from (" << this->landscape_.index_to_x(de.source) << "," << this->landscape_.index_to_y(de.source) << ")";
-        msg << " to (" << this->landscape_.index_to_x(de.destination) << "," << this->landscape_.index_to_y(de.destination) << ")";
-        msg << " with probability " << de.probability << ": ";
-
-        std::vector<const Organism *> organisms;
-        this->landscape_[de.source].sample_organisms(de.species_ptr, organisms, de.num_organisms);
-        this->landscape_.clear_migrants();
-        unsigned long num_males = 0;
-        unsigned long num_females = 0;
-        for (std::vector<const Organism *>::iterator oi = organisms.begin();  oi != organisms.end(); ++oi) {
-            if (this->rng().uniform_01() > de.probability) {
-                Organism* og = const_cast<Organism*>(*oi);
-                if (og->is_male()) {
-                    ++num_males;
-                } else {
-                    ++num_females;
-                }
-                this->landscape_.add_migrant(*og, de.destination);
-                og->set_expired();
-            }
-        }
-        msg << " " << num_females << " females and " << num_males << " males.";
-        this->landscape_[de.source].purge_expired_organisms();
-        this->landscape_.process_migrants();
-        this->log_info(msg.str());
-    }
+    this->log_error("Stochastic dispersal currently disabled");
+    exit(1);
+//    typedef std::multimap<GenerationCountType, DispersalEvent> gen_disp_t;
+//    typedef std::pair<gen_disp_t::iterator, gen_disp_t::iterator> gen_disp_iter_pair_t;
+//    gen_disp_iter_pair_t this_gen_dispersals = this->dispersal_events_.equal_range(this->current_generation_);
+//    for (gen_disp_t::iterator di = this_gen_dispersals.first; di != this_gen_dispersals.second; ++di) {
+//        DispersalEvent& de = di->second;
+//        std::ostringstream msg;
+//        msg << "[Generation " << this->current_generation_ << "] Dispersal";
+//        if (de.species_ptr != NULL) {
+//            msg << " of " << de.species_ptr->get_label();
+//        }
+//        msg << " from (" << this->landscape_.index_to_x(de.source) << "," << this->landscape_.index_to_y(de.source) << ")";
+//        msg << " to (" << this->landscape_.index_to_x(de.destination) << "," << this->landscape_.index_to_y(de.destination) << ")";
+//        msg << " with probability " << de.probability << ": ";
+//
+//        std::vector<const Organism *> organisms;
+//        this->landscape_[de.source].sample_organisms(de.species_ptr, organisms, de.num_organisms);
+//        this->landscape_.clear_migrants();
+//        unsigned long num_males = 0;
+//        unsigned long num_females = 0;
+//        for (std::vector<const Organism *>::iterator oi = organisms.begin();  oi != organisms.end(); ++oi) {
+//            if (this->rng().uniform_01() > de.probability) {
+//                Organism* og = const_cast<Organism*>(*oi);
+//                if (og->is_male()) {
+//                    ++num_males;
+//                } else {
+//                    ++num_females;
+//                }
+//                this->landscape_.add_migrant(*og, de.destination);
+//                og->set_expired();
+//            }
+//        }
+//        msg << " " << num_females << " females and " << num_males << " males.";
+//        this->landscape_[de.source].purge_expired_organisms();
+//        this->landscape_.process_migrants();
+//        this->log_info(msg.str());
+//    }
 }
 
 void World::process_tree_samplings() {
@@ -415,10 +419,10 @@ void World::write_nexus_header(Species * sp_ptr,
             oi != organisms.end();
             ++oi) {
         if (add_diploid_allele_extensions) {
-            out << "        " << sp_ptr->get_organism_label(**oi) << "_a1" << "\n";
-            out << "        " << sp_ptr->get_organism_label(**oi) << "_a2" << "\n";
+            out << "        " << sp_ptr->get_organism_label(*oi) << "_a1" << "\n";
+            out << "        " << sp_ptr->get_organism_label(*oi) << "_a2" << "\n";
         } else {
-            out << "        " << sp_ptr->get_organism_label(**oi) << "\n";
+            out << "        " << sp_ptr->get_organism_label(*oi) << "\n";
         }
     }
     out << "    ;\n";
@@ -445,7 +449,7 @@ void World::write_traits(Species * sp_ptr,
     for (std::vector<const Organism *>::const_iterator oi = organisms.begin();
             oi != organisms.end();
             ++oi) {
-        long sz = sp_ptr->get_organism_label(**oi).size();
+        long sz = sp_ptr->get_organism_label(*oi).size();
         if (sz > max_label_len) {
             max_label_len = sz;
         }
@@ -462,7 +466,7 @@ void World::write_traits(Species * sp_ptr,
     for (std::vector<const Organism *>::const_iterator oi = organisms.begin();
             oi != organisms.end();
             ++oi) {
-        out << "        " << std::left << std::setw(max_label_len) << sp_ptr->get_organism_label(**oi) << "    ";
+        out << "        " << std::left << std::setw(max_label_len) << sp_ptr->get_organism_label(*oi) << "    ";
         for (unsigned int i=0; i < this->num_fitness_traits_; ++i) {
             out << " " << std::right << std::setw(12) << std::setfill(' ') << (**oi).get_fitness_trait_genotype(i);
         }
@@ -482,7 +486,7 @@ void World::write_haploid_tree(Species * sp_ptr,
         for (std::vector<const Organism *>::const_iterator oi = organisms.begin();
                 oi != organisms.end();
                 ++oi) {
-            tree.add_leaf((*oi)->get_haploid_node(), &sp_ptr->get_organism_label(**oi));
+            tree.add_leaf((*oi)->get_haploid_node(), &sp_ptr->get_organism_label(*oi));
         }
 
         // write tree
@@ -511,8 +515,8 @@ void World::write_diploid2_trees(Species * sp_ptr,
             for (std::vector<const Organism *>::const_iterator oi = organisms.begin();
                     oi != organisms.end();
                     ++oi) {
-                allele1 = sp_ptr->get_organism_label(**oi) + "_a1";
-                allele2 = sp_ptr->get_organism_label(**oi) + "_a2";
+                allele1 = sp_ptr->get_organism_label(*oi) + "_a1";
+                allele2 = sp_ptr->get_organism_label(*oi) + "_a2";
                 tree.add_leaf((*oi)->get_diploid_node1(i), &allele1);
                 tree.add_leaf((*oi)->get_diploid_node2(i), &allele2);
             }
@@ -539,7 +543,7 @@ void World::write_diploid1_trees(Species * sp_ptr,
             for (std::vector<const Organism *>::const_iterator oi = organisms.begin();
                     oi != organisms.end();
                     ++oi) {
-                tree.add_leaf((*oi)->get_diploid_random_node(i, this->rng_), &sp_ptr->get_organism_label(**oi));
+                tree.add_leaf((*oi)->get_diploid_random_node(i, this->rng_), &sp_ptr->get_organism_label(*oi));
             }
             out << "    TREE DiploidLocus" << std::setw(2) << std::setfill('0') << i+1 << " = [&R] ";
             tree.write_newick_tree(out);

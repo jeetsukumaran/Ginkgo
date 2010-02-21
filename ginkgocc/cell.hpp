@@ -216,8 +216,8 @@ class Cell {
          * @param organism  the organism to be copied into this cell's
          *                  vector of organisms
          */
-        void add_organism(const Organism& organism) {
-            this->populations_.add(organism);
+        void add_organism(Organism * organism_ptr) {
+            this->populations_.add(organism_ptr);
         }
 
         //** Removes organisms flagged for removal from this cell's organisms. */
@@ -305,12 +305,8 @@ class Cell {
         BreedingPopulations                    populations_;
         /** reference to random number generator of the World of this cell */
         RandomNumberGenerator&                 rng_;
-
-    private:
-        /** scratch space to female offpsring while composing next generation */
-        static OrganismVector                  next_gen_females;
-        /** scratch space to male offpsring while composing next generation */
-        static OrganismVector                  next_gen_males;
+        /** memory pool */
+        OrganismMemoryManager&                 organism_memory_manager_;
 
 };
 // Cell

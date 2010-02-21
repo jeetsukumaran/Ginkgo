@@ -30,11 +30,10 @@
 
 using namespace ginkgo;
 
+OrganismMemoryManager& ORGANISM_MM = OrganismMemoryManager::get_instance();
+
 ///////////////////////////////////////////////////////////////////////////////
 // Cell
-
-OrganismVector Cell::next_gen_females;
-OrganismVector Cell::next_gen_males;
 
 // --- lifecycle and assignment ---
 
@@ -53,7 +52,8 @@ Cell::Cell(CellIndexType index,
           landscape_(landscape),
           species_(species),
           populations_(species, rng),
-          rng_(rng) {
+          rng_(rng),
+          organism_memory_manager_(ORGANISM_MM) {
     memset(this->fitness_trait_optimum_, 0,
     MAX_FITNESS_TRAITS*sizeof(FitnessTraitType));
 }
@@ -94,20 +94,26 @@ void Cell::reproduction(bool evolve_fitness_components) {
 
     for (SpeciesByLabel::const_iterator spi = this->species_.begin(); spi != this->species_.end(); ++spi) {
         Species * sp = spi->second;
-        BreedingPopulation pop = this->populations_[sp];
-        OrganismVector& females = pop.females();
-        OrganismVector& males = pop.males();
-        if ( (females.size() > 0) and (males.size() > 0)) {
+        BreedingPopulation& pop = this->populations_[sp];
+
+        // TODO: instead of handles to the male and female vectors,
+        //       BreedingPopulation should return iterators
+
+        OrganismPointers& female_ptrs = pop.females();
+        OrganismPointers& male_ptrs = pop.males();
+        if ( (female_ptrs.size() > 0) and (male_ptrs.size() > 0)) {
             BreedingPopulation next_gen;
             unsigned num_offspring = sp->get_mean_reproductive_rate();
-            for (OrganismVector::iterator fi = females.begin();
-                    fi != females.end();
+            for (OrganismPointers::iterator fi = female_ptrs.begin();
+                    fi != female_ptrs.end();
                     ++fi) {
+                const Organism* female_ptr = *fi;
                 for (unsigned n = 0; n <= num_offspring; ++n) {
-                    const Organism* male = this->rng_.select_ptr(males);
-                    next_gen.add(sp->new_organism(*fi, *male, this->index_, evolve_fitness_components));
+                    const Organism* male_ptr = *(this->rng_.select_ptr(male_ptrs));
+                    next_gen.add(sp->new_organism(female_ptr, male_ptr, this->index_, evolve_fitness_components));
                 } // for each offspring
             } // for each female
+            this->populations_[sp].clear();
             this->populations_[sp].swap(next_gen);
 
             // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -126,9 +132,10 @@ void Cell::migration() {
             spi != this->species_.end();
             ++spi) {
         Species * sp = spi->second;
-        BreedingPopulation& pop = this->populations_[sp];
-        for (BreedingPopulation::iterator oi = pop.begin(); oi != pop.end(); ++oi) {
-            Organism& og = *oi;
+        BreedingPopulation& current_pop = this->populations_[sp];
+        BreedingPopulation remaining_pop;
+        for (BreedingPopulation::iterator oi = current_pop.begin(); oi != current_pop.end(); ++oi) {
+            Organism * og_ptr = *oi;
             if (this->rng_.uniform_01() <= sp->movement_probability(this->index_)) {
                 MovementCountType movement = sp->get_movement_capacity();
                 CellIndexType curr_idx = this->index_;
@@ -145,13 +152,15 @@ void Cell::migration() {
                     }
                 }
                 if (curr_idx != this->index_) {
-                    this->landscape_.add_migrant(og, curr_idx);
-                    og.set_expired();
+                    this->landscape_.add_migrant(og_ptr, curr_idx);
+                    og_ptr->set_expired();
+                } else {
+                    remaining_pop.add(og_ptr);
                 }
             }
         }
+        this->populations_[sp] = remaining_pop;
     }
-    this->purge_expired_organisms();
 }
 
 PopulationCountType Cell::survival() {
@@ -162,11 +171,11 @@ PopulationCountType Cell::survival() {
         Species * sp = spi->second;
         BreedingPopulation& pop = this->populations_[sp];
         for (BreedingPopulation::iterator oi = pop.begin(); oi != pop.end(); ++oi) {
-            Organism& og = *oi;
-            float fitness = sp->calc_fitness(og, this->fitness_trait_optimum_);
-            og.set_fitness(fitness);
+            Organism * og_ptr = *oi;
+            float fitness = sp->calc_fitness(og_ptr, this->fitness_trait_optimum_);
+            og_ptr->set_fitness(fitness);
             if (this->rng_.uniform_01() > fitness) {
-                og.set_expired();
+                og_ptr->set_expired();
             } else {
                 ++num_survivors;
             }
@@ -184,27 +193,34 @@ void Cell::competition() {
         CompareOrganismFitnessFuncPtrType comp_fitness_fptr = &compare_organism_fitness;
 
         // build set of organisms sorted by fitness
-        std::multiset<Organism *, CompareOrganismFitnessFuncPtrType> optrs(comp_fitness_fptr);
+        std::multiset<Organism *, CompareOrganismFitnessFuncPtrType> organism_fitness_map(comp_fitness_fptr);
         for (SpeciesByLabel::const_iterator spi = this->species_.begin();
                 spi != this->species_.end();
                 ++spi) {
             Species * sp = spi->second;
             BreedingPopulation& pop = this->populations_[sp];
             for (BreedingPopulation::iterator oi = pop.begin(); oi != pop.end(); ++oi) {
-                optrs.insert( &(*oi) );
+                organism_fitness_map.insert(*oi);
             }
         }
-        assert(optrs.size() == this->populations_.size());
+        assert(organism_fitness_map.size() == this->populations_.size());
 
-        // find winners
-        BreedingPopulations winners(this->species_, this->rng_);
+        std::multiset<Organism *, CompareOrganismFitnessFuncPtrType>::iterator opi = organism_fitness_map.begin();
         PopulationCountType count = 0;
-        for (std::multiset<Organism *, CompareOrganismFitnessFuncPtrType>::iterator opi = optrs.begin();
-                count < this->carrying_capacity_;
-                ++opi, ++count) {
-            winners.add(**opi);
+
+        // advance past the top K individuals, where K == carrying capacity
+        while ( (count <= this->carrying_capacity_) && opi != organism_fitness_map.end() ) {
+            ++count;
+            ++opi;
         }
-        this->populations_ = winners;
+
+        // mark remaining individuals for expiration
+        while (opi != organism_fitness_map.end())  {
+            (*opi)->set_expired();
+        }
+
+        // expire
+        this->purge_expired_organisms();
     }
     assert(this->populations_.size() <= this->carrying_capacity_);
 }
@@ -212,15 +228,10 @@ void Cell::competition() {
 // --- for trees etc ---
 
 void Cell::sample_organisms(Species * sp_ptr,
-    std::vector<const Organism *>& samples, PopulationCountType num_organisms) {
-    std::vector<const Organism *> s = this->populations_[sp_ptr].sample_organism_ptrs(num_organisms);
-    if (s.size() > num_organisms) {
-        RandomPointer rp(this->rng_);
-        std::random_shuffle(s.begin(), s.end(), rp);
-        samples.insert(samples.end(), s.begin(), s.begin() + num_organisms);
-    } else {
-        samples.insert(samples.end(), s.begin(), s.end());
-    }
+        std::vector<const Organism *>& samples,
+        PopulationCountType num_organisms) {
+    OrganismPointers s = this->populations_[sp_ptr].sample_organism_ptrs(num_organisms, this->rng_);
+    samples.insert(samples.end(), s.begin(), s.end());
 }
 
 void Cell::num_organisms(Species * species_ptr, PopulationCountType& num_females, PopulationCountType& num_males) const {

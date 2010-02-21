@@ -85,7 +85,7 @@ void Landscape::process_migrants() {
     for (MigrationEvents::iterator m = this->migrants_.begin();
             m != this->migrants_.end();
             ++m) {
-        m->first.set_fitness(-1);   // invalidate cached fitness
+        m->first->set_fitness(-1);   // invalidate cached fitness
         this->cells_.at(m->second)->add_organism(m->first);
     }
     this->migrants_.clear();

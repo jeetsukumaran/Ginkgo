@@ -33,6 +33,10 @@
 
 namespace ginkgo {
 
+// collection of Organism pointers
+typedef std::vector<Organism *>   OrganismPointers;
+
+
 ///////////////////////////////////////////////////////////////////////////////
 // Breeding Population
 
@@ -58,22 +62,22 @@ class BreedingPopulation {
         /**
          * Returns reference to females.
          */
-        OrganismVector& females() {
+        OrganismPointers& females() {
             return this->females_;
         }
 
         /**
          * Returns reference to males.
          */
-        OrganismVector& males() {
+        OrganismPointers& males() {
             return this->males_;
         }
 
         /**
          * Adds a new organism to this breeding population.
          */
-        void add(const Organism& organism) {
-            if (organism.is_male()) {
+        void add(Organism* organism) {
+            if (organism->is_male()) {
                 this->males_.push_back(organism);
             } else {
                 this->females_.push_back(organism);
@@ -83,16 +87,22 @@ class BreedingPopulation {
         /**
          * Returns pointers to all organisms.
          */
-        std::vector<const Organism *> organism_ptrs();
+        OrganismPointers get_organism_ptrs();
+
+        /**
+         * Inserts pointers to all organisms across all species into vector
+         * of pointers passed as argument.
+         */
+        OrganismPointers& get_organism_ptrs(OrganismPointers& optrs);
 
         /**
          * Selects pointers to random organisms across all species.
          * @param   num_organisms   number of organisms
          */
-        std::vector<const Organism *> sample_organism_ptrs(PopulationCountType num_organisms);
+        OrganismPointers sample_organism_ptrs(PopulationCountType num_organisms, RandomNumberGenerator& rng);
 
         /**
-         * Removes all organisms from population.
+         * Removes and deallocates all organisms from population.
          */
         void clear();
 
@@ -107,7 +117,7 @@ class BreedingPopulation {
         void swap(BreedingPopulation& other);
 
         /**
-         * Removes all individuals marked for expiration.
+         * Removes and deallocates all organisms marked for expiration.
          */
         void purge_expired_organisms();
 
@@ -118,15 +128,13 @@ class BreedingPopulation {
         {
             public:
                 typedef iterator self_type;
-                typedef Organism value_type;
-                typedef Organism& reference;
-                typedef Organism* pointer;
+                typedef Organism* value_type;
                 typedef std::forward_iterator_tag iterator_category;
                 typedef int difference_type;
-                iterator(OrganismVector::iterator f_begin,
-                         OrganismVector::iterator f_end,
-                         OrganismVector::iterator m_begin,
-                         OrganismVector::iterator m_end)
+                iterator(OrganismPointers::iterator f_begin,
+                         OrganismPointers::iterator f_end,
+                         OrganismPointers::iterator m_begin,
+                         OrganismPointers::iterator m_end)
                         : f_current_(f_begin),
                           f_end_(f_end),
                           m_current_(m_begin),
@@ -144,18 +152,18 @@ class BreedingPopulation {
                     ++(*this);
                     return *this;
                 }
-                reference operator*() {
+                value_type operator*() {
                     if (f_current_ != f_end_) {
                        return *(this->f_current_);
                     } else {
                        return *(this->m_current_);
                     }
                 }
-                pointer operator->() {
+                value_type operator->() {
                     if (f_current_ != f_end_) {
-                        return &(*(this->f_current_));
+                       return *(this->f_current_);
                     } else {
-                        return &(*(this->m_current_));
+                       return *(this->m_current_);
                     }
                 }
                 bool operator==(const self_type& rhs) {
@@ -168,10 +176,10 @@ class BreedingPopulation {
                     return !(*this == rhs);
                 }
             private:
-                OrganismVector::iterator       f_current_;
-                OrganismVector::iterator       f_end_;
-                OrganismVector::iterator       m_current_;
-                OrganismVector::iterator       m_end_;
+                OrganismPointers::iterator       f_current_;
+                OrganismPointers::iterator       f_end_;
+                OrganismPointers::iterator       m_current_;
+                OrganismPointers::iterator       m_end_;
         };
 
         iterator begin()
@@ -189,9 +197,9 @@ class BreedingPopulation {
 
     private:
         /** all females in the population */
-        OrganismVector      females_;
+        OrganismPointers      females_;
         /** all males in the population */
-        OrganismVector      males_;
+        OrganismPointers      males_;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -228,8 +236,8 @@ class BreedingPopulations {
         /**
          * Adds an organism to the mix.
          */
-        void add(const Organism& organism) {
-            this->species_populations_[organism.species_ptr()].add(organism);
+        void add(Organism * organism_ptr) {
+            this->species_populations_[organism_ptr->species_ptr()].add(organism_ptr);
         }
 
         /**
@@ -253,13 +261,19 @@ class BreedingPopulations {
         /**
          * Returns pointers to all organisms across all species.
          */
-        std::vector<const Organism *> organism_ptrs();
+        OrganismPointers get_organism_ptrs();
+
+        /**
+         * Inserts pointers to all organisms across all species into vector
+         * of pointers passed as argument.
+         */
+        OrganismPointers& get_organism_ptrs(OrganismPointers& optrs);
 
         /**
          * Selects pointers to random organisms across all species.
          * @param   num_organisms   number of organisms
          */
-        std::vector<const Organism *> sample_organism_ptrs(PopulationCountType num_organisms);
+        OrganismPointers sample_organism_ptrs(PopulationCountType num_organisms);
 
         /**
          * Removes random organisms such that the total number of organisms is equal to num_organisms.

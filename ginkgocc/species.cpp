@@ -40,7 +40,8 @@ Species::Species(const std::string& label,
       movement_capacity_(1),
       global_selection_strength_(global_selection_strength),
       rng_(rng),
-      organism_label_index_(0) {
+      organism_label_index_(0),
+      organism_memory_manager_(OrganismMemoryManager::get_instance()) {
     this->mean_reproductive_rate_ = 6;
     this->selection_weights_.assign(this->num_fitness_traits_, 1);
     this->fitness_trait_inheritance_sd_.assign(this->num_fitness_traits_, 0.7071068);

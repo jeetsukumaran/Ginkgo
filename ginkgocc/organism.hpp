@@ -50,7 +50,7 @@ namespace ginkgo {
 
 class Organism;
 class Species;
-
+class OrganismMemoryManager;
 
 ///////////////////////////////////////////////////////////////////////////////
 // GenealogyNode
@@ -77,6 +77,10 @@ class GenealogyNode {
          * winking out of existence.
          */
         ~GenealogyNode() {
+            this->clear();
+        }
+
+        void clear() {
             assert(this->parent_ != this);
             if (this->parent_) {
                 this->parent_->decrement_count();
@@ -221,6 +225,10 @@ class HaploidMarker {
          * GenealogyNode object) is registered.
          */
         ~HaploidMarker() {
+            this->clear();
+        }
+
+        void clear() {
             if (this->allele_) {
                 this->allele_->decrement_count();
             }
@@ -324,6 +332,10 @@ class DiploidMarker {
          * (GenealogyNode objects) are registered.
          */
         ~DiploidMarker() {
+            this->clear();
+        }
+
+        void clear() {
 			if (this->allele1_ != NULL) {
                 this->allele1_->decrement_count();
             }
@@ -472,43 +484,12 @@ class Organism {
             ExpiredMale = 3 // 11 = expired, male
         };
 
+        /**
+         * Blank constructor.
+         */
         Organism()
             : fitness_(-1),
               state_flags_(0) {  }
-
-        /**
-         * Constructor instantiates a new organism with species, identity,
-         * (fitness) genotype, and sex.
-         *
-         * @param species           pointer to Species of this Organism
-         * @param fitness_traits    array of fitness factor values representing
-         *                          the inheritable portion of fitness of this
-         *                          individual organism
-         * @param sex               gender of this organism
-         */
-        Organism(Species * species,
-                 const FitnessTraits& fitness_traits,
-                 Organism::Status status)
-                : species_(species),
-                  fitness_(-1),
-                  state_flags_(status) {
-            memcpy(this->fitness_trait_genotypes_, fitness_traits, MAX_FITNESS_TRAITS*sizeof(FitnessTraitType));
-        }
-
-        /**
-         * Constructor instantiates a new organism with species, identity,
-         * and sex.
-         * @param species_index     index of Species object in species pool
-         *                          of the World object to which this organism
-         *                          belongs
-         * @param sex               gender of this organism
-         */
-        Organism(Species * species,
-                 Organism::Status status)
-                : species_(species),
-                  fitness_(-1),
-                  state_flags_(status) {
-        }
 
         /**
          * Copy constructor, delegate work to assignment operator.
@@ -516,12 +497,6 @@ class Organism {
         Organism(const Organism& ind) {
             *this = ind;
         }
-
-        /** Destructor. */
-        ~Organism() { }
-
-        /** For memory management */
-        void clear() { }
 
         /**
          * Assignment.
@@ -541,6 +516,34 @@ class Organism {
                 this->neutral_diploid_markers_[i] = ind.neutral_diploid_markers_[i];
             }
             return *this;
+        }
+
+        void init(Species * species,
+                 const FitnessTraits& fitness_traits,
+                 Organism::Status status) {
+            this->species_ = species;
+            this->fitness_ = -1;
+            this->state_flags_ = status;
+            memcpy(this->fitness_trait_genotypes_, fitness_traits, MAX_FITNESS_TRAITS*sizeof(FitnessTraitType));
+        }
+
+        void init(Species * species, Organism::Status status) {
+            this->species_ = species;
+            this->fitness_ = -1;
+            this->state_flags_ = status;
+        }
+
+        /** Destructor. */
+        ~Organism() {
+            this->clear();
+        }
+
+        /** For memory management */
+        void clear() {
+            this->neutral_haploid_marker_.clear();
+            for (unsigned i = 0; i < NUM_NEUTRAL_DIPLOID_loci; ++i) {
+                this->neutral_diploid_markers_[i].clear();
+            }
         }
 
         /**
@@ -816,7 +819,7 @@ class OrganismMemoryManager  {
             return OrganismMemoryManager::instance_;
         }
         Organism* allocate();
-        void free(Organism* org);
+        void deallocate(Organism* org);
         void set_block_size(unsigned long block_size) {
             assert(block_size >= 1);
             this->block_size_ = block_size;
@@ -850,12 +853,6 @@ bool compare_organism_fitness(const Organism * o1, const Organism * o2);
 typedef bool(*CompareOrganismFitnessFuncPtrType)(const Organism *, const Organism *);
 
 // compare_organism_fitness
-///////////////////////////////////////////////////////////////////////////////
-
-///////////////////////////////////////////////////////////////////////////////
-// collection of Organism objects
-typedef std::vector<Organism>   OrganismVector;
-//
 ///////////////////////////////////////////////////////////////////////////////
 
 } // ginkgo namespace
