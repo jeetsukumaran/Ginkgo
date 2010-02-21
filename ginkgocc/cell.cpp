@@ -213,7 +213,7 @@ void Cell::competition() {
         // alternate approach: "rescue" the top K individuals from expiration
         unsigned long count = 0;
         for (std::multiset<Organism *, CompareOrganismFitnessFuncPtrType>::iterator opi = organism_fitness_map.begin();
-                count < this->carrying_capacity_;
+                count < this->carrying_capacity_ && opi != organism_fitness_map.end();
                 ++opi, ++count) {
             (*opi)->set_unexpired();
         }
