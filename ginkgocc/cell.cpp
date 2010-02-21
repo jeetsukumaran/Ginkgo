@@ -205,11 +205,16 @@ void Cell::competition() {
         assert(organism_fitness_map.size() == this->populations_.size());
 
         std::multiset<Organism *, CompareOrganismFitnessFuncPtrType>::iterator opi = organism_fitness_map.begin();
-        PopulationCountType count = 0;
+        PopulationCountType retained = 0;
+
+        // --FOR DEBUGGING-- //
+        PopulationCountType original_size = this->populations_.size();
+        PopulationCountType removed = 0;
+        // --FOR DEBUGGING-- //
 
         // advance past the top K individuals, where K == carrying capacity
-        while ( (count < (this->carrying_capacity_-1) ) && opi != organism_fitness_map.end() ) {
-            ++count;
+        while ( (retained < (this->carrying_capacity_-1) ) && opi != organism_fitness_map.end() ) {
+            ++retained;
             ++opi;
         }
 
@@ -217,11 +222,34 @@ void Cell::competition() {
         while (opi != organism_fitness_map.end())  {
             (*opi)->set_expired();
             ++opi;
+
+            // --FOR DEBUGGING-- //
+            ++removed;
+            // --FOR DEBUGGING-- //
+
         }
+        assert(retained+removed == original_size);
 
         // expire
         this->purge_expired_organisms();
 
+        // --FOR DEBUGGING-- //
+        if (!(this->populations_.size() <= this->carrying_capacity_)) {
+            std::cout << " Original: " << original_size << std::endl;
+            std::cout << " Capacity: " << this->carrying_capacity_ << std::endl;
+            std::cout << " Retained: " << retained << std::endl;
+            std::cout << "  Removed: " << removed << std::endl;
+            std::cout << "Remaining: " << this->populations_.size() << std::endl;
+            OrganismPointers orgs = this->populations_.get_organism_ptrs();
+            unsigned long expired = 0;
+            for (OrganismPointers::iterator oi = orgs.begin(); oi != orgs.end(); ++oi) {
+                if ((*oi)->is_expired()) {
+                    ++expired;
+                }
+            }
+            std::cout << expired << " expired organisms still in population" << std::endl;
+        }
+        // --FOR DEBUGGING-- //
     }
     assert(this->populations_.size() <= this->carrying_capacity_);
 }
