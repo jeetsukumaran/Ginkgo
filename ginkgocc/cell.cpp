@@ -208,7 +208,7 @@ void Cell::competition() {
         PopulationCountType count = 0;
 
         // advance past the top K individuals, where K == carrying capacity
-        while ( (count < this->carrying_capacity_) && opi != organism_fitness_map.end() ) {
+        while ( (count < (this->carrying_capacity_-1) ) && opi != organism_fitness_map.end() ) {
             ++count;
             ++opi;
         }
@@ -221,6 +221,7 @@ void Cell::competition() {
 
         // expire
         this->purge_expired_organisms();
+
     }
     assert(this->populations_.size() <= this->carrying_capacity_);
 }
