@@ -115,7 +115,6 @@ void Cell::reproduction(bool evolve_fitness_components) {
             } // for each female
             this->populations_[sp].clear();
             this->populations_[sp].swap(next_gen);
-
             // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
             // TODO: check if this is neccessary
             //this->populations_[sp].shuffle(this->rng_);
@@ -125,6 +124,7 @@ void Cell::reproduction(bool evolve_fitness_components) {
             this->populations_[sp].clear();
         } // if females == 0 or males == 0
     }  // for each species
+
 }
 
 void Cell::migration() {
@@ -153,7 +153,6 @@ void Cell::migration() {
                 }
                 if (curr_idx != this->index_) {
                     this->landscape_.add_migrant(og_ptr, curr_idx);
-                    og_ptr->set_expired();
                 } else {
                     remaining_pop.add(og_ptr);
                 }
