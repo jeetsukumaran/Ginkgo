@@ -237,7 +237,9 @@ void Cell::competition() {
         }
     }
 
+    unsigned trace_flag = 0;
     if (num_in_map > this->carrying_capacity_) {
+        trace_flag = 1;
         PopulationCountType total_unexpired = 0;
         std::map<double, std::list<Organism *> >::iterator mi = fitness_organisms_map.begin();
         ++mi;
@@ -260,6 +262,7 @@ void Cell::competition() {
             ++i;
         }
     } else {
+        trace_flag = 2;
         for (std::map<double, std::list<Organism *> >::iterator mi = fitness_organisms_map.begin();
                 mi != fitness_organisms_map.end();
                 ++mi) {
@@ -272,6 +275,7 @@ void Cell::competition() {
         std::cerr << "*** Carrying Capacity Enforcement Failure ***" << std::endl;
         std::cerr << "Expected Population Size: " << this->carrying_capacity_ << std::endl;
         std::cerr << "Actual Population Size: " << this->populations_.size() << std::endl;
+        std::cerr << "Trace Flag Value: " << trace_flag << std::endl;
     }
     assert(this->populations_.size() <= this->carrying_capacity_);
 
