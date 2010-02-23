@@ -26,11 +26,10 @@
 #include <iostream>
 #include <iomanip>
 #include <algorithm>
-#include <set>
+#include <map>
+#include <list>
 
 using namespace ginkgo;
-
-OrganismMemoryManager& ORGANISM_MM = OrganismMemoryManager::get_instance();
 
 ///////////////////////////////////////////////////////////////////////////////
 // Cell
@@ -53,7 +52,7 @@ Cell::Cell(CellIndexType index,
           species_(species),
           populations_(species, rng),
           rng_(rng),
-          organism_memory_manager_(ORGANISM_MM) {
+          organism_memory_manager_(OrganismMemoryManager::get_instance()) {
     memset(this->fitness_trait_optimum_, 0,
     MAX_FITNESS_TRAITS*sizeof(FitnessTraitType));
 }
@@ -184,97 +183,91 @@ PopulationCountType Cell::survival() {
     return num_survivors;
 }
 
-void Cell::competition() {
-    // NOTE: ASSUMES THAT FITNESS HAS BEEN CALCULATED FOR THE ORGANISM IN THIS CELL!
-    // This would have been done during the survival phase.
-    if (this->populations_.size() > this->carrying_capacity_) {
-
-        CompareOrganismFitnessFuncPtrType comp_fitness_fptr = &compare_organism_fitness;
-
-        // build set of organisms sorted by fitness
-        std::multiset<Organism *, CompareOrganismFitnessFuncPtrType> organism_fitness_map(comp_fitness_fptr);
-        for (SpeciesByLabel::const_iterator spi = this->species_.begin();
-                spi != this->species_.end();
-                ++spi) {
-            Species * sp = spi->second;
-            BreedingPopulation& pop = this->populations_[sp];
-            for (BreedingPopulation::iterator oi = pop.begin(); oi != pop.end(); ++oi) {
-                organism_fitness_map.insert(*oi);
-
-                // we set the organism's expired flag here, and unset it if
-                // it is in the top K organisms later; we do it this way
-                // b/c of the failure in the original approach noted below
-                (*oi)->set_expired();
-
-            }
-        }
-        assert(organism_fitness_map.size() == this->populations_.size());
-
-        // alternate approach: "rescue" the top K individuals from expiration
-        unsigned long count = 0;
-        for (std::multiset<Organism *, CompareOrganismFitnessFuncPtrType>::iterator opi = organism_fitness_map.begin();
-                count < this->carrying_capacity_ && opi != organism_fitness_map.end();
-                ++opi, ++count) {
-            (*opi)->set_unexpired();
-        }
-        this->purge_expired_organisms();
-
-/******************************************************************************
-Original Approach
-------------------
-Following does not work if many organisms have the same fitness. Specifically,
-the "opi != organism_fitness_map.end()" seems to evaluate to True even if it
-has not actually reached the end.
-******************************************************************************/
-
-//        std::multiset<Organism *, CompareOrganismFitnessFuncPtrType>::iterator opi = organism_fitness_map.begin();
-//        PopulationCountType retained = 0;
-//
-//        // --FOR DEBUGGING-- //
-//        PopulationCountType original_size = this->populations_.size();
-//        PopulationCountType removed = 0;
-//        // --FOR DEBUGGING-- //
-//
-//        // advance past the top K individuals, where K == carrying capacity
-//        while ( (retained < (this->carrying_capacity_-1) ) && opi != organism_fitness_map.end() ) {
-//            ++retained;
-//            ++opi;
-//        }
-//
-//        // mark remaining individuals for expiration
-//        while (opi != organism_fitness_map.end())  {
-//            (*opi)->set_expired();
-//            ++opi;
-//
-//            // --FOR DEBUGGING-- //
-//            ++removed;
-//            // --FOR DEBUGGING-- //
-//
-//        }
-//        assert(retained+removed == original_size);
-//
-//        // expire
-//        this->purge_expired_organisms();
-//
-//        // --FOR DEBUGGING-- //
-//        if (!(this->populations_.size() <= this->carrying_capacity_)) {
-//            std::cout << " Original: " << original_size << std::endl;
-//            std::cout << " Capacity: " << this->carrying_capacity_ << std::endl;
-//            std::cout << " Retained: " << retained << std::endl;
-//            std::cout << "  Removed: " << removed << std::endl;
-//            std::cout << "Remaining: " << this->populations_.size() << std::endl;
-//            OrganismPointers orgs = this->populations_.get_organism_ptrs();
-//            unsigned long expired = 0;
-//            for (OrganismPointers::iterator oi = orgs.begin(); oi != orgs.end(); ++oi) {
-//                if ((*oi)->is_expired()) {
-//                    ++expired;
-//                }
-//            }
-//            std::cout << expired << " expired organisms still in population" << std::endl;
-//        }
-//        // --FOR DEBUGGING-- //
+template <class T>
+void set_unexpired_(T& organism_ptrs) {
+    for (typename T::iterator i = organism_ptrs.begin();
+            i != organism_ptrs.end();
+            ++i) {
+        (*i)->set_unexpired();
     }
-    assert(this->populations_.size() <= this->carrying_capacity_);
+}
+
+void Cell::competition() {
+
+    if (this->populations_.size() <=  this->carrying_capacity_) {
+        return;
+    }
+    OrganismPointers original_pop;
+    this->populations_.get_organism_ptrs(original_pop);
+
+    std::map<double, std::list<Organism *> > fitness_organisms_map;
+    OrganismPointers::const_iterator pop_iter = original_pop.begin();
+
+    // add initial batch
+    for (PopulationCountType num_added;
+            num_added < this->carrying_capacity_;
+            ++pop_iter, ++num_added) {
+        (*pop_iter)->set_expired();
+        fitness_organisms_map[(*pop_iter)->get_fitness()].push_back(*pop_iter);
+    }
+
+    PopulationCountType num_in_map = this->carrying_capacity_;
+    std::map<double, std::list<Organism *> >::iterator lowest_fitness_iter = fitness_organisms_map.begin();
+    double lowest_stored_fitness_score = lowest_fitness_iter->first;
+    PopulationCountType num_in_lowest_fitness = lowest_fitness_iter->second.size();
+
+    for (; pop_iter != original_pop.end(); ++pop_iter) {
+        (*pop_iter)->set_expired();
+        const double curr_fitness = (*pop_iter)->get_fitness();
+        if (curr_fitness > lowest_stored_fitness_score) {
+            fitness_organisms_map[curr_fitness].push_back(*pop_iter);
+            if (num_in_map - num_in_lowest_fitness == this->carrying_capacity_ - 1) {
+                num_in_map = this->carrying_capacity_;
+                fitness_organisms_map.erase(lowest_fitness_iter);
+                lowest_fitness_iter = fitness_organisms_map.begin();
+                lowest_stored_fitness_score = lowest_fitness_iter->first;
+                num_in_lowest_fitness = lowest_fitness_iter->second.size();
+            } else {
+                ++num_in_map;
+            }
+        } else if (curr_fitness == lowest_stored_fitness_score) {
+            ++num_in_lowest_fitness;
+            lowest_fitness_iter->second.push_back(*pop_iter);
+        }
+    }
+
+    if (num_in_map > this->carrying_capacity_) {
+        PopulationCountType total_unexpired = 0;
+        std::map<double, std::list<Organism *> >::iterator mi = fitness_organisms_map.begin();
+        ++mi;
+        for (; mi != fitness_organisms_map.end();
+                ++mi) {
+            set_unexpired_(mi->second);
+            ++total_unexpired;
+        }
+
+        // TODO: !!!REFACTOR FOR EFFICIENCY!!!
+        // randomly sample list
+        // not crazy about current approach ...
+        std::vector<Organism *> final(lowest_fitness_iter->second.begin(), lowest_fitness_iter->second.end());
+        RandomPointer rp(this->rng_);
+        std::random_shuffle(final.begin(), final.end(), rp);
+        std::vector<Organism *>::iterator i = final.begin();
+        while (total_unexpired < this->carrying_capacity_ && i != final.end()) {
+            (*i)->set_unexpired();
+            ++total_unexpired;
+        }
+
+    } else {
+        for (std::map<double, std::list<Organism *> >::iterator mi = fitness_organisms_map.begin();
+                mi != fitness_organisms_map.end();
+                ++mi) {
+            set_unexpired_(mi->second);
+        }
+    }
+
+    this->purge_expired_organisms();
+    assert(original_pop.size() <= this->carrying_capacity_);
 }
 
 // --- for trees etc ---
