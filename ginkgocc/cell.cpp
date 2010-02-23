@@ -257,8 +257,8 @@ void Cell::competition() {
         while (total_unexpired < this->carrying_capacity_ && i != final.end()) {
             (*i)->set_unexpired();
             ++total_unexpired;
+            ++i;
         }
-
     } else {
         for (std::map<double, std::list<Organism *> >::iterator mi = fitness_organisms_map.begin();
                 mi != fitness_organisms_map.end();
@@ -266,7 +266,6 @@ void Cell::competition() {
             set_unexpired_(mi->second);
         }
     }
-
     this->purge_expired_organisms();
     assert(this->populations_.size() <= this->carrying_capacity_);
 }
