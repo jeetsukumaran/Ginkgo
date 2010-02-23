@@ -267,7 +267,14 @@ void Cell::competition() {
         }
     }
     this->purge_expired_organisms();
+
+    if (this->populations_.size() > this->carrying_capacity_) {
+        std::cerr << "*** Carrying Capacity Enforcement Failure ***" << std::endl;
+        std::cerr << "Expected Population Size: " << this->carrying_capacity_ << std::endl;
+        std::cerr << "Actual Population Size: " << this->populations_.size() << std::endl;
+    }
     assert(this->populations_.size() <= this->carrying_capacity_);
+
 }
 
 // --- for trees etc ---
