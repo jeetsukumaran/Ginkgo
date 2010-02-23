@@ -267,7 +267,7 @@ void Cell::competition() {
     }
 
     this->purge_expired_organisms();
-    assert(original_pop.size() <= this->carrying_capacity_);
+    assert(this->populations_.size() <= this->carrying_capacity_);
 }
 
 // --- for trees etc ---
