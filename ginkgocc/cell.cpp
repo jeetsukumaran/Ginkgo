@@ -237,9 +237,7 @@ void Cell::competition() {
         }
     }
 
-    unsigned trace_flag = 0;
     if (num_in_map > this->carrying_capacity_) {
-        trace_flag = 1;
         PopulationCountType total_unexpired = 0;
         std::map<double, std::list<Organism *> >::iterator mi = fitness_organisms_map.begin();
         ++mi;
@@ -252,17 +250,17 @@ void Cell::competition() {
         // TODO: !!!REFACTOR FOR EFFICIENCY!!!
         // randomly sample list
         // not crazy about current approach ...
+        lowest_fitness_iter = fitness_organisms_map.begin();
         std::vector<Organism *> final(lowest_fitness_iter->second.begin(), lowest_fitness_iter->second.end());
         RandomPointer rp(this->rng_);
         std::random_shuffle(final.begin(), final.end(), rp);
         std::vector<Organism *>::iterator i = final.begin();
-        while (total_unexpired < this->carrying_capacity_ && i != final.end()) {
+        while ( (total_unexpired < this->carrying_capacity_-1) && i != final.end()) {
             (*i)->set_unexpired();
             ++total_unexpired;
             ++i;
         }
     } else {
-        trace_flag = 2;
         for (std::map<double, std::list<Organism *> >::iterator mi = fitness_organisms_map.begin();
                 mi != fitness_organisms_map.end();
                 ++mi) {
@@ -275,7 +273,6 @@ void Cell::competition() {
         std::cerr << "*** Carrying Capacity Enforcement Failure ***" << std::endl;
         std::cerr << "Expected Population Size: " << this->carrying_capacity_ << std::endl;
         std::cerr << "Actual Population Size: " << this->populations_.size() << std::endl;
-        std::cerr << "Trace Flag Value: " << trace_flag << std::endl;
     }
     assert(this->populations_.size() <= this->carrying_capacity_);
 
