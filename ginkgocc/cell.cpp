@@ -232,6 +232,7 @@ void Cell::competition() {
             }
         } else if (curr_fitness == lowest_stored_fitness_score) {
             ++num_in_lowest_fitness;
+            ++num_in_map;
             lowest_fitness_iter->second.push_back(*pop_iter);
         }
     }
