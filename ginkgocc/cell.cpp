@@ -204,7 +204,7 @@ void Cell::competition() {
     OrganismPointers::const_iterator pop_iter = original_pop.begin();
 
     // add initial batch
-    for (PopulationCountType num_added;
+    for (PopulationCountType num_added=0;
             num_added < this->carrying_capacity_;
             ++pop_iter, ++num_added) {
         (*pop_iter)->set_expired();
