@@ -39,11 +39,14 @@
 
 using namespace ginkgo;
 
+// singleton instance
+World World::instance_;
+
 // constructor
-World::World(RandomNumberGenerator& rng)
+World::World()
     : species_(),
-      rng_(rng),
-      landscape_(species_, rng),
+      rng_(RandomNumberGenerator::get_instance()),
+      landscape_(species_, rng_),
       num_fitness_traits_(1),
       global_selection_strength_(DEFAULT_GLOBAL_SELECTION_STRENGTH),
       generations_to_run_(0),

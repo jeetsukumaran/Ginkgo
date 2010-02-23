@@ -79,7 +79,7 @@ int main(int argc, char* argv[]) {
         exit(1);
     }
 
-    ginkgo::World world(ginkgo::RandomNumberGenerator::get_instance());
+    ginkgo::World& world = ginkgo::World::get_instance();
     world.set_replicate_id(replicate_id);
     world.set_output_dir(output_dir);
 

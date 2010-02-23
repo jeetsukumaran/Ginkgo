@@ -164,12 +164,6 @@ class World {
         // --- lifecycle --
 
         /**
-         * Constructs a World with a given RNG seed.
-         * @param rng  global random number generator
-         */
-        World(RandomNumberGenerator& rng);
-
-        /**
          * Destructor, destroys Species and frees memory allocated to Species
          * objects.
          */
@@ -751,6 +745,20 @@ class World {
          */
         void log_error(const std::string& message);
 
+    ///////////////////////////////////////////////////////////////////////////
+    // Singleton infrastructure
+
+    public:
+        static World& get_instance() {
+            return World::instance_;
+        }
+
+    private:
+        static World instance_;
+        World();
+        World(const World &);
+        World & operator=(const World &);
+
     private:
         /** Name of this World (used for output files/reports). */
         std::string                             label_;
@@ -801,33 +809,7 @@ class World {
         /** Track output filenames, so as to prevent clashes. */
         std::set<std::string>                   output_filenames_;
 
-    private:
-        /** Disabled copy constructor. */
-		World(const World &);
-		/** Disabled assignment operator. */
-		World & operator=(const World &);
-
 }; // World
-
-
-/**
- * Parses a configuration file, creating and returning a correspondingly
- * configured and populated World object.
- */
-class WorldFactory {
-
-    public:
-
-        /**
-         * Parses the given input stream and returns a World object based on
-         * this.
-         *
-         * @param   src     reference to input stream describing the World
-         * @return          a new World object
-         */
-        World build(std::istream& src);
-
-}; // ConfigurationFileTokenizer
 
 
 } // ginkgo namespace

@@ -37,6 +37,9 @@ class RandomNumberGenerator {
 
     public:
 
+        // default destructor
+        ~RandomNumberGenerator() {}
+
         /** Returns current seed. */
         unsigned long get_seed() const;
 
@@ -145,7 +148,6 @@ class RandomNumberGenerator {
     private:
         static RandomNumberGenerator instance_;
         RandomNumberGenerator() {}
-        ~RandomNumberGenerator() {}
         RandomNumberGenerator(const RandomNumberGenerator &);
         RandomNumberGenerator & operator=(const RandomNumberGenerator &);
 

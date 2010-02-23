@@ -25,7 +25,7 @@
 using namespace ginkgo;
 
 int main(int, char * []) {
-    World world(RandomNumberGenerator::get_instance());
+    World& world = World::get_instance();
     world.set_output_dir("/tmp");
     world.open_logs();
     world.log_info("World object created");
