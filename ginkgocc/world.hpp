@@ -334,25 +334,6 @@ class World {
         }
 
         /**
-         * Returns pointer to species if it exists.
-         */
-        Species * get_species_ptr(const std::string& label) {
-            SpeciesByLabel::iterator sp = this->species_.find(label);
-            assert(sp != this->species_.end());
-            return (*sp).second;
-        }
-
-        /**
-         * Returns <code>true</code> if a species of the specified name/label
-         * has been defined.
-         * @return <code>true</code> if a species of the specified name/label
-         * has been defined
-         */
-        bool has_species(const std::string& label) {
-            return (this->species_.find(label) != this->species_.end());
-        }
-
-        /**
          * Globally set individual cell carrying capacity.
          *
          * @param carrying_capacity the maximum number of organisms that can
@@ -366,108 +347,24 @@ class World {
         }
 
         /**
-         * Set the costs for entering particular cells on the landscape for
-         * a particular species.
-         *
-         * @param species_label  label of the Species object
-         * @param costs         vector of costs for entering a cell, with
-         *                      cost for cell \f$i\f$ in the landscape given
-         *                      by element \f$i\f$ in the costs vector
+         * Returns pointer to species if it exists.
          */
-        void set_species_movement_costs(const std::string& species_label, const std::vector<MovementCountType>& costs) {
-            assert(this->species_.find(species_label) != this->species_.end());
-            assert(costs.size() == static_cast<CellIndexType>(this->landscape_.size()));
-            this->species_[species_label]->set_movement_costs(costs);
+        SpeciesRegistry& species_registry() {
+            return this->species_registry_;
         }
 
-        /**
-         * Set the costs for entering particular cells on the landscape for
-         * a particular species.
-         *
-         * @param species_ptr   pointer to species object
-         * @param costs         vector of costs for entering a cell, with
-         *                      cost for cell \f$i\f$ in the landscape given
-         *                      by element \f$i\f$ in the costs vector
-         */
-        void set_species_movement_costs(Species * species_ptr, const std::vector<MovementCountType>& costs) {
-            assert(costs.size() == static_cast<CellIndexType>(this->landscape_.size()));
-            species_ptr->set_movement_costs(costs);
-        }
+        ///////////////////////////////////////////////////////////////////////
+        //// TO BE REFACTORED OUT
+        ///////////////////////////////////////////////////////////////////////
 
         /**
-         * Set the probs for moving out of cells on the landscape for
-         * a particular species.
-         *
-         * @param species_label  label of the Species object
-         * @param probs         vector of probs for moving out of a cell
+         * Returns <code>true</code> if a species of the specified name/label
+         * has been defined.
+         * @return <code>true</code> if a species of the specified name/label
+         * has been defined
          */
-        void set_species_movement_probabilities(const std::string& species_label, const std::vector<float>& probs) {
-            assert(this->species_.find(species_label) != this->species_.end());
-            assert(probs.size() == static_cast<CellIndexType>(this->landscape_.size()));
-            this->species_[species_label]->set_movement_probabilities(probs);
-        }
-
-        /**
-         * Set the probs for moving out of cells on the landscape for
-         * a particular species.
-         *
-         * @param species_ptr   pointer to species object
-         * @param probs         vector of probs for moving out of a cell
-         */
-        void set_species_movement_probabilities(Species * species_ptr, const std::vector<float>& probs) {
-            assert(probs.size() == static_cast<CellIndexType>(this->landscape_.size()));
-            species_ptr->set_movement_probabilities(probs);
-        }
-
-        /**
-         * Sets the weight for each fitness factor for a particular species.
-         *
-         * @param species_label  label of the Species object
-         * @param strengths     vector coeffecients to the Gaussian distance
-         *                      equation used to evaluate fitness
-         */
-        void set_species_selection_weights(const std::string& species_label, const std::vector<float>& strengths) {
-            assert(this->species_.find(species_label) != this->species_.end());
-            assert(strengths.size() == this->num_fitness_traits_);
-            this->species_[species_label]->set_selection_weights(strengths);
-        }
-
-        /**
-         * Sets the weight for each fitness factor for a particular species.
-         *
-         * @param species_ptr   pointer to species object
-         * @param strengths     vector coeffecients to the Gaussian distance
-         *                      equation used to evaluate fitness
-         */
-        void set_species_selection_weights(Species * species_ptr, const std::vector<float>& strengths) {
-            assert(strengths.size() == this->num_fitness_traits_);
-            species_ptr->set_selection_weights(strengths);
-        }
-
-
-        /**
-         * Sets the default genotypic (inheritable) component of fitness for a
-         * organisms of the given species when generated de novo.
-         *
-         * @param species_label  label of the Species object
-         * @param genotype      vector genotypic fitness values for a new
-         *                      organism of the given species
-         */
-        void set_species_default_genotype(const std::string& species_label, const FitnessTraits& genotype) {
-            assert(this->species_.find(species_label) != this->species_.end());
-            this->species_[species_label]->set_default_fitness_trait_genotypes(genotype);
-        }
-
-        /**
-         * Sets the default genotypic (inheritable) component of fitness for a
-         * organisms of the given species when generated de novo.
-         *
-         * @param species_ptr   pointer to species object
-         * @param genotype      vector genotypic fitness values for a new
-         *                      organism of the given species
-         */
-        void set_species_default_genotype(Species * species_ptr, const FitnessTraits& genotype) {
-            species_ptr->set_default_fitness_trait_genotypes(genotype);
+        bool has_species(const std::string& label) {
+            return this->species_registry_.has_species(label);
         }
 
         // --- setup, initialization and seeding ---
@@ -479,20 +376,6 @@ class World {
          * @param label     unique label identifying species
          */
         Species& new_species(const std::string& label);
-
-        /**
-         * Generates specified number of new Organism objects of the specified
-         * Species, and inserts them into a Cell specified by its geospatial
-         * coordinates.
-         *
-         * @param x              the geospatial x-coordinate of the Cell into
-         *                       which the new Organism objects will added
-         * @param y              the geospatial y-coordinate of the Cell into
-         *                       which the new Organism objects will added
-         * @param species_label  label of the Species object
-         * @param size           number of new Organism objects to generate
-         */
-//         void seed_population(CellIndexType x, CellIndexType y, const std::string& species_label, unsigned long size);
 
         /**
          * Generates specified number of new Organism objects of the specified
@@ -763,7 +646,7 @@ class World {
         /** Name of this World (used for output files/reports). */
         std::string                             label_;
         /** Collection of pointers to the Species objects of this World. */
-        SpeciesByLabel                          species_;
+        SpeciesRegistry                         species_registry_;
         /** The RandomNumberGenerator that is used by all objects of this World. */
         RandomNumberGenerator&                  rng_;
         /** The geospatial framework of this World. */

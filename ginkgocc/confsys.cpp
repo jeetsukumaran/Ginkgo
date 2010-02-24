@@ -292,7 +292,7 @@ void ConfigurationFile::process_environments(World& world) {
                     if (not world.has_species(lineage_id)) {
                         throw ConfigurationError("movement costs: lineage \"" + lineage_id + "\" not defined");
                     }
-                    Species * lineage = world.get_species_ptr(lineage_id);
+                    Species * lineage = world.species_registry()[lineage_id];
                     std::string gridfile = this->get_validated_grid_path<MovementCountType>(this->get_element_scalar<std::string>(sub_node), world);
                     world_settings.movement_costs.insert(std::make_pair(lineage, gridfile));
                 } else if (node_name == "movementProbabilities") {
@@ -300,7 +300,7 @@ void ConfigurationFile::process_environments(World& world) {
                     if (not world.has_species(lineage_id)) {
                         throw ConfigurationError("movement probabilities: lineage \"" + lineage_id + "\" not defined");
                     }
-                    Species * lineage = world.get_species_ptr(lineage_id);
+                    Species * lineage = world.species_registry()[lineage_id];
                     std::string gridfile = this->get_validated_grid_path<float>(this->get_element_scalar<std::string>(sub_node), world);
                     world_settings.movement_probabilities.insert(std::make_pair(lineage, gridfile));
                 }
@@ -333,7 +333,7 @@ void ConfigurationFile::process_dispersals(World& world) {
                 if (not world.has_species(lineage_id)) {
                     throw ConfigurationError("dispersal: lineage \"" + lineage_id + "\" not defined");
                 }
-                disp_event.species_ptr = world.get_species_ptr(lineage_id);
+                disp_event.species_ptr = world.species_registry()[lineage_id];
             } else {
                 disp_event.species_ptr = NULL;
             }
@@ -406,12 +406,12 @@ void ConfigurationFile::process_samplings(World& world) {
                 if (not world.has_species(lineage_id)) {
                     throw ConfigurationError("sample: lineage \"" + lineage_id + "\" not defined");
                 }
-                world.add_occurrence_sampling(gen, world.get_species_ptr(lineage_id));
+                world.add_occurrence_sampling(gen, world.species_registry()[lineage_id]);
 
                 bool write_trees = this->get_attribute_bool(snode, "trees", true);
                 if (write_trees) {
                     SamplingRegime world_sampling_regime;
-                    world_sampling_regime.species_ptr = world.get_species_ptr(lineage_id);
+                    world_sampling_regime.species_ptr = world.species_registry()[lineage_id];
                     std::string label = this->get_attribute<std::string>(snode, "label", "");
                     if (label.size() > 0) {
                         world_sampling_regime.label = label;

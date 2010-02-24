@@ -44,9 +44,8 @@ World World::instance_;
 
 // constructor
 World::World()
-    : species_(),
-      rng_(RandomNumberGenerator::get_instance()),
-      landscape_(species_, rng_),
+    : rng_(RandomNumberGenerator::get_instance()),
+      landscape_(this),
       num_fitness_traits_(1),
       global_selection_strength_(DEFAULT_GLOBAL_SELECTION_STRENGTH),
       generations_to_run_(0),
@@ -59,17 +58,7 @@ World::World()
     this->current_generation_ = 0;
 }
 
-// clean up species pool
-World::~World() {
-    for (SpeciesByLabel::iterator sp = this->species_.begin();
-            sp != this->species_.end();
-            ++sp) {
-        assert (sp->second != NULL);
-        delete sp->second;
-//         sp->second = NULL;
-//         this->species_.erase(sp);
-    }
-}
+World::~World() {}
 
 // --- initialization and set up ---
 
@@ -86,22 +75,15 @@ void World::generate_landscape(CellIndexType size_x, CellIndexType size_y) {
 
 // Adds a new species definition to this world.
 Species& World::new_species(const std::string& label) {
-    Species* sp = new Species(label);
+    Species* sp = this->species_registry_.new_species(label);
     sp->set_num_fitness_traits(this->num_fitness_traits_);
-    sp->set_global_selection_strength(this->global_selection_strength_),
-    this->species_.insert(std::make_pair(std::string(label), sp));
+    sp->set_global_selection_strength(this->global_selection_strength_);
     std::vector<MovementCountType> default_movement_costs(this->landscape_.size(), 1);
     sp->set_movement_costs(default_movement_costs);
     std::vector<float> default_movement_probabilities(this->landscape_.size(), 1.0);
     sp->set_movement_probabilities(default_movement_probabilities);
     return *sp;
 }
-
-// Populates the cell at (x,y) with organisms of the given species.
-// void World::seed_population(CellIndexType x, CellIndexType y, const std::string& species_label, unsigned long size) {
-//     assert(this->species_.find(species_label) != this->species_.end());
-//     // this->landscape_.at(x, y).generate_new_organisms(this->species_[species_label], size);
-// }
 
 // Populates the cell cell_index with organisms of the given species.
 void World::generate_seed_population(CellIndexType cell_index,
@@ -232,10 +214,10 @@ void World::run() {
     while (this->current_generation_ <= this->generations_to_run_) {
 
         // clear organism labels
-        for (std::map<std::string, Species *>::iterator spi = this->species_.begin();
-                spi != this->species_.end();
+        for (SpeciesRegistry::iterator spi = this->species_registry_.begin();
+                spi != this->species_registry_.end();
                 ++spi) {
-            (spi->second)->clear_organism_labels();
+            (*spi)->clear_organism_labels();
         }
 
         // clear output filename stems
@@ -263,11 +245,11 @@ void World::run() {
         for (CellIndexType i = 0; i < this->landscape_.size(); ++i) {
             cell_indexes.insert(i);
         }
-        for (std::map<std::string, Species *>::iterator spi = this->species_.begin();
-                spi != this->species_.end();
+        for (SpeciesRegistry::iterator spi = this->species_registry_.begin();
+                spi != this->species_registry_.end();
                 ++spi) {
-            this->save_occurrences(spi->second);
-            this->save_trees(spi->second, 0, cell_indexes, "COMPLETE");
+            this->save_occurrences(*spi);
+            this->save_trees(*spi, 0, cell_indexes, "COMPLETE");
         }
     }
 
@@ -307,7 +289,7 @@ void World::process_world_settings() {
             msg << "[Generation " << this->current_generation_ << "] Setting movement costs for species " <<  mi->first->get_label() <<  ": \"" <<  mi->second <<  "\"";
             this->log_info(msg.str());
             asciigrid::AsciiGrid<MovementCountType> grid(mi->second);
-            this->set_species_movement_costs(mi->first, grid.get_cell_values());
+            mi->first->set_movement_costs(grid.get_cell_values());
         }
     }
     if (wi->second.movement_probabilities.size() != 0) {
@@ -318,7 +300,7 @@ void World::process_world_settings() {
             msg << "[Generation " << this->current_generation_ << "] Setting movement probabilities for species " <<  mi->first->get_label() <<  ": \"" <<  mi->second <<  "\"";
             this->log_info(msg.str());
             asciigrid::AsciiGrid<float> grid(mi->second);
-            this->set_species_movement_probabilities(mi->first, grid.get_cell_values());
+            mi->first->set_movement_probabilities(grid.get_cell_values());
         }
     }
 }
@@ -751,11 +733,11 @@ void World::log_configuration() {
 
     out << std::endl;
     out << "*** LINEAGES ***" << std::endl;
-    out << "(" << this->species_.size() << " lineages specified)" << std::endl;
+    out << "(" << this->species_registry_.size() << " lineages specified)" << std::endl;
     unsigned i = 0;
-    for (SpeciesByLabel::iterator spi = this->species_.begin(); spi != this->species_.end(); ++spi) {
+    for (SpeciesRegistry::iterator spi = this->species_registry_.begin(); spi != this->species_registry_.end(); ++spi) {
         i += 1;
-        Species& lineage = *spi->second;
+        Species& lineage = **spi;
         out << std::endl;
         out << "\"" << lineage.get_label() << "\"" << std::endl;
         out << "     Number of fitness traits: " << lineage.get_num_fitness_traits() << std::endl;
