@@ -15,6 +15,7 @@
 #include <iostream>
 #include <sstream>
 #include <map>
+#include <list>
 #include <utility>
 #include <cstring>
 #include "ginkgo_defs.hpp"
@@ -46,14 +47,20 @@ class Species {
          * Constructor.
          *
          * @param label                     identifier string for this species
+         */
+        Species(const std::string& label);
+
+        /**
+         * Constructor.
+         *
+         * @param label                     identifier string for this species
          * @param num_fitness_traits        number of factors in fitness function
          * @param global_selection_strength strength of selection
-         * @param rng                       random number generator
          */
         Species(const std::string& label,
                 unsigned num_fitness_traits,
-                float global_selection_strength,
-                RandomNumberGenerator& rng);
+                float global_selection_strength);
+
 
         /**
          * Destructor.
@@ -95,6 +102,20 @@ class Species {
          */
         void set_num_fitness_traits(unsigned num_fitness_traits) {
             this->num_fitness_traits_ = num_fitness_traits;
+        }
+
+        /**
+         * Returns the global selection strength.
+         */
+        float get_global_selection_strength() const {
+            return this->global_selection_strength_;
+        }
+
+        /**
+         * Sets the global selection strength.
+         */
+        void set_global_selection_strength(float global_selection_strength) {
+            this->global_selection_strength_ = global_selection_strength;
         }
 
         /**
@@ -530,6 +551,61 @@ class Species {
 };
 // Species
 ///////////////////////////////////////////////////////////////////////////////
+
+///////////////////////////////////////////////////////////////////////////////
+// SpeciesRegistry
+
+class SpeciesRegistry {
+
+    public:
+
+        typedef std::list<Species *>::iterator iterator;
+        typedef std::list<Species *>::const_iterator const_iterator;
+
+        SpeciesRegistry();
+        ~SpeciesRegistry();
+
+        Species * new_species(const std::string& label);
+
+        Species * operator[](const std::string& label) {
+            if (this->label_species_map_.find(label) == this->label_species_map_.end()) {
+                return this->new_species(label);
+            }
+            return this->label_species_map_[label];
+        }
+
+        bool has_species(const std::string& label) {
+            return (this->label_species_map_.find(label) != this->label_species_map_.end());
+        }
+
+        unsigned size() {
+            return this->species_list_.size();
+        }
+
+        iterator begin() {
+            return this->species_list_.begin();
+        }
+
+        iterator end() {
+            return this->species_list_.end();
+        }
+
+        const_iterator begin() const {
+            return this->species_list_.begin();
+        }
+
+        const_iterator end() const {
+            return this->species_list_.end();
+        }
+
+    private:
+        std::map<std::string, Species *>    label_species_map_;
+        std::list<Species *>                species_list_;
+
+};
+// SpeciesRegistry
+///////////////////////////////////////////////////////////////////////////////
+
 
 
 } // namespace ginkgo

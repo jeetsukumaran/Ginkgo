@@ -86,10 +86,9 @@ void World::generate_landscape(CellIndexType size_x, CellIndexType size_y) {
 
 // Adds a new species definition to this world.
 Species& World::new_species(const std::string& label) {
-    Species* sp = new Species(label,
-                              this->num_fitness_traits_,
-                              this->global_selection_strength_,
-                              this->rng_);
+    Species* sp = new Species(label);
+    sp->set_num_fitness_traits(this->num_fitness_traits_);
+    sp->set_global_selection_strength(this->global_selection_strength_),
     this->species_.insert(std::make_pair(std::string(label), sp));
     std::vector<MovementCountType> default_movement_costs(this->landscape_.size(), 1);
     sp->set_movement_costs(default_movement_costs);
