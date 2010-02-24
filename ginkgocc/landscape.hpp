@@ -31,6 +31,8 @@
 
 namespace ginkgo {
 
+class World;
+
 ///////////////////////////////////////////////////////////////////////////////
 // Landscape
 /**
@@ -55,6 +57,12 @@ class Landscape {
          * @param rng       reference to a RandomNumberGenerator
          */
         Landscape(const SpeciesByLabel& species, RandomNumberGenerator& rng);
+
+        Landscape(World& world) :
+             species_(SpeciesByLabel()),
+             rng_(RandomNumberGenerator::get_instance()) {
+
+        }
 
         /** Destructor */
         ~Landscape();

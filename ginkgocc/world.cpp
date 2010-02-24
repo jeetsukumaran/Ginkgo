@@ -45,7 +45,7 @@ World World::instance_;
 // constructor
 World::World()
     : rng_(RandomNumberGenerator::get_instance()),
-      landscape_(this),
+      landscape_(*this),
       num_fitness_traits_(1),
       global_selection_strength_(DEFAULT_GLOBAL_SELECTION_STRENGTH),
       generations_to_run_(0),
