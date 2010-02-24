@@ -646,7 +646,7 @@ class World {
         /** Name of this World (used for output files/reports). */
         std::string                             label_;
         /** Collection of pointers to the Species objects of this World. */
-        SpeciesRegistry                         species_registry_;
+        SpeciesRegistry&                        species_registry_;
         /** The RandomNumberGenerator that is used by all objects of this World. */
         RandomNumberGenerator&                  rng_;
         /** The geospatial framework of this World. */

@@ -45,24 +45,10 @@ class Landscape {
         /** To store information on a single migration event: organism, dest */
         typedef std::pair<Organism *, CellIndexType>   MigrationEvent;
         /** To store collection of single migration events */
-        typedef std::vector<MigrationEvent>          MigrationEvents;
+        typedef std::vector<MigrationEvent>            MigrationEvents;
 
-        // --- lifecycle and assignment ---
-
-        /**
-         * Constructs a landscape object, binding a species pool and a random
-         * number generator.
-         *
-         * @param species   reference to map of Species objects
-         * @param rng       reference to a RandomNumberGenerator
-         */
-        Landscape(const SpeciesByLabel& species, RandomNumberGenerator& rng);
-
-        Landscape(World& world) :
-             species_(SpeciesByLabel()),
-             rng_(RandomNumberGenerator::get_instance()) {
-
-        }
+        /** Constructor */
+        Landscape();
 
         /** Destructor */
         ~Landscape();
@@ -74,7 +60,6 @@ class Landscape {
          *
          * @param size_x                    x-dimension
          * @param size_y                    y-dimension
-         * @param num_fitness_traits number of active fitness factors
          */
         void generate(CellIndexType size_x, CellIndexType size_y, unsigned num_fitness_traits);
 
@@ -321,12 +306,15 @@ class Landscape {
         /** Actually process the migration events (move the organisms). */
         void process_migrants();
 
-        // --- debugging ---
-
-        // dump structure to std::cerr
+        /* logging/debugging/sanity-checking */
         void debug_dump_cell_xy(std::ostream& out = std::cerr);
         void debug_dump_cell_indexes(std::ostream& out = std::cerr);
         void debug_dump_carrying_capacity(std::ostream& out = std::cerr);
+
+    private:
+        // no copying ...
+        Landscape(const Landscape&);
+        const Landscape& operator=(const Landscape&);
 
     private:
 
@@ -342,16 +330,14 @@ class Landscape {
         CellIndexType                   max_y_;
         /** Maximum cell index. */
         CellIndexType                   max_size_;
+        /** (0,0) is at upper-left? */
+        bool                            origin_upper_left_;
         /** Collection of cells in this Landscape. */
         std::vector<Cell*>              cells_;
         /** Collection migration events. */
         MigrationEvents                 migrants_;
-        /** Reference to collection of pointers to Species objects in the World. */
-        const SpeciesByLabel&           species_;
-        /** Reference to RandomNumberGenerator of the World. */
+        /** Random number generator. */
         RandomNumberGenerator&          rng_;
-        /** (0,0) is at upper-left? */
-        bool                            origin_upper_left_;
 };
 // Landscape
 //////////////////////////////////////////////////////////////////////////////

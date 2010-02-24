@@ -36,7 +36,6 @@ namespace ginkgo {
 // collection of Organism pointers
 typedef std::vector<Organism *>   OrganismPointers;
 
-
 ///////////////////////////////////////////////////////////////////////////////
 // Breeding Population
 
@@ -212,9 +211,9 @@ class BreedingPopulations {
     public:
 
         /**
-         * Constructor, takes reference to species pool map and rng.
+         * Constructor.
          */
-        BreedingPopulations(const SpeciesByLabel& species_pool, RandomNumberGenerator& rng);
+        BreedingPopulations();
 
         /**
          * Returns a reference to the breeding population referenced by the
@@ -284,8 +283,6 @@ class BreedingPopulations {
     private:
         /** the breeding pools */
         std::map<const Species *, BreedingPopulation >    species_populations_;
-        /** random number genereator */
-        RandomNumberGenerator *                           rng_ptr_;
 
 };
 

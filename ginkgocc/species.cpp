@@ -70,9 +70,7 @@ Species::Species(const std::string& label,
 ///////////////////////////////////////////////////////////////////////////////
 // SpeciesRegistry
 
-SpeciesRegistry::SpeciesRegistry() {
-
-}
+SpeciesRegistry SpeciesRegistry::instance_;
 
 SpeciesRegistry::~SpeciesRegistry() {
     for (std::list<Species *>::iterator spi = this->species_list_.begin();

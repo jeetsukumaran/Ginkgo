@@ -562,7 +562,6 @@ class SpeciesRegistry {
         typedef std::list<Species *>::iterator iterator;
         typedef std::list<Species *>::const_iterator const_iterator;
 
-        SpeciesRegistry();
         ~SpeciesRegistry();
 
         Species * new_species(const std::string& label);
@@ -601,6 +600,20 @@ class SpeciesRegistry {
     private:
         std::map<std::string, Species *>    label_species_map_;
         std::list<Species *>                species_list_;
+
+    ///////////////////////////////////////////////////////////////////////////
+    // Singleton infrastructure
+
+    public:
+        static SpeciesRegistry& get_instance() {
+            return SpeciesRegistry::instance_;
+        }
+
+    private:
+        static SpeciesRegistry instance_;
+        SpeciesRegistry() {}
+        SpeciesRegistry(const SpeciesRegistry &);
+        SpeciesRegistry & operator=(const SpeciesRegistry &);
 
 };
 // SpeciesRegistry

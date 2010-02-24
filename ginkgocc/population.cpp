@@ -112,13 +112,13 @@ void BreedingPopulation::purge_expired_organisms() {
 // BreedingPopulations
 
 // constructor
-BreedingPopulations::BreedingPopulations(const SpeciesByLabel& species_pool, RandomNumberGenerator& rng):
-        rng_ptr_(&rng) {
-    for (SpeciesByLabel::const_iterator spi = species_pool.begin();
-            spi != species_pool.end();
+BreedingPopulations::BreedingPopulations() {
+    SpeciesRegistry& species_registry = SpeciesRegistry::get_instance();
+    for (SpeciesRegistry::iterator spi = species_registry.begin();
+            spi != species_registry.end();
             ++spi) {
         BreedingPopulation pop;
-        this->species_populations_.insert(std::make_pair((*spi).second, pop));
+        this->species_populations_.insert(std::make_pair(*spi, pop));
     }
 }
 
@@ -153,7 +153,7 @@ OrganismPointers& BreedingPopulations::get_organism_ptrs(OrganismPointers& optrs
 OrganismPointers BreedingPopulations::sample_organism_ptrs(PopulationCountType num_organisms) {
     OrganismPointers source;
     this->get_organism_ptrs(source);
-    RandomPointer rp(*(this->rng_ptr_));
+    RandomPointer rp(RandomNumberGenerator::get_instance());
     std::random_shuffle(source.begin(), source.end(), rp);
     if (num_organisms <= source.size()) {
         OrganismPointers samples;

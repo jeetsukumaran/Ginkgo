@@ -40,21 +40,17 @@ Cell::Cell(CellIndexType index,
            CellIndexType x,
            CellIndexType y,
            unsigned num_fitness_traits,
-           Landscape& landscape,
-           const SpeciesByLabel& species,
-           RandomNumberGenerator& rng)
+           Landscape& landscape)
         : index_(index),
           x_(x),
           y_(y),
           carrying_capacity_(0),
           num_fitness_traits_(num_fitness_traits),
           landscape_(landscape),
-          species_(species),
-          populations_(species, rng),
-          rng_(rng),
+          species_registry_(SpeciesRegistry::get_instance()),
+          rng_(RandomNumberGenerator::get_instance()),
           organism_memory_manager_(OrganismMemoryManager::get_instance()) {
-    memset(this->fitness_trait_optimum_, 0,
-    MAX_FITNESS_TRAITS*sizeof(FitnessTraitType));
+    memset(this->fitness_trait_optimum_, 0, MAX_FITNESS_TRAITS*sizeof(FitnessTraitType));
 }
 
 // --- basic biotics ---
@@ -76,7 +72,7 @@ void Cell::generate_new_population(Species * sp,
     if (ancestral_generations == 0) {
         ancestral_generations = ancestral_pop_size * 10;
     }
-    Cell temp_cell(this->index_, this->x_, this->y_, this->num_fitness_traits_, this->landscape_, this->species_, this->rng_);
+    Cell temp_cell(this->index_, this->x_, this->y_, this->num_fitness_traits_, this->landscape_);
     temp_cell.generate_new_organisms(sp, ancestral_pop_size);
     for (GenerationCountType g = 0; g != ancestral_generations; ++g) {
         temp_cell.reproduction(false); // reproduce without evolving fitness component traits
@@ -91,8 +87,8 @@ void Cell::generate_new_population(Species * sp,
 
 void Cell::reproduction(bool evolve_fitness_components) {
 
-    for (SpeciesByLabel::const_iterator spi = this->species_.begin(); spi != this->species_.end(); ++spi) {
-        Species * sp = spi->second;
+    for (SpeciesRegistry::iterator spi = this->species_registry_.begin(); spi != this->species_registry_.end(); ++spi) {
+        Species * sp = *spi;
         BreedingPopulation& pop = this->populations_[sp];
 
         // TODO: instead of handles to the male and female vectors,
@@ -127,10 +123,10 @@ void Cell::reproduction(bool evolve_fitness_components) {
 }
 
 void Cell::migration() {
-    for (SpeciesByLabel::const_iterator spi = this->species_.begin();
-            spi != this->species_.end();
+    for (SpeciesRegistry::const_iterator spi = this->species_registry_.begin();
+            spi != this->species_registry_.end();
             ++spi) {
-        Species * sp = spi->second;
+        Species * sp = *spi;
         BreedingPopulation& current_pop = this->populations_[sp];
         BreedingPopulation remaining_pop;
         for (BreedingPopulation::iterator oi = current_pop.begin(); oi != current_pop.end(); ++oi) {
@@ -163,10 +159,10 @@ void Cell::migration() {
 
 PopulationCountType Cell::survival() {
     PopulationCountType num_survivors = 0;
-    for (SpeciesByLabel::const_iterator spi = this->species_.begin();
-            spi != this->species_.end();
+    for (SpeciesRegistry::const_iterator spi = this->species_registry_.begin();
+            spi != this->species_registry_.end();
             ++spi) {
-        Species * sp = spi->second;
+        Species * sp = *spi;
         BreedingPopulation& pop = this->populations_[sp];
         for (BreedingPopulation::iterator oi = pop.begin(); oi != pop.end(); ++oi) {
             Organism * og_ptr = *oi;

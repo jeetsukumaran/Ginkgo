@@ -45,21 +45,18 @@ class Cell {
          * at a specific position and with the specified number of active
          * environmental fitness factors.
          *
-         * @param index     the index of this cell on the Landscape
-         * @param index     the x geographic coordinate of this cell
-         * @param index     the y geographic coordinate of this cell
-         * @param num_fitness_traits
-         *                  the number of factors to be considered for fitness
-         * @species         reference to the World species pool
-         * @rng             reference to the World random number generator
+         * @param index         the index of this cell on the Landscape
+         * @param index         the x geographic coordinate of this cell
+         * @param index         the y geographic coordinate of this cell
+         * @num_fitness_traits  number of dimensions in the fitness equation
+         * @landscape           reference to containing landscape
+         * @world               reference to containing world
          */
         Cell(CellIndexType index,
              CellIndexType x,
              CellIndexType y,
              unsigned num_fitness_traits,
-             Landscape& landscape,
-             const SpeciesByLabel& species,
-             RandomNumberGenerator& rng);
+             Landscape& landscape);
 
         /**
          * No-op destructor.
@@ -299,8 +296,8 @@ class Cell {
         FitnessTraits                          fitness_trait_optimum_;
         /** reference to Landscape in which this cell is located */
         Landscape&                             landscape_;
-        /** reference to pool of species in the World of this cell */
-        const SpeciesByLabel&                  species_;
+        /** reference to pool of species */
+        SpeciesRegistry&                       species_registry_;
         /** breeding populations of this cell */
         BreedingPopulations                    populations_;
         /** reference to random number generator of the World of this cell */
