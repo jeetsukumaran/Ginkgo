@@ -17,6 +17,7 @@ ginkgo@PROGRAMLABEL@_SOURCES = \
     landscape.cpp \
     cell.cpp \
     world.cpp \
+    logging.cpp \
     cmdopt.cpp \
     textutil.cpp \
     tree.cpp \

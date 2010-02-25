@@ -73,6 +73,7 @@ test_convert_SOURCES = \
 test_world_log_SOURCES = \
     test_world_log.cpp \
     ../world.cpp \
+    ../logging.cpp \
     ../randgen.cpp \
     ../organism.cpp \
     ../species.cpp \
