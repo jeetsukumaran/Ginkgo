@@ -39,6 +39,11 @@
 
 using namespace ginkgo;
 
+///////////////////////////////////////////////////////////////////////////////
+// World
+
+// lifecycle ##################################################################
+
 // singleton instance
 World World::instance_;
 
@@ -50,6 +55,7 @@ World::World()
       global_selection_strength_(DEFAULT_GLOBAL_SELECTION_STRENGTH),
       generations_to_run_(0),
       current_generation_(0),
+      logger_init_(false),
       log_frequency_(10),
       is_log_to_screen_(true),
       allow_multifurcations_(true),
@@ -60,7 +66,7 @@ World::World()
 
 World::~World() {}
 
-// --- initialization and set up ---
+// initialization and set up ##################################################
 
 // Creates a new landscape.
 void World::generate_landscape(CellIndexType size_x, CellIndexType size_y) {
@@ -95,7 +101,7 @@ void World::generate_seed_population(CellIndexType cell_index,
     pre_msg << "[Generation " << this->current_generation_ << "] ";
     pre_msg << "Bootstrapping seed population of species " << species_ptr->get_label() << ": ";
     pre_msg << ancestral_pop_size << " individuals for " << ancestral_generations << " generations.";
-    this->log_info(pre_msg.str());
+    this->logger_.info(pre_msg.str());
 
     this->landscape_.at(cell_index).generate_new_population(species_ptr,
             pop_size,
@@ -114,17 +120,17 @@ void World::generate_seed_population(CellIndexType cell_index,
     post_msg << num_females << " females and " << num_males << " males ";
     post_msg << "drawn from an ancestral population of " << ancestral_pop_size << " ";
     post_msg << "after " << ancestral_generations << " generations.";
-    this->log_info(post_msg.str());
+    this->logger_.info(post_msg.str());
 }
 
-// --- event handlers ---
+// event handlers #############################################################
 
 void World::add_world_settings(GenerationCountType generation, const WorldSettings& world_settings) {
     this->world_settings_[generation] = world_settings;
 }
 
 void World::add_dispersal_event(GenerationCountType generation, const DispersalEvent& dispersal_event) {
-    this->log_error("Stochastic dispersal currently disabled");
+    this->logger_.error("Stochastic dispersal currently disabled");
     exit(1);
     this->dispersal_events_.insert(std::make_pair(generation, dispersal_event));
 }
@@ -146,8 +152,7 @@ void World::add_seed_population(CellIndexType cell_index,
     this->seed_populations_.push_back( SeedPopulation(cell_index, species_ptr, pop_size, ancestral_pop_size, ancestral_generations) );
 }
 
-
-// --- simulation cycles ---
+// simulation cycles ##########################################################
 
 void World::cycle() {
 
@@ -167,37 +172,35 @@ void World::cycle() {
     if ( this->current_generation_ % this->log_frequency_ == 0) {
         std::ostringstream gen;
         gen << "Generation " << this->current_generation_ << " life-cycle running.";
-        this->log_info(gen.str());
+        this->logger_.info(gen.str());
     }
-//     this->log_detail("Reproduction/migration phase.");
     for (CellIndexType i = 0; i < this->landscape_.size(); ++i) {
         this->landscape_[i].reproduction();
         this->landscape_[i].migration();
     }
-//     this->log_detail("Processing migrants.");
     this->landscape_.process_migrants();
-//     this->log_detail("Survival/competition phase.");
     for (CellIndexType i = 0; i < this->landscape_.size(); ++i) {
         this->landscape_[i].survival();
         this->landscape_[i].competition();
     }
-//     this->log_detail("Generation life-cycle completed.");
     ++this->current_generation_;
 }
 
 void World::run() {
-    this->open_logs();
+    if (!this->logger_init_) {
+        this->init_logger();
+    }
     this->log_configuration();
 
 #if defined(DEBUG)
-    this->log_info("RUNNING DEBUG-MODE BUILD.");
+    this->logger_.info("RUNNING DEBUG-MODE BUILD.");
 #endif
 
 #if defined(MEMCHECK)
-    this->log_info("UNRELEASED NODE MEMORY WILL BE LOGGED.");
+    this->logger_.info("UNRELEASED NODE MEMORY WILL BE LOGGED.");
 #endif
 
-    this->log_info("Starting simulation.");
+    this->logger_.info("Starting simulation.");
 
     // startup
     for (std::vector<SeedPopulation>::iterator spi = this->seed_populations_.begin();
@@ -240,7 +243,7 @@ void World::run() {
     }
 
     if (this->is_produce_final_output_) {
-        this->log_info("Saving final set of occurrences and trees for all species.");
+        this->logger_.info("Saving final set of occurrences and trees for all species.");
         std::set<CellIndexType> cell_indexes;
         for (CellIndexType i = 0; i < this->landscape_.size(); ++i) {
             cell_indexes.insert(i);
@@ -257,7 +260,7 @@ void World::run() {
     run_final_cleanup_and_memory_check();
 #endif
 
-    this->log_info("Ending simulation.");
+    this->logger_.info("Ending simulation.");
 }
 
 void World::process_world_settings() {
@@ -266,7 +269,7 @@ void World::process_world_settings() {
         return;
     }
     if (wi->second.carrying_capacity.size() != 0) {
-        this->log_info("[Generation " + convert::to_scalar<std::string>(this->current_generation_) + "] Setting carrying capacity: \"" + wi->second.carrying_capacity + "\".");
+        this->logger_.info("[Generation " + convert::to_scalar<std::string>(this->current_generation_) + "] Setting carrying capacity: \"" + wi->second.carrying_capacity + "\".");
         asciigrid::AsciiGrid<PopulationCountType> grid(wi->second.carrying_capacity);
         this->landscape_.set_carrying_capacities(grid.get_cell_values());
     }
@@ -276,7 +279,7 @@ void World::process_world_settings() {
                  ++ei) {
             std::ostringstream msg;
             msg << "[Generation " << this->current_generation_ << "] Setting optima for fitness trait " <<  ei->first <<  ": \"" <<  ei->second <<  "\"";
-            this->log_info(msg.str());
+            this->logger_.info(msg.str());
             asciigrid::AsciiGrid<FitnessTraitType> grid(ei->second);
             this->landscape_.set_environment(ei->first, grid.get_cell_values());
         }
@@ -287,7 +290,7 @@ void World::process_world_settings() {
                  ++mi) {
             std::ostringstream msg;
             msg << "[Generation " << this->current_generation_ << "] Setting movement costs for species " <<  mi->first->get_label() <<  ": \"" <<  mi->second <<  "\"";
-            this->log_info(msg.str());
+            this->logger_.info(msg.str());
             asciigrid::AsciiGrid<MovementCountType> grid(mi->second);
             mi->first->set_movement_costs(grid.get_cell_values());
         }
@@ -298,7 +301,7 @@ void World::process_world_settings() {
                  ++mi) {
             std::ostringstream msg;
             msg << "[Generation " << this->current_generation_ << "] Setting movement probabilities for species " <<  mi->first->get_label() <<  ": \"" <<  mi->second <<  "\"";
-            this->log_info(msg.str());
+            this->logger_.info(msg.str());
             asciigrid::AsciiGrid<float> grid(mi->second);
             mi->first->set_movement_probabilities(grid.get_cell_values());
         }
@@ -306,7 +309,7 @@ void World::process_world_settings() {
 }
 
 void World::process_dispersal_events() {
-    this->log_error("Stochastic dispersal currently disabled");
+    this->logger_.error("Stochastic dispersal currently disabled");
     exit(1);
 //    typedef std::multimap<GenerationCountType, DispersalEvent> gen_disp_t;
 //    typedef std::pair<gen_disp_t::iterator, gen_disp_t::iterator> gen_disp_iter_pair_t;
@@ -342,7 +345,7 @@ void World::process_dispersal_events() {
 //        msg << " " << num_females << " females and " << num_males << " males.";
 //        this->landscape_[de.source].purge_expired_organisms();
 //        this->landscape_.process_migrants();
-//        this->log_info(msg.str());
+//        this->logger_.info(msg.str());
 //    }
 }
 
@@ -375,10 +378,10 @@ void World::process_occurrence_samplings() {
     }
 #endif
 
-// --- logging and output ---
+// results output #############################################################
 
 void World::save_occurrences(Species * species_ptr ) {
-    this->log_info("[Generation " + convert::to_scalar<std::string>(this->current_generation_) + "] Saving occurrence data for species " + species_ptr->get_label() + ".");
+    this->logger_.info("[Generation " + convert::to_scalar<std::string>(this->current_generation_) + "] Saving occurrence data for species " + species_ptr->get_label() + ".");
     std::vector<PopulationCountType> counts;
     this->landscape_.count_organisms(species_ptr, counts);
     std::ofstream occs;
@@ -540,15 +543,6 @@ void World::write_diploid1_trees(Species * sp_ptr,
     }
 }
 
-void World::log_tree_multiple_root_error(const std::string& species_label, unsigned long num_taxa) {
-    std::ostringstream msg;
-    msg << "tree for sample of organisms of species " << species_label;
-    msg << " in generation " << this->current_generation_;
-    msg << " could not be built due to multiple root nodes";
-    msg << " (organism sample size = " << num_taxa << ").";
-    this->log_error(msg.str());
-}
-
 void World::save_trees(Species * sp_ptr,
                 PopulationCountType num_organisms_per_cell,
                 const std::set<CellIndexType>& cell_indexes,
@@ -567,38 +561,38 @@ void World::save_trees(Species * sp_ptr,
     } else {
         msg << " from " << cell_indexes.size() << " cells).";
     }
-    this->log_info(msg.str());
+    this->logger_.info(msg.str());
 
     std::vector<const Organism *> organisms;
     this->landscape_.sample_organisms(sp_ptr, num_organisms_per_cell, cell_indexes, organisms);
     std::string num_samples = convert::to_scalar<std::string>(organisms.size());
 
     if (organisms.size() == 0) {
-        this->log_error("no organisms found in sample: aborting tree building");
+        this->logger_.error("no organisms found in sample: aborting tree building");
         return;
     }
 
-    this->log_info("[Generation " + convert::to_scalar<std::string>(this->current_generation_) + "] Building single allele diploid loci trees for " + num_samples + " organisms (" + num_samples + " leaves per tree).");
+    this->logger_.info("[Generation " + convert::to_scalar<std::string>(this->current_generation_) + "] Building single allele diploid loci trees for " + num_samples + " organisms (" + num_samples + " leaves per tree).");
     std::ofstream combined_trees;
     this->open_ofstream(combined_trees,
         this->compose_output_filename(sp_ptr->get_label(), label, "diploid1.tre"));
     this->write_diploid1_trees(sp_ptr, organisms, combined_trees);
 
-    this->log_info("[Generation " + convert::to_scalar<std::string>(this->current_generation_) + "] Building haploid locus tree for " + num_samples + " organisms (" + num_samples + " leaves per tree).");
+    this->logger_.info("[Generation " + convert::to_scalar<std::string>(this->current_generation_) + "] Building haploid locus tree for " + num_samples + " organisms (" + num_samples + " leaves per tree).");
     std::ofstream haploid_trees;
     this->open_ofstream(haploid_trees,
         this->compose_output_filename(sp_ptr->get_label(), label, "haploid.tre"));
     this->write_haploid_tree(sp_ptr, organisms, haploid_trees);
 
     if (this->is_produce_full_complement_diploid_trees_) {
-        this->log_info("[Generation " + convert::to_scalar<std::string>(this->current_generation_) + "] Building full complement diploid loci trees for " + num_samples + " organisms (" + convert::to_scalar<std::string>(organisms.size()*2) + " leaves per tree).");
+        this->logger_.info("[Generation " + convert::to_scalar<std::string>(this->current_generation_) + "] Building full complement diploid loci trees for " + num_samples + " organisms (" + convert::to_scalar<std::string>(organisms.size()*2) + " leaves per tree).");
         std::ofstream diploid_trees;
         this->open_ofstream(diploid_trees,
             this->compose_output_filename(sp_ptr->get_label(), label, "diploid2.tre"));
         this->write_diploid2_trees(sp_ptr, organisms, diploid_trees);
     }
 
-    this->log_info("[Generation " + convert::to_scalar<std::string>(this->current_generation_) + "] Building traits matrix for " + num_samples + " organisms (" + num_samples + " leaves per tree).");
+    this->logger_.info("[Generation " + convert::to_scalar<std::string>(this->current_generation_) + "] Building traits matrix for " + num_samples + " organisms (" + num_samples + " leaves per tree).");
     std::ofstream traits;
     this->open_ofstream(traits,
         this->compose_output_filename(sp_ptr->get_label(), label, "traits.nex"));
@@ -606,55 +600,36 @@ void World::save_trees(Species * sp_ptr,
 
 }
 
-void World::open_ofstream(std::ofstream& out, const std::string& fpath) {
-    std::string full_fpath = filesys::compose_path(this->output_dir_, fpath);
-    out.open(full_fpath.c_str());
-    if (not out) {
-        throw WorldIOError("cannot open file \"" + full_fpath + "\" for output");
-    }
-}
+// logging ####################################################################
 
-std::string World::get_output_filename_stem() {
-    if (this->output_filename_stem_.size() == 0) {
-        if (this->label_.size() == 0) {
-            this->output_filename_stem_ += "ginkgorun";
-        } else {
-            this->output_filename_stem_ += this->label_;
+
+void World::init_logger() {
+    if (not this->logger_init_) {
+        this->logger_.reset_start_time();
+        if (this->is_log_to_screen_) {
+            this->logger_.add_handler(std::cout, LogHandler::LOG_INFO);
         }
-        if (this->replicate_id_.size() > 0) {
-            this->output_filename_stem_ += this->replicate_id_;
-        }
+        this->logger_.add_handler(this->get_output_filename_stem() + ".run.log", LogHandler::LOG_DEBUG);
+        this->logger_.add_handler(this->get_output_filename_stem() + ".err.log", LogHandler::LOG_ERROR);
+        this->logger_init_ = true;
     }
-    return this->output_filename_stem_;
 }
 
-std::string World::compose_output_filename(const std::string& species_label,
-        const std::string& additional,
-        const std::string& extension) {
-    std::ostringstream f;
-    f << this->get_output_filename_stem();
-    f << "_G" << std::setw(8) << std::setfill('0') <<  this->current_generation_;
-    f << "_" << species_label;
-    if (additional.size() > 0) {
-        f << "_" << additional;
-    }
-    unsigned index = 0;
-    std::string candidate_name = f.str() + "." + extension;
-    std::set<std::string>::iterator fname_found = this->output_filenames_.find(candidate_name);
-    while (fname_found != this->output_filenames_.end()) {
-        ++index;
-        candidate_name = f.str() + "-" + convert::to_scalar<std::string>(index) + "." + extension;
-        fname_found = this->output_filenames_.find(candidate_name);
-    }
-    this->output_filenames_.insert(candidate_name);
-    return candidate_name;
+void World::log_tree_multiple_root_error(const std::string& species_label, unsigned long num_taxa) {
+    std::ostringstream msg;
+    msg << "tree for sample of organisms of species " << species_label;
+    msg << " in generation " << this->current_generation_;
+    msg << " could not be built due to multiple root nodes";
+    msg << " (organism sample size = " << num_taxa << ").";
+    this->logger_.error(msg.str());
 }
 
+// configuration logging ######################################################
 
 void World::log_configuration() {
     std::ofstream out;
     this->open_ofstream(out, this->get_output_filename_stem() + ".conf.log");
-    out <<  "GINKGO CONFIGURATION LOG " << this->get_timestamp() << std::endl;
+    out <<  "GINKGO CONFIGURATION LOG " << this->logger_.get_current_timestamp() << std::endl;
 
     out << std::endl;
     out << "*** LOGGING ***" << std::endl;
@@ -861,60 +836,52 @@ void World::log_configuration() {
     out.close();
 }
 
-void World::open_logs() {
-    if (not this->infos_.is_open()) {
-        this->open_ofstream(this->infos_, this->get_output_filename_stem() + ".out.log");
-    }
-    if (not this->errs_.is_open()) {
-        this->open_ofstream(this->errs_, this->get_output_filename_stem() + ".err.log");
-    }
-}
+// file-handling helpers ######################################################
 
-void World::close_logs() {
-    if (this->infos_.is_open()) {
-        this->infos_.close();
-    }
-    if (this->errs_.is_open()) {
-        this->errs_.close();
+void World::open_ofstream(std::ofstream& out, const std::string& fpath) {
+    std::string full_fpath = filesys::compose_path(this->output_dir_, fpath);
+    out.open(full_fpath.c_str());
+    if (not out) {
+        throw WorldIOError("cannot open file \"" + full_fpath + "\" for output");
     }
 }
 
-std::string World::get_timestamp() {
-    time_t rawtime;
-    time ( &rawtime );
-    struct tm * timeinfo = localtime ( &rawtime );
-    char buffer[80];
-    strftime (buffer,80,"%Y-%m-%d %H:%M:%S",timeinfo);
-    return "[" + std::string(buffer) + "]";
-}
-
-void World::log_detail(const std::string& message) {
-    assert(this->infos_);
-    this->infos_ << this->get_timestamp();
-    this->infos_ << " [Generation ";
-    this->infos_ << this->current_generation_;
-    this->infos_ << "] ";
-    this->infos_ << message << std::endl;
-}
-
-void World::log_info(const std::string& message) {
-    assert(this->infos_);
-    std::string ts = this->get_timestamp();
-    if (this->is_log_to_screen_) {
-        std::cout << ts << " " << message << std::endl;
+std::string World::get_output_filename_stem() {
+    if (this->output_filename_stem_.size() == 0) {
+        if (this->label_.size() == 0) {
+            this->output_filename_stem_ += "ginkgorun";
+        } else {
+            this->output_filename_stem_ += this->label_;
+        }
+        if (this->replicate_id_.size() > 0) {
+            this->output_filename_stem_ += this->replicate_id_;
+        }
     }
-    this->infos_ << ts << " " << message << std::endl;
+    return this->output_filename_stem_;
 }
 
-void World::log_error(const std::string& message) {
-    assert(this->errs_);
-    assert(this->infos_);
-    std::string ts = this->get_timestamp();
-    if (this->is_log_to_screen_) {
-        std::cerr << ts << " ERROR: " << message << std::endl;
+std::string World::compose_output_filename(const std::string& species_label,
+        const std::string& additional,
+        const std::string& extension) {
+    std::ostringstream f;
+    f << this->get_output_filename_stem();
+    f << "_G" << std::setw(8) << std::setfill('0') <<  this->current_generation_;
+    f << "_" << species_label;
+    if (additional.size() > 0) {
+        f << "_" << additional;
     }
-    this->errs_ << ts << " ERROR: " << message << std::endl;
-    this->infos_ << ts << " ERROR: " << message << std::endl;
+    unsigned index = 0;
+    std::string candidate_name = f.str() + "." + extension;
+    std::set<std::string>::iterator fname_found = this->output_filenames_.find(candidate_name);
+    while (fname_found != this->output_filenames_.end()) {
+        ++index;
+        candidate_name = f.str() + "-" + convert::to_scalar<std::string>(index) + "." + extension;
+        fname_found = this->output_filenames_.find(candidate_name);
+    }
+    this->output_filenames_.insert(candidate_name);
+    return candidate_name;
 }
 
+// World
+///////////////////////////////////////////////////////////////////////////////
 

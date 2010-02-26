@@ -35,8 +35,12 @@
 #include "cell.hpp"
 #include "landscape.hpp"
 #include "tree.hpp"
+#include "logging.hpp"
 
 namespace ginkgo {
+
+///////////////////////////////////////////////////////////////////////////////
+// Exceptions
 
 /**
  * General i/o error.
@@ -46,6 +50,12 @@ class WorldIOError : public std::runtime_error {
         WorldIOError(const char * msg) : std::runtime_error(msg) {}
         WorldIOError(const std::string& msg) : std::runtime_error(msg.c_str()) {}
 };
+
+// Exceptions
+///////////////////////////////////////////////////////////////////////////////
+
+///////////////////////////////////////////////////////////////////////////////
+// Supporting Data
 
 /**
  * Seed colonies.
@@ -154,6 +164,12 @@ struct WorldSettings {
 
 }; // WorldSettings
 
+// Supporting Data
+///////////////////////////////////////////////////////////////////////////////
+
+///////////////////////////////////////////////////////////////////////////////
+// World
+
 /**
  * Meta-framework that binds everything together.
  */
@@ -161,7 +177,7 @@ class World {
 
     public:
 
-        // --- lifecycle --
+        // lifecycle ##########################################################
 
         /**
          * Destructor, destroys Species and frees memory allocated to Species
@@ -169,7 +185,271 @@ class World {
          */
         ~World();
 
-        // --- access and mutation ---
+        // initialization and set up ##########################################
+
+        /**
+         * Build a landscape of the specified spatial and environmental
+         * dimensions.
+         *
+         * @param size_x                the size of the Landscape from a
+         *                              geospatial perspective in the
+         *                              x-dimension
+         * @param size_y                the size of the Landscape from a
+         *                              geospatial perspective in the
+         *                              y-dimension
+         */
+        void generate_landscape(CellIndexType size_x, CellIndexType size_y);
+
+        /**
+         * Instantiates a new species on the heap and inserts into species
+         * pool.
+         *
+         * @param label     unique label identifying species
+         */
+        Species& new_species(const std::string& label);
+
+        /**
+         * Generates specified number of new Organism objects of the specified
+         * Species, and inserts them into a Cell specified by its vector index.
+         *
+         * @param cell_index     the vector index of the Cell into which the
+         *                       new Organism objects will be added
+         * @param species_index  index of pointer to the Species object in the
+         *                       Species pool of the Landscape/World
+         * @param size           number of new Organism objects to generate
+         * @param ancestral_pop_size       size of ancestral population of seed population (N; 0 => N = n )
+         * @param ancestral_generations    number of generations in ancestral population  (0 => 10N)
+         */
+        void generate_seed_population(CellIndexType cell_index,
+                Species * species_ptr,
+                PopulationCountType pop_size,
+                PopulationCountType ancestral_pop_size,
+                GenerationCountType ancestral_generations);
+
+        // event handlers #####################################################
+
+        /**
+         * Add a set of environments and settings that reconfigure the
+         * world.
+         *
+         * @param   generation      generation number for this set of events
+         *                          to be activated
+         * @param   world_settings  WorldSettings data
+         */
+        void add_world_settings(GenerationCountType generation, const WorldSettings& world_settings);
+
+        /**
+         * Add a dispersal event.
+         *
+         * @param   generation      generation number for this set of events
+         *                          to be activated
+         * @param   dispersal_event descripion of event
+         */
+        void add_dispersal_event(GenerationCountType generation, const DispersalEvent& dispersal_event);
+
+        /**
+         * Add a directive to sample organisms and save a tree.
+         *
+         * @param   generation       generation number for this tree to be built
+         * @param   sampling_regime  the leaves to add to the tree
+         */
+        void add_tree_sampling(GenerationCountType generation, const SamplingRegime& sampling_regime);
+
+        /**
+         * Add a directive to sample organisms and save their occurrence distribution.
+         *
+         * @param   generation       generation number for this occurrence be built
+         * @param   species_ptr      pointer to species
+         */
+        void add_occurrence_sampling(GenerationCountType generation, Species * species_ptr);
+
+        /**
+         * Add a directive to seed a population.
+         * @param cell_index     the vector index of the Cell into which the
+         *                       new Organism objects will be added
+         * @param species_index  index of pointer to the Species object in the
+         *                       Species pool of the Landscape/World
+         * @param size           number of new Organism objects to generate
+         * @param ancestral_pop_size       size of ancestral population of seed population (N; 0 => N = n )
+         * @param ancestral_generations    number of generations in ancestral population  (0 => 10N)
+         */
+        void add_seed_population(CellIndexType cell_index,
+                Species * species_ptr,
+                PopulationCountType pop_size,
+                PopulationCountType ancestral_pop_size,
+                GenerationCountType ancestral_generations);
+
+        // simulation cycles ##################################################
+
+        /**
+         * A single cycle or generation of the simulation, including the
+         * reproduction, migration, survival and competition phases.
+         */
+        void cycle();
+
+        /**
+         * Run multiple cycles or generations of the simulation.
+         */
+        void run();
+
+        /**
+         * Process world settings for the current generation.
+         */
+        void process_world_settings();
+
+        /**
+         * Process dispersal events for the current generation.
+         */
+        void process_dispersal_events();
+
+        /**
+         * Process tree building directives for the current generation.
+         */
+        void process_tree_samplings();
+
+        /**
+         * Process occurrence sampling directives for the current generation.
+         */
+        void process_occurrence_samplings();
+
+#if defined(MEMCHECK)
+        // --- memory check ---
+        void run_final_cleanup_and_memory_check();
+#endif
+
+        // results output #####################################################
+
+        /**
+         * Save occurrence info for the current generation.
+         * @param species_ptr   Pointer to species for which to save info.
+         */
+        void save_occurrences(Species * species_ptr);
+
+        /**
+         * Composes and writes a NEXUS file header.
+         */
+        void write_nexus_header(Species * sp_ptr,
+                const std::vector<const Organism *>& organisms,
+                std::ostream& out,
+                bool add_diploid_allele_extensions=false);
+
+        /**
+         * Given a list of pointers to organisms, writes trait data.
+         * @param   sp_ptr      pointer to species
+         * @param   organisms   sample of organisms
+         * @param   out         output stream
+         */
+        void write_traits(Species * sp_ptr,
+                const std::vector<const Organism *>& organisms,
+                std::ostream& out);
+
+        /**
+         * Given a list of pointers to organisms, builds and saves a tree
+         * of the haploid locus allele to the given outputstream.
+         * @param sp_ptr                    pointer to species
+         * @param   organisms   sample of organisms
+         * @param   out         output stream
+         */
+        void write_haploid_tree(Species * sp_ptr,
+                const std::vector<const Organism *>& organisms,
+                std::ostream& out);
+
+        /**
+         * Given a list of pointers to organisms, builds and saves trees
+         * of the diploid locus alleles to the given outputstream.
+         * @param   sp_ptr      pointer to species
+         * @param   organisms   sample of organisms
+         * @param   out         output stream
+         */
+        void write_diploid2_trees(Species * sp_ptr,
+                const std::vector<const Organism *>& organisms,
+                std::ostream& out);
+
+        /**
+         * Given a list of pointers to organisms, builds and saves trees
+         * of the haploid and diploid locus alleles to the given outputstream,
+         * with a single allele of each diploid complement chosen at random for
+         * the diploid trees.
+         * @param   sp_ptr      pointer to species
+         * @param   organisms   sample of organisms
+         * @param   out         output stream
+         */
+        void write_diploid1_trees(Species * sp_ptr,
+                const std::vector<const Organism *>& organisms,
+                std::ostream& out);
+
+        /**
+         * Samples organisms of specified species and specified cells of the
+         * the landscape, and write out the corresponding trees.
+         * Three tree files will be produced:
+         *   (1) one for the haploid locus
+         *   (2) one for all the diploid loci, with both alleles from each
+         *       individual included
+         *   (3) one for the haploid locus and all the diploid loci, with one
+         *       allele sampled at random from each individual's diploid locus
+         * @param sp_ptr                    pointer to species
+         * @param num_organisms_per_cell    number of organisms of the given
+         *                                  species per cell to sample
+         *                                  (0 = sample all)
+         * @param cell_indexes              list of cell indexes to sample
+         * @param tree_filename             filename for trees
+         */
+        void save_trees(Species * sp_ptr,
+                        PopulationCountType num_organisms_per_cell,
+                        const std::set<CellIndexType>& cell_indexes,
+                        const std::string& tree_filename_stem);
+
+        // logging ############################################################
+
+        /**
+         * Configure the logger.
+         */
+        void init_logger();
+
+        /**
+         * Report coalescence failure/
+         *
+         * @param species_label     identifier of lineage/species that failed to coalesce
+         * @param num_taxa          number of taxa
+         */
+        void log_tree_multiple_root_error(const std::string& species_label, unsigned long num_taxa);
+
+        // configuration logging ##############################################
+
+        /**
+         * Dump out configuration file.
+         */
+        void log_configuration();
+
+
+        // file-handling helpers ##############################################
+
+        /**
+         * Tries to open file, throwing exception if failed.
+         * @param fpath     file path to open
+         * @param ofstream  output file stream to use
+         */
+        void open_ofstream(std::ofstream& out, const std::string& fpath);
+
+        /**
+         * Returns label for output and reporting.
+         * @return label for output and reporting
+         */
+        std::string get_output_filename_stem();
+
+
+        /**
+         * Composes and returns a name for a sampling (occurrence/tree) output
+         * file.
+         * @param   species_label   label for the species
+         * @param   additional      any additional label info
+         * @param   extension       file extension
+         */
+        std::string compose_output_filename(const std::string& species_label,
+                const std::string& additional,
+                const std::string& extension);
+
+        // references to system-wide utilities ################################
 
         /**
          * Returns reference to this World's RandomNumberGenerator object.
@@ -178,6 +458,24 @@ class World {
         RandomNumberGenerator& rng() {
             return this->rng_;
         }
+
+        /**
+         * Returns reference to this World's SpeciesRegistry object.
+         * @return reference to this World's SpeciesRegistry object
+         */
+        SpeciesRegistry& species_registry() {
+            return this->species_registry_;
+        }
+
+        /**
+         * Returns reference to this World's Logger object.
+         * @return reference to this World's Logger object
+         */
+        Logger& logger() {
+            return this->logger_;
+        }
+
+        // accessors and mutators #############################################
 
         /**
          * Returns the current random number seed
@@ -203,12 +501,6 @@ class World {
         Landscape& landscape() {
             return this->landscape_;
         }
-
-        /**
-         * Returns label for output and reporting.
-         * @return label for output and reporting
-         */
-        std::string get_output_filename_stem();
 
         /**
          * Sets label for output and reporting.
@@ -313,19 +605,6 @@ class World {
         }
 
         /**
-         * Build a landscape of the specified spatial and environmental
-         * dimensions.
-         *
-         * @param size_x                the size of the Landscape from a
-         *                              geospatial perspective in the
-         *                              x-dimension
-         * @param size_y                the size of the Landscape from a
-         *                              geospatial perspective in the
-         *                              y-dimension
-         */
-        void generate_landscape(CellIndexType size_x, CellIndexType size_y);
-
-        /**
          * Returns number of cells in the landscape.
          * @param number of cells in the landscape
          */
@@ -346,13 +625,6 @@ class World {
             }
         }
 
-        /**
-         * Returns pointer to species if it exists.
-         */
-        SpeciesRegistry& species_registry() {
-            return this->species_registry_;
-        }
-
         ///////////////////////////////////////////////////////////////////////
         //// TO BE REFACTORED OUT
         ///////////////////////////////////////////////////////////////////////
@@ -367,266 +639,6 @@ class World {
             return this->species_registry_.has_species(label);
         }
 
-        // --- setup, initialization and seeding ---
-
-        /**
-         * Instantiates a new species on the heap and inserts into species
-         * pool.
-         *
-         * @param label     unique label identifying species
-         */
-        Species& new_species(const std::string& label);
-
-        /**
-         * Generates specified number of new Organism objects of the specified
-         * Species, and inserts them into a Cell specified by its vector index.
-         *
-         * @param cell_index     the vector index of the Cell into which the
-         *                       new Organism objects will be added
-         * @param species_index  index of pointer to the Species object in the
-         *                       Species pool of the Landscape/World
-         * @param size           number of new Organism objects to generate
-         * @param ancestral_pop_size       size of ancestral population of seed population (N; 0 => N = n )
-         * @param ancestral_generations    number of generations in ancestral population  (0 => 10N)
-         */
-        void generate_seed_population(CellIndexType cell_index,
-                Species * species_ptr,
-                PopulationCountType pop_size,
-                PopulationCountType ancestral_pop_size,
-                GenerationCountType ancestral_generations);
-
-        // --- event handlers ---
-
-        /**
-         * Add a set of environments and settings that reconfigure the
-         * world.
-         *
-         * @param   generation      generation number for this set of events
-         *                          to be activated
-         * @param   world_settings  WorldSettings data
-         */
-        void add_world_settings(GenerationCountType generation, const WorldSettings& world_settings);
-
-        /**
-         * Add a dispersal event.
-         *
-         * @param   generation      generation number for this set of events
-         *                          to be activated
-         * @param   dispersal_event descripion of event
-         */
-        void add_dispersal_event(GenerationCountType generation, const DispersalEvent& dispersal_event);
-
-        /**
-         * Add a directive to sample organisms and save a tree.
-         *
-         * @param   generation       generation number for this tree to be built
-         * @param   sampling_regime  the leaves to add to the tree
-         */
-        void add_tree_sampling(GenerationCountType generation, const SamplingRegime& sampling_regime);
-
-        /**
-         * Add a directive to sample organisms and save their occurrence distribution.
-         *
-         * @param   generation       generation number for this occurrence be built
-         * @param   species_ptr      pointer to species
-         */
-        void add_occurrence_sampling(GenerationCountType generation, Species * species_ptr);
-
-        /**
-         * Add a directive to seed a population.
-         * @param cell_index     the vector index of the Cell into which the
-         *                       new Organism objects will be added
-         * @param species_index  index of pointer to the Species object in the
-         *                       Species pool of the Landscape/World
-         * @param size           number of new Organism objects to generate
-         * @param ancestral_pop_size       size of ancestral population of seed population (N; 0 => N = n )
-         * @param ancestral_generations    number of generations in ancestral population  (0 => 10N)
-         */
-        void add_seed_population(CellIndexType cell_index,
-                Species * species_ptr,
-                PopulationCountType pop_size,
-                PopulationCountType ancestral_pop_size,
-                GenerationCountType ancestral_generations);
-
-        // --- simulation cycles ---
-
-        /**
-         * A single cycle or generation of the simulation, including the
-         * reproduction, migration, survival and competition phases.
-         */
-        void cycle();
-
-        /**
-         * Run multiple cycles or generations of the simulation.
-         */
-        void run();
-
-        /**
-         * Process world settings for the current generation.
-         */
-        void process_world_settings();
-
-        /**
-         * Process dispersal events for the current generation.
-         */
-        void process_dispersal_events();
-
-        /**
-         * Process tree building directives for the current generation.
-         */
-        void process_tree_samplings();
-
-        /**
-         * Process occurrence sampling directives for the current generation.
-         */
-        void process_occurrence_samplings();
-
-#if defined(MEMCHECK)
-        // --- memory check ---
-        void run_final_cleanup_and_memory_check();
-#endif
-
-        // --- logging and output ---
-
-        /**
-         * Dump out configuration file.
-         */
-        void log_configuration();
-
-        /**
-         * Save occurrence info for the current generation.
-         * @param species_ptr   Pointer to species for which to save info.
-         */
-        void save_occurrences(Species * species_ptr);
-
-        /**
-         * Composes and writes a NEXUS file header.
-         */
-        void write_nexus_header(Species * sp_ptr,
-                const std::vector<const Organism *>& organisms,
-                std::ostream& out,
-                bool add_diploid_allele_extensions=false);
-
-        /**
-         * Given a list of pointers to organisms, builds and saves a tree
-         * of the haploid locus allele to the given outputstream.
-         * @param sp_ptr                    pointer to species
-         * @param   organisms   sample of organisms
-         * @param   out         output stream
-         */
-        void write_haploid_tree(Species * sp_ptr,
-                const std::vector<const Organism *>& organisms,
-                std::ostream& out);
-
-        /**
-         * Given a list of pointers to organisms, builds and saves trees
-         * of the diploid locus alleles to the given outputstream.
-         * @param   sp_ptr      pointer to species
-         * @param   organisms   sample of organisms
-         * @param   out         output stream
-         */
-        void write_diploid2_trees(Species * sp_ptr,
-                const std::vector<const Organism *>& organisms,
-                std::ostream& out);
-
-        /**
-         * Given a list of pointers to organisms, builds and saves trees
-         * of the haploid and diploid locus alleles to the given outputstream,
-         * with a single allele of each diploid complement chosen at random for
-         * the diploid trees.
-         * @param   sp_ptr      pointer to species
-         * @param   organisms   sample of organisms
-         * @param   out         output stream
-         */
-        void write_diploid1_trees(Species * sp_ptr,
-                const std::vector<const Organism *>& organisms,
-                std::ostream& out);
-
-        /**
-         * Given a list of pointers to organisms, writes trait data.
-         * @param   sp_ptr      pointer to species
-         * @param   organisms   sample of organisms
-         * @param   out         output stream
-         */
-        void write_traits(Species * sp_ptr,
-                const std::vector<const Organism *>& organisms,
-                std::ostream& out);
-
-        /**
-         * Samples organisms of specified species and specified cells of the
-         * the landscape, and write out the corresponding trees.
-         * Three tree files will be produced:
-         *   (1) one for the haploid locus
-         *   (2) one for all the diploid loci, with both alleles from each
-         *       individual included
-         *   (3) one for the haploid locus and all the diploid loci, with one
-         *       allele sampled at random from each individual's diploid locus
-         * @param sp_ptr                    pointer to species
-         * @param num_organisms_per_cell    number of organisms of the given
-         *                                  species per cell to sample
-         *                                  (0 = sample all)
-         * @param cell_indexes              list of cell indexes to sample
-         * @param tree_filename             filename for trees
-         */
-        void save_trees(Species * sp_ptr,
-                        PopulationCountType num_organisms_per_cell,
-                        const std::set<CellIndexType>& cell_indexes,
-                        const std::string& tree_filename_stem);
-
-        void log_tree_multiple_root_error(const std::string& species_label, unsigned long num_taxa);
-
-        /**
-         * Tries to open file, throwing exception if failed.
-         * @param fpath     file path to open
-         * @param ofstream  output file stream to use
-         */
-        void open_ofstream(std::ofstream& out, const std::string& fpath);
-
-        /**
-         * Opens standard and error log file streams.
-         */
-        void open_logs();
-
-        /**
-         * Closes standard and error log file streams.
-         */
-        void close_logs();
-
-        /**
-         * Composes and returns a name for a sampling (occurrence/tree) output
-         * file.
-         * @param   species_label   label for the species
-         * @param   additional      any additional label info
-         * @param   extension       file extension
-         */
-        std::string compose_output_filename(const std::string& species_label,
-                const std::string& additional,
-                const std::string& extension);
-
-        /**
-         * Time stamp for log.
-         * @return  formatted time stamp
-         */
-        std::string get_timestamp();
-
-        /**
-         * Write message to the general log stream (file only).
-         * @param   message message to write
-         */
-        void log_detail(const std::string& message);
-
-        /**
-         * Write message to the general log stream (file and stdout).
-         * @param   message message to write
-         */
-        void log_info(const std::string& message);
-
-        /**
-         * Write message to the error log stream (with duplicate to general
-         * log stream).
-         * @param   message message to write
-         */
-        void log_error(const std::string& message);
 
     ///////////////////////////////////////////////////////////////////////////
     // Singleton infrastructure
@@ -665,10 +677,10 @@ class World {
         std::string                             replicate_id_;
         /** Output filename prefix. */
         std::string                             output_filename_stem_;
-        /** Info log file stream. */
-        std::ofstream                           infos_;
-        /** Error log stream. */
-        std::ofstream                           errs_;
+        /** Log control. */
+        Logger                                  logger_;
+        /** Flag that logger has been created and configured. */
+        bool                                    logger_init_;
         /** Frequency (in # of generations) to log status. */
         unsigned                                log_frequency_;
         /** Duplicate log output to stdout/stderr? */
@@ -694,6 +706,8 @@ class World {
 
 }; // World
 
+// World
+///////////////////////////////////////////////////////////////////////////////
 
 } // ginkgo namespace
 

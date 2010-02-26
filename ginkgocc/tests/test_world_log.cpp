@@ -27,9 +27,10 @@ using namespace ginkgo;
 int main(int, char * []) {
     World& world = World::get_instance();
     world.set_output_dir("/tmp");
-    world.open_logs();
-    world.log_info("World object created");
-    world.log_info("World populate from [some file]");
-    world.log_error("could not find grid file cxxx");
-    world.close_logs();
+    world.init_logger();
+    world.logger().debug("This is a DEBUG level message");
+    world.logger().info("This is a INFO level message");
+    world.logger().warning("This is a WARNING level message");
+    world.logger().error("This is a ERROR level message");
+    world.logger().critical("This is a CRITICAL level message");
 }

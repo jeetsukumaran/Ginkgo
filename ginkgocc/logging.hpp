@@ -282,6 +282,14 @@ class Logger {
          */
         void set_timestamps();
 
+        /**
+         * Returns timestamp.
+         */
+        const char * get_current_timestamp() {
+            this->set_timestamps();
+            return this->current_timestamp_;
+        }
+
     private:
         LogStreamManager&               log_stream_manager_;
         std::vector<LogHandler>         log_handlers_;

@@ -89,9 +89,9 @@ int main(int argc, char* argv[]) {
         std::cout << "World configured using: \"" + args[0] + "\"" << "." << std::endl;
         std::cout << "Configuration file validates." << std:: endl;
     } else {
-        world.open_logs();
-        world.log_info("Running: " + program_identity);
-        world.log_info("World configured using: \"" + args[0] + "\"");
+        world.init_logger();
+        world.logger().info("Running: " + program_identity);
+        world.logger().info("World configured using: \"" + args[0] + "\"");
 
         std::ostringstream seed_info;
         if (parser.is_set("--random-seed")) {
@@ -100,14 +100,14 @@ int main(int argc, char* argv[]) {
         } else {
             seed_info << "Using random seed: " << world.get_random_seed() << ".";
         }
-        world.log_info(seed_info.str());
+        world.logger().info(seed_info.str());
 
         if (parser.is_set("--log-frequency")) {
             world.set_log_frequency(log_freq);
         }
 
         world.run();
-        world.close_logs();
+
     }
 
 }
