@@ -19,7 +19,9 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
+#include <sstream>
 #include "organism.hpp"
+//#include "world.hpp"
 
 namespace ginkgo
 {
@@ -30,13 +32,15 @@ OrganismMemoryManager OrganismMemoryManager::instance_;
 // allocate a new Organism slot
 Organism* OrganismMemoryManager::allocate(){
  	if (this->free_organism_ptrs_.empty()) {
+
+// 	    World& world = World::get_instance();
+// 	    Logger& logger = world.logger();
+// 	    std::ostringstream o;
+// 	    o << "Allocating slots for " << this->block_size_ << " organisms.";
+// 	    logger.info(o.str());
+//
  		this->organism_pool_.push_back(std::vector<Organism>());
  		std::vector<Organism> & last_pool_element = *(this->organism_pool_.rbegin());
-// 		last_pool_element.reserve(this->block_size_);
-// 		for (unsigned int i = 0; i < this->block_size_; ++i) {
-//            last_pool_element.push_back(Organism());
-//            this->free_organism_ptrs_.push( &(last_pool_element.back()) );
-// 		}
  		last_pool_element.resize(this->block_size_);
  		for (std::vector<Organism>::iterator i = last_pool_element.begin();
                 i != last_pool_element.end();
