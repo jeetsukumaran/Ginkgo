@@ -105,7 +105,7 @@ void ConfigurationFile::open(const char * fpath) {
 void ConfigurationFile::configure(World& world) {
     this->process_world(world);
     this->process_biota(world);
-    this->process_initialize(world);
+    this->process_initialization(world);
     this->process_environments(world);
 //    this->process_dispersals(world);
     this->process_samplings(world);
@@ -263,20 +263,22 @@ void ConfigurationFile::process_lineage(XmlElementType& lineage_node, World& wor
 //    }
 }
 
-void ConfigurationFile::process_initialize(World& world) {
-    Initialize  initialization;
+void ConfigurationFile::process_initialization(World& world) {
+    InitializationSettings  initialization_configuration;
 
     XmlElementType world_node = this->get_child_node(this->xml_, "world", true);
     XmlElementType initialize = this->get_child_node(world_node, "initialize", true);
     XmlElementType env_node = this->get_child_node(world_node, "environment", false);
 
     if (!env_node.isEmpty()) {
-        initialization.environment = this->parse_environment_settings(world, env_node);
+        initialization_configuration.environment = this->parse_environment_settings(world, env_node);
     }
 
     XmlElementType pops = this->get_child_node(initialize, "populations", true);
     for (int i = 0; i < pops.nChildNode("cell"); ++i) {
         XmlElementType cell_node = pops.getChildNode("cell", i);
+        CellIndexType cell_index = this->parse_cell_index_from_node(world, cell_node);
+
     }
 
 }
@@ -432,6 +434,34 @@ EnvironmentSettings ConfigurationFile::parse_environment_settings(World& world, 
         }
     }
     return environment_settings;
+}
+
+CellIndexType ConfigurationFile::parse_cell_index_from_node(World& world, XmlElementType& cell_node) {
+        bool has_x = this->has_attribute(cell_node, "x");
+        bool has_y = this->has_attribute(cell_node, "y");
+        bool has_index = this->has_attribute(cell_node, "index");
+        if ( (has_x or has_y) and has_index ) {
+            throw ConfigurationError("cannot specify cell by both coordinates ('x'/'y') and indexes ('index')");
+        } else if (has_x and not has_y) {
+            throw ConfigurationError("'y' coordinate not specified for cell");
+        } else if (has_y and not has_x)  {
+            throw ConfigurationError("'x' coordinate not specified for cell");
+        } else if (has_x and has_y) {
+            CellIndexType x = this->get_attribute<CellIndexType>(cell_node, "x");
+            CellIndexType y = this->get_attribute<CellIndexType>(cell_node, "y");
+            return this->get_validated_cell_index(x, y, world, "cell coordinate");
+        } else if (has_index) {
+            CellIndexType cell_index = this->get_attribute<CellIndexType>(cell_node, "index");
+            if (cell_index >= world.landscape().size()) {
+                std::ostringstream msg;
+                msg << "seed population: maximum cell index is " << world.landscape().size() - 1;
+                msg << " (0-based indexing), but cell index of " << cell_index << " specified";
+                throw ConfigurationError(msg.str());
+            }
+            return cell_index;
+        } else {
+            throw ConfigurationError("Logical switch failure processing cell");
+        }
 }
 
 template <class T>

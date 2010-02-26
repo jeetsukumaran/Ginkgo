@@ -179,10 +179,10 @@ struct EnvironmentSettings {
 /**
  * Initialization of system.
  */
-struct Initialize {
+struct InitializationSettings {
     public:
         typedef std::map<CellIndexType, std::pair<Species *, PopulationCountType> > CellPopulationMapType;
-        CellPopulationMapType   cell_population_map;
+        CellPopulationMapType         cell_population_map;
         EnvironmentSettings           environment;
 }; // initialize
 

@@ -251,12 +251,13 @@ class ConfigurationFile {
         void process_world(World& world);
         void process_biota(World& world);
         void process_lineage(XmlElementType& lnode, World& world);
-        void process_initialize(World& world);
+        void process_initialization(World& world);
         void process_environments(World& world);
         void process_dispersals(World& world);
         void process_samplings(World& world);
 
         EnvironmentSettings parse_environment_settings(World& world, const XmlElementType& env_node);
+        CellIndexType parse_cell_index_from_node(World& world, XmlElementType& node);
 
     private:
 
