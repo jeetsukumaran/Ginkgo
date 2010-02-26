@@ -34,7 +34,12 @@ test_tree_from_parent_indexes_SOURCES = \
     ../population.cpp \
     ../tree.cpp \
     ../memcheck.cpp \
-    ../randgen.cpp
+    ../randgen.cpp \
+    ../world.cpp \
+    ../logging.cpp \
+    ../landscape.cpp \
+    ../cell.cpp \
+    ../filesys.cpp
 
 test_tree_from_genealogies_SOURCES = \
     test_tree_from_genealogies.cpp \
@@ -43,14 +48,27 @@ test_tree_from_genealogies_SOURCES = \
     ../population.cpp \
     ../tree.cpp \
     ../memcheck.cpp \
-    ../randgen.cpp
+    ../randgen.cpp \
+    ../world.cpp \
+    ../logging.cpp \
+    ../landscape.cpp \
+    ../cell.cpp \
+    ../textutil.cpp \
+    ../filesys.cpp
 
 test_organism_states_SOURCES = \
     test_organism_states.cpp \
     ../organism.cpp \
     ../species.cpp \
     ../population.cpp \
-    ../randgen.cpp
+    ../randgen.cpp \
+    ../world.cpp \
+    ../logging.cpp \
+    ../landscape.cpp \
+    ../cell.cpp \
+    ../textutil.cpp \
+    ../tree.cpp \
+    ../filesys.cpp
 
 test_textutil_SOURCES = \
     test_textutil.cpp \
