@@ -102,14 +102,13 @@ void ConfigurationFile::open(const char * fpath) {
     this->xml_ = XMLNode::openFileHelper(fpath,"ginkgo");
 }
 
-XmlElementType ConfigurationFile::get_child_node(XmlElementType& current_node, const char * node_name, bool required) {
-    XmlElementType cnode = current_node.getChildNode(node_name);
-    if (cnode.isEmpty() && required) {
-        std::ostringstream msg;
-        msg << "mandatory element \"" << node_name << "\" is missing from configuration file";
-        throw ConfigurationSyntaxError(msg.str());
-    }
-    return cnode;
+void ConfigurationFile::configure(World& world) {
+    this->process_world(world);
+    this->process_biota(world);
+    this->process_initialize(world);
+    this->process_environments(world);
+//    this->process_dispersals(world);
+    this->process_samplings(world);
 }
 
 void ConfigurationFile::process_world(World& world) {
@@ -225,43 +224,61 @@ void ConfigurationFile::process_lineage(XmlElementType& lineage_node, World& wor
     }
 
     // seed populations
-    XmlElementType seed_pops = lineage_node.getChildNode("seedPopulations");
-    if (seed_pops.isEmpty()) {
-        throw ConfigurationError("no seed populations defined for lineage \"" + lineage_id + "\"");
+//    XmlElementType seed_pops = lineage_node.getChildNode("seedPopulations");
+//    if (seed_pops.isEmpty()) {
+//        throw ConfigurationError("no seed populations defined for lineage \"" + lineage_id + "\"");
+//    }
+//    for (int i = 0; i < seed_pops.nChildNode("seedPopulation"); ++i) {
+//        XmlElementType pop_node = seed_pops.getChildNode("seedPopulation", i);
+//        std::ostringstream item_desc;
+//        item_desc << "seed population " << i+1 << " for lineage \"" << lineage_id << "\"";
+//        bool has_x =  this->has_attribute(pop_node, "x");
+//        bool has_y =  this->has_attribute(pop_node, "y");
+//        bool has_index=  this->has_attribute(pop_node, "cell");
+//        CellIndexType cell_index = 0;
+//        if ( (has_x or has_y) and has_index ) {
+//            throw ConfigurationError("seed population: cannot specify both cell using both coordinates ('x', 'y') and index ('cell')");
+//        } else if (has_index) {
+//            cell_index = this->get_attribute<CellIndexType>(pop_node, "cell");
+//            if (cell_index >= world.landscape().size()) {
+//                std::ostringstream msg;
+//                msg << "seed population: maximum cell index is " << world.landscape().size() - 1;
+//                msg << " (0-based indexing), but cell index of " << cell_index << " specified";
+//                throw ConfigurationError(msg.str());
+//            }
+//        } else if (has_x and has_y) {
+//            cell_index = this->get_validated_cell_index(this->get_attribute<CellIndexType>(pop_node, "x"),
+//                                                                  this->get_attribute<CellIndexType>(pop_node, "y"),
+//                                                                  world,
+//                                                                  item_desc.str().c_str());
+//        } else if ((has_x and !has_y) or (has_y and !has_x)) {
+//            throw ConfigurationError("seed population: incomplete target cell specification");
+//        } else {
+//            throw ConfigurationError("seed population: must specify target cell either by coordinates ('x', 'y') or index ('cell')");
+//        }
+//        PopulationCountType size = this->get_attribute<PopulationCountType>(pop_node, "size");
+//        PopulationCountType ancestral_pop_size = this->get_child_node_scalar<PopulationCountType>(pop_node, "ancestralPopulationSize");
+//        GenerationCountType ancestral_generations = this->get_child_node_scalar<GenerationCountType>(pop_node, "ancestralGenerations");
+//        world.add_seed_population(cell_index, &lineage, size, ancestral_pop_size, ancestral_generations);
+//    }
+}
+
+void ConfigurationFile::process_initialize(World& world) {
+    Initialize  initialization;
+
+    XmlElementType world_node = this->get_child_node(this->xml_, "world", true);
+    XmlElementType initialize = this->get_child_node(world_node, "initialize", true);
+    XmlElementType env_node = this->get_child_node(world_node, "environment", false);
+
+    if (!env_node.isEmpty()) {
+        initialization.environment = this->parse_environment_settings(world, env_node);
     }
-    for (int i = 0; i < seed_pops.nChildNode("seedPopulation"); ++i) {
-        XmlElementType pop_node = seed_pops.getChildNode("seedPopulation", i);
-        std::ostringstream item_desc;
-        item_desc << "seed population " << i+1 << " for lineage \"" << lineage_id << "\"";
-        bool has_x =  this->has_attribute(pop_node, "x");
-        bool has_y =  this->has_attribute(pop_node, "y");
-        bool has_index=  this->has_attribute(pop_node, "cell");
-        CellIndexType cell_index = 0;
-        if ( (has_x or has_y) and has_index ) {
-            throw ConfigurationError("seed population: cannot specify both cell using both coordinates ('x', 'y') and index ('cell')");
-        } else if (has_index) {
-            cell_index = this->get_attribute<CellIndexType>(pop_node, "cell");
-            if (cell_index >= world.landscape().size()) {
-                std::ostringstream msg;
-                msg << "seed population: maximum cell index is " << world.landscape().size() - 1;
-                msg << " (0-based indexing), but cell index of " << cell_index << " specified";
-                throw ConfigurationError(msg.str());
-            }
-        } else if (has_x and has_y) {
-            cell_index = this->get_validated_cell_index(this->get_attribute<CellIndexType>(pop_node, "x"),
-                                                                  this->get_attribute<CellIndexType>(pop_node, "y"),
-                                                                  world,
-                                                                  item_desc.str().c_str());
-        } else if ((has_x and !has_y) or (has_y and !has_x)) {
-            throw ConfigurationError("seed population: incomplete target cell specification");
-        } else {
-            throw ConfigurationError("seed population: must specify target cell either by coordinates ('x', 'y') or index ('cell')");
-        }
-        PopulationCountType size = this->get_attribute<PopulationCountType>(pop_node, "size");
-        PopulationCountType ancestral_pop_size = this->get_child_node_scalar<PopulationCountType>(pop_node, "ancestralPopulationSize");
-        GenerationCountType ancestral_generations = this->get_child_node_scalar<GenerationCountType>(pop_node, "ancestralGenerations");
-        world.add_seed_population(cell_index, &lineage, size, ancestral_pop_size, ancestral_generations);
+
+    XmlElementType pops = this->get_child_node(initialize, "populations", true);
+    for (int i = 0; i < pops.nChildNode("cell"); ++i) {
+        XmlElementType cell_node = pops.getChildNode("cell", i);
     }
+
 }
 
 void ConfigurationFile::process_environments(World& world) {
@@ -270,42 +287,8 @@ void ConfigurationFile::process_environments(World& world) {
         for (int i = 0; i < environs.nChildNode("environment"); ++i) {
             XmlElementType env_node = environs.getChildNode("environment", i);
             GenerationCountType gen = this->get_attribute<GenerationCountType>(env_node, "gen");
-            WorldSettings world_settings;
-            for (int j = 0; j < env_node.nChildNode(); ++j) {
-                XmlElementType sub_node = env_node.getChildNode(j);
-                std::string node_name = sub_node.getName();
-                if ( node_name == "carryingCapacity") {
-                    world_settings.carrying_capacity = this->get_validated_grid_path<PopulationCountType>(this->get_element_scalar<std::string>(sub_node), world);
-                } else if (node_name == "fitnessTraitOptima") {
-                    unsigned eidx = this->get_attribute<unsigned>(sub_node, "trait");
-                    if (eidx > world.get_num_fitness_traits()) {
-                        std::ostringstream msg;
-                        msg << "invalid fitness trait index: " << eidx;
-                        msg << " (maximum valid index is " << world.get_num_fitness_traits();
-                        msg << ", given " << world.get_num_fitness_traits() << " defined fitness traits)";
-                        throw ConfigurationError(msg.str());
-                    }
-                    std::string gridfile = this->get_validated_grid_path<FitnessTraitType>(this->get_element_scalar<std::string>(sub_node), world);
-                    world_settings.fitness_trait_optima.insert(std::make_pair(eidx, gridfile));
-                } else if (node_name == "movementCosts") {
-                    std::string lineage_id = this->get_attribute<std::string>(sub_node, "lineage");
-                    if (not world.has_species(lineage_id)) {
-                        throw ConfigurationError("movement costs: lineage \"" + lineage_id + "\" not defined");
-                    }
-                    Species * lineage = world.species_registry()[lineage_id];
-                    std::string gridfile = this->get_validated_grid_path<MovementCountType>(this->get_element_scalar<std::string>(sub_node), world);
-                    world_settings.movement_costs.insert(std::make_pair(lineage, gridfile));
-                } else if (node_name == "movementProbabilities") {
-                    std::string lineage_id = this->get_attribute<std::string>(sub_node, "lineage");
-                    if (not world.has_species(lineage_id)) {
-                        throw ConfigurationError("movement probabilities: lineage \"" + lineage_id + "\" not defined");
-                    }
-                    Species * lineage = world.species_registry()[lineage_id];
-                    std::string gridfile = this->get_validated_grid_path<float>(this->get_element_scalar<std::string>(sub_node), world);
-                    world_settings.movement_probabilities.insert(std::make_pair(lineage, gridfile));
-                }
-            }
-            world.add_world_settings(gen, world_settings);
+            EnvironmentSettings environment_settings = this->parse_environment_settings(world, env_node);
+            world.add_environment_settings(gen, environment_settings);
         }
     }
 }
@@ -340,57 +323,6 @@ void ConfigurationFile::process_dispersals(World& world) {
             world.add_dispersal_event(gen, disp_event);
         }
     }
-}
-
-template <class T>
-std::string ConfigurationFile::get_validated_grid_path(const std::string& grid_path, const World& world) {
-    std::string top_dir = filesys::get_path_parent(this->config_filepath_);
-    std::string full_grid_path;
-    if (filesys::is_abs_path(grid_path) or top_dir.size() == 0) {
-        full_grid_path = grid_path;
-    } else {
-        full_grid_path = filesys::compose_path(top_dir, grid_path);
-    }
-    try {
-        asciigrid::AsciiGrid<T> grid(full_grid_path);
-        std::vector<T> values = grid.get_cell_values();
-        if (values.size() != world.size()) {
-            std::ostringstream msg;
-            msg << "landscape has " << world.size() << " cells, ";
-            msg << "but grid \"" << full_grid_path << "\" describes " << values.size() << " cells";
-            throw ConfigurationError(msg.str());
-        }
-        return full_grid_path;
-    } catch (asciigrid::AsciiGridIOError e) {
-        throw ConfigurationIOError("I/O error reading grid \"" + full_grid_path + "\": " + e.what());
-    } catch (asciigrid::AsciiGridFormatError e) {
-        throw ConfigurationIOError("format error reading grid \"" + full_grid_path + "\": " + e.what());
-    }
-}
-
-CellIndexType ConfigurationFile::get_validated_cell_index(CellIndexType x,
-        CellIndexType y,
-        World& world,
-        const char * item_desc) {
-    if (x > world.landscape().size_x() - 1) {
-        std::ostringstream msg;
-        msg << "maximum x-coordinate on landscape is " << world.landscape().size_x() - 1;
-        msg << " (0-based indexing), but x-coordinate of " << x << " specified";
-        if (item_desc != NULL) {
-            msg << " for " << item_desc;
-        }
-        throw ConfigurationError(msg.str());
-    }
-    if (y > world.landscape().size_y() - 1) {
-        std::ostringstream msg;
-        msg << "maximum y-coordinate on landscape is " << world.landscape().size_y() - 1;
-        msg << " (0-based indexing), but y-coordinate of " << y << " specified";
-        if (item_desc != NULL) {
-            msg << " for " << item_desc;
-        }
-        throw ConfigurationError(msg.str());
-    }
-    return world.landscape().xy_to_index(x, y);
 }
 
 void ConfigurationFile::process_samplings(World& world) {
@@ -463,12 +395,104 @@ void ConfigurationFile::process_samplings(World& world) {
     }
 }
 
-void ConfigurationFile::configure(World& world) {
-    this->process_world(world);
-    this->process_biota(world);
-    this->process_environments(world);
-    this->process_dispersals(world);
-    this->process_samplings(world);
+EnvironmentSettings ConfigurationFile::parse_environment_settings(World& world, const XmlElementType& env_node) {
+    EnvironmentSettings environment_settings;
+    for (int j = 0; j < env_node.nChildNode(); ++j) {
+        XmlElementType sub_node = env_node.getChildNode(j);
+        std::string node_name = sub_node.getName();
+        if ( node_name == "carryingCapacity") {
+            environment_settings.carrying_capacity = this->get_validated_grid_path<PopulationCountType>(this->get_element_scalar<std::string>(sub_node), world);
+        } else if (node_name == "fitnessTraitOptima") {
+            unsigned eidx = this->get_attribute<unsigned>(sub_node, "trait");
+            if (eidx > world.get_num_fitness_traits()) {
+                std::ostringstream msg;
+                msg << "invalid fitness trait index: " << eidx;
+                msg << " (maximum valid index is " << world.get_num_fitness_traits();
+                msg << ", given " << world.get_num_fitness_traits() << " defined fitness traits)";
+                throw ConfigurationError(msg.str());
+            }
+            std::string gridfile = this->get_validated_grid_path<FitnessTraitType>(this->get_element_scalar<std::string>(sub_node), world);
+            environment_settings.fitness_trait_optima.insert(std::make_pair(eidx, gridfile));
+        } else if (node_name == "movementCosts") {
+            std::string lineage_id = this->get_attribute<std::string>(sub_node, "lineage");
+            if (not world.has_species(lineage_id)) {
+                throw ConfigurationError("movement costs: lineage \"" + lineage_id + "\" not defined");
+            }
+            Species * lineage = world.species_registry()[lineage_id];
+            std::string gridfile = this->get_validated_grid_path<MovementCountType>(this->get_element_scalar<std::string>(sub_node), world);
+            environment_settings.movement_costs.insert(std::make_pair(lineage, gridfile));
+        } else if (node_name == "movementProbabilities") {
+            std::string lineage_id = this->get_attribute<std::string>(sub_node, "lineage");
+            if (not world.has_species(lineage_id)) {
+                throw ConfigurationError("movement probabilities: lineage \"" + lineage_id + "\" not defined");
+            }
+            Species * lineage = world.species_registry()[lineage_id];
+            std::string gridfile = this->get_validated_grid_path<float>(this->get_element_scalar<std::string>(sub_node), world);
+            environment_settings.movement_probabilities.insert(std::make_pair(lineage, gridfile));
+        }
+    }
+    return environment_settings;
+}
+
+template <class T>
+std::string ConfigurationFile::get_validated_grid_path(const std::string& grid_path, const World& world) {
+    std::string top_dir = filesys::get_path_parent(this->config_filepath_);
+    std::string full_grid_path;
+    if (filesys::is_abs_path(grid_path) or top_dir.size() == 0) {
+        full_grid_path = grid_path;
+    } else {
+        full_grid_path = filesys::compose_path(top_dir, grid_path);
+    }
+    try {
+        asciigrid::AsciiGrid<T> grid(full_grid_path);
+        std::vector<T> values = grid.get_cell_values();
+        if (values.size() != world.size()) {
+            std::ostringstream msg;
+            msg << "landscape has " << world.size() << " cells, ";
+            msg << "but grid \"" << full_grid_path << "\" describes " << values.size() << " cells";
+            throw ConfigurationError(msg.str());
+        }
+        return full_grid_path;
+    } catch (asciigrid::AsciiGridIOError e) {
+        throw ConfigurationIOError("I/O error reading grid \"" + full_grid_path + "\": " + e.what());
+    } catch (asciigrid::AsciiGridFormatError e) {
+        throw ConfigurationIOError("format error reading grid \"" + full_grid_path + "\": " + e.what());
+    }
+}
+
+CellIndexType ConfigurationFile::get_validated_cell_index(CellIndexType x,
+        CellIndexType y,
+        World& world,
+        const char * item_desc) {
+    if (x > world.landscape().size_x() - 1) {
+        std::ostringstream msg;
+        msg << "maximum x-coordinate on landscape is " << world.landscape().size_x() - 1;
+        msg << " (0-based indexing), but x-coordinate of " << x << " specified";
+        if (item_desc != NULL) {
+            msg << " for " << item_desc;
+        }
+        throw ConfigurationError(msg.str());
+    }
+    if (y > world.landscape().size_y() - 1) {
+        std::ostringstream msg;
+        msg << "maximum y-coordinate on landscape is " << world.landscape().size_y() - 1;
+        msg << " (0-based indexing), but y-coordinate of " << y << " specified";
+        if (item_desc != NULL) {
+            msg << " for " << item_desc;
+        }
+        throw ConfigurationError(msg.str());
+    }
+    return world.landscape().xy_to_index(x, y);
+}
+
+XmlElementType ConfigurationFile::get_child_node(XmlElementType& current_node, const char * node_name, bool required) {
+    XmlElementType cnode = current_node.getChildNode(node_name);
+    if (cnode.isEmpty() && required) {
+        std::ostringstream msg;
+        msg << "mandatory element \"" << node_name << "\" is missing from configuration file";
+        throw ConfigurationSyntaxError(msg.str());
+    }
+    return cnode;
 }
 
 } // confsys_detail

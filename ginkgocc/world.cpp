@@ -125,8 +125,8 @@ void World::generate_seed_population(CellIndexType cell_index,
 
 // event handlers #############################################################
 
-void World::add_world_settings(GenerationCountType generation, const WorldSettings& world_settings) {
-    this->world_settings_[generation] = world_settings;
+void World::add_environment_settings(GenerationCountType generation, const EnvironmentSettings& environment_settings) {
+    this->environment_settings_[generation] = environment_settings;
 }
 
 void World::add_dispersal_event(GenerationCountType generation, const DispersalEvent& dispersal_event) {
@@ -233,7 +233,7 @@ void World::run() {
         this->process_tree_samplings();
 
         // process world changes
-        this->process_world_settings();
+        this->process_environment_settings();
 
         // process dispersal events
         // this->process_dispersal_events();
@@ -263,9 +263,9 @@ void World::run() {
     this->logger_.info("Ending simulation.");
 }
 
-void World::process_world_settings() {
-    std::map<GenerationCountType, WorldSettings>::iterator wi = this->world_settings_.find(this->current_generation_);
-    if (wi == this->world_settings_.end()) {
+void World::process_environment_settings() {
+    std::map<GenerationCountType, EnvironmentSettings>::iterator wi = this->environment_settings_.find(this->current_generation_);
+    if (wi == this->environment_settings_.end()) {
         return;
     }
     if (wi->second.carrying_capacity.size() != 0) {
@@ -752,9 +752,9 @@ void World::log_configuration() {
 
     out << std::endl;
     out << "*** ENVIRONMENTS ***" << std::endl;
-    out << "(" << this->world_settings_.size() << " generations with environmental changes specified)" << std::endl;
+    out << "(" << this->environment_settings_.size() << " generations with environmental changes specified)" << std::endl;
 
-    for (std::map<GenerationCountType, WorldSettings>::iterator wi = this->world_settings_.begin(); wi != this->world_settings_.end(); ++wi) {
+    for (std::map<GenerationCountType, EnvironmentSettings>::iterator wi = this->environment_settings_.begin(); wi != this->environment_settings_.end(); ++wi) {
         out << "\n[ENVIRONMENT: GENERATION " << wi->first << "]" << std::endl;
         if (wi->second.carrying_capacity.size() != 0) {
             out << "    Carrying-capacity: \"" << wi->second.carrying_capacity << "\"" << std::endl;

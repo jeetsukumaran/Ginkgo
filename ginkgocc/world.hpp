@@ -57,6 +57,10 @@ class WorldIOError : public std::runtime_error {
 ///////////////////////////////////////////////////////////////////////////////
 // Supporting Data
 
+
+
+// [to be removed -------------------]
+
 /**
  * Seed colonies.
  */
@@ -86,6 +90,10 @@ struct SeedPopulation {
               ancestral_pop_size(ancestral_pop_size),
               ancestral_generations(ancestral_generations) { }
 };
+
+// [to be removed ----------------------]
+
+
 
 /**
  * Sampling regime, tracking the number of organisms and list of cells to
@@ -135,11 +143,14 @@ struct DispersalEvent {
 
 };
 
+
+
+
 /**
  * Changes to world geographical template at the start of a generation,
  * modelling climate change, changes in landscape etc.
  */
-struct WorldSettings {
+struct EnvironmentSettings {
 
     /** Path to grid setting carrying capacity. */
     std::string                             carrying_capacity;
@@ -162,7 +173,19 @@ struct WorldSettings {
      */
     std::map<Species *, std::string>        movement_probabilities;
 
-}; // WorldSettings
+}; // EnvironmentSettings
+
+
+/**
+ * Initialization of system.
+ */
+struct Initialize {
+    public:
+        typedef std::map<CellIndexType, std::pair<Species *, PopulationCountType> > CellPopulationMapType;
+        CellPopulationMapType   cell_population_map;
+        EnvironmentSettings           environment;
+}; // initialize
+
 
 // Supporting Data
 ///////////////////////////////////////////////////////////////////////////////
@@ -234,9 +257,9 @@ class World {
          *
          * @param   generation      generation number for this set of events
          *                          to be activated
-         * @param   world_settings  WorldSettings data
+         * @param   environment_settings  EnvironmentSettings data
          */
-        void add_world_settings(GenerationCountType generation, const WorldSettings& world_settings);
+        void add_environment_settings(GenerationCountType generation, const EnvironmentSettings& environment_settings);
 
         /**
          * Add a dispersal event.
@@ -295,7 +318,7 @@ class World {
         /**
          * Process world settings for the current generation.
          */
-        void process_world_settings();
+        void process_environment_settings();
 
         /**
          * Process dispersal events for the current generation.
@@ -692,7 +715,7 @@ class World {
         /** Produce full diploid trees (i.e., both alleles at each locus)? */
         bool                                    is_produce_full_complement_diploid_trees_;
         /** Collection of events (key = generation #). */
-        std::map<GenerationCountType, WorldSettings>  world_settings_;
+        std::map<GenerationCountType, EnvironmentSettings>  environment_settings_;
         /** Collection of dispersal events (key = generation #). */
         std::multimap<GenerationCountType, DispersalEvent>  dispersal_events_;
         /** Collection of tree building directives (key = generation #). */
