@@ -155,12 +155,9 @@ void World::initialize() {
         ancestral_genes.push_back(haploid);
         // diploid 1 and 2
         for (unsigned i = 0; i < NUM_NEUTRAL_DIPLOID_loci; ++i) {
-            GenealogyNode * diploid1 = new GenealogyNode();
-            diploid1->increment_count();
-            ancestral_genes.push_back(diploid1);
-            GenealogyNode * diploid2 = new GenealogyNode();
-            diploid2->increment_count();
-            ancestral_genes.push_back(diploid2);
+            GenealogyNode * diploid = new GenealogyNode();
+            diploid->increment_count();
+            ancestral_genes.push_back(diploid);
         }
     }
 
@@ -171,7 +168,7 @@ void World::initialize() {
         CellIndexType cell_index = cpm->first;
         Cell& cell = this->landscape_[cell_index];
         InitializationRegime::SpeciesPopulationSizeMapType& sp_pop_sizes = cpm->second;
-        unsigned int ancestor_gene_idx = 0;
+        unsigned int species_ancestor_gene_idx = 0;
         for (SpeciesRegistry::iterator spi = this->species_registry_.begin();
                 spi != this->species_registry_.end();
                 ++spi) {
@@ -185,18 +182,31 @@ void World::initialize() {
                         bpi != pop.end();
                         ++bpi) {
                     Organism * o = *bpi;
-                    assert( (ancestor_gene_idx + 2) < ancestral_genes.size() );
+                    unsigned int ancestor_gene_idx = species_ancestor_gene_idx;
+                    assert( (ancestor_gene_idx + NUM_NEUTRAL_DIPLOID_loci - 1) < ancestral_genes.size() );
                     o->haploid_marker().link(ancestral_genes[ancestor_gene_idx]);
                     for (unsigned i = 0; i < NUM_NEUTRAL_DIPLOID_loci; ++i) {
-                        o->diploid_marker(i).link(ancestral_genes[ancestor_gene_idx+1],
-                                ancestral_genes[ancestor_gene_idx+2]);
+                        ++ancestor_gene_idx;
+                        o->diploid_marker(i).link(ancestral_genes[ancestor_gene_idx],
+                                ancestral_genes[ancestor_gene_idx]);
                     }
                 }
             }
-            ancestor_gene_idx += 3;
+            species_ancestor_gene_idx += NUM_NEUTRAL_DIPLOID_loci + 1;
         }
-        assert ( ancestor_gene_idx = ancestral_genes.size()-1 );
+        assert ( species_ancestor_gene_idx = ancestral_genes.size()-1 );
     }
+
+
+    //---- DEBUGGING -----
+    std::cerr << "After seeding: ";
+    for (std::vector<GenealogyNode *>::iterator gni = ancestral_genes.begin();
+            gni != ancestral_genes.end();
+            ++gni) {
+        std::cerr << (*gni)->reference_count() << ", ";
+    }
+    std::cerr << std::endl;
+    //---- DEBUGGING -----
 
     //---- DEBUGGING -----
     Species * X_SPECIES = *(this->species_registry_.begin());
@@ -227,10 +237,17 @@ void World::initialize() {
         for (std::vector<GenealogyNode *>::iterator gni = ancestral_genes.begin();
                 gni != ancestral_genes.end();
                 ++gni) {
-            if ( (*gni)->reference_count() > 2 ) {
+            //---- DEBUGGING -----
+            std::cerr << (*gni)->reference_count() << ", ";
+            //---- DEBUGGING -----
+            if ( (*gni)->reference_count() > 3 ) {
                 ++num_uncoalesced;
             }
         }
+
+        //---- DEBUGGING -----
+        std::cerr << " (" << num_uncoalesced << " uncoalesced) " << std::endl;
+        //---- DEBUGGING -----
 
         if (num_uncoalesced == 0) {
             all_coalesced = true;
@@ -239,7 +256,7 @@ void World::initialize() {
         if ( cycle_count % this->log_frequency_ == 0 ) {
             std::ostringstream log_msg;
             log_msg << "Initialization cycle " << cycle_count;
-            log_msg << ": " << ancestral_genes.size()-num_uncoalesced << " of " << ancestral_genes.size() << " loci remaining to coalesce.";
+            log_msg << ": " << num_uncoalesced << " of " << ancestral_genes.size() << " loci remaining to coalesce.";
             this->logger_.info(log_msg.str());
         }
 
