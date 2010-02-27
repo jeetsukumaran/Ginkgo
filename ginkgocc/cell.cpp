@@ -280,7 +280,12 @@ void Cell::sample_organisms(Species * sp_ptr,
         std::vector<const Organism *>& samples,
         PopulationCountType num_organisms) {
     assert(sp_ptr);
-    OrganismPointers s = this->populations_[sp_ptr].sample_organism_ptrs(num_organisms, this->rng_);
+    OrganismPointers s;
+    if (num_organisms > 0) {
+        s = this->populations_[sp_ptr].sample_organism_ptrs(num_organisms, this->rng_);
+    } else {
+        this->populations_[sp_ptr].get_organism_ptrs(s);
+    }
     for (OrganismPointers::iterator og = s.begin(); og != s.end(); ++og) {
         sp_ptr->set_organism_label(*og, this->index_, this->x_, this->y_);
     }

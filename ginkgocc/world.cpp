@@ -198,6 +198,14 @@ void World::initialize() {
         assert ( ancestor_gene_idx = ancestral_genes.size()-1 );
     }
 
+    //---- DEBUGGING -----
+    Species * X_SPECIES = *(this->species_registry_.begin());
+    std::set<CellIndexType> X_CI;
+    for (CellIndexType xci = 0; xci < this->landscape_.size(); ++xci) {
+        X_CI.insert(xci);
+    }
+    //---- DEBUGGING -----
+
 
     // loop until all ancestral alleles have reference count of 2
     bool all_coalesced = false;
@@ -231,9 +239,18 @@ void World::initialize() {
         if ( cycle_count % this->log_frequency_ == 0 ) {
             std::ostringstream log_msg;
             log_msg << "Initialization cycle " << cycle_count;
-            log_msg << ": " << ancestral_genes.size()-num_uncoalesced << " uncoalesced loci remaining.";
+            log_msg << ": " << ancestral_genes.size()-num_uncoalesced << " of " << ancestral_genes.size() << " loci remaining to coalesce.";
             this->logger_.info(log_msg.str());
         }
+
+
+        //---- DEBUGGING -----
+        if ( cycle_count % 100 == 0 ) {
+            std::ostringstream X_LAB;
+            X_LAB << "init" << cycle_count;
+            this->save_trees(X_SPECIES, 0, X_CI, X_LAB.str());
+        }
+        //---- DEBUGGING -----
 
     }
 
