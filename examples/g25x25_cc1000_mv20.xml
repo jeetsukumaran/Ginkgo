@@ -10,20 +10,24 @@
         default_cell_carrying_capacity="1000"
         log_frequency="1"
         multifurcating_trees="1">
-        <biota>
+        <lineages>
             <lineage id="Zx">
                 <fitness_trait_relative_selection_weights>1</fitness_trait_relative_selection_weights>
                 <fitness_trait_default_genotypes>0</fitness_trait_default_genotypes>
                 <fecundity>16</fecundity>
                 <movementCapacity distribution="constant">1</movementCapacity>
-                <seedPopulations>
-                    <seedPopulation x="0" y="0" size="1000">
-                        <ancestralPopulationSize>1000</ancestralPopulationSize>
-                        <ancestralGenerations>20</ancestralGenerations>
-                    </seedPopulation>
-                </seedPopulations>
             </lineage>
-        </biota>
+        </lineages>
+        <initialization>
+            <populations>
+                <cell index="0">
+                    <population lineage="Zx" size="100" />
+                </cell>
+            </populations>
+            <environment>
+                <movementCosts lineage="Zx">g25x25_mv1.asc</movementCosts>
+            </environment>
+        </initialization>
         <environments>
             <environment gen="0">
                 <movementCosts lineage="Zx">g25x25_mv1.asc</movementCosts>
