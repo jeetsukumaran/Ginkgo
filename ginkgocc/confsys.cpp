@@ -104,7 +104,7 @@ void ConfigurationFile::open(const char * fpath) {
 
 void ConfigurationFile::configure(World& world) {
     this->process_world(world);
-    this->process_biota(world);
+    this->process_lineages(world);
     this->process_initialization(world);
     this->process_environments(world);
 //    this->process_dispersals(world);
@@ -135,10 +135,10 @@ void ConfigurationFile::process_world(World& world) {
     world.set_log_frequency(this->get_attribute<unsigned>(world_node, "log_frequency", 10));
 }
 
-void ConfigurationFile::process_biota(World& world) {
-    XmlElementType bio_node = this->xml_.getChildNode("world").getChildNode("biota");
+void ConfigurationFile::process_lineages(World& world) {
+    XmlElementType bio_node = this->xml_.getChildNode("world").getChildNode("lineages");
     if (bio_node.isEmpty()) {
-        throw ConfigurationSyntaxError("biota element is missing from configuration file");
+        throw ConfigurationSyntaxError("lineages element is missing from configuration file");
     }
 
     for (int i = 0; i < bio_node.nChildNode("lineage"); ++i) {
@@ -267,13 +267,13 @@ void ConfigurationFile::process_lineage(XmlElementType& lineage_node, World& wor
 void ConfigurationFile::process_initialization(World& world) {
     InitializationRegime  initialization_regime;
     XmlElementType world_node = this->get_child_node(this->xml_, "world", true);
-    XmlElementType initialize = this->get_child_node(world_node, "initialize", true);
+    XmlElementType initialization = this->get_child_node(world_node, "initialization", true);
     XmlElementType env_node = this->get_child_node(world_node, "environment", false);
 
     if (!env_node.isEmpty()) {
         initialization_regime.environment = this->parse_environment_settings(world, env_node);
     }
-    XmlElementType cell_pops = this->get_child_node(initialize, "populations", true);
+    XmlElementType cell_pops = this->get_child_node(initialization, "populations", true);
     for (int i = 0; i < cell_pops.nChildNode("cell"); ++i) {
         XmlElementType cell_node = cell_pops.getChildNode("cell", i);
         CellIndexType cell_index = this->parse_cell_index_from_node(world, cell_node);
@@ -303,37 +303,37 @@ void ConfigurationFile::process_environments(World& world) {
     }
 }
 
-void ConfigurationFile::process_dispersals(World& world) {
-    XmlElementType dispersals = this->xml_.getChildNode("world").getChildNode("dispersals");
-    if (!dispersals.isEmpty()) {
-        for (int i = 0; i < dispersals.nChildNode("dispersal"); ++i) {
-            XmlElementType disp_node = dispersals.getChildNode("dispersal", i);
-            GenerationCountType gen = this->get_attribute<GenerationCountType>(disp_node, "gen");
-            DispersalEvent disp_event;
-            std::ostringstream item_desc;
-            item_desc << "dispersal event " << i+1 << " in generation " << gen;
-            disp_event.source = this->get_validated_cell_index(this->get_attribute<CellIndexType>(disp_node, "from_x"),
-                    this->get_attribute<CellIndexType>(disp_node, "from_y"),
-                    world,
-                    item_desc.str().c_str());
-            disp_event.destination = this->get_validated_cell_index(this->get_attribute<CellIndexType>(disp_node, "to_x"),
-                    this->get_attribute<CellIndexType>(disp_node, "to_y"),
-                    world,
-                    item_desc.str().c_str());
-            disp_event.probability = this->get_child_node_scalar<float>(disp_node, "probability", 1.0);
-            std::string lineage_id = this->get_child_node_scalar<std::string>(disp_node, "lineage", "");
-            if (lineage_id.size() > 0) {
-                if (not world.has_species(lineage_id)) {
-                    throw ConfigurationError("dispersal: lineage \"" + lineage_id + "\" not defined");
-                }
-                disp_event.species_ptr = world.species_registry()[lineage_id];
-            } else {
-                disp_event.species_ptr = NULL;
-            }
-            world.add_dispersal_event(gen, disp_event);
-        }
-    }
-}
+//void ConfigurationFile::process_dispersals(World& world) {
+//    XmlElementType dispersals = this->xml_.getChildNode("world").getChildNode("dispersals");
+//    if (!dispersals.isEmpty()) {
+//        for (int i = 0; i < dispersals.nChildNode("dispersal"); ++i) {
+//            XmlElementType disp_node = dispersals.getChildNode("dispersal", i);
+//            GenerationCountType gen = this->get_attribute<GenerationCountType>(disp_node, "gen");
+//            DispersalEvent disp_event;
+//            std::ostringstream item_desc;
+//            item_desc << "dispersal event " << i+1 << " in generation " << gen;
+//            disp_event.source = this->get_validated_cell_index(this->get_attribute<CellIndexType>(disp_node, "from_x"),
+//                    this->get_attribute<CellIndexType>(disp_node, "from_y"),
+//                    world,
+//                    item_desc.str().c_str());
+//            disp_event.destination = this->get_validated_cell_index(this->get_attribute<CellIndexType>(disp_node, "to_x"),
+//                    this->get_attribute<CellIndexType>(disp_node, "to_y"),
+//                    world,
+//                    item_desc.str().c_str());
+//            disp_event.probability = this->get_child_node_scalar<float>(disp_node, "probability", 1.0);
+//            std::string lineage_id = this->get_child_node_scalar<std::string>(disp_node, "lineage", "");
+//            if (lineage_id.size() > 0) {
+//                if (not world.has_species(lineage_id)) {
+//                    throw ConfigurationError("dispersal: lineage \"" + lineage_id + "\" not defined");
+//                }
+//                disp_event.species_ptr = world.species_registry()[lineage_id];
+//            } else {
+//                disp_event.species_ptr = NULL;
+//            }
+//            world.add_dispersal_event(gen, disp_event);
+//        }
+//    }
+//}
 
 void ConfigurationFile::process_samplings(World& world) {
     XmlElementType samplings = this->xml_.getChildNode("world").getChildNode("samples");

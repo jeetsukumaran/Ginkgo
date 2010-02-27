@@ -249,11 +249,11 @@ class ConfigurationFile {
         XmlElementType get_child_node(XmlElementType& current_node, const char * node_name, bool required=true);
 
         void process_world(World& world);
-        void process_biota(World& world);
+        void process_lineages(World& world);
         void process_lineage(XmlElementType& lnode, World& world);
         void process_initialization(World& world);
         void process_environments(World& world);
-        void process_dispersals(World& world);
+//        void process_dispersals(World& world);
         void process_samplings(World& world);
 
         EnvironmentSettings parse_environment_settings(World& world, const XmlElementType& env_node);
