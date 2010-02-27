@@ -90,7 +90,8 @@ int main(int argc, char* argv[]) {
         std::cout << "Configuration file validates." << std:: endl;
     } else {
         world.init_logger();
-        world.logger().info("Running: " + program_identity);
+        world.logger().reset_elapsed_time("S+");
+        world.logger().info("Starting: " + program_identity);
         world.logger().info("World configured using: \"" + args[0] + "\"");
 
         std::ostringstream seed_info;
@@ -107,6 +108,8 @@ int main(int argc, char* argv[]) {
         }
 
         world.run();
+        world.logger().reset_elapsed_time("Q+");
+        world.logger().info("Ending " + program_identity + ".");
 
     }
 

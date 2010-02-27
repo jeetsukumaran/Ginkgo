@@ -121,8 +121,9 @@ void LogHandler::emit(LoggingLevel level, const std::string& message) {
 
 // Constructor: gets reference to LogStreamManager singleton object.
 Logger::Logger():
-            log_stream_manager_(LogStreamManager::get_instance()) {
-    this->reset_start_time();
+            log_stream_manager_(LogStreamManager::get_instance()),
+            elapsed_time_leader_("T+") {
+    this->reset_elapsed_time();
 }
 
 // Destructor: no-op
@@ -148,7 +149,7 @@ LogHandler& Logger::add_handler(std::ostream& dest, LogHandler::LoggingLevel log
 }
 
 // resets the log start time
-void Logger::reset_start_time() {
+void Logger::reset_elapsed_time() {
     time (&this->start_time_);
 }
 
@@ -216,7 +217,7 @@ void Logger::log(LogHandler::LoggingLevel logging_level, const char * message) {
         std::ostringstream msg;
         msg << "[" << this->current_timestamp_;
 //        msg << " -- " << std::fixed << std::setprecision(4) << std::setw(8) << this->elapsed_hours_ << " hrs]";
-        msg << " -- T+" << std::fixed << std::setprecision(4) << this->elapsed_hours_ << "h]";
+        msg << " -- " << this->elapsed_time_leader_ << std::fixed << std::setprecision(4) << this->elapsed_hours_ << "h]";
         msg << " " << message;
         (*logh).emit(logging_level, msg.str());
     }

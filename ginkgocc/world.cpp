@@ -131,15 +131,6 @@ void World::set_initialization_regime(const InitializationRegime& initialization
 
 void World::initialize() {
 
-
-    // for each species, for each locus, create the ancestral allele
-    // add pointer to ancestral alleles, reference counted, to vector of ancestral alleles
-    // for each species, for each cell, create a N new organisms
-    // for each organism, for each locus, inherit the ancestral allele
-
-    // run until ancestral allele reference count = 1
-
-
     // set initialization environment
     this->set_world_environment(this->initialization_regime_.environment, "[Initialization]");
 
@@ -311,6 +302,7 @@ void World::cycle() {
 void World::run() {
     if (!this->logger_init_) {
         this->init_logger();
+        this->logger_.reset_elapsed_time("S+");
     }
     this->log_configuration();
 
@@ -322,21 +314,15 @@ void World::run() {
     this->logger_.info("UNRELEASED NODE MEMORY WILL BE LOGGED.");
 #endif
 
-    this->logger_.info("Starting simulation.");
-
-    // startup
+    // initialization
+    this->logger_.reset_elapsed_time("I+");
+    this->logger_.info("Starting initialization cycles.");
     this->initialize();
-//    for (std::vector<SeedPopulation>::iterator spi = this->seed_populations_.begin();
-//            spi != this->seed_populations_.end();
-//            ++spi) {
-//        SeedPopulation& sp = *spi;
-//        this->generate_seed_population(sp.cell_index,
-//            sp.species_ptr,
-//            sp.pop_size,
-//            sp.ancestral_pop_size,
-//            sp.ancestral_generations);
-//    }
+    this->logger_.info("Initialization cycles ended.");
 
+    // main run
+    this->logger_.reset_elapsed_time("R+");
+    this->logger_.info("Starting main run cycles.");
     while (this->current_generation_ <= this->generations_to_run_) {
 
         // clear organism labels
@@ -365,6 +351,8 @@ void World::run() {
         this->cycle();
     }
 
+    this->logger_.info("Ending main run cycles.");
+
     if (this->is_produce_final_output_) {
         this->logger_.info("Saving final set of occurrences and trees for all species.");
         std::set<CellIndexType> cell_indexes;
@@ -383,7 +371,6 @@ void World::run() {
     run_final_cleanup_and_memory_check();
 #endif
 
-    this->logger_.info("Ending simulation.");
 }
 
 void World::process_environment_settings() {
@@ -736,7 +723,7 @@ void World::save_trees(Species * sp_ptr,
 
 void World::init_logger() {
     if (not this->logger_init_) {
-        this->logger_.reset_start_time();
+        this->logger_.reset_elapsed_time();
         if (this->is_log_to_screen_) {
             this->logger_.add_handler(std::cout, LogHandler::LOG_INFO);
         }

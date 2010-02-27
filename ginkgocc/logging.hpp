@@ -189,7 +189,38 @@ class Logger {
         /**
          * Sets the log time to NOW.
          */
-        void reset_start_time();
+        void reset_elapsed_time();
+
+        /**
+         * Sets the log time to NOW, and simultaneous sets the string
+         * leader to be printed in the time definition.
+         */
+        void reset_elapsed_time(const std::string& leader) {
+            this->reset_elapsed_time(leader.c_str());
+        }
+
+        /**
+         * Sets the log time to NOW, and simultaneous sets the string
+         * leader to be printed in the time definition.
+         */
+        void reset_elapsed_time(const char * leader) {
+            this->set_elapsed_time_leader(leader);
+            this->reset_elapsed_time();
+        }
+
+        /**
+         * Sets the token preceding the elapsed time in the timestamp.
+         */
+        void set_elapsed_time_leader(const std::string& leader) {
+            this->elapsed_time_leader_ = leader;
+        }
+
+        /**
+         * Sets the token preceding the elapsed time in the timestamp.
+         */
+        void set_elapsed_time_leader(const char * leader) {
+            this->elapsed_time_leader_ = leader;
+        }
 
         /**
          * Writes a message at the "DEBUG" level.
@@ -296,6 +327,7 @@ class Logger {
         time_t                          start_time_;
         char                            current_timestamp_[80];
         double                          elapsed_hours_;
+        std::string                     elapsed_time_leader_;
 
 }; // logger
 
