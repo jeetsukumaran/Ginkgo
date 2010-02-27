@@ -150,6 +150,14 @@ class GenealogyNode {
         }
 
         /**
+         * Returns reference count.
+         */
+        unsigned reference_count() const {
+            return this->reference_count_;
+        }
+
+
+        /**
          * Returns pointer to parent node.
          *
          * @return      pointer to parent node
@@ -274,6 +282,18 @@ class HaploidMarker {
         }
 
         /**
+         * Connects the alleles (the GenealogyNode objects) at this locus into
+         * existing genealogies represented by given alleles.
+         *
+         * @param allele parent of allele
+         */
+//        void link(const GenealogyNode& allele) {
+//            assert(this->allele_ == NULL);
+//            this->allele_ = new GenealogyNode();
+//            this->allele_->link(allele_);
+//        }
+
+        /**
          * Returns pointer to GenealogyNode representing allele at this locus.
          * @return GenealogyNode representing allele at this locus
          */
@@ -396,6 +416,23 @@ class DiploidMarker {
             this->allele2_ = new GenealogyNode();
             this->allele2_->link(rng.select(male.allele1_, male.allele2_));
         }
+
+        /**
+         * Connects the alleles (the GenealogyNode objects) at this locus into
+         * existing genealogies represented by given alleles.
+         *
+         * @param allele1 parent of first allele
+         * @param allele2 parent of second allele
+         */
+//        void link(const GenealogyNode& allele1,
+//                     const GenealogyNode& allele2) {
+//            assert(this->allele1_ == NULL);
+//            this->allele1_ = new GenealogyNode();
+//            this->allele1_->link(allele1);
+//            assert(this->allele2_ == NULL);
+//            this->allele2_ = new GenealogyNode();
+//            this->allele2_->link(allele1);
+//        }
 
         /**
          * Returns pointer to GenealogyNode representing allele 1 at this locus.
@@ -617,14 +654,30 @@ class Organism {
             return this->neutral_haploid_marker_;
         }
 
+        /** Returns a reference to the haploid marker of this organism. */
+        HaploidMarker& haploid_marker() {
+            return this->neutral_haploid_marker_;
+        }
+
         /** Returns a reference to the diploid marker of this organism. */
         const DiploidMarker& diploid_marker(unsigned idx) const {
             assert(idx < NUM_NEUTRAL_DIPLOID_loci);
             return this->neutral_diploid_markers_[idx];
         }
 
+        /** Returns a reference to the diploid marker of this organism. */
+        DiploidMarker& diploid_marker(unsigned idx) {
+            assert(idx < NUM_NEUTRAL_DIPLOID_loci);
+            return this->neutral_diploid_markers_[idx];
+        }
+
         /** Returns a reference to the haploid marker of this organism. */
         GenealogyNode * get_haploid_node() const {
+            return this->neutral_haploid_marker_.node();
+        }
+
+        /** Returns a reference to the haploid marker of this organism. */
+        GenealogyNode * get_haploid_node() {
             return this->neutral_haploid_marker_.node();
         }
 
@@ -635,10 +688,24 @@ class Organism {
         }
 
         /** Returns a reference to allele 1 of the diploid marker of this organism. */
+        GenealogyNode * get_diploid_node1(unsigned idx) {
+            assert(idx < NUM_NEUTRAL_DIPLOID_loci);
+            return this->neutral_diploid_markers_[idx].node1();
+        }
+
+
+        /** Returns a reference to allele 1 of the diploid marker of this organism. */
         GenealogyNode * get_diploid_node2(unsigned idx) const {
             assert(idx < NUM_NEUTRAL_DIPLOID_loci);
             return this->neutral_diploid_markers_[idx].node2();
         }
+
+        /** Returns a reference to allele 1 of the diploid marker of this organism. */
+        GenealogyNode * get_diploid_node2(unsigned idx) {
+            assert(idx < NUM_NEUTRAL_DIPLOID_loci);
+            return this->neutral_diploid_markers_[idx].node2();
+        }
+
 
         /** Returns a reference to random allele of the diploid marker of this organism. */
         GenealogyNode * get_diploid_random_node(unsigned idx, RandomNumberGenerator& rng) const {

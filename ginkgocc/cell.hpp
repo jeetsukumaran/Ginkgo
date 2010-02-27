@@ -275,6 +275,11 @@ class Cell {
         void sample_organisms(Species * sp_ptr,
             std::vector<const Organism *>& samples, PopulationCountType num_organisms);
 
+
+        BreedingPopulation& population(Species * sp) {
+            return this->populations_[sp];
+        }
+
     private:
         /** Copy constructor, disabled by private scoping and no definition */
         Cell(const Cell&);

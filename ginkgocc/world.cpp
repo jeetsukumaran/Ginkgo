@@ -66,7 +66,7 @@ World::World()
 
 World::~World() {}
 
-// initialization and set up ##################################################
+// set up #####################################################################
 
 // Creates a new landscape.
 void World::generate_landscape(CellIndexType size_x, CellIndexType size_y) {
@@ -121,6 +121,129 @@ void World::generate_seed_population(CellIndexType cell_index,
     post_msg << "drawn from an ancestral population of " << ancestral_pop_size << " ";
     post_msg << "after " << ancestral_generations << " generations.";
     this->logger_.info(post_msg.str());
+}
+
+// initialization #############################################################
+
+void World::set_initialization_regime(const InitializationRegime& initialization_regime) {
+    this->initialization_regime_ = initialization_regime;
+}
+
+void World::initialize() {
+
+
+    // for each species, for each locus, create the ancestral allele
+    // add pointer to ancestral alleles, reference counted, to vector of ancestral alleles
+    // for each species, for each cell, create a N new organisms
+    // for each organism, for each locus, inherit the ancestral allele
+
+    // run until ancestral allele reference count = 1
+
+    // create ancestral alleles
+    std::vector<GenealogyNode *>  ancestral_genes;
+    for (SpeciesRegistry::iterator spi = this->species_registry_.begin();
+            spi != this->species_registry_.end();
+            ++spi) {
+        // haploid
+        GenealogyNode * haploid = new GenealogyNode();
+        haploid->increment_count();
+        ancestral_genes.push_back(haploid);
+        // diploid 1 and 2
+        for (unsigned i = 0; i < NUM_NEUTRAL_DIPLOID_loci; ++i) {
+            GenealogyNode * diploid1 = new GenealogyNode();
+            diploid1->increment_count();
+            ancestral_genes.push_back(diploid1);
+            GenealogyNode * diploid2 = new GenealogyNode();
+            diploid2->increment_count();
+            ancestral_genes.push_back(diploid2);
+        }
+    }
+
+    // generate organisms, linking to ancestral alleles
+    for (InitializationRegime::CellSpeciesPopulationMapType::iterator cpm = this->initialization_regime_.cell_populations.begin();
+            cpm != this->initialization_regime_.cell_populations.end();
+            ++cpm) {
+        CellIndexType cell_index = cpm->first;
+        Cell& cell = this->landscape_[cell_index];
+        InitializationRegime::SpeciesPopulationSizeMapType& sp_pop_sizes = cpm->second;
+        unsigned int ancestor_gene_idx = 0;
+        for (SpeciesRegistry::iterator spi = this->species_registry_.begin();
+                spi != this->species_registry_.end();
+                ++spi) {
+            Species * sp = *spi;
+            InitializationRegime::SpeciesPopulationSizeMapType::iterator sppi = sp_pop_sizes.find(sp);
+            if (sppi != sp_pop_sizes.end()) {
+                PopulationCountType pop_size = sppi->second;
+                cell.generate_new_organisms(sp, pop_size);
+                BreedingPopulation& pop = cell.population(sp);
+                for (BreedingPopulation::iterator bpi = pop.begin();
+                        bpi != pop.end();
+                        ++bpi) {
+                    Organism * o = *bpi;
+                    assert( (ancestor_gene_idx + 2) < ancestral_genes.size() );
+                    o->get_haploid_node()->link(ancestral_genes[ancestor_gene_idx]);
+                    for (unsigned i = 0; i < NUM_NEUTRAL_DIPLOID_loci; ++i) {
+                        o->get_diploid_node1(i)->link(ancestral_genes[ancestor_gene_idx+1]);
+                        o->get_diploid_node2(i)->link(ancestral_genes[ancestor_gene_idx+2]);
+                    }
+                }
+            }
+            ancestor_gene_idx += 3;
+        }
+        assert ( ancestor_gene_idx = ancestral_genes.size()-1 );
+    }
+
+
+    // set initialization environment
+    this->set_world_environment(this->initialization_regime_.environment, "[Initialization]");
+
+
+    // loop until all ancestral alleles have reference count of 2
+    bool all_coalesced = false;
+    unsigned long cycle_count = 0;
+    while (!all_coalesced) {
+        cycle_count += 1;
+
+        for (CellIndexType i = 0; i < this->landscape_.size(); ++i) {
+            this->landscape_[i].reproduction();
+            this->landscape_[i].migration();
+        }
+        this->landscape_.process_migrants();
+        for (CellIndexType i = 0; i < this->landscape_.size(); ++i) {
+            this->landscape_[i].survival();
+            this->landscape_[i].competition();
+        }
+
+        unsigned num_uncoalesced = 0;
+        for (std::vector<GenealogyNode *>::iterator gni = ancestral_genes.begin();
+                gni != ancestral_genes.end();
+                ++gni) {
+            if ( (*gni)->reference_count() > 2 ) {
+                ++num_uncoalesced;
+            }
+        }
+
+        if (num_uncoalesced == 0) {
+            all_coalesced = true;
+        }
+
+        if ( cycle_count % this->log_frequency_ == 0 ) {
+            std::ostringstream log_msg;
+            log_msg << "Initialization cycle " << cycle_count;
+            log_msg << ": " << num_uncoalesced << " loci of " << ancestral_genes.size() << " coalesced.";
+            this->logger_.info(log_msg.str());
+        }
+
+    }
+
+
+    // clean-up: decrement reference count self
+    for (std::vector<GenealogyNode *>::iterator gni = ancestral_genes.begin();
+            gni != ancestral_genes.end();
+            ++gni) {
+        (*gni)->decrement_count();;
+    }
+
 }
 
 // event handlers #############################################################
@@ -203,16 +326,17 @@ void World::run() {
     this->logger_.info("Starting simulation.");
 
     // startup
-    for (std::vector<SeedPopulation>::iterator spi = this->seed_populations_.begin();
-            spi != this->seed_populations_.end();
-            ++spi) {
-        SeedPopulation& sp = *spi;
-        this->generate_seed_population(sp.cell_index,
-            sp.species_ptr,
-            sp.pop_size,
-            sp.ancestral_pop_size,
-            sp.ancestral_generations);
-    }
+    this->initialize();
+//    for (std::vector<SeedPopulation>::iterator spi = this->seed_populations_.begin();
+//            spi != this->seed_populations_.end();
+//            ++spi) {
+//        SeedPopulation& sp = *spi;
+//        this->generate_seed_population(sp.cell_index,
+//            sp.species_ptr,
+//            sp.pop_size,
+//            sp.ancestral_pop_size,
+//            sp.ancestral_generations);
+//    }
 
     while (this->current_generation_ <= this->generations_to_run_) {
 
@@ -268,39 +392,47 @@ void World::process_environment_settings() {
     if (wi == this->environment_settings_.end()) {
         return;
     }
-    if (wi->second.carrying_capacity.size() != 0) {
-        this->logger_.info("[Generation " + convert::to_scalar<std::string>(this->current_generation_) + "] Setting carrying capacity: \"" + wi->second.carrying_capacity + "\".");
-        asciigrid::AsciiGrid<PopulationCountType> grid(wi->second.carrying_capacity);
+    std::ostringstream log_leader;
+    log_leader << "[Generation " << this->current_generation_  << "]";
+    this->set_world_environment(wi->second, log_leader.str().c_str());
+}
+
+void World::set_world_environment(EnvironmentSettings& env, const char * log_leader) {
+    if (env.carrying_capacity.size() != 0) {
+        std::ostringstream msg;
+        msg << log_leader << " Setting carrying capacity: \"" << env.carrying_capacity << "\".";
+        this->logger_.info(msg.str());
+        asciigrid::AsciiGrid<PopulationCountType> grid(env.carrying_capacity);
         this->landscape_.set_carrying_capacities(grid.get_cell_values());
     }
-    if (wi->second.fitness_trait_optima.size() != 0) {
-        for (std::map<unsigned, std::string>::iterator ei = wi->second.fitness_trait_optima.begin();
-                 ei != wi->second.fitness_trait_optima.end();
+    if (env.fitness_trait_optima.size() != 0) {
+        for (std::map<unsigned, std::string>::iterator ei = env.fitness_trait_optima.begin();
+                 ei != env.fitness_trait_optima.end();
                  ++ei) {
             std::ostringstream msg;
-            msg << "[Generation " << this->current_generation_ << "] Setting optima for fitness trait " <<  ei->first <<  ": \"" <<  ei->second <<  "\"";
+            msg << log_leader << " Setting optima for fitness trait " <<  ei->first <<  ": \"" <<  ei->second <<  "\"";
             this->logger_.info(msg.str());
             asciigrid::AsciiGrid<FitnessTraitType> grid(ei->second);
             this->landscape_.set_environment(ei->first, grid.get_cell_values());
         }
     }
-    if (wi->second.movement_costs.size() != 0) {
-        for (std::map<Species *, std::string>::iterator mi = wi->second.movement_costs.begin();
-                 mi != wi->second.movement_costs.end();
+    if (env.movement_costs.size() != 0) {
+        for (std::map<Species *, std::string>::iterator mi = env.movement_costs.begin();
+                 mi != env.movement_costs.end();
                  ++mi) {
             std::ostringstream msg;
-            msg << "[Generation " << this->current_generation_ << "] Setting movement costs for species " <<  mi->first->get_label() <<  ": \"" <<  mi->second <<  "\"";
+            msg << log_leader << " Setting movement costs for species " <<  mi->first->get_label() <<  ": \"" <<  mi->second <<  "\"";
             this->logger_.info(msg.str());
             asciigrid::AsciiGrid<MovementCountType> grid(mi->second);
             mi->first->set_movement_costs(grid.get_cell_values());
         }
     }
-    if (wi->second.movement_probabilities.size() != 0) {
-        for (std::map<Species *, std::string>::iterator mi = wi->second.movement_probabilities.begin();
-                 mi != wi->second.movement_probabilities.end();
+    if (env.movement_probabilities.size() != 0) {
+        for (std::map<Species *, std::string>::iterator mi = env.movement_probabilities.begin();
+                 mi != env.movement_probabilities.end();
                  ++mi) {
             std::ostringstream msg;
-            msg << "[Generation " << this->current_generation_ << "] Setting movement probabilities for species " <<  mi->first->get_label() <<  ": \"" <<  mi->second <<  "\"";
+            msg << log_leader << " Setting movement probabilities for species " <<  mi->first->get_label() <<  ": \"" <<  mi->second <<  "\"";
             this->logger_.info(msg.str());
             asciigrid::AsciiGrid<float> grid(mi->second);
             mi->first->set_movement_probabilities(grid.get_cell_values());
@@ -782,20 +914,20 @@ void World::log_configuration() {
         }
     }
 
-    out << std::endl;
-    out << "*** DISPERSALS ***" << std::endl;
-    out << "(" << this->dispersal_events_.size() << " dispersal events specified)" << std::endl;
-    out << std::endl;
-    for (std::map<GenerationCountType, DispersalEvent>::iterator di = this->dispersal_events_.begin(); di != this->dispersal_events_.end(); ++di) {
-        DispersalEvent& de = di->second;
-        out << "    GENERATION " << di->first << ": " << "Dispersal";
-        if (de.species_ptr != NULL) {
-            out << " of " << de.species_ptr->get_label();
-        }
-        out << " from (" << this->landscape_.index_to_x(de.source) << "," << this->landscape_.index_to_y(de.source) << ")";
-        out << " to (" << this->landscape_.index_to_x(de.destination) << "," << this->landscape_.index_to_y(de.destination) << ")";
-        out << " with probability " << de.probability << "." << std::endl;
-    }
+//    out << std::endl;
+//    out << "*** DISPERSALS ***" << std::endl;
+//    out << "(" << this->dispersal_events_.size() << " dispersal events specified)" << std::endl;
+//    out << std::endl;
+//    for (std::map<GenerationCountType, DispersalEvent>::iterator di = this->dispersal_events_.begin(); di != this->dispersal_events_.end(); ++di) {
+//        DispersalEvent& de = di->second;
+//        out << "    GENERATION " << di->first << ": " << "Dispersal";
+//        if (de.species_ptr != NULL) {
+//            out << " of " << de.species_ptr->get_label();
+//        }
+//        out << " from (" << this->landscape_.index_to_x(de.source) << "," << this->landscape_.index_to_y(de.source) << ")";
+//        out << " to (" << this->landscape_.index_to_x(de.destination) << "," << this->landscape_.index_to_y(de.destination) << ")";
+//        out << " with probability " << de.probability << "." << std::endl;
+//    }
 
     out << std::endl;
     out << "*** OCCURRENCE SAMPLES ***";

@@ -181,8 +181,9 @@ struct EnvironmentSettings {
  */
 struct InitializationRegime {
     public:
-        typedef std::map<CellIndexType, std::pair<Species *, PopulationCountType> > CellPopulationMapType;
-        CellPopulationMapType         cell_populations;
+        typedef std::map<Species *, PopulationCountType>  SpeciesPopulationSizeMapType;
+        typedef std::map<CellIndexType, SpeciesPopulationSizeMapType > CellSpeciesPopulationMapType;
+        CellSpeciesPopulationMapType  cell_populations;
         EnvironmentSettings           environment;
 }; // initialize
 
@@ -208,7 +209,7 @@ class World {
          */
         ~World();
 
-        // initialization and set up ##########################################
+        // set up #############################################################
 
         /**
          * Build a landscape of the specified spatial and environmental
@@ -248,6 +249,11 @@ class World {
                 PopulationCountType pop_size,
                 PopulationCountType ancestral_pop_size,
                 GenerationCountType ancestral_generations);
+
+        // initialization #####################################################
+
+        void set_initialization_regime(const InitializationRegime& initialization_regime);
+        void initialize();
 
         // event handlers #####################################################
 
@@ -319,6 +325,11 @@ class World {
          * Process world settings for the current generation.
          */
         void process_environment_settings();
+
+        /**
+         * Configure world according to given environment.
+         */
+        void set_world_environment(EnvironmentSettings& env, const char * log_leader);
 
         /**
          * Process dispersal events for the current generation.
@@ -714,6 +725,8 @@ class World {
         bool                                    is_produce_final_output_;
         /** Produce full diploid trees (i.e., both alleles at each locus)? */
         bool                                    is_produce_full_complement_diploid_trees_;
+        /** Initialization regime. */
+        InitializationRegime                    initialization_regime_;
         /** Collection of events (key = generation #). */
         std::map<GenerationCountType, EnvironmentSettings>  environment_settings_;
         /** Collection of dispersal events (key = generation #). */

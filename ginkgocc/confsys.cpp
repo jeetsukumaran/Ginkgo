@@ -266,7 +266,6 @@ void ConfigurationFile::process_lineage(XmlElementType& lineage_node, World& wor
 
 void ConfigurationFile::process_initialization(World& world) {
     InitializationRegime  initialization_regime;
-
     XmlElementType world_node = this->get_child_node(this->xml_, "world", true);
     XmlElementType initialize = this->get_child_node(world_node, "initialize", true);
     XmlElementType env_node = this->get_child_node(world_node, "environment", false);
@@ -274,7 +273,6 @@ void ConfigurationFile::process_initialization(World& world) {
     if (!env_node.isEmpty()) {
         initialization_regime.environment = this->parse_environment_settings(world, env_node);
     }
-
     XmlElementType cell_pops = this->get_child_node(initialize, "populations", true);
     for (int i = 0; i < cell_pops.nChildNode("cell"); ++i) {
         XmlElementType cell_node = cell_pops.getChildNode("cell", i);
@@ -282,15 +280,15 @@ void ConfigurationFile::process_initialization(World& world) {
         for (int i = 0; i < cell_node.nChildNode("population"); ++i) {
             XmlElementType cell_pop_node = cell_node.getChildNode("population", i);
             std::string lineage_id = this->get_attribute<std::string>(cell_pop_node, "lineage");
-            PopulationCountType size = this->get_attribute<PopulationCountType>(cell_pop_node, "size");
+            PopulationCountType pop_size = this->get_attribute<PopulationCountType>(cell_pop_node, "size");
             if (not world.has_species(lineage_id)) {
                 throw ConfigurationError("dispersal: lineage \"" + lineage_id + "\" not defined");
             }
             Species * species_ptr = world.species_registry()[lineage_id];
-            initialization_regime.cell_populations.insert(std::make_pair(cell_index, std::make_pair(species_ptr, size)));
+            initialization_regime.cell_populations[cell_index][species_ptr] = pop_size;
         }
     }
-
+    world.set_initialization_regime(initialization_regime);
 }
 
 void ConfigurationFile::process_environments(World& world) {
