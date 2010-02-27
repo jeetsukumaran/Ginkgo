@@ -231,7 +231,7 @@ void World::initialize() {
         if ( cycle_count % this->log_frequency_ == 0 ) {
             std::ostringstream log_msg;
             log_msg << "Initialization cycle " << cycle_count;
-            log_msg << ": " << num_uncoalesced << " loci of " << ancestral_genes.size() << " coalesced.";
+            log_msg << ": " << ancestral_genes.size()-num_uncoalesced << " uncoalesced loci remaining.";
             this->logger_.info(log_msg.str());
         }
 
