@@ -144,11 +144,14 @@ void World::initialize() {
     this->set_world_environment(this->initialization_regime_.environment, "[Initialization]");
 
 
-    // create ancestral alleles
+    // create ancestral alleles for each locus for each species, recording
+    // where the first locus for each species is
     std::vector<GenealogyNode *>  ancestral_genes;
+    std::map<Species *, unsigned> species_ancestral_gene_index_start;
     for (SpeciesRegistry::iterator spi = this->species_registry_.begin();
             spi != this->species_registry_.end();
             ++spi) {
+        species_ancestral_gene_index_start.insert(std::make_pair(*spi, ancestral_genes.size()));
         // haploid
         GenealogyNode * haploid = new GenealogyNode();
         haploid->increment_count();
@@ -168,7 +171,6 @@ void World::initialize() {
         CellIndexType cell_index = cpm->first;
         Cell& cell = this->landscape_[cell_index];
         InitializationRegime::SpeciesPopulationSizeMapType& sp_pop_sizes = cpm->second;
-        unsigned int species_ancestor_gene_idx = 0;
         for (SpeciesRegistry::iterator spi = this->species_registry_.begin();
                 spi != this->species_registry_.end();
                 ++spi) {
@@ -182,7 +184,7 @@ void World::initialize() {
                         bpi != pop.end();
                         ++bpi) {
                     Organism * o = *bpi;
-                    unsigned int ancestor_gene_idx = species_ancestor_gene_idx;
+                    unsigned int ancestor_gene_idx = species_ancestral_gene_index_start[sp];
                     assert( (ancestor_gene_idx + NUM_NEUTRAL_DIPLOID_loci - 1) < ancestral_genes.size() );
                     o->haploid_marker().link(ancestral_genes[ancestor_gene_idx]);
                     for (unsigned i = 0; i < NUM_NEUTRAL_DIPLOID_loci; ++i) {
@@ -192,30 +194,8 @@ void World::initialize() {
                     }
                 }
             }
-            species_ancestor_gene_idx += NUM_NEUTRAL_DIPLOID_loci + 1;
         }
-        assert ( species_ancestor_gene_idx = ancestral_genes.size()-1 );
     }
-
-
-    //---- DEBUGGING -----
-    std::cerr << "After seeding: ";
-    for (std::vector<GenealogyNode *>::iterator gni = ancestral_genes.begin();
-            gni != ancestral_genes.end();
-            ++gni) {
-        std::cerr << (*gni)->reference_count() << ", ";
-    }
-    std::cerr << std::endl;
-    //---- DEBUGGING -----
-
-    //---- DEBUGGING -----
-    Species * X_SPECIES = *(this->species_registry_.begin());
-    std::set<CellIndexType> X_CI;
-    for (CellIndexType xci = 0; xci < this->landscape_.size(); ++xci) {
-        X_CI.insert(xci);
-    }
-    //---- DEBUGGING -----
-
 
     // loop until all ancestral alleles have reference count of 2
     bool all_coalesced = false;
@@ -237,17 +217,10 @@ void World::initialize() {
         for (std::vector<GenealogyNode *>::iterator gni = ancestral_genes.begin();
                 gni != ancestral_genes.end();
                 ++gni) {
-            //---- DEBUGGING -----
-            std::cerr << (*gni)->reference_count() << ", ";
-            //---- DEBUGGING -----
             if ( (*gni)->reference_count() > 3 ) {
                 ++num_uncoalesced;
             }
         }
-
-        //---- DEBUGGING -----
-        std::cerr << " (" << num_uncoalesced << " uncoalesced) " << std::endl;
-        //---- DEBUGGING -----
 
         if (num_uncoalesced == 0) {
             all_coalesced = true;
@@ -260,23 +233,14 @@ void World::initialize() {
             this->logger_.info(log_msg.str());
         }
 
-
-        //---- DEBUGGING -----
-        if ( cycle_count % 100 == 0 ) {
-            std::ostringstream X_LAB;
-            X_LAB << "init" << cycle_count;
-            this->save_trees(X_SPECIES, 0, X_CI, X_LAB.str());
-        }
-        //---- DEBUGGING -----
-
     }
-
 
     // clean-up: decrement reference count self
     for (std::vector<GenealogyNode *>::iterator gni = ancestral_genes.begin();
             gni != ancestral_genes.end();
             ++gni) {
-        (*gni)->decrement_count();;
+        (*gni)->decrement_count();
+//        delete *gni;
     }
 
 }
