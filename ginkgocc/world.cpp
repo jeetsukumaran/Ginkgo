@@ -139,6 +139,11 @@ void World::initialize() {
 
     // run until ancestral allele reference count = 1
 
+
+    // set initialization environment
+    this->set_world_environment(this->initialization_regime_.environment, "[Initialization]");
+
+
     // create ancestral alleles
     std::vector<GenealogyNode *>  ancestral_genes;
     for (SpeciesRegistry::iterator spi = this->species_registry_.begin();
@@ -181,10 +186,10 @@ void World::initialize() {
                         ++bpi) {
                     Organism * o = *bpi;
                     assert( (ancestor_gene_idx + 2) < ancestral_genes.size() );
-                    o->get_haploid_node()->link(ancestral_genes[ancestor_gene_idx]);
+                    o->haploid_marker().link(ancestral_genes[ancestor_gene_idx]);
                     for (unsigned i = 0; i < NUM_NEUTRAL_DIPLOID_loci; ++i) {
-                        o->get_diploid_node1(i)->link(ancestral_genes[ancestor_gene_idx+1]);
-                        o->get_diploid_node2(i)->link(ancestral_genes[ancestor_gene_idx+2]);
+                        o->diploid_marker(i).link(ancestral_genes[ancestor_gene_idx+1],
+                                ancestral_genes[ancestor_gene_idx+2]);
                     }
                 }
             }
@@ -192,10 +197,6 @@ void World::initialize() {
         }
         assert ( ancestor_gene_idx = ancestral_genes.size()-1 );
     }
-
-
-    // set initialization environment
-    this->set_world_environment(this->initialization_regime_.environment, "[Initialization]");
 
 
     // loop until all ancestral alleles have reference count of 2

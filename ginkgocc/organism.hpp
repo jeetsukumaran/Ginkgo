@@ -287,11 +287,11 @@ class HaploidMarker {
          *
          * @param allele parent of allele
          */
-//        void link(const GenealogyNode& allele) {
-//            assert(this->allele_ == NULL);
-//            this->allele_ = new GenealogyNode();
-//            this->allele_->link(allele_);
-//        }
+        void link(GenealogyNode * allele) {
+            assert(this->allele_ == NULL);
+            this->allele_ = new GenealogyNode();
+            this->allele_->link(allele);
+        }
 
         /**
          * Returns pointer to GenealogyNode representing allele at this locus.
@@ -424,15 +424,14 @@ class DiploidMarker {
          * @param allele1 parent of first allele
          * @param allele2 parent of second allele
          */
-//        void link(const GenealogyNode& allele1,
-//                     const GenealogyNode& allele2) {
-//            assert(this->allele1_ == NULL);
-//            this->allele1_ = new GenealogyNode();
-//            this->allele1_->link(allele1);
-//            assert(this->allele2_ == NULL);
-//            this->allele2_ = new GenealogyNode();
-//            this->allele2_->link(allele1);
-//        }
+        void link(GenealogyNode * allele1, GenealogyNode * allele2) {
+            assert(this->allele1_ == NULL);
+            this->allele1_ = new GenealogyNode();
+            this->allele1_->link(allele1);
+            assert(this->allele2_ == NULL);
+            this->allele2_ = new GenealogyNode();
+            this->allele2_->link(allele2);
+        }
 
         /**
          * Returns pointer to GenealogyNode representing allele 1 at this locus.
