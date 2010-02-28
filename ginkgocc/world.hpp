@@ -250,11 +250,6 @@ class World {
                 PopulationCountType ancestral_pop_size,
                 GenerationCountType ancestral_generations);
 
-        // initialization #####################################################
-
-        void set_initialization_regime(const InitializationRegime& initialization_regime);
-        void initialize();
-
         // event handlers #####################################################
 
         /**
@@ -302,24 +297,42 @@ class World {
          * @param ancestral_pop_size       size of ancestral population of seed population (N; 0 => N = n )
          * @param ancestral_generations    number of generations in ancestral population  (0 => 10N)
          */
-        void add_seed_population(CellIndexType cell_index,
-                Species * species_ptr,
-                PopulationCountType pop_size,
-                PopulationCountType ancestral_pop_size,
-                GenerationCountType ancestral_generations);
+//        void add_seed_population(CellIndexType cell_index,
+//                Species * species_ptr,
+//                PopulationCountType pop_size,
+//                PopulationCountType ancestral_pop_size,
+//                GenerationCountType ancestral_generations);
+
+        // initialization #####################################################
+
+        /**
+         * Set up initialization regime.
+         */
+        void set_initialization_regime(const InitializationRegime& initialization_regime);
 
         // simulation cycles ##################################################
+
+        /**
+         * Run this simulation: initialization followded by main.
+         */
+        void run();
+
+        /**
+         * Run initialization cycles.
+         */
+        void run_initialization_cycles();
+
+        /**
+         * Run main simulation: set environment(s), single life-cycle, followed
+         * by samplings.
+         */
+        void run_main_cycles();
 
         /**
          * A single cycle or generation of the simulation, including the
          * reproduction, migration, survival and competition phases.
          */
-        void cycle();
-
-        /**
-         * Run multiple cycles or generations of the simulation.
-         */
-        void run();
+        void run_life_cycle();
 
         /**
          * Process world settings for the current generation.

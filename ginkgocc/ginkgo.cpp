@@ -108,7 +108,7 @@ int main(int argc, char* argv[]) {
         }
 
         world.run();
-        world.logger().reset_elapsed_time("Q+");
+        world.logger().reset_elapsed_time("S+");
         world.logger().info("Ending " + program_identity + ".");
 
     }

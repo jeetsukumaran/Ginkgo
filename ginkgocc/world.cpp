@@ -123,17 +123,99 @@ void World::generate_seed_population(CellIndexType cell_index,
     this->logger_.info(post_msg.str());
 }
 
-// initialization #############################################################
+// event handlers #############################################################
+
+void World::add_environment_settings(GenerationCountType generation, const EnvironmentSettings& environment_settings) {
+    this->environment_settings_[generation] = environment_settings;
+}
+
+void World::add_dispersal_event(GenerationCountType generation, const DispersalEvent& dispersal_event) {
+    this->logger_.error("Stochastic dispersal currently disabled");
+    exit(1);
+    this->dispersal_events_.insert(std::make_pair(generation, dispersal_event));
+}
+
+
+void World::add_tree_sampling(GenerationCountType generation, const SamplingRegime& sampling_regime) {
+    this->tree_samples_.insert(std::make_pair(generation, sampling_regime));
+}
+
+void World::add_occurrence_sampling(GenerationCountType generation, Species * species_ptr) {
+    this->occurrence_samples_.insert(std::make_pair(generation, species_ptr));
+}
+
+//void World::add_seed_population(CellIndexType cell_index,
+//        Species * species_ptr,
+//        PopulationCountType pop_size,
+//        PopulationCountType ancestral_pop_size,
+//        GenerationCountType ancestral_generations) {
+//    this->seed_populations_.push_back( SeedPopulation(cell_index, species_ptr, pop_size, ancestral_pop_size, ancestral_generations) );
+//}
 
 void World::set_initialization_regime(const InitializationRegime& initialization_regime) {
     this->initialization_regime_ = initialization_regime;
 }
 
-void World::initialize() {
+// simulation cycles ##########################################################
+
+void World::run() {
+
+    // ---- SETUP ----
+
+    if (!this->logger_init_) {
+        this->init_logger();
+        this->logger_.reset_elapsed_time("S+");
+    }
+    this->log_configuration();
+
+#if defined(DEBUG)
+    this->logger_.info("RUNNING DEBUG-MODE BUILD.");
+#endif
+
+#if defined(MEMCHECK)
+    this->logger_.info("UNRELEASED NODE MEMORY WILL BE LOGGED.");
+#endif
+
+    // ---- INITIALIZATION ----
+
+    this->logger_.reset_elapsed_time("I+");
+    this->logger_.info("Starting initialization cycles.");
+    this->run_initialization_cycles();
+    this->logger_.info("Initialization cycles ended.");
+
+    // ---- MAIN RUN ----
+
+    this->logger_.reset_elapsed_time("M+");
+    this->logger_.info("Starting main run cycles.");
+    this->run_main_cycles();
+    this->logger_.info("Ending main run cycles.");
+
+    // ---- POST-RUN ----
+
+    if (this->is_produce_final_output_) {
+        this->logger_.info("Saving final set of occurrences and trees for all species.");
+        std::set<CellIndexType> cell_indexes;
+        for (CellIndexType i = 0; i < this->landscape_.size(); ++i) {
+            cell_indexes.insert(i);
+        }
+        for (SpeciesRegistry::iterator spi = this->species_registry_.begin();
+                spi != this->species_registry_.end();
+                ++spi) {
+            this->save_occurrences(*spi);
+            this->save_trees(*spi, 0, cell_indexes, "COMPLETE");
+        }
+    }
+
+#if defined(MEMCHECK)
+    run_final_cleanup_and_memory_check();
+#endif
+
+}
+
+void World::run_initialization_cycles() {
 
     // set initialization environment
     this->set_world_environment(this->initialization_regime_.environment, "[Initialization]");
-
 
     // create ancestral alleles for each locus for each species, recording
     // where the first locus for each species is
@@ -188,22 +270,12 @@ void World::initialize() {
         }
     }
 
-    // loop until all ancestral alleles have reference count of 2
+    // loop until all ancestral alleles have reference count of 3
     bool all_coalesced = false;
     unsigned long cycle_count = 0;
     while (!all_coalesced) {
         cycle_count += 1;
-
-        for (CellIndexType i = 0; i < this->landscape_.size(); ++i) {
-            this->landscape_[i].reproduction();
-            this->landscape_[i].migration();
-        }
-        this->landscape_.process_migrants();
-        for (CellIndexType i = 0; i < this->landscape_.size(); ++i) {
-            this->landscape_[i].survival();
-            this->landscape_[i].competition();
-        }
-
+        this->run_life_cycle();
         unsigned num_uncoalesced = 0;
         for (std::vector<GenealogyNode *>::iterator gni = ancestral_genes.begin();
                 gni != ancestral_genes.end();
@@ -212,18 +284,15 @@ void World::initialize() {
                 ++num_uncoalesced;
             }
         }
-
         if (num_uncoalesced == 0) {
             all_coalesced = true;
         }
-
         if ( cycle_count % this->log_frequency_ == 0 ) {
             std::ostringstream log_msg;
             log_msg << "Initialization cycle " << cycle_count;
             log_msg << ": " << num_uncoalesced << " of " << ancestral_genes.size() << " loci remaining to coalesce.";
             this->logger_.info(log_msg.str());
         }
-
     }
 
     // clean-up: decrement reference count self
@@ -236,38 +305,48 @@ void World::initialize() {
 
 }
 
-// event handlers #############################################################
+void World::run_main_cycles() {
 
-void World::add_environment_settings(GenerationCountType generation, const EnvironmentSettings& environment_settings) {
-    this->environment_settings_[generation] = environment_settings;
+    while (this->current_generation_ <= this->generations_to_run_) {
+
+        // clear organism labels
+        for (SpeciesRegistry::iterator spi = this->species_registry_.begin();
+                spi != this->species_registry_.end();
+                ++spi) {
+            (*spi)->clear_organism_labels();
+        }
+
+        // process world changes
+        this->process_environment_settings();
+
+        // process dispersal events
+        // this->process_dispersal_events();
+
+        // run the life cycle
+        if ( this->current_generation_ % this->log_frequency_ == 0) {
+            std::ostringstream gen;
+            gen << "Main cycle generation " << this->current_generation_ << " running.";
+            this->logger_.info(gen.str());
+        }
+        this->run_life_cycle();
+
+        // clear output filename stems
+        this->output_filenames_.clear();
+
+        // save occurrence data requested in this generation
+        this->process_occurrence_samplings();
+
+        // build trees requested in this generation
+        this->process_tree_samplings();
+
+        // increment generation count
+        ++this->current_generation_;
+
+    }
+
 }
 
-void World::add_dispersal_event(GenerationCountType generation, const DispersalEvent& dispersal_event) {
-    this->logger_.error("Stochastic dispersal currently disabled");
-    exit(1);
-    this->dispersal_events_.insert(std::make_pair(generation, dispersal_event));
-}
-
-
-void World::add_tree_sampling(GenerationCountType generation, const SamplingRegime& sampling_regime) {
-    this->tree_samples_.insert(std::make_pair(generation, sampling_regime));
-}
-
-void World::add_occurrence_sampling(GenerationCountType generation, Species * species_ptr) {
-    this->occurrence_samples_.insert(std::make_pair(generation, species_ptr));
-}
-
-void World::add_seed_population(CellIndexType cell_index,
-        Species * species_ptr,
-        PopulationCountType pop_size,
-        PopulationCountType ancestral_pop_size,
-        GenerationCountType ancestral_generations) {
-    this->seed_populations_.push_back( SeedPopulation(cell_index, species_ptr, pop_size, ancestral_pop_size, ancestral_generations) );
-}
-
-// simulation cycles ##########################################################
-
-void World::cycle() {
+void World::run_life_cycle() {
 
 // Results in inflated population: the migrants get distributed after the
 // competition phase, resulting in a artificially (>> carrying capacity)
@@ -282,11 +361,6 @@ void World::cycle() {
 //     }
 //     this->landscape_.process_migrants();
 
-    if ( this->current_generation_ % this->log_frequency_ == 0) {
-        std::ostringstream gen;
-        gen << "Generation " << this->current_generation_ << " life-cycle running.";
-        this->logger_.info(gen.str());
-    }
     for (CellIndexType i = 0; i < this->landscape_.size(); ++i) {
         this->landscape_[i].reproduction();
         this->landscape_[i].migration();
@@ -296,81 +370,6 @@ void World::cycle() {
         this->landscape_[i].survival();
         this->landscape_[i].competition();
     }
-    ++this->current_generation_;
-}
-
-void World::run() {
-    if (!this->logger_init_) {
-        this->init_logger();
-        this->logger_.reset_elapsed_time("S+");
-    }
-    this->log_configuration();
-
-#if defined(DEBUG)
-    this->logger_.info("RUNNING DEBUG-MODE BUILD.");
-#endif
-
-#if defined(MEMCHECK)
-    this->logger_.info("UNRELEASED NODE MEMORY WILL BE LOGGED.");
-#endif
-
-    // initialization
-    this->logger_.reset_elapsed_time("I+");
-    this->logger_.info("Starting initialization cycles.");
-    this->initialize();
-    this->logger_.info("Initialization cycles ended.");
-
-    // main run
-    this->logger_.reset_elapsed_time("R+");
-    this->logger_.info("Starting main run cycles.");
-    while (this->current_generation_ <= this->generations_to_run_) {
-
-        // clear organism labels
-        for (SpeciesRegistry::iterator spi = this->species_registry_.begin();
-                spi != this->species_registry_.end();
-                ++spi) {
-            (*spi)->clear_organism_labels();
-        }
-
-        // clear output filename stems
-        this->output_filenames_.clear();
-
-        // save occurrence data requested in this generation
-        this->process_occurrence_samplings();
-
-        // build trees requested in this generation
-        this->process_tree_samplings();
-
-        // process world changes
-        this->process_environment_settings();
-
-        // process dispersal events
-        // this->process_dispersal_events();
-
-        // run the life cycle
-        this->cycle();
-    }
-
-    this->logger_.info("Ending main run cycles.");
-
-    if (this->is_produce_final_output_) {
-        this->logger_.info("Saving final set of occurrences and trees for all species.");
-        std::set<CellIndexType> cell_indexes;
-        for (CellIndexType i = 0; i < this->landscape_.size(); ++i) {
-            cell_indexes.insert(i);
-        }
-        for (SpeciesRegistry::iterator spi = this->species_registry_.begin();
-                spi != this->species_registry_.end();
-                ++spi) {
-            this->save_occurrences(*spi);
-            this->save_trees(*spi, 0, cell_indexes, "COMPLETE");
-        }
-    }
-
-#if defined(MEMCHECK)
-    run_final_cleanup_and_memory_check();
-#endif
-
 }
 
 void World::process_environment_settings() {
