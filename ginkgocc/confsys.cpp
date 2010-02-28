@@ -374,15 +374,16 @@ EnvironmentSettings ConfigurationFile::parse_environment_settings(World& world, 
             Species * lineage = world.species_registry()[lineage_id];
             std::string gridfile = this->get_validated_grid_path<MovementCountType>(this->get_element_scalar<std::string>(sub_node), world);
             environment_settings.movement_costs.insert(std::make_pair(lineage, gridfile));
-        } else if (node_name == "movement_probabilities") {
-            std::string lineage_id = this->get_attribute<std::string>(sub_node, "lineage");
-            if (not world.has_species(lineage_id)) {
-                throw ConfigurationError("movement probabilities: lineage \"" + lineage_id + "\" not defined");
-            }
-            Species * lineage = world.species_registry()[lineage_id];
-            std::string gridfile = this->get_validated_grid_path<float>(this->get_element_scalar<std::string>(sub_node), world);
-            environment_settings.movement_probabilities.insert(std::make_pair(lineage, gridfile));
         }
+//        else if (node_name == "movement_probabilities") {
+//            std::string lineage_id = this->get_attribute<std::string>(sub_node, "lineage");
+//            if (not world.has_species(lineage_id)) {
+//                throw ConfigurationError("movement probabilities: lineage \"" + lineage_id + "\" not defined");
+//            }
+//            Species * lineage = world.species_registry()[lineage_id];
+//            std::string gridfile = this->get_validated_grid_path<float>(this->get_element_scalar<std::string>(sub_node), world);
+//            environment_settings.movement_probabilities.insert(std::make_pair(lineage, gridfile));
+//        }
     }
     return environment_settings;
 }
