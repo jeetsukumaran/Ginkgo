@@ -253,6 +253,18 @@ class BreedingPopulations {
         }
 
         /**
+         * Removes all organisms from the population (but retains species slots).
+         */
+        void clear_organisms() {
+            for (std::map<const Species *, BreedingPopulation >::iterator spi = this->species_populations_.begin();
+                    spi != this->species_populations_.end();
+                    ++spi) {
+                (*spi).second.clear();
+            }
+        }
+
+
+        /**
          * Removes all individuals marked for expiration.
          */
         void purge_expired_organisms();

@@ -193,6 +193,10 @@ void Cell::competition() {
     if (this->populations_.size() <=  this->carrying_capacity_) {
         return;
     }
+    if (this->carrying_capacity_ == 0) {
+        this->populations_.clear_organisms();
+        return;
+    }
     OrganismPointers original_pop;
     this->populations_.get_organism_ptrs(original_pop);
 

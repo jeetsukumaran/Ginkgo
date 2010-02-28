@@ -11,7 +11,7 @@
         <ngens>1000</ngens>
     </system>
     <landscape ncols="10" nrows="10">
-        <default_cell_carrying_capacity>0</default_cell_carrying_capacity>
+        <default_cell_carrying_capacity>30</default_cell_carrying_capacity>
     </landscape>
     <lineages>
         <lineage id="Zx">
