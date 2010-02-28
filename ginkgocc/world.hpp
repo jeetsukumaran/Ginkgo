@@ -181,10 +181,12 @@ struct EnvironmentSettings {
  */
 struct InitializationRegime {
     public:
+        InitializationRegime() :  max_cycles(0) { }
         typedef std::map<Species *, PopulationCountType>  SpeciesPopulationSizeMapType;
         typedef std::map<CellIndexType, SpeciesPopulationSizeMapType > CellSpeciesPopulationMapType;
         CellSpeciesPopulationMapType  cell_populations;
         EnvironmentSettings           environment;
+        GenerationCountType           max_cycles;
 }; // initialize
 
 

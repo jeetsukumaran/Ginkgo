@@ -273,7 +273,7 @@ void World::run_initialization_cycles() {
     // loop until all ancestral alleles have reference count of 3
     bool all_coalesced = false;
     unsigned long cycle_count = 0;
-    while (!all_coalesced) {
+    while (!all_coalesced and (this->initialization_regime_.max_cycles == 0 or cycle_count < this->initialization_regime_.max_cycles )) {
         cycle_count += 1;
         this->run_life_cycle();
         unsigned num_uncoalesced = 0;
@@ -292,6 +292,11 @@ void World::run_initialization_cycles() {
             log_msg << "Initialization cycle " << cycle_count;
             log_msg << ": " << num_uncoalesced << " of " << ancestral_genes.size() << " loci remaining to coalesce.";
             this->logger_.info(log_msg.str());
+        }
+        if ( this->initialization_regime_.max_cycles > 0 and cycle_count >= this->initialization_regime_.max_cycles) {
+            std::ostringstream msg;
+            msg << "Reached initialization cycle limit of " << this->initialization_regime_.max_cycles << ": terminating initialization cycles.";
+            this->logger_.info(msg.str());
         }
     }
 

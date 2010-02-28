@@ -268,6 +268,7 @@ void ConfigurationFile::process_initialization(World& world) {
     InitializationRegime  initialization_regime;
     XmlElementType world_node = this->get_child_node(this->xml_, "world", true);
     XmlElementType initialization = this->get_child_node(world_node, "initialization", true);
+    initialization_regime.max_cycles = this->get_attribute<GenerationCountType>(initialization, "max_cycles", 0);
     XmlElementType env_node = this->get_child_node(world_node, "environment", false);
 
     if (!env_node.isEmpty()) {
