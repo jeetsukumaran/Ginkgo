@@ -736,8 +736,8 @@ void World::init_logger() {
         if (this->is_log_to_screen_) {
             this->logger_.add_handler(std::cout, LogHandler::LOG_INFO);
         }
-        this->logger_.add_handler(this->get_output_filename_stem() + ".run.log", LogHandler::LOG_DEBUG);
-        this->logger_.add_handler(this->get_output_filename_stem() + ".err.log", LogHandler::LOG_ERROR);
+        this->logger_.add_handler(filesys::compose_path(this->output_dir_, this->get_output_filename_stem() + ".run.log"), LogHandler::LOG_DEBUG);
+        this->logger_.add_handler(filesys::compose_path(this->output_dir_, this->get_output_filename_stem() + ".err.log"), LogHandler::LOG_ERROR);
         this->logger_init_ = true;
     }
 }
