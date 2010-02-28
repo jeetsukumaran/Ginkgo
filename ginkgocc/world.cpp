@@ -164,7 +164,7 @@ void World::run() {
 
     if (!this->logger_init_) {
         this->init_logger();
-        this->logger_.reset_elapsed_time("S+");
+        this->logger_.hide_elapsed_time();
     }
     this->log_configuration();
 
@@ -179,6 +179,7 @@ void World::run() {
     // ---- INITIALIZATION ----
 
     this->logger_.reset_elapsed_time("I+");
+    this->logger_.show_elapsed_time();
     this->logger_.info("Starting initialization cycles.");
     this->run_initialization_cycles();
     this->logger_.info("Initialization cycles ended.");

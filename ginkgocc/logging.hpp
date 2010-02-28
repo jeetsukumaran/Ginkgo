@@ -314,6 +314,20 @@ class Logger {
         void set_timestamps();
 
         /**
+         * Displays elapsed time in log.
+         */
+        void show_elapsed_time() {
+            this->is_show_elapsed_time_ = true;
+        }
+
+        /**
+         * Hides elapsed time in log.
+         */
+        void hide_elapsed_time() {
+            this->is_show_elapsed_time_ = false;
+        }
+
+        /**
          * Returns timestamp.
          */
         const char * get_current_timestamp() {
@@ -328,6 +342,7 @@ class Logger {
         char                            current_timestamp_[80];
         double                          elapsed_hours_;
         std::string                     elapsed_time_leader_;
+        bool                            is_show_elapsed_time_;
 
 }; // logger
 

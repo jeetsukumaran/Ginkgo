@@ -122,7 +122,8 @@ void LogHandler::emit(LoggingLevel level, const std::string& message) {
 // Constructor: gets reference to LogStreamManager singleton object.
 Logger::Logger():
             log_stream_manager_(LogStreamManager::get_instance()),
-            elapsed_time_leader_("T+") {
+            elapsed_time_leader_("T+"),
+            is_show_elapsed_time_(true) {
     this->reset_elapsed_time();
 }
 
@@ -216,8 +217,10 @@ void Logger::log(LogHandler::LoggingLevel logging_level, const char * message) {
             ++logh) {
         std::ostringstream msg;
         msg << "[" << this->current_timestamp_;
-//        msg << " -- " << std::fixed << std::setprecision(4) << std::setw(8) << this->elapsed_hours_ << " hrs]";
-        msg << " -- " << this->elapsed_time_leader_ << std::fixed << std::setprecision(4) << this->elapsed_hours_ << "h]";
+        if (this->is_show_elapsed_time_) {
+            msg << " -- " << this->elapsed_time_leader_ << std::fixed << std::setprecision(4) << this->elapsed_hours_ << "h";
+        }
+        msg << "]";
         msg << " " << message;
         (*logh).emit(logging_level, msg.str());
     }
