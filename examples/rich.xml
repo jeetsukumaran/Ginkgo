@@ -1,0 +1,99 @@
+<?xml version="1.0"?>
+<ginkgo
+    title="results_rich"
+    log_frequency="1"
+    multifurcating_trees="True"
+    final_output = "True"
+    full_complement_diploid_trees = "False">
+
+    <system>
+        <random_seed>3124</random_seed>
+        <fitness_dimensions>1</fitness_dimensions>
+        <global_selection_strength>1.0</global_selection_strength>
+        <ngens>2500</ngens>
+    </system>
+
+    <landscape ncols="25" nrows="25">
+        <default_cell_carrying_capacity>100</default_cell_carrying_capacity>
+    </landscape>
+
+    <lineages>
+        <lineage id="Zr">
+            <fitness_trait_relative_selection_weights>1</fitness_trait_relative_selection_weights>
+            <fitness_trait_default_genotypes>0</fitness_trait_default_genotypes>
+            <fecundity>30</fecundity>
+            <movement_capacity distribution="constant">1</movement_capacity>
+        </lineage>
+        <lineage id="Zk">
+            <fitness_trait_relative_selection_weights>1</fitness_trait_relative_selection_weights>
+            <fitness_trait_default_genotypes>0</fitness_trait_default_genotypes>
+            <fecundity>16</fecundity>
+            <movement_capacity distribution="poisson">20</movement_capacity>
+        </lineage>
+    </lineages>
+
+    <initialization>
+        <populations>
+            <cell index="0">
+                <population lineage="Zk" size="100" />
+            </cell>
+            <cell x="24" y="24">
+                <population lineage="Zr" size="100" />
+            </cell>
+        </populations>
+        <environment>
+            <movement_costs lineage="Zk">g25x25_mv1.asc</movement_costs>
+            <movement_costs lineage="Zr">g25x25_mv1.asc</movement_costs>
+        </environment>
+    </initialization>
+
+    <environments>
+        <environment gen="1">
+            <movement_costs lineage="Zk">g25x25_mv1.asc</movement_costs>
+        </environment>
+    </environments>
+
+    <samples>
+
+        <sample gen="0" lineage="Zk" label="a">
+            <individuals_per_cell>10<individuals_per_cell>
+        </sample>
+
+        <sample gen="1" lineage="Zk" label="b">
+            <individuals_per_cell>10<individuals_per_cell>
+            <cells>
+                <cell x="0" y="0" /> <cell x="1" y="0" />
+                <cell x="0" y="1" /> <cell x="1" y="1" />
+                <cell x="0" y="2" /> <cell x="1" y="2" />
+            </cells>
+        </sample>
+
+        <sample gen="1" lineage="Zk" label="c">
+            <individuals_per_cell>10<individuals_per_cell>
+            <cells>
+                <cell index="0" />  <cell index="1" />
+                <cell index="25" /> <cell index="26" />
+            </cells>
+        </sample>
+
+        <sample gen="100" lineage="Zr" label="e1" trees="False" />
+        <sample gen="100" lineage="Zk" label="e1" trees="False" />
+        <sample gen="1000" lineage="Zr" label="e1" trees="False" />
+        <sample gen="1000" lineage="Zk" label="e1" trees="False" />
+        <sample gen="1500" lineage="Zr" label="e1" trees="False" />
+        <sample gen="1500" lineage="Zk" label="e1" trees="False" />
+        <sample gen="2000" lineage="Zr" label="e1" trees="False" />
+
+        <sample gen="2000" lineage="Zk" label="e1" trees="False" />
+
+        <sample gen="2500" lineage="Zr" label="final">
+            <individuals_per_cell>10<individuals_per_cell>
+        </sample>
+
+        <sample gen="2500" lineage="Zk" label="final">
+            <individuals_per_cell>10<individuals_per_cell>
+        </sample>
+
+    </samples>
+
+</ginkgo>
