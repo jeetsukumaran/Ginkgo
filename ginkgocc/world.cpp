@@ -287,17 +287,21 @@ void World::run_initialization_cycles() {
         }
         if (num_uncoalesced == 0) {
             all_coalesced = true;
-        }
-        if ( cycle_count % this->log_frequency_ == 0 ) {
+            std::ostringstream log_msg;
+            log_msg << "Initialization cycle " << cycle_count;
+            log_msg << ": all " << ancestral_genes.size() << " loci haved coalesced -- terminating initialization cycles.";
+            this->logger_.info(log_msg.str());
+        } else if ( this->initialization_regime_.max_cycles > 0 and cycle_count >= this->initialization_regime_.max_cycles) {
+            std::ostringstream msg;
+            msg << "Reached initialization cycle limit of " << this->initialization_regime_.max_cycles;
+            msg << ": terminating initialization cycles";
+            msg << " (" << num_uncoalesced << " of " << ancestral_genes.size() << " loci remaining to coalesce). ";
+            this->logger_.info(msg.str());
+        } else if ( cycle_count % this->log_frequency_ == 0 ) {
             std::ostringstream log_msg;
             log_msg << "Initialization cycle " << cycle_count;
             log_msg << ": " << num_uncoalesced << " of " << ancestral_genes.size() << " loci remaining to coalesce.";
             this->logger_.info(log_msg.str());
-        }
-        if ( this->initialization_regime_.max_cycles > 0 and cycle_count >= this->initialization_regime_.max_cycles) {
-            std::ostringstream msg;
-            msg << "Reached initialization cycle limit of " << this->initialization_regime_.max_cycles << ": terminating initialization cycles.";
-            this->logger_.info(msg.str());
         }
     }
 
