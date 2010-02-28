@@ -775,12 +775,8 @@ void World::log_configuration() {
 #endif
 
     out << std::endl;
-    out << "*** WORLD ***" << std::endl;
-    out << "Label: " << this->label_ << std::endl;
-    out << "Random seed: " << this->rng_.get_seed() << std::endl;
-    out << "Maximum landscape size: " << MAX_LANDSCAPE_SIZE << " cells" << std::endl;
-    out << "Number of fitness traits: " << this->num_fitness_traits_ << std::endl;
-    out << "Generations to run: " << this->generations_to_run_ << std::endl;
+    out << "*** GINKGO ***" << std::endl;
+    out << "Title: " << this->title_ << std::endl;
     out << "Output directory: " << this->output_dir_ << std::endl;
     out << "Replicate ID: " << this->replicate_id_ << std::endl;
     out << "Log frequency: " << this->log_frequency_ << std::endl;
@@ -802,8 +798,19 @@ void World::log_configuration() {
     } else {
         out << "no" << std::endl;
     }
-
     out << std::endl;
+
+    out << "*** SYSTEM ***" << std::endl;
+    out << "Random seed: " << this->rng_.get_seed() << std::endl;
+    out << "Number of fitness traits: " << this->num_fitness_traits_ << std::endl;
+    out << "Global selection strength: " << this->global_selection_strength_ << std::endl;
+    if (this->global_selection_strength_ == 0) {
+        out << "WARNING: GLOBAL SELECTION STRENGTH IS 0: ENVIRONMENT HAS NO EFFECT!" << std::endl;
+    }
+    out << "Generations to run: " << this->generations_to_run_ << std::endl;
+    out << std::endl;
+
+
     out << "*** LANDSCAPE ***" << std::endl;
     out << "Rows (X-dimension): " << this->landscape_.size_x() << std::endl;
     out << "Columns (Y-dimension): " << this->landscape_.size_y() << std::endl;
@@ -815,7 +822,6 @@ void World::log_configuration() {
     } else {
         out << "Landscape grid origin: lower-left" << std::endl;
     }
-
     out << std::endl;
 
     out << "Cell indexes: " << std::endl;
@@ -826,12 +832,8 @@ void World::log_configuration() {
 
     out << "Default carrying capacity: " << std::endl;
     this->landscape_.debug_dump_carrying_capacity(out);
-
     out << std::endl;
-    out << "Global selection strength: " << this->global_selection_strength_ << std::endl;
-    if (this->global_selection_strength_ <= 0) {
-        out << "WARNING: GLOBAL SELECTION STRENGTH IS 0: ENVIRONMENT HAS NO EFFECT!" << std::endl;
-    }
+
 
     out << std::endl;
     out << "*** LINEAGES ***" << std::endl;
@@ -975,10 +977,10 @@ void World::open_ofstream(std::ofstream& out, const std::string& fpath) {
 
 std::string World::get_output_filename_stem() {
     if (this->output_filename_stem_.size() == 0) {
-        if (this->label_.size() == 0) {
+        if (this->title_.size() == 0) {
             this->output_filename_stem_ += "ginkgorun";
         } else {
-            this->output_filename_stem_ += this->label_;
+            this->output_filename_stem_ += this->title_;
         }
         if (this->replicate_id_.size() > 0) {
             this->output_filename_stem_ += this->replicate_id_;

@@ -555,8 +555,8 @@ class World {
          * Sets label for output and reporting.
          * @param label label for output and reporting
          */
-        void set_label(std::string label) {
-            this->label_ = label;
+        void set_title(std::string title) {
+            this->title_ = title;
         }
 
         /**
@@ -705,7 +705,7 @@ class World {
 
     private:
         /** Name of this World (used for output files/reports). */
-        std::string                             label_;
+        std::string                             title_;
         /** Collection of pointers to the Species objects of this World. */
         SpeciesRegistry&                        species_registry_;
         /** The RandomNumberGenerator that is used by all objects of this World. */

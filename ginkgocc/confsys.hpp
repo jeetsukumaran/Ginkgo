@@ -248,13 +248,15 @@ class ConfigurationFile {
 
         XmlElementType get_child_node(XmlElementType& current_node, const char * node_name, bool required=true);
 
-        void process_world(World& world);
-        void process_lineages(World& world);
-        void process_lineage(XmlElementType& lnode, World& world);
-        void process_initialization(World& world);
-        void process_environments(World& world);
-//        void process_dispersals(World& world);
-        void process_samplings(World& world);
+        void parse_meta(World& world);
+        void parse_system(World& world);
+        void parse_landscape(World& world);
+        void parse_lineages(World& world);
+        void parse_lineage(XmlElementType& lnode, World& world);
+        void parse_initialization(World& world);
+        void parse_environments(World& world);
+//        void parse_dispersals(World& world);
+        void parse_samplings(World& world);
 
         EnvironmentSettings parse_environment_settings(World& world, const XmlElementType& env_node);
         CellIndexType parse_cell_index_from_node(World& world, XmlElementType& node);
@@ -265,7 +267,7 @@ class ConfigurationFile {
         std::string         config_filepath_;
 
         /** XML parser. */
-        XmlElementType      xml_;
+        XmlElementType      ginkgo_root_;
 
 };
 

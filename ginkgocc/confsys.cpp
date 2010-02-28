@@ -77,7 +77,7 @@ double poisson_pdf(unsigned long k, long double mean) {
 
 ConfigurationFile::ConfigurationFile(const char * fpath) {
     this->open(fpath);
-//     bool success = this->xml_.Load(fpath);
+//     bool success = this->ginkgo_root_.Load(fpath);
 //     if (!success) {
 //         std::ostringstream msg;
 //         msg << "invalineage_id source \"" << fpath << "\"";
@@ -87,7 +87,7 @@ ConfigurationFile::ConfigurationFile(const char * fpath) {
 
 ConfigurationFile::ConfigurationFile(const std::string& fpath) {
     this->open(fpath.c_str());
-//     bool success = this->xml_.Load(fpath);
+//     bool success = this->ginkgo_root_.Load(fpath);
 //     if (!success) {
 //         std::ostringstream msg;
 //         msg << "invalineage_id source \"" << fpath << "\"";
@@ -99,55 +99,63 @@ ConfigurationFile::~ConfigurationFile() { }
 
 void ConfigurationFile::open(const char * fpath) {
     this->config_filepath_ = fpath;
-    this->xml_ = XMLNode::openFileHelper(fpath,"ginkgo");
+    this->ginkgo_root_ = XMLNode::openFileHelper(fpath,"ginkgo");
 }
 
 void ConfigurationFile::configure(World& world) {
-    this->process_world(world);
-    this->process_lineages(world);
-    this->process_initialization(world);
-    this->process_environments(world);
-//    this->process_dispersals(world);
-    this->process_samplings(world);
+    this->parse_meta(world);
+    this->parse_system(world);
+    this->parse_landscape(world);
+    this->parse_lineages(world);
+    this->parse_initialization(world);
+    this->parse_environments(world);
+//    this->parse_dispersals(world);
+    this->parse_samplings(world);
 }
 
-void ConfigurationFile::process_world(World& world) {
+void ConfigurationFile::parse_meta(World& world) {
+    world.set_title( this->get_attribute<std::string>(this->ginkgo_root_, "title", "GinkgoWorld") );
+    world.set_log_frequency(this->get_attribute<unsigned>(this->ginkgo_root_, "log_frequency", 10));
+    world.set_allow_multifurcations(this->get_attribute_bool(this->ginkgo_root_, "multifurcating_trees", true));
+    world.set_produce_final_output(this->get_attribute_bool(this->ginkgo_root_, "final_output", false));
+    world.set_produce_full_complement_diploid_trees(this->get_attribute_bool(this->ginkgo_root_, "full_complement_diploid_trees", false));
+}
 
-    XmlElementType world_node = this->get_child_node(this->xml_, "world");
-    world.set_label( this->get_attribute<std::string>(world_node, "label", "GinkgoWorld") );
-    world.set_random_seed( this->get_attribute<unsigned long>(world_node, "random_seed", time(0)) );
-    world.set_generations_to_run( this->get_attribute<GenerationCountType>(world_node, "num_gens") );
-    unsigned fitness_dim = this->get_attribute<unsigned>(world_node, "num_fitness_traits");
+void ConfigurationFile::parse_system(World& world) {
+    XmlElementType sys_node = this->get_child_node(this->ginkgo_root_, "system");
+    world.set_random_seed( this->get_attribute<unsigned long>(sys_node, "random_seed", time(0)) );
+    world.set_global_selection_strength(this->get_attribute<float>(sys_node, "global_selection_strength", DEFAULT_GLOBAL_SELECTION_STRENGTH));
+    unsigned fitness_dim = this->get_attribute<unsigned>(sys_node, "fitness_dimensions");
     if (fitness_dim > MAX_FITNESS_TRAITS) {
         std::ostringstream s;
-        s << "maximum number of fitness traits allowed is " << MAX_FITNESS_TRAITS;
+        s << "maximum number of fitness dimensions allowed is " << MAX_FITNESS_TRAITS;
         s << ", but requested " << fitness_dim;
         throw ConfigurationError(s.str());
     }
     world.set_num_fitness_traits(fitness_dim);
-    world.set_global_selection_strength(this->get_attribute<float>(world_node, "global_selection_strength", DEFAULT_GLOBAL_SELECTION_STRENGTH));
-    world.set_allow_multifurcations(this->get_attribute_bool(world_node, "multifurcating_trees", true));
-    world.set_produce_final_output(this->get_attribute_bool(world_node, "final_output", false));
-    world.set_produce_full_complement_diploid_trees(this->get_attribute_bool(world_node, "full_complement_diploid_trees", false));
-    world.generate_landscape( this->get_attribute<CellIndexType>(world_node, "x_range"),
-                              this->get_attribute<CellIndexType>(world_node, "y_range") );
-    world.set_global_cell_carrying_capacity(this->get_attribute<PopulationCountType>(world_node, "default_cell_carrying_capacity", 0));
-    world.set_log_frequency(this->get_attribute<unsigned>(world_node, "log_frequency", 10));
+    world.set_generations_to_run( this->get_attribute<GenerationCountType>(sys_node, "ngens") );
 }
 
-void ConfigurationFile::process_lineages(World& world) {
-    XmlElementType bio_node = this->xml_.getChildNode("world").getChildNode("lineages");
+void ConfigurationFile::parse_landscape(World& world) {
+    XmlElementType landscape_node = this->get_child_node(this->ginkgo_root_, "landscape");
+    world.generate_landscape( this->get_attribute<CellIndexType>(landscape_node, "ncols"),
+                              this->get_attribute<CellIndexType>(landscape_node, "nrows") );
+    world.set_global_cell_carrying_capacity(this->get_child_node_scalar<PopulationCountType>(landscape_node, "default_cell_carrying_capacity", 0));
+}
+
+void ConfigurationFile::parse_lineages(World& world) {
+    XmlElementType bio_node = this->ginkgo_root_.getChildNode("world").getChildNode("lineages");
     if (bio_node.isEmpty()) {
         throw ConfigurationSyntaxError("lineages element is missing from configuration file");
     }
 
     for (int i = 0; i < bio_node.nChildNode("lineage"); ++i) {
         XmlElementType lineage_node = bio_node.getChildNode("lineage", i);
-        this->process_lineage(lineage_node, world);
+        this->parse_lineage(lineage_node, world);
     }
 }
 
-void ConfigurationFile::process_lineage(XmlElementType& lineage_node, World& world) {
+void ConfigurationFile::parse_lineage(XmlElementType& lineage_node, World& world) {
 
     // lineage name / id
     std::string lineage_id = this->get_attribute<std::string>(lineage_node, "id");
@@ -223,50 +231,11 @@ void ConfigurationFile::process_lineage(XmlElementType& lineage_node, World& wor
         lineage.set_movement_capacity_fixed(1);
     }
 
-    // seed populations
-//    XmlElementType seed_pops = lineage_node.getChildNode("seedPopulations");
-//    if (seed_pops.isEmpty()) {
-//        throw ConfigurationError("no seed populations defined for lineage \"" + lineage_id + "\"");
-//    }
-//    for (int i = 0; i < seed_pops.nChildNode("seedPopulation"); ++i) {
-//        XmlElementType pop_node = seed_pops.getChildNode("seedPopulation", i);
-//        std::ostringstream item_desc;
-//        item_desc << "seed population " << i+1 << " for lineage \"" << lineage_id << "\"";
-//        bool has_x =  this->has_attribute(pop_node, "x");
-//        bool has_y =  this->has_attribute(pop_node, "y");
-//        bool has_index=  this->has_attribute(pop_node, "cell");
-//        CellIndexType cell_index = 0;
-//        if ( (has_x or has_y) and has_index ) {
-//            throw ConfigurationError("seed population: cannot specify both cell using both coordinates ('x', 'y') and index ('cell')");
-//        } else if (has_index) {
-//            cell_index = this->get_attribute<CellIndexType>(pop_node, "cell");
-//            if (cell_index >= world.landscape().size()) {
-//                std::ostringstream msg;
-//                msg << "seed population: maximum cell index is " << world.landscape().size() - 1;
-//                msg << " (0-based indexing), but cell index of " << cell_index << " specified";
-//                throw ConfigurationError(msg.str());
-//            }
-//        } else if (has_x and has_y) {
-//            cell_index = this->get_validated_cell_index(this->get_attribute<CellIndexType>(pop_node, "x"),
-//                                                                  this->get_attribute<CellIndexType>(pop_node, "y"),
-//                                                                  world,
-//                                                                  item_desc.str().c_str());
-//        } else if ((has_x and !has_y) or (has_y and !has_x)) {
-//            throw ConfigurationError("seed population: incomplete target cell specification");
-//        } else {
-//            throw ConfigurationError("seed population: must specify target cell either by coordinates ('x', 'y') or index ('cell')");
-//        }
-//        PopulationCountType size = this->get_attribute<PopulationCountType>(pop_node, "size");
-//        PopulationCountType ancestral_pop_size = this->get_child_node_scalar<PopulationCountType>(pop_node, "ancestralPopulationSize");
-//        GenerationCountType ancestral_generations = this->get_child_node_scalar<GenerationCountType>(pop_node, "ancestralGenerations");
-//        world.add_seed_population(cell_index, &lineage, size, ancestral_pop_size, ancestral_generations);
-//    }
 }
 
-
-void ConfigurationFile::process_initialization(World& world) {
+void ConfigurationFile::parse_initialization(World& world) {
     InitializationRegime  initialization_regime;
-    XmlElementType world_node = this->get_child_node(this->xml_, "world", true);
+    XmlElementType world_node = this->get_child_node(this->ginkgo_root_, "world", true);
     XmlElementType initialization = this->get_child_node(world_node, "initialization", true);
     initialization_regime.max_cycles = this->get_attribute<GenerationCountType>(initialization, "max_cycles", 0);
     XmlElementType env_node = this->get_child_node(world_node, "environment", false);
@@ -292,8 +261,8 @@ void ConfigurationFile::process_initialization(World& world) {
     world.set_initialization_regime(initialization_regime);
 }
 
-void ConfigurationFile::process_environments(World& world) {
-    XmlElementType environs = this->xml_.getChildNode("world").getChildNode("environments");
+void ConfigurationFile::parse_environments(World& world) {
+    XmlElementType environs = this->ginkgo_root_.getChildNode("world").getChildNode("environments");
     if (!environs.isEmpty()) {
         for (int i = 0; i < environs.nChildNode("environment"); ++i) {
             XmlElementType env_node = environs.getChildNode("environment", i);
@@ -304,8 +273,8 @@ void ConfigurationFile::process_environments(World& world) {
     }
 }
 
-//void ConfigurationFile::process_dispersals(World& world) {
-//    XmlElementType dispersals = this->xml_.getChildNode("world").getChildNode("dispersals");
+//void ConfigurationFile::parse_dispersals(World& world) {
+//    XmlElementType dispersals = this->ginkgo_root_.getChildNode("world").getChildNode("dispersals");
 //    if (!dispersals.isEmpty()) {
 //        for (int i = 0; i < dispersals.nChildNode("dispersal"); ++i) {
 //            XmlElementType disp_node = dispersals.getChildNode("dispersal", i);
@@ -336,8 +305,8 @@ void ConfigurationFile::process_environments(World& world) {
 //    }
 //}
 
-void ConfigurationFile::process_samplings(World& world) {
-    XmlElementType samplings = this->xml_.getChildNode("world").getChildNode("samples");
+void ConfigurationFile::parse_samplings(World& world) {
+    XmlElementType samplings = this->ginkgo_root_.getChildNode("world").getChildNode("samples");
     if (!samplings.isEmpty()) {
         for (int i = 0; i < samplings.nChildNode(); ++i) {
             XmlElementType snode = samplings.getChildNode(i);
