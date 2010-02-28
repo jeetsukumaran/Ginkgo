@@ -29,65 +29,48 @@ from cStringIO import StringIO
 
 INDENT_SIZE = 4
 
-class World(object):
+class GinkgoConfiguration(object):
 
-    def __init__(self, x_range, y_range, num_gens, **kwargs):
-        self.x_range = x_range
-        self.y_range = y_range
-        self.num_gens = num_gens
-        self.label = kwargs.get("label", None)
-        self.num_fitness_traits = kwargs.get("num_fitness_traits", None)
-        self.global_selection_strength = kwargs.get("global_selection_strength", None)
-        self.default_cell_carrying_capacity = kwargs.get("default_cell_carrying_capacity", None)
-        self.random_seed = kwargs.get("random_seed", None)
+    def __init__(self, **kwargs):
+        self.title = kwargs.get("title", "results")
         self.log_frequency = kwargs.get("log_frequency", None)
         self.multifurcating_trees = kwargs.get("multifurcating_trees", None)
         self.final_output = kwargs.get("final_output", None)
         self.full_complement_diploid_trees = kwargs.get("full_complement_diploid_trees", None)
-        self.lineages = []
-        self.environments = []
+        self.system = kwargs.get("system", None)
+        self.landscape = kwargs.get("landscape", None)
+        self.lineages = kwargs.get("lineages", [])
         self.initialization_regime = kwargs.get("initialization_regime", None)
-        self.samples = []
-        self._child_elements = [self.lineages, self.environments, self.samples]
+        self.environments = kwargs.get("environments", [])
+        self.samples = kwargs.get("samples", [])
 
     def __str__(self):
         s = StringIO()
         s.write('<?xml version="1.0"?>\n')
-        s.write('<ginkgo>\n')
-        indent = (INDENT_SIZE * ' ')
-        parts = []
-        parts.append('world')
-        parts.append('x_range="%s"' % self.x_range)
-        parts.append('y_range="%s"' % self.y_range)
-        parts.append('num_gens="%s"' % self.num_gens)
-        if self.label:
-            parts.append('label="%s"' % self.label)
-        if self.num_fitness_traits:
-            parts.append('num_fitness_traits="%s"' % self.num_fitness_traits)
-        if self.global_selection_strength:
-            parts.append('global_selection_strength="%s"' % self.global_selection_strength)
-        if self.default_cell_carrying_capacity:
-            parts.append('default_cell_carrying_capacity="%s"' % self.default_cell_carrying_capacity)
-        if self.random_seed:
-            parts.append('random_seed="%s"' % self.random_seed)
-        if self.log_frequency:
-            parts.append('log_frequency="%s"' % self.log_frequency)
-        if self.multifurcating_trees:
-            parts.append('multifurcating_trees="%s"' % self.multifurcating_trees)
-        if self.final_output:
-            parts.append('final_output="%s"' % self.final_output)
-        if self.full_complement_diploid_trees:
-            parts.append('full_complement_diploid_trees="%s"' % self.full_complement_diploid_trees)
-        sep = "\n%s" % (indent * 2)
-        world_elem = sep.join(parts)
-        s.write('%s<%s>\n' % (indent, world_elem))
-        sub_indent = indent * 2
+        s.write('<ginkgo')
+        indent = INDENT_SIZE * ' '
+        if self.title is not None:
+            s.write('\n%stitle="%s"' % (indent, self.title))
+        if self.log_frequency is not None:
+            s.write('\n%slog_frequency="%s"' % (indent, self.log_frequency))
+        if self.multifurcating_trees is not None:
+            s.write('\n%smultifurcating_trees="%s"' % (indent, self.multifurcating_trees))
+        if self.final_output is not None:
+            s.write('\n%sfinal_output="%s"' % (indent, self.final_output))
+        if self.full_complement_diploid_trees is not None:
+            s.write('\n%sfull_complement_diploid_trees="%s"' % (indent, self.full_complement_diploid_trees))
+        s.write('>\n')
+        sub_indent = indent * 1
+        if self.system is not None:
+            s.write(str(self.system))
+        if self.landscape is not None:
+            s.write(str(self.landscape))
         if self.lineages:
             s.write('%s<lineages>\n' % sub_indent)
             for lineage in self.lineages:
                 s.write(str(lineage))
             s.write('%s</lineages>\n' % sub_indent)
-        if self.initialization_regime:
+        if self.initialization_regime is not None:
             s.write(str(self.initialization_regime))
         if self.environments:
             s.write('%s<environments>\n' % sub_indent)
@@ -99,8 +82,48 @@ class World(object):
             for sample in self.samples:
                 s.write(str(sample))
             s.write('%s</samples>\n' % sub_indent)
-        s.write('%s</world>\n' % indent)
         s.write('</ginkgo>\n')
+        return s.getvalue()
+
+class System(object):
+
+    def __init__(self, **kwargs):
+        self.random_seed = kwargs.get("random_seed", None)
+        self.fitness_dimensions = kwargs.get("fitness_dimensions", None)
+        self.global_selection_strength = kwargs.get("global_selection_strength", None)
+        self.ngens = kwargs.get("ngens", None)
+
+    def __str__(self):
+        s = StringIO()
+        indent = (INDENT_SIZE * ' ')
+        sub_indent = indent * 2
+        s.write('%s<system>' % indent)
+        if self.random_seed is not None:
+            s.write('\n%s<random_seed>%s</random_seed>' % (sub_indent, self.random_seed))
+        if self.fitness_dimensions is not None:
+            s.write('\n%s<fitness_dimensions>%s</fitness_dimensions>' % (sub_indent, self.fitness_dimensions))
+        if self.global_selection_strength is not None:
+            s.write('\n%s<global_selection_strength>%s</global_selection_strength>' % (sub_indent, self.global_selection_strength))
+        if self.ngens is not None:
+            s.write('\n%s<ngens>%s</ngens>' % (sub_indent, self.ngens))
+        s.write('\n%s</system>\n' % indent)
+        return s.getvalue()
+
+class Landscape(object):
+
+    def __init__(self, ncols, nrows, **kwargs):
+        self.ncols = ncols
+        self.nrows = nrows
+        self.default_cell_carrying_capacity = kwargs.get("default_cell_carrying_capacity", None)
+
+    def __str__(self):
+        s = StringIO()
+        indent = (INDENT_SIZE * ' ')
+        sub_indent = indent * 2
+        s.write('%s<landscape ncols="%s" nrows="%s">' % (indent, self.ncols, self.nrows))
+        if self.default_cell_carrying_capacity is not None:
+            s.write('\n%s<default_cell_carrying_capacity>%s</default_cell_carrying_capacity>' % (sub_indent, self.default_cell_carrying_capacity))
+        s.write('\n%s</landscape>\n' % indent)
         return s.getvalue()
 
 class Lineage(object):
@@ -112,7 +135,7 @@ class Lineage(object):
         self.fecundity = kwargs.get("fecundity", None)
         self.__movement_capacity = None
         self.movement_capacity = kwargs.get("movement_capacity", None)
-        self.indent_level = kwargs.get('indent_level', 3)
+        self.indent_level = kwargs.get('indent_level', 2)
 
     def _set_movement_capacity(self, val):
         if not (isinstance(val, list) or isinstance(val, tuple))\
@@ -142,7 +165,7 @@ class Lineage(object):
         if self.fecundity:
             s.write('%s<fecundity>%s</fecundity>\n' % (sub_indent, self.fecundity))
         if self.movement_capacity:
-            s.write('%s<movementCapacity distribution="%s">%s</movementCapacity>\n' \
+            s.write('%s<movement_capacity distribution="%s">%s</movement_capacity>\n' \
                     % (sub_indent, self.movement_capacity[0], self.movement_capacity[1]))
         s.write('%s</lineage>\n' % (top_indent))
         return s.getvalue()
@@ -173,19 +196,19 @@ class CarryingCapacityGrid(EnvironmentGrid):
                 attribute_dict={},
                 grid_filepath=grid_filepath)
 
-class MovementProbabilitiesGrid(EnvironmentGrid):
-
-    def __init__(self, lineage, grid_filepath):
-        EnvironmentGrid.__init__(self,
-                "movementProbabilities",
-                attribute_dict={'lineage': lineage},
-                grid_filepath=grid_filepath)
+#class MovementProbabilitiesGrid(EnvironmentGrid):
+#
+#    def __init__(self, lineage, grid_filepath):
+#        EnvironmentGrid.__init__(self,
+#                "movement_probabilities",
+#                attribute_dict={'lineage': lineage},
+#                grid_filepath=grid_filepath)
 
 class MovementCostsGrid(EnvironmentGrid):
 
     def __init__(self, lineage, grid_filepath):
         EnvironmentGrid.__init__(self,
-                "movementCosts",
+                "movement_costs",
                 attribute_dict={'lineage': lineage},
                 grid_filepath=grid_filepath)
 
@@ -193,13 +216,13 @@ class FitnessTraitOptimaGrid(EnvironmentGrid):
 
     def __init__(self, trait, grid_filepath):
         EnvironmentGrid.__init__(self,
-                "fitnessTraitOptima",
+                "fitness_trait_optima",
                 attribute_dict={'trait': trait},
                 grid_filepath=grid_filepath)
 
 class Environment(object):
 
-    def __init__(self, gen, indent_level=3):
+    def __init__(self, gen, indent_level=2):
         self.gen = gen
         self.grids = []
         self.indent_level = indent_level
@@ -227,7 +250,7 @@ class InitializationCellPopulations(object):
         self.y = kwargs.get("y", None)
         self.index = kwargs.get("index", None)
         self.pops = kwargs.get("pops", {})
-        self.indent_level = kwargs.get("indent_level", 4)
+        self.indent_level = kwargs.get("indent_level", 3)
 
     def __str__(self):
         parts = []
@@ -246,7 +269,7 @@ class InitializationCellPopulations(object):
 
 class InitializationRegime(object):
 
-    def __init__(self, pops, environment, max_cycles=None, indent_level=2):
+    def __init__(self, pops, environment, max_cycles=None, indent_level=1):
         self.pops = pops
         self.environment = environment
         self.max_cycles = max_cycles
@@ -281,7 +304,7 @@ class Sample(object):
         self.individuals_per_cell = kwargs.get('individuals_per_cell', None)
         self.cell_coordinates = kwargs.get('cell_coordinates', None)
         self.cell_indexes = kwargs.get('cell_indexes', None)
-        self.indent_level = kwargs.get('indent_level', 3)
+        self.indent_level = kwargs.get('indent_level', 2)
         self.build_trees = kwargs.get('build_trees', True)
 
     def __str__(self):
@@ -295,49 +318,39 @@ class Sample(object):
             close = '>'
         else:
             close = ' trees="False" />\n'
-        parts.append('%s<sample gen="%d" lineage=%s%s%s' % (top_indent, self.gen, self.lineage_id, label, close))
+        parts.append('%s<sample gen="%d" lineage="%s"%s%s' % (top_indent, self.gen, self.lineage_id, label, close))
         if self.build_trees:
             sub_indent = ((self.indent_level + 1) * INDENT_SIZE) * ' '
             if self.individuals_per_cell:
-                parts.append('%s<individualsPerCell>%s</individualsPerCell>' % (sub_indent, self.individuals_per_cell))
-            if self.cell_indexes:
-                parts.append('%s<cellIndexes>' % sub_indent)
+                parts.append('%s<individuals_per_cell>%s</individuals_per_cell>' % (sub_indent, self.individuals_per_cell))
+            if self.cell_indexes or self.cell_coordinates:
+                parts.append('%s<cells>' % sub_indent)
                 sub_sub_indent = ((self.indent_level + 2) * INDENT_SIZE) * ' '
-                if isinstance(self.cell_indexes, str):
-                    rows = self.cell_indexes.split('\n')
-                    for r in rows:
-                        parts.append('%s%s' % (sub_sub_indent, r))
-                else:
-                    parts.append('%s%s' % (sub_sub_indent, " ".join([str(s) for s in self.cell_indexes])))
-                parts.append('%s</cellIndexes>' % sub_indent)
-            elif self.cell_coordinates:
-                parts.append('%s<cellCoordinates>' % sub_indent)
-                sub_sub_indent = ((self.indent_level + 2) * INDENT_SIZE) * ' '
-                if isinstance(self.cell_coordinates, str):
-                    rows = self.cell_coordinates.split('\n')
-                    for r in rows:
-                        parts.append('%s%s' % (sub_sub_indent, r))
-                else:
+                if self.cell_indexes:
+                    for c in self.indexes:
+                        parts.append('%s<cell index="%s" />' % (sub_sub_indent, c))
+                if self.cell_coordinates:
                     for c in self.cell_coordinates:
-                        parts.append('%s%s,%s' % (sub_sub_indent, c[0], c[1]))
-                parts.append('%s</cellCoordinates>' % sub_indent)
+                        parts.append('%s<cell x="%s" y="%s"/>' % (sub_sub_indent, c[0], c[1]))
+                parts.append('%s<cells>' % sub_indent)
             parts.append('%s</sample>\n' % top_indent)
         return "\n".join(parts)
 
 if __name__ == "__main__":
     num_fitness_traits = 1
-    w = World(
-            x_range=10,
-            y_range=10,
-            num_gens=20000,
-            label="ginkgo_run",
-            num_fitness_traits=num_fitness_traits,
-            global_selection_strength=1.0,
-            default_cell_carrying_capacity=100,
-            log_frequency=1000,
+
+    g = GinkgoConfiguration(
+            title="results1",
+            log_frequency=100,
             multifurcating_trees=True,
             final_output=False,
-            full_complement_diploid_trees=False)
+            full_complement_diploid_trees=False,
+            system=System(random_seed=3124,
+                         fitness_dimensions=num_fitness_traits,
+                         global_selection_strength=1.0,
+                         ngens=1000),
+            landscape=Landscape(ncols=10, nrows=10, default_cell_carrying_capacity=100)
+        )
     cells = [(1,1),(2,1),(3,1),(4,1),
              (1,2),(2,2),(3,2),(4,2)]
     s1 = Lineage("Zx",
@@ -345,29 +358,27 @@ if __name__ == "__main__":
             fitness_trait_default_genotypes=[0]*num_fitness_traits,
             fecundity=16,
             movement_capacity=("poisson", 10))
-    w.lineages.append(s1)
+    g.lineages.append(s1)
 
     e0 = Environment(None)
     e0.grids.append(CarryingCapacityGrid('cc.grd'))
-    e0.grids.append(MovementProbabilitiesGrid('Zx', 'movp_zx.grd'))
     e0.grids.append(MovementCostsGrid('Zx', 'movp_zx.grd'))
     e0.grids.append(FitnessTraitOptimaGrid('1', 'movp_zx.grd'))
     cell_pops = []
     for cell in cells:
         cell_pops.append(InitializationCellPopulations(x=cell[0], y=cell[1], pops={"Zx": 100}))
     init_reg = InitializationRegime(pops=cell_pops, environment=e0)
-    w.initialization_regime = init_reg
+    g.initialization_regime = init_reg
 
     e1 = Environment(1)
     e1.grids.append(CarryingCapacityGrid('cc.grd'))
-    e1.grids.append(MovementProbabilitiesGrid('Zx', 'movp_zx.grd'))
     e1.grids.append(MovementCostsGrid('Zx', 'movp_zx.grd'))
     e1.grids.append(FitnessTraitOptimaGrid('1', 'movp_zx.grd'))
-    w.environments.append(e1)
+    g.environments.append(e1)
 
     for t in xrange(10):
         gen = (t + 10) * 1000
-        s = Sample(lineage_id="Zx", gen=gen, individuals_per_cell=10, cells=cells)
-        w.samples.append(s)
+        s = Sample(lineage_id="Zx", gen=gen, individuals_per_cell=10, cell_coordinates=cells)
+        g.samples.append(s)
 
-    print(str(w))
+    print(str(g))
