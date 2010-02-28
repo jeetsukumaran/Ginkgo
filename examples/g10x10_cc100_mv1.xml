@@ -1,45 +1,47 @@
 <?xml version="1.0"?>
-<ginkgo>
-    <world
-        x_range="10"
-        y_range="10"
-        num_gens="100"
-        label="run"
-        num_fitness_traits="1"
-        global_selection_strength="1"
-        default_cell_carrying_capacity="100"
-        log_frequency="1"
-        multifurcating_trees="1">
-        <lineages>
-            <lineage id="Zx">
-                <fitness_trait_relative_selection_weights>1</fitness_trait_relative_selection_weights>
-                <fitness_trait_default_genotypes>0</fitness_trait_default_genotypes>
-                <fecundity>16</fecundity>
-                <movementCapacity distribution="constant">1</movementCapacity>
-            </lineage>
-        </lineages>
-        <initialization>
-            <populations>
-                <cell index="0">
-                    <population lineage="Zx" size="100" />
-                </cell>
-            </populations>
-            <environment>
-                <movementCosts lineage="Zx">g10x10_mv1.asc</movementCosts>
-            </environment>
-        </initialization>
-        <environments>
-            <environment gen="0">
-                <movementCosts lineage="Zx">g10x10_mv1.asc</movementCosts>
-            </environment>
-        </environments>
-        <samples>
-            <sample gen="1" lineage=Zx label="e1" trees="False" />
-            <sample gen="10" lineage=Zx label="e1" trees="False" />
-            <sample gen="100" lineage=Zx label="e1" trees="False" />
-            <sample gen="1000" lineage=Zx label="e1" trees="False" />
-            <sample gen="1500" lineage=Zx label="e1" trees="False" />
-            <sample gen="2000" lineage=Zx label="e1" trees="False" />
-        </samples>
-    </world>
+<ginkgo
+    title="ginkgo_output"
+    log_frequency="1"
+    multifurcating_trees="True"
+    final_output = "True"
+    full_complement_diploid_trees = "False">
+    <system>
+        <fitness_dimensions>1</fitness_dimensions>
+        <global_selection_strength>1.0</global_selection_strength>
+        <ngens>1000</ngens>
+    </system>
+    <landscape ncols="10" nrows="10">
+        <default_cell_carrying_capacity>0</default_cell_carrying_capacity>
+    </landscape>
+    <lineages>
+        <lineage id="Zx">
+            <fitness_trait_relative_selection_weights>1</fitness_trait_relative_selection_weights>
+            <fitness_trait_default_genotypes>0</fitness_trait_default_genotypes>
+            <fecundity>16</fecundity>
+            <movement_capacity distribution="constant">1</movement_capacity>
+        </lineage>
+    </lineages>
+    <initialization>
+        <populations>
+            <cell index="0">
+                <population lineage="Zx" size="100" />
+            </cell>
+        </populations>
+        <environment>
+            <movement_costs lineage="Zx">g10x10_mv1.asc</movement_costs>
+        </environment>
+    </initialization>
+    <environments>
+        <environment gen="0">
+            <movement_costs lineage="Zx">g10x10_mv1.asc</movement_costs>
+        </environment>
+    </environments>
+    <samples>
+        <sample gen="1" lineage=Zx label="e1" trees="False" />
+        <sample gen="10" lineage=Zx label="e1" trees="False" />
+        <sample gen="100" lineage=Zx label="e1" trees="False" />
+        <sample gen="1000" lineage=Zx label="e1" trees="False" />
+        <sample gen="1500" lineage=Zx label="e1" trees="False" />
+        <sample gen="2000" lineage=Zx label="e1" trees="False" />
+    </samples>
 </ginkgo>

@@ -306,71 +306,45 @@ void ConfigurationFile::parse_environments(World& world) {
 
 void ConfigurationFile::parse_samplings(World& world) {
     XmlElementType samplings = this->ginkgo_root_.getChildNode("samples");
-    if (!samplings.isEmpty()) {
-        for (int i = 0; i < samplings.nChildNode(); ++i) {
-            XmlElementType snode = samplings.getChildNode(i);
-            std::string node_name = snode.getName();
-            if (node_name == "sample") {
+    if (samplings.isEmpty()) {
+        return;
+    }
+    for (int i = 0; i < samplings.nChildNode("sample"); ++i) {
 
-                GenerationCountType gen = this->get_attribute<GenerationCountType>(snode, "gen");
-                std::string lineage_id = this->get_attribute<std::string>(snode, "lineage");
-                if (not world.has_species(lineage_id)) {
-                    throw ConfigurationError("sample: lineage \"" + lineage_id + "\" not defined");
-                }
-                world.add_occurrence_sampling(gen, world.species_registry()[lineage_id]);
-
-                bool write_trees = this->get_attribute_bool(snode, "trees", true);
-                if (write_trees) {
-                    SamplingRegime world_sampling_regime;
-                    world_sampling_regime.species_ptr = world.species_registry()[lineage_id];
-                    std::string label = this->get_attribute<std::string>(snode, "label", "");
-                    if (label.size() > 0) {
-                        world_sampling_regime.label = label;
-                    }
-                    world_sampling_regime.num_organisms_per_cell = this->get_child_node_scalar<PopulationCountType>(snode, "individuals_per_cell", 0);
-                    XmlElementType cell_xy_node = snode.getChildNode("cell_coordinates");
-                    XmlElementType cell_index_node = snode.getChildNode("cell_indexes");
-                    if (!cell_xy_node.isEmpty() and !cell_index_node.isEmpty()) {
-                        throw ConfigurationError("sample: cannot specify cells using both coordinates and indexes");
-                    } else if (!cell_xy_node.isEmpty()) {
-                        std::ostringstream raw;
-                        for (int i = 0; i < cell_xy_node.nText(); ++i) {
-                            raw << cell_xy_node.getText(i);
-                        }
-                        std::string cells_desc = raw.str();
-                        if (cells_desc.size() > 0) {
-                            std::vector<std::string> cells_vec = textutil::split_on_any(cells_desc, " \r\n\t", 0, false);
-                            for (std::vector<std::string>::iterator ci = cells_vec.begin(); ci != cells_vec.end(); ++ci) {
-                                std::vector<std::string> xy = textutil::split(*ci, ",", 0, false);
-                                if (xy.size() < 2) {
-                                    throw ConfigurationError("sample cell position: missing coordinate");
-                                } else if (xy.size() > 2) {
-                                    throw ConfigurationError("sample cell position: too many coordinates");
-                                }
-                                CellIndexType x = convert::to_scalar<CellIndexType>(xy[0]);
-                                CellIndexType y = convert::to_scalar<CellIndexType>(xy[1]);
-                                CellIndexType cell_index = this->get_validated_cell_index(x, y, world, "sampling coordinate");
-                                world_sampling_regime.cell_indexes.insert(cell_index);
-                            }
-                        }
-                    } else if (!cell_index_node.isEmpty()) {
-                        std::vector<CellIndexType> cell_indexes = this->get_element_vector<CellIndexType>(cell_index_node);
-                        for (std::vector<CellIndexType>::iterator ci = cell_indexes.begin();
-                                ci != cell_indexes.end();
-                                ++ci) {
-                            if (*ci >= world.landscape().size()) {
-                                std::ostringstream msg;
-                                msg << "sample cell position: maximum cell index is " << world.landscape().size() - 1;
-                                msg << " (0-based indexing), but cell index of " << *ci << " specified";
-                                throw ConfigurationError(msg.str());
-                            }
-                            world_sampling_regime.cell_indexes.insert(*ci);
-                        }
-                    }
-                    world.add_tree_sampling(gen, world_sampling_regime);
-                }
-            }
+        // common
+        XmlElementType sample_node = samplings.getChildNode("sample", i);
+        GenerationCountType gen = this->get_attribute<GenerationCountType>(sample_node, "gen");
+        std::string lineage_id = this->get_attribute<std::string>(sample_node, "lineage");
+        if (not world.has_species(lineage_id)) {
+            throw ConfigurationError("sample: lineage \"" + lineage_id + "\" not defined");
         }
+
+        // occurrence
+        world.add_occurrence_sampling(gen, world.species_registry()[lineage_id]);
+
+        // skip to next if trees not wanted
+        if (!this->get_attribute_bool(sample_node, "trees", true) ) {
+            continue;
+        }
+
+        // process tree sampling directive
+        SamplingRegime world_sampling_regime;
+        world_sampling_regime.species_ptr = world.species_registry()[lineage_id];
+        std::string label = this->get_attribute<std::string>(sample_node, "label", "");
+        if (label.size() > 0) {
+            world_sampling_regime.label = label;
+        }
+        world_sampling_regime.num_organisms_per_cell = this->get_child_node_scalar<PopulationCountType>(sample_node, "individuals_per_cell", 0);
+        XmlElementType cell_nodes = sample_node.getChildNode("cells");
+        if (cell_nodes.isEmpty()) {
+            continue; // all cells assumed by default
+        }
+        for (int j = 0; j < cell_nodes.nChildNode("cell"); ++j) {
+            XmlElementType sample_cell_node = samplings.getChildNode("cell", i);
+            CellIndexType cell_index = this->parse_cell_index_from_node(world, sample_cell_node);
+            world_sampling_regime.cell_indexes.insert(cell_index);
+        }
+        world.add_tree_sampling(gen, world_sampling_regime);
     }
 }
 
