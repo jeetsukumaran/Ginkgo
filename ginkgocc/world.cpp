@@ -86,8 +86,8 @@ Species& World::new_species(const std::string& label) {
     sp->set_global_selection_strength(this->global_selection_strength_);
     std::vector<MovementCountType> default_movement_costs(this->landscape_.size(), 1);
     sp->set_movement_costs(default_movement_costs);
-    std::vector<float> default_movement_probabilities(this->landscape_.size(), 1.0);
-    sp->set_movement_probabilities(default_movement_probabilities);
+//    std::vector<float> default_movement_probabilities(this->landscape_.size(), 1.0);
+//    sp->set_movement_probabilities(default_movement_probabilities);
     return *sp;
 }
 
@@ -422,17 +422,17 @@ void World::set_world_environment(EnvironmentSettings& env, const char * log_lea
             mi->first->set_movement_costs(grid.get_cell_values());
         }
     }
-    if (env.movement_probabilities.size() != 0) {
-        for (std::map<Species *, std::string>::iterator mi = env.movement_probabilities.begin();
-                 mi != env.movement_probabilities.end();
-                 ++mi) {
-            std::ostringstream msg;
-            msg << log_leader << " Setting movement probabilities for species " <<  mi->first->get_label() <<  ": \"" <<  mi->second <<  "\"";
-            this->logger_.info(msg.str());
-            asciigrid::AsciiGrid<float> grid(mi->second);
-            mi->first->set_movement_probabilities(grid.get_cell_values());
-        }
-    }
+//    if (env.movement_probabilities.size() != 0) {
+//        for (std::map<Species *, std::string>::iterator mi = env.movement_probabilities.begin();
+//                 mi != env.movement_probabilities.end();
+//                 ++mi) {
+//            std::ostringstream msg;
+//            msg << log_leader << " Setting movement probabilities for species " <<  mi->first->get_label() <<  ": \"" <<  mi->second <<  "\"";
+//            this->logger_.info(msg.str());
+//            asciigrid::AsciiGrid<float> grid(mi->second);
+//            mi->first->set_movement_probabilities(grid.get_cell_values());
+//        }
+//    }
 }
 
 void World::process_dispersal_events() {
@@ -902,13 +902,13 @@ void World::log_configuration() {
                 out << "    Movement costs for lineage \"" << mi->first->get_label() << "\": \"" << mi->second << "\"" << std::endl;
             }
         }
-        if (wi->second.movement_probabilities.size() != 0) {
-            for (std::map<Species *, std::string>::iterator mi = wi->second.movement_probabilities.begin();
-                     mi != wi->second.movement_probabilities.end();
-                     ++mi) {
-                out << "    Movement probablities for lineage \"" << mi->first->get_label() << "\": \"" << mi->second << "\"" << std::endl;
-            }
-        }
+//        if (wi->second.movement_probabilities.size() != 0) {
+//            for (std::map<Species *, std::string>::iterator mi = wi->second.movement_probabilities.begin();
+//                     mi != wi->second.movement_probabilities.end();
+//                     ++mi) {
+//                out << "    Movement probablities for lineage \"" << mi->first->get_label() << "\": \"" << mi->second << "\"" << std::endl;
+//            }
+//        }
     }
 
 //    out << std::endl;

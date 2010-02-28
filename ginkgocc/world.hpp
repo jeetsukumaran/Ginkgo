@@ -166,12 +166,12 @@ struct EnvironmentSettings {
      * mapped to ESRI ASCII Grid file paths).
      */
     std::map<Species *, std::string>        movement_costs;
-
-    /**
-     * Movement probabiities that need to be changed/set. (expressed as species labels
-     * mapped to ESRI ASCII Grid file paths).
-     */
-    std::map<Species *, std::string>        movement_probabilities;
+//
+//    /**
+//     * Movement probabiities that need to be changed/set. (expressed as species labels
+//     * mapped to ESRI ASCII Grid file paths).
+//     */
+//    std::map<Species *, std::string>        movement_probabilities;
 
 }; // EnvironmentSettings
 

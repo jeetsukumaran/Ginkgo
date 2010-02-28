@@ -49,7 +49,7 @@
 
     <environments>
         <environment gen="1">
-            <carrying_capacity">cc100.asc</carrying_capacity>
+            <carrying_capacity>cc100.asc</carrying_capacity>
             <movement_costs lineage="Zk">g25x25_mv1.asc</movement_costs>
             <movement_costs lineage="Zr">g25x25_mv9.asc</movement_costs>
             <fitness_trait_optima trait="0">trait_unif0.asc</fitness_trait_optima>
@@ -57,12 +57,12 @@
             <fitness_trait_optima trait="2">trait_rand2.asc</fitness_trait_optima>
         </environment>
         <environment gen="100">
-            <carrying_capacity">cc50.asc</carrying_capacity>
+            <carrying_capacity>cc50.asc</carrying_capacity>
             <movement_costs lineage="Zk">g25x25_mv9.asc</movement_costs>
             <movement_costs lineage="Zr">g25x25_mv1.asc</movement_costs>
             <fitness_trait_optima trait="0">trait_unif0.asc</fitness_trait_optima>
             <fitness_trait_optima trait="1">trait_rand3.asc</fitness_trait_optima>
-            <fitness_trait_optima trait="2">trait_rand4.asc</fitness_trait_optim
+            <fitness_trait_optima trait="2">trait_rand4.asc</fitness_trait_optima>
         </environment>
         <environment gen="1000">
             <movement_costs lineage="Zk">g25x25_mv1.asc</movement_costs>
@@ -79,11 +79,11 @@
     <samples>
 
         <sample gen="0" lineage="Zk" label="a">
-            <individuals_per_cell>10<individuals_per_cell>
+            <individuals_per_cell>10</individuals_per_cell>
         </sample>
 
         <sample gen="1" lineage="Zk" label="b">
-            <individuals_per_cell>10<individuals_per_cell>
+            <individuals_per_cell>10</individuals_per_cell>
             <cells>
                 <cell x="0" y="0" /> <cell x="1" y="0" />
                 <cell x="0" y="1" /> <cell x="1" y="1" />
@@ -92,7 +92,7 @@
         </sample>
 
         <sample gen="1" lineage="Zk" label="c">
-            <individuals_per_cell>10<individuals_per_cell>
+            <individuals_per_cell>10</individuals_per_cell>
             <cells>
                 <cell index="0" />  <cell index="1" />
                 <cell index="25" /> <cell index="26" />
@@ -110,11 +110,11 @@
         <sample gen="2000" lineage="Zk" label="e1" trees="False" />
 
         <sample gen="2500" lineage="Zr" label="final">
-            <individuals_per_cell>10<individuals_per_cell>
+            <individuals_per_cell>10</individuals_per_cell>
         </sample>
 
         <sample gen="2500" lineage="Zk" label="final">
-            <individuals_per_cell>10<individuals_per_cell>
+            <individuals_per_cell>10</individuals_per_cell>
         </sample>
 
     </samples>

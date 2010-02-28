@@ -182,26 +182,26 @@ class Species {
             this->movement_capacity_probabilities_ = probs;
         }
 
-        /**
-         * Sets the cell-specific probability of movement of an organism of
-         * this lineage on the landscape.
-         *
-         * @param movement_probabilities probability of movement
-         */
-        void set_movement_probabilities(const std::vector<float>& movement_probabilities) {
-            this->movement_probabilities_ = movement_probabilities;
-        }
+//        /**
+//         * Sets the cell-specific probability of movement of an organism of
+//         * this lineage on the landscape.
+//         *
+//         * @param movement_probabilities probability of movement
+//         */
+//        void set_movement_probabilities(const std::vector<float>& movement_probabilities) {
+//            this->movement_probabilities_ = movement_probabilities;
+//        }
 
-        /**
-         * Gets the probability of movement of an organism of this species in
-         * a particular cell on the landscape.
-         *
-         * @param movement_probabilities probability of movement
-         */
-        float movement_probability(CellIndexType i) {
-            assert( i < this->movement_probabilities_.size() );
-            return this->movement_probabilities_[i];
-        }
+//        /**
+//         * Gets the probability of movement of an organism of this species in
+//         * a particular cell on the landscape.
+//         *
+//         * @param movement_probabilities probability of movement
+//         */
+//        float movement_probability(CellIndexType i) {
+//            assert( i < this->movement_probabilities_.size() );
+//            return this->movement_probabilities_[i];
+//        }
 
         /**
          * Defines the costs for entering cells in the landscape.
@@ -533,8 +533,8 @@ class Species {
         MovementCountType                   movement_capacity_;
         /** variable movement-capacity assignment: vector of probabilities associated with each movement capacity */
         std::vector<float>                  movement_capacity_probabilities_;
-        /** cell- and lineage-specific probability of movement of each organism */
-        std::vector<float>                  movement_probabilities_;
+//        /** cell- and lineage-specific probability of movement of each organism */
+//        std::vector<float>                  movement_probabilities_;
         /** genotype for organisms created de novo */
         FitnessTraits                       default_fitness_trait_genotypes_;
         /** global selection strength */

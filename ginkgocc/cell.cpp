@@ -131,27 +131,27 @@ void Cell::migration() {
         BreedingPopulation remaining_pop;
         for (BreedingPopulation::iterator oi = current_pop.begin(); oi != current_pop.end(); ++oi) {
             Organism * og_ptr = *oi;
-            if (this->rng_.uniform_01() <= sp->movement_probability(this->index_)) {
-                MovementCountType movement = sp->get_movement_capacity();
-                CellIndexType curr_idx = this->index_;
-                MovementCountType movement_cost = 0;
-                while (movement > 0) {
-                    CellIndexType dest_idx = this->landscape_.random_neighbor(curr_idx);
-                    assert(dest_idx < this->landscape_.size());
-                    movement_cost = sp->movement_cost(dest_idx);
-                    if ( movement >= movement_cost) {
-                        movement -= movement_cost;
-                        curr_idx = dest_idx;
-                    } else {
-                        movement -= sp->movement_cost(curr_idx);
-                    }
-                }
-                if (curr_idx != this->index_) {
-                    this->landscape_.add_migrant(og_ptr, curr_idx);
+//            if (this->rng_.uniform_01() <= sp->movement_probability(this->index_)) {
+            MovementCountType movement = sp->get_movement_capacity();
+            CellIndexType curr_idx = this->index_;
+            MovementCountType movement_cost = 0;
+            while (movement > 0) {
+                CellIndexType dest_idx = this->landscape_.random_neighbor(curr_idx);
+                assert(dest_idx < this->landscape_.size());
+                movement_cost = sp->movement_cost(dest_idx);
+                if ( movement >= movement_cost) {
+                    movement -= movement_cost;
+                    curr_idx = dest_idx;
                 } else {
-                    remaining_pop.add(og_ptr);
+                    movement -= sp->movement_cost(curr_idx);
                 }
             }
+            if (curr_idx != this->index_) {
+                this->landscape_.add_migrant(og_ptr, curr_idx);
+            } else {
+                remaining_pop.add(og_ptr);
+            }
+//            } // movement probability: if (this->rng_.uniform_01() <= sp->movement_probability(this->index_))
         }
         this->populations_[sp] = remaining_pop;
     }
