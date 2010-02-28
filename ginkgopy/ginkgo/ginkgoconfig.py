@@ -332,7 +332,7 @@ class Sample(object):
                 if self.cell_coordinates:
                     for c in self.cell_coordinates:
                         parts.append('%s<cell x="%s" y="%s"/>' % (sub_sub_indent, c[0], c[1]))
-                parts.append('%s<cells>' % sub_indent)
+                parts.append('%s</cells>' % sub_indent)
             parts.append('%s</sample>\n' % top_indent)
         return "\n".join(parts)
 
