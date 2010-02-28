@@ -65,19 +65,19 @@ class World(object):
         if self.num_fitness_traits:
             parts.append('num_fitness_traits="%s"' % self.num_fitness_traits)
         if self.global_selection_strength:
-            parts.append('global_selection_strength="%s"' % self.num_fitness_traits)
+            parts.append('global_selection_strength="%s"' % self.global_selection_strength)
         if self.default_cell_carrying_capacity:
             parts.append('default_cell_carrying_capacity="%s"' % self.default_cell_carrying_capacity)
         if self.random_seed:
-            parts.append('random_seed="%s"' % self.num_fitness_traits)
+            parts.append('random_seed="%s"' % self.random_seed)
         if self.log_frequency:
-            parts.append('log_frequency="%s"' % self.num_fitness_traits)
+            parts.append('log_frequency="%s"' % self.log_frequency)
         if self.multifurcating_trees:
-            parts.append('multifurcating_trees="%s"' % self.num_fitness_traits)
+            parts.append('multifurcating_trees="%s"' % self.multifurcating_trees)
         if self.final_output:
-            parts.append('final_output="%s"' % self.num_fitness_traits)
+            parts.append('final_output="%s"' % self.final_output)
         if self.full_complement_diploid_trees:
-            parts.append('full_complement_diploid_trees="%s"' % self.num_fitness_traits)
+            parts.append('full_complement_diploid_trees="%s"' % self.full_complement_diploid_trees)
         sep = "\n%s" % (indent * 2)
         world_elem = sep.join(parts)
         s.write('%s<%s>\n' % (indent, world_elem))
