@@ -123,9 +123,9 @@ void ConfigurationFile::parse_meta(World& world) {
 
 void ConfigurationFile::parse_system(World& world) {
     XmlElementType sys_node = this->get_child_node(this->ginkgo_root_, "system");
-    world.set_random_seed( this->get_attribute<unsigned long>(sys_node, "random_seed", time(0)) );
-    world.set_global_selection_strength(this->get_attribute<float>(sys_node, "global_selection_strength", DEFAULT_GLOBAL_SELECTION_STRENGTH));
-    unsigned fitness_dim = this->get_attribute<unsigned>(sys_node, "fitness_dimensions");
+    world.set_random_seed( this->get_child_node_scalar<unsigned long>(sys_node, "random_seed", time(0)) );
+    world.set_global_selection_strength(this->get_child_node_scalar<float>(sys_node, "global_selection_strength", DEFAULT_GLOBAL_SELECTION_STRENGTH));
+    unsigned fitness_dim = this->get_child_node_scalar<unsigned>(sys_node, "fitness_dimensions");
     if (fitness_dim > MAX_FITNESS_TRAITS) {
         std::ostringstream s;
         s << "maximum number of fitness dimensions allowed is " << MAX_FITNESS_TRAITS;
@@ -133,7 +133,7 @@ void ConfigurationFile::parse_system(World& world) {
         throw ConfigurationError(s.str());
     }
     world.set_num_fitness_traits(fitness_dim);
-    world.set_generations_to_run( this->get_attribute<GenerationCountType>(sys_node, "ngens") );
+    world.set_generations_to_run( this->get_child_node_scalar<GenerationCountType>(sys_node, "ngens") );
 }
 
 void ConfigurationFile::parse_landscape(World& world) {
@@ -144,7 +144,7 @@ void ConfigurationFile::parse_landscape(World& world) {
 }
 
 void ConfigurationFile::parse_lineages(World& world) {
-    XmlElementType bio_node = this->ginkgo_root_.getChildNode("world").getChildNode("lineages");
+    XmlElementType bio_node = this->ginkgo_root_.getChildNode("lineages");
     if (bio_node.isEmpty()) {
         throw ConfigurationSyntaxError("lineages element is missing from configuration file");
     }
@@ -165,7 +165,7 @@ void ConfigurationFile::parse_lineage(XmlElementType& lineage_node, World& world
     Species& lineage = world.new_species(lineage_id);
 
     // genotypic fitness factor
-    XmlElementType gtf_node = this->get_child_node(lineage_node, "fitnessTraitDefaultGenotype", false);
+    XmlElementType gtf_node = this->get_child_node(lineage_node, "fitness_trait_default_genotypes", false);
     if (!gtf_node.isEmpty()) {
         std::vector<FitnessTraitType> gff = this->get_element_vector<FitnessTraitType>(gtf_node);
         if (gff.size() != lineage.get_num_fitness_traits()) {
@@ -179,7 +179,7 @@ void ConfigurationFile::parse_lineage(XmlElementType& lineage_node, World& world
     }
 
     // selection weights
-    XmlElementType sw_node = this->get_child_node(lineage_node, "fitnessTraitRelativeSelectionWeights", false);
+    XmlElementType sw_node = this->get_child_node(lineage_node, "fitness_trait_relative_selection_weights", false);
     if (!sw_node.isEmpty()) {
         std::vector<float> sw = this->get_element_vector<float>(sw_node);
         if (sw.size() != lineage.get_num_fitness_traits()) {
@@ -193,22 +193,22 @@ void ConfigurationFile::parse_lineage(XmlElementType& lineage_node, World& world
     }
 
     // fitness sd
-    XmlElementType fsd_node = this->get_child_node(lineage_node, "fitnessTraitInheritanceStdDev", false);
-    if (!fsd_node.isEmpty()) {
-        std::vector<float> sd = this->get_element_vector<float>(fsd_node);
-        if (sd.size() != lineage.get_num_fitness_traits()) {
-            std::ostringstream msg;
-            msg << "expecting " << lineage.get_num_fitness_traits();
-            msg << " fitness inheritance standard deviations, but found ";
-            msg << sd.size() << " instead";
-            throw ConfigurationError(msg.str());
-        }
-        lineage.set_fitness_trait_inheritance_sd(sd);
-    }
+//    XmlElementType fsd_node = this->get_child_node(lineage_node, "fitnessTraitInheritanceStdDev", false);
+//    if (!fsd_node.isEmpty()) {
+//        std::vector<float> sd = this->get_element_vector<float>(fsd_node);
+//        if (sd.size() != lineage.get_num_fitness_traits()) {
+//            std::ostringstream msg;
+//            msg << "expecting " << lineage.get_num_fitness_traits();
+//            msg << " fitness inheritance standard deviations, but found ";
+//            msg << sd.size() << " instead";
+//            throw ConfigurationError(msg.str());
+//        }
+//        lineage.set_fitness_trait_inheritance_sd(sd);
+//    }
 
     lineage.set_mean_reproductive_rate(this->get_child_node_scalar<unsigned>(lineage_node, "fecundity", 16));
 
-    XmlElementType mc_node = this->get_child_node(lineage_node, "movementCapacity", false);
+    XmlElementType mc_node = this->get_child_node(lineage_node, "movement_capacity", false);
     if (!mc_node.isEmpty()) {
         std::string dist = this->get_attribute<std::string>(mc_node, "distribution");
         if (dist == "constant") {
@@ -225,7 +225,7 @@ void ConfigurationFile::parse_lineage(XmlElementType& lineage_node, World& world
             }
             lineage.set_movement_capacity_probabilities(mov_probs);
         } else {
-            throw ConfigurationError("movementCapacity for '" + lineage_id + "': 'distribution' attribute must be one of: 'constant', 'poisson', or 'user'");
+            throw ConfigurationError("movement_capacity for '" + lineage_id + "': 'distribution' attribute must be one of: 'constant', 'poisson', or 'user'");
         }
     } else {
         lineage.set_movement_capacity_fixed(1);
@@ -235,10 +235,9 @@ void ConfigurationFile::parse_lineage(XmlElementType& lineage_node, World& world
 
 void ConfigurationFile::parse_initialization(World& world) {
     InitializationRegime  initialization_regime;
-    XmlElementType world_node = this->get_child_node(this->ginkgo_root_, "world", true);
-    XmlElementType initialization = this->get_child_node(world_node, "initialization", true);
+    XmlElementType initialization = this->get_child_node(this->ginkgo_root_, "initialization", true);
     initialization_regime.max_cycles = this->get_attribute<GenerationCountType>(initialization, "max_cycles", 0);
-    XmlElementType env_node = this->get_child_node(world_node, "environment", false);
+    XmlElementType env_node = this->get_child_node(initialization, "environment", false);
 
     if (!env_node.isEmpty()) {
         initialization_regime.environment = this->parse_environment_settings(world, env_node);
@@ -252,7 +251,7 @@ void ConfigurationFile::parse_initialization(World& world) {
             std::string lineage_id = this->get_attribute<std::string>(cell_pop_node, "lineage");
             PopulationCountType pop_size = this->get_attribute<PopulationCountType>(cell_pop_node, "size");
             if (not world.has_species(lineage_id)) {
-                throw ConfigurationError("dispersal: lineage \"" + lineage_id + "\" not defined");
+                throw ConfigurationError("initialization: lineage \"" + lineage_id + "\" not defined");
             }
             Species * species_ptr = world.species_registry()[lineage_id];
             initialization_regime.cell_populations[cell_index][species_ptr] = pop_size;
@@ -262,7 +261,7 @@ void ConfigurationFile::parse_initialization(World& world) {
 }
 
 void ConfigurationFile::parse_environments(World& world) {
-    XmlElementType environs = this->ginkgo_root_.getChildNode("world").getChildNode("environments");
+    XmlElementType environs = this->ginkgo_root_.getChildNode("environments");
     if (!environs.isEmpty()) {
         for (int i = 0; i < environs.nChildNode("environment"); ++i) {
             XmlElementType env_node = environs.getChildNode("environment", i);
@@ -306,7 +305,7 @@ void ConfigurationFile::parse_environments(World& world) {
 //}
 
 void ConfigurationFile::parse_samplings(World& world) {
-    XmlElementType samplings = this->ginkgo_root_.getChildNode("world").getChildNode("samples");
+    XmlElementType samplings = this->ginkgo_root_.getChildNode("samples");
     if (!samplings.isEmpty()) {
         for (int i = 0; i < samplings.nChildNode(); ++i) {
             XmlElementType snode = samplings.getChildNode(i);
@@ -328,9 +327,9 @@ void ConfigurationFile::parse_samplings(World& world) {
                     if (label.size() > 0) {
                         world_sampling_regime.label = label;
                     }
-                    world_sampling_regime.num_organisms_per_cell = this->get_child_node_scalar<PopulationCountType>(snode, "individualsPerCell", 0);
-                    XmlElementType cell_xy_node = snode.getChildNode("cellCoordinates");
-                    XmlElementType cell_index_node = snode.getChildNode("cellIndexes");
+                    world_sampling_regime.num_organisms_per_cell = this->get_child_node_scalar<PopulationCountType>(snode, "individuals_per_cell", 0);
+                    XmlElementType cell_xy_node = snode.getChildNode("cell_coordinates");
+                    XmlElementType cell_index_node = snode.getChildNode("cell_indexes");
                     if (!cell_xy_node.isEmpty() and !cell_index_node.isEmpty()) {
                         throw ConfigurationError("sample: cannot specify cells using both coordinates and indexes");
                     } else if (!cell_xy_node.isEmpty()) {
