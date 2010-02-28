@@ -339,8 +339,8 @@ void ConfigurationFile::parse_samplings(World& world) {
         if (cell_nodes.isEmpty()) {
             continue; // all cells assumed by default
         }
-        for (int j = 0; j < cell_nodes.nChildNode("cell"); ++j) {
-            XmlElementType sample_cell_node = samplings.getChildNode("cell", i);
+        for (int cnidx = 0; cnidx < cell_nodes.nChildNode("cell"); ++cnidx) {
+            XmlElementType sample_cell_node = cell_nodes.getChildNode("cell", cnidx);
             CellIndexType cell_index = this->parse_cell_index_from_node(world, sample_cell_node);
             world_sampling_regime.cell_indexes.insert(cell_index);
         }
@@ -412,7 +412,7 @@ CellIndexType ConfigurationFile::parse_cell_index_from_node(World& world, XmlEle
             }
             return cell_index;
         } else {
-            throw ConfigurationError("Logical switch failure processing cell");
+            throw ConfigurationError("Cell node missing coordinates or index specification");
         }
 }
 
