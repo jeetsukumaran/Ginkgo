@@ -353,9 +353,9 @@ EnvironmentSettings ConfigurationFile::parse_environment_settings(World& world, 
     for (int j = 0; j < env_node.nChildNode(); ++j) {
         XmlElementType sub_node = env_node.getChildNode(j);
         std::string node_name = sub_node.getName();
-        if ( node_name == "carryingCapacity") {
+        if (node_name == "carrying_capacity") {
             environment_settings.carrying_capacity = this->get_validated_grid_path<PopulationCountType>(this->get_element_scalar<std::string>(sub_node), world);
-        } else if (node_name == "fitnessTraitOptima") {
+        } else if (node_name == "fitness_trait_optima") {
             unsigned eidx = this->get_attribute<unsigned>(sub_node, "trait");
             if (eidx > world.get_num_fitness_traits()) {
                 std::ostringstream msg;
@@ -366,7 +366,7 @@ EnvironmentSettings ConfigurationFile::parse_environment_settings(World& world, 
             }
             std::string gridfile = this->get_validated_grid_path<FitnessTraitType>(this->get_element_scalar<std::string>(sub_node), world);
             environment_settings.fitness_trait_optima.insert(std::make_pair(eidx, gridfile));
-        } else if (node_name == "movementCosts") {
+        } else if (node_name == "movement_costs") {
             std::string lineage_id = this->get_attribute<std::string>(sub_node, "lineage");
             if (not world.has_species(lineage_id)) {
                 throw ConfigurationError("movement costs: lineage \"" + lineage_id + "\" not defined");
@@ -374,7 +374,7 @@ EnvironmentSettings ConfigurationFile::parse_environment_settings(World& world, 
             Species * lineage = world.species_registry()[lineage_id];
             std::string gridfile = this->get_validated_grid_path<MovementCountType>(this->get_element_scalar<std::string>(sub_node), world);
             environment_settings.movement_costs.insert(std::make_pair(lineage, gridfile));
-        } else if (node_name == "movementProbabilities") {
+        } else if (node_name == "movement_probabilities") {
             std::string lineage_id = this->get_attribute<std::string>(sub_node, "lineage");
             if (not world.has_species(lineage_id)) {
                 throw ConfigurationError("movement probabilities: lineage \"" + lineage_id + "\" not defined");
