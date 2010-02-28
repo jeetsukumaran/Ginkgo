@@ -46,6 +46,7 @@ class World(object):
         self.full_complement_diploid_trees = kwargs.get("full_complement_diploid_trees", None)
         self.lineages = []
         self.environments = []
+        self.initialization_regime = kwargs.get("initialization_regime", None)
         self.samples = []
         self._child_elements = [self.lineages, self.environments, self.samples]
 
@@ -82,10 +83,12 @@ class World(object):
         s.write('%s<%s>\n' % (indent, world_elem))
         sub_indent = indent * 2
         if self.lineages:
-            s.write('%s<biota>\n' % sub_indent)
+            s.write('%s<lineages>\n' % sub_indent)
             for lineage in self.lineages:
                 s.write(str(lineage))
-            s.write('%s</biota>\n' % sub_indent)
+            s.write('%s</lineages>\n' % sub_indent)
+        if self.initialization_regime:
+            s.write(str(self.initialization_regime))
         if self.environments:
             s.write('%s<environments>\n' % sub_indent)
             for environment in self.environments:
@@ -100,26 +103,6 @@ class World(object):
         s.write('</ginkgo>\n')
         return s.getvalue()
 
-class SeedPopulation(object):
-
-    def __init__(self, x, y, size, ancestral_size, ancestral_generations, indent_level=5):
-        self.x = x
-        self.y = y
-        self.size = size
-        self.ancestral_size = ancestral_size
-        self.ancestral_generations = ancestral_generations
-        self.indent_level = indent_level
-
-    def __str__(self):
-        parts = []
-        top_indent = (self.indent_level * INDENT_SIZE) * ' '
-        parts.append('%s<seedPopulation x="%s" y="%s" size="%s">' % (top_indent, self.x, self.y, self.size))
-        sub_indent = ((self.indent_level + 1) * INDENT_SIZE) * ' '
-        parts.append('%s<ancestralPopulationSize>%s</ancestralPopulationSize>' % (sub_indent, self.ancestral_size))
-        parts.append('%s<ancestralGenerations>%s</ancestralGenerations>' % (sub_indent, self.ancestral_generations))
-        parts.append('%s</seedPopulation>\n' % top_indent)
-        return "\n".join(parts)
-
 class Lineage(object):
 
     def __init__(self, lineage_id, **kwargs):
@@ -129,7 +112,6 @@ class Lineage(object):
         self.fecundity = kwargs.get("fecundity", None)
         self.__movement_capacity = None
         self.movement_capacity = kwargs.get("movement_capacity", None)
-        self.seed_populations = kwargs.get("seed_populations", [])
         self.indent_level = kwargs.get('indent_level', 3)
 
     def _set_movement_capacity(self, val):
@@ -162,11 +144,6 @@ class Lineage(object):
         if self.movement_capacity:
             s.write('%s<movementCapacity distribution="%s">%s</movementCapacity>\n' \
                     % (sub_indent, self.movement_capacity[0], self.movement_capacity[1]))
-        if self.seed_populations:
-            s.write('%s<seedPopulations>\n' % (sub_indent))
-            for seed_pop in self.seed_populations:
-                s.write(str(seed_pop))
-            s.write('%s</seedPopulations>\n' % (sub_indent))
         s.write('%s</lineage>\n' % (top_indent))
         return s.getvalue()
 
@@ -232,11 +209,67 @@ class Environment(object):
             return ""
         parts = []
         top_indent = (self.indent_level * INDENT_SIZE) * ' '
-        parts.append('%s<environment gen="%d">' % (top_indent, self.gen))
+        if self.gen is not None:
+            gen = ' gen="%d"' % self.gen
+        else:
+            gen = ""
+        parts.append('%s<environment%s>' % (top_indent, gen))
         sub_indent = ((self.indent_level + 1) * INDENT_SIZE) * ' '
         for grid in self.grids:
             parts.append('%s%s' % (sub_indent, str(grid)))
         parts.append('%s</environment>\n' % top_indent)
+        return "\n".join(parts)
+
+class InitializationCellPopulations(object):
+
+    def __init__(self, **kwargs):
+        self.x = kwargs.get("x", None)
+        self.y = kwargs.get("y", None)
+        self.index = kwargs.get("index", None)
+        self.pops = kwargs.get("pops", {})
+        self.indent_level = kwargs.get("indent_level", 4)
+
+    def __str__(self):
+        parts = []
+        top_indent = (self.indent_level * INDENT_SIZE) * ' '
+        if self.index is not None:
+            parts.append('%s<cell index="%s">' % (top_indent, self.index))
+        elif self.x is not None and self.y is not None:
+            parts.append('%s<cell x="%s" y="%s">' % (top_indent, self.x, self.y))
+        else:
+            raise TypeError("Either 'index' or both 'x' and 'y' must be specified")
+        sub_indent = ((self.indent_level+1) * INDENT_SIZE) * ' '
+        for sp, sz in self.pops.items():
+            parts.append('%s<population lineage="%s" size="%s" />' % (sub_indent, sp, sz))
+        parts.append("%s</cell>" % top_indent)
+        return "\n".join(parts)
+
+class InitializationRegime(object):
+
+    def __init__(self, pops, environment, max_cycles=None, indent_level=2):
+        self.pops = pops
+        self.environment = environment
+        self.max_cycles = max_cycles
+        self.indent_level = indent_level
+
+    def __str__(self):
+        parts = []
+        top_indent = (self.indent_level * INDENT_SIZE) * ' '
+        sub_indent = ((self.indent_level+1) * INDENT_SIZE) * ' '
+        if self.max_cycles is not None:
+            max_cycles = ' max_cycles="%s"' % self.max_cycles
+        else:
+            max_cycles = ""
+        parts.append('%s<initialization%s>' % (top_indent, max_cycles))
+        e = str(self.environment)
+        if e.endswith('\n'):
+            e = e[:-1]
+        parts.append(e)
+        parts.append('%s<populations>' % (sub_indent))
+        for cp in self.pops:
+            parts.append(str(cp))
+        parts.append('%s</populations>' % (sub_indent))
+        parts.append("%s</initialization>\n" % top_indent)
         return "\n".join(parts)
 
 class Sample(object):
@@ -305,27 +338,33 @@ if __name__ == "__main__":
             multifurcating_trees=True,
             final_output=False,
             full_complement_diploid_trees=False)
-    seed_pop = SeedPopulation(x=0, y=0, size=100, ancestral_size=100, ancestral_generations=1000)
+    cells = [(1,1),(2,1),(3,1),(4,1),
+             (1,2),(2,2),(3,2),(4,2)]
     s1 = Lineage("Zx",
             fitness_trait_relative_selection_weights=[1]*num_fitness_traits,
             fitness_trait_default_genotypes=[0]*num_fitness_traits,
             fecundity=16,
-            movement_capacity=("poisson", 10),
-            seed_populations=[seed_pop])
+            movement_capacity=("poisson", 10))
     w.lineages.append(s1)
-    e0 = Environment(0)
+
+    e0 = Environment(None)
     e0.grids.append(CarryingCapacityGrid('cc.grd'))
     e0.grids.append(MovementProbabilitiesGrid('Zx', 'movp_zx.grd'))
     e0.grids.append(MovementCostsGrid('Zx', 'movp_zx.grd'))
     e0.grids.append(FitnessTraitOptimaGrid('1', 'movp_zx.grd'))
-    e1 = Environment(0)
+    cell_pops = []
+    for cell in cells:
+        cell_pops.append(InitializationCellPopulations(x=cell[0], y=cell[1], pops={"Zx": 100}))
+    init_reg = InitializationRegime(pops=cell_pops, environment=e0)
+    w.initialization_regime = init_reg
+
+    e1 = Environment(1)
     e1.grids.append(CarryingCapacityGrid('cc.grd'))
     e1.grids.append(MovementProbabilitiesGrid('Zx', 'movp_zx.grd'))
     e1.grids.append(MovementCostsGrid('Zx', 'movp_zx.grd'))
     e1.grids.append(FitnessTraitOptimaGrid('1', 'movp_zx.grd'))
+    w.environments.append(e1)
 
-    cells = [(1,1),(2,1),(3,1),(4,1),
-             (1,2),(2,2),(3,2),(4,2)]
     for t in xrange(10):
         gen = (t + 10) * 1000
         s = Sample(lineage_id="Zx", gen=gen, individuals_per_cell=10, cells=cells)
