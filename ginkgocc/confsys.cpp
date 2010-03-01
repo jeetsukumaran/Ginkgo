@@ -323,7 +323,7 @@ void ConfigurationFile::parse_samplings(World& world) {
         world.add_occurrence_sampling(gen, world.species_registry()[lineage_id]);
 
         // skip to next if trees not wanted
-        if (!this->get_attribute_bool(sample_node, "trees", true) ) {
+        if (not this->get_attribute_bool(sample_node, "trees", true) ) {
             continue;
         }
 
@@ -336,13 +336,12 @@ void ConfigurationFile::parse_samplings(World& world) {
         }
         world_sampling_regime.num_organisms_per_cell = this->get_child_node_scalar<PopulationCountType>(sample_node, "individuals_per_cell", 0);
         XmlElementType cell_nodes = sample_node.getChildNode("cells");
-        if (cell_nodes.isEmpty()) {
-            continue; // all cells assumed by default
-        }
-        for (int cnidx = 0; cnidx < cell_nodes.nChildNode("cell"); ++cnidx) {
-            XmlElementType sample_cell_node = cell_nodes.getChildNode("cell", cnidx);
-            CellIndexType cell_index = this->parse_cell_index_from_node(world, sample_cell_node);
-            world_sampling_regime.cell_indexes.insert(cell_index);
+        if (not cell_nodes.isEmpty()) {
+            for (int cnidx = 0; cnidx < cell_nodes.nChildNode("cell"); ++cnidx) {
+                XmlElementType sample_cell_node = cell_nodes.getChildNode("cell", cnidx);
+                CellIndexType cell_index = this->parse_cell_index_from_node(world, sample_cell_node);
+                world_sampling_regime.cell_indexes.insert(cell_index);
+            }
         }
         world.add_tree_sampling(gen, world_sampling_regime);
     }
