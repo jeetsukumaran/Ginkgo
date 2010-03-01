@@ -19,15 +19,16 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "cell.hpp"
-#include "landscape.hpp"
-#include "randgen.hpp"
-
 #include <iostream>
 #include <iomanip>
 #include <algorithm>
 #include <map>
 #include <list>
+
+#include "cell.hpp"
+#include "landscape.hpp"
+#include "randgen.hpp"
+#include "world.hpp"
 
 using namespace ginkgo;
 
@@ -237,8 +238,8 @@ void Cell::competition() {
         }
     }
 
+    PopulationCountType total_unexpired = 0;
     if (num_in_map > this->carrying_capacity_) {
-        PopulationCountType total_unexpired = 0;
         std::map<double, std::list<Organism *> >::iterator mi = fitness_organisms_map.begin();
         ++mi;
         for (; mi != fitness_organisms_map.end();
@@ -270,9 +271,15 @@ void Cell::competition() {
     this->purge_expired_organisms();
 
     if (this->populations_.size() > this->carrying_capacity_) {
-        std::cerr << "*** Carrying Capacity Enforcement Failure ***" << std::endl;
-        std::cerr << "Expected Population Size: " << this->carrying_capacity_ << std::endl;
-        std::cerr << "Actual Population Size: " << this->populations_.size() << std::endl;
+ 	    World& world = World::get_instance();
+ 	    Logger& logger = world.logger();
+ 	    std::ostringstream o;
+ 	    o << "Carrying capacity enforcement failure: ";
+ 	    o << "carrying capacity = " << this->carrying_capacity_ << ", ";
+ 	    o << "post-competition population size = " << this->populations_.size() << ", ";
+        o << "num_in_map = " << num_in_map << ", ";
+        o << "total_unexpired = " << total_unexpired << ", ";
+        logger.debug(o.str());
     }
     assert(this->populations_.size() <= this->carrying_capacity_);
 
