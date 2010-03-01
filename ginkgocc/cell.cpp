@@ -273,6 +273,7 @@ void Cell::competition() {
             set_unexpired_(mi->second);
         }
     }
+    PopulationCountType pre_purge_pop_size = this->populations_.size();
     PopulationCountType num_purged = this->purge_expired_organisms();
 
     if (this->populations_.size() > this->carrying_capacity_) {
@@ -282,7 +283,9 @@ void Cell::competition() {
         //              carrying capacity = 100,
         //              post-competition population size = 101,
         //              num_in_map = 101,
+        //              total_expired = 630,
         //              total_unexpired = 99,
+        //              num_purged = 529,
  	    World& world = World::get_instance();
  	    Logger& logger = world.logger();
  	    std::ostringstream o;
@@ -290,6 +293,7 @@ void Cell::competition() {
  	    o << "carrying capacity = " << this->carrying_capacity_ << ", ";
  	    o << "post-competition population size = " << this->populations_.size() << ", ";
         o << "num_in_map = " << num_in_map << ", ";
+        o << "pre_purge_pop_size = " << pre_purge_pop_size << ", ";
         o << "total_expired = " << total_expired << ", ";
         o << "total_unexpired = " << total_unexpired << ", ";
         o << "num_purged = " << num_purged << ", ";
