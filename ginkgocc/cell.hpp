@@ -218,12 +218,8 @@ class Cell {
         }
 
         //** Removes organisms flagged for removal from this cell's organisms. */
-        void purge_expired_organisms() {
-            this->populations_.purge_expired_organisms();
-//            OrganismVector::iterator end_unexpired = std::remove_if(this->organisms_.begin(),
-//                this->organisms_.end(),
-//                std::mem_fun_ref(&Organism::is_expired));
-//            this->organisms_.erase(end_unexpired, this->organisms_.end());
+        PopulationCountType purge_expired_organisms() {
+            return this->populations_.purge_expired_organisms();
         }
 
         // --- primary biogeographical and evolutionary processes ---

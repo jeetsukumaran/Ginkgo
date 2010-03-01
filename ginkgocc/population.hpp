@@ -118,7 +118,7 @@ class BreedingPopulation {
         /**
          * Removes and deallocates all organisms marked for expiration.
          */
-        void purge_expired_organisms();
+        PopulationCountType purge_expired_organisms();
 
         ///////////////////////////////////////////////////////////////////////
         // iteration support
@@ -267,7 +267,7 @@ class BreedingPopulations {
         /**
          * Removes all individuals marked for expiration.
          */
-        void purge_expired_organisms();
+        PopulationCountType purge_expired_organisms();
 
         /**
          * Returns pointers to all organisms across all species.

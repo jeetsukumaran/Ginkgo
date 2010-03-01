@@ -204,11 +204,15 @@ void Cell::competition() {
     std::map<double, std::list<Organism *> > fitness_organisms_map;
     OrganismPointers::const_iterator pop_iter = original_pop.begin();
 
+    // debugging
+    PopulationCountType total_expired = 0;
+
     // add initial batch
     for (PopulationCountType num_added=0;
             num_added < this->carrying_capacity_;
             ++pop_iter, ++num_added) {
         (*pop_iter)->set_expired();
+        ++total_expired;
         fitness_organisms_map[(*pop_iter)->get_fitness()].push_back(*pop_iter);
     }
 
@@ -219,6 +223,7 @@ void Cell::competition() {
 
     for (; pop_iter != original_pop.end(); ++pop_iter) {
         (*pop_iter)->set_expired();
+        ++total_expired;
         const double curr_fitness = (*pop_iter)->get_fitness();
         if (curr_fitness > lowest_stored_fitness_score) {
             fitness_organisms_map[curr_fitness].push_back(*pop_iter);
@@ -268,9 +273,16 @@ void Cell::competition() {
             set_unexpired_(mi->second);
         }
     }
-    this->purge_expired_organisms();
+    PopulationCountType num_purged = this->purge_expired_organisms();
 
     if (this->populations_.size() > this->carrying_capacity_) {
+        // trying to debug weird boundary issues on carrying capacity enforcement
+        // failure:
+        //        Carrying capacity enforcement failure:
+        //              carrying capacity = 100,
+        //              post-competition population size = 101,
+        //              num_in_map = 101,
+        //              total_unexpired = 99,
  	    World& world = World::get_instance();
  	    Logger& logger = world.logger();
  	    std::ostringstream o;
@@ -278,8 +290,10 @@ void Cell::competition() {
  	    o << "carrying capacity = " << this->carrying_capacity_ << ", ";
  	    o << "post-competition population size = " << this->populations_.size() << ", ";
         o << "num_in_map = " << num_in_map << ", ";
+        o << "total_expired = " << total_expired << ", ";
         o << "total_unexpired = " << total_unexpired << ", ";
-        logger.debug(o.str());
+        o << "num_purged = " << num_purged << ", ";
+        logger.error(o.str());
     }
     assert(this->populations_.size() <= this->carrying_capacity_);
 

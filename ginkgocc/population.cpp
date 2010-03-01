@@ -27,13 +27,15 @@ using namespace ginkgo;
 
 // local helper functions
 
-void purge_expired_organisms_(OrganismPointers& organism_ptrs) {
+PopulationCountType purge_expired_organisms_(OrganismPointers& organism_ptrs) {
+    PopulationCountType num_purged = 0;
 	OrganismMemoryManager& organism_memory_manager = OrganismMemoryManager::get_instance();
 	std::vector<Organism *> to_keep_ptrs;
 	to_keep_ptrs.reserve(organism_ptrs.size());
 	for (OrganismPointers::iterator i = organism_ptrs.begin(); i != organism_ptrs.end(); ++i) {
 		Organism * org = *i;
 		if (org->is_expired()) {
+		    ++num_purged;
             organism_memory_manager.deallocate(org);
 		} else {
 			to_keep_ptrs.push_back(org);
@@ -41,6 +43,7 @@ void purge_expired_organisms_(OrganismPointers& organism_ptrs) {
 	}
 	organism_ptrs.clear();
 	to_keep_ptrs.swap(organism_ptrs);
+	return num_purged;
 }
 
 void deallocate_and_clear_organisms_(OrganismPointers& organism_ptrs) {
@@ -100,9 +103,11 @@ void BreedingPopulation::swap(BreedingPopulation& other) {
 }
 
 // Removes all individuals marked for expiration.
-void BreedingPopulation::purge_expired_organisms() {
-    purge_expired_organisms_(this->females_);
-    purge_expired_organisms_(this->males_);
+PopulationCountType BreedingPopulation::purge_expired_organisms() {
+    PopulationCountType num_purged = 0;
+    num_purged += purge_expired_organisms_(this->females_);
+    num_purged += purge_expired_organisms_(this->males_);
+    return num_purged;
 }
 
 // BreedingPopulation
@@ -123,12 +128,14 @@ BreedingPopulations::BreedingPopulations() {
 }
 
 // removes organisms flagged for expiration
-void BreedingPopulations::purge_expired_organisms() {
+PopulationCountType BreedingPopulations::purge_expired_organisms() {
+    PopulationCountType num_purged = 0;
     for (std::map<const Species *, BreedingPopulation >::iterator spi = this->species_populations_.begin();
             spi != this->species_populations_.end();
             ++spi) {
-        (*spi).second.purge_expired_organisms();
+        num_purged += (*spi).second.purge_expired_organisms();
     }
+    return num_purged;
 }
 
 // returns pointers to all organisms
