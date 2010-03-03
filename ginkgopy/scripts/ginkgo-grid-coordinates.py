@@ -19,7 +19,7 @@ def grid_coords(ncols=10, nrows=10, origin_upper_left=True, as_indexes=False):
     if as_indexes:
         max_field_len = int(math.log(ncols*nrows, 10)) + 1
     else:
-        max_field_len = int(math.log(ncols, 10)) + int(math.log(nrows, 10)) + 2
+        max_field_len = int(math.log(ncols, 10)) + int(math.log(nrows, 10)) + 3
     idx = 0
     for y in xrange(nrows):
         if y % 5 == 0:
