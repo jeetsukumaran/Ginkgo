@@ -1,0 +1,38 @@
+<?xml version="1.0"?>
+<ginkgo
+    title="results_tiny_neutral"
+    log_frequency="1"
+    multifurcating_trees="True"
+    final_output = "False"
+    full_complement_diploid_trees = "False">
+    <system>
+        <fitness_dimensions>1</fitness_dimensions>
+        <global_selection_strength>0.0</global_selection_strength>
+        <ngens>100</ngens>
+    </system>
+    <landscape ncols="1" nrows="1">
+        <default_cell_carrying_capacity>50</default_cell_carrying_capacity>
+    </landscape>
+    <lineages>
+        <lineage id="Zu">
+            <fitness_trait_relative_selection_weights>1</fitness_trait_relative_selection_weights>
+            <fitness_trait_default_genotypes>0</fitness_trait_default_genotypes>
+            <fecundity>16</fecundity>
+            <movement_capacity distribution="constant">1</movement_capacity>
+        </lineage>
+    </lineages>
+    <initialization>
+        <populations>
+            <cell index="0">
+                <population lineage="Zu" size="100" />
+            </cell>
+        </populations>
+    </initialization>
+    <samples>
+        <sample gen="100" lineage="Zu" label="e1" >
+            <cells>
+
+            </cells>
+        </sample>
+    </samples>
+</ginkgo>
