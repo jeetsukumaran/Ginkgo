@@ -28,7 +28,7 @@ def gen_fixed_val(args):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
         description=_prog_description)
-    parser.add_argument('-o', '--output-file', default=None)
+    parser.add_argument('-o', '--output-file', default=None, metavar='FILEPATH', help="write grid to FILEPATH")
     subparsers = parser.add_subparsers(title='grid types')
 #                                       description='valid subcommands',
 #                                       help='additional help')
