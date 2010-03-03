@@ -64,6 +64,7 @@ cellsize      50.0""").format(self.ncols, self.nrows)
                 v = fv[x][y]
                 row.append("{2}{0:>{1}}".format(v, self._max_formatted_value_len, leader))
             rows.append("  ".join(row))
+            rows.append("")
         return "\n".join(rows)
 
 ###############################################################################\\
