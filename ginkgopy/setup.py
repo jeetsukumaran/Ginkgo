@@ -35,7 +35,7 @@ import sys
 import os
 import subprocess
 
-script_names = ['ginkgo-ascii-grid.py']
+script_names = ['ginkgo-ascii-grid.py', 'ginkgo-grid-coordinates.py']
 setup(name='Ginkgo',
       version=PACKAGE_VERSION,
       author='Jeet Sukumaran and Mark T. Holder',
