@@ -55,7 +55,8 @@ A library to faciliate setting up runs and processing results of the GINKGO Biog
       include_package_data=True,
       zip_safe=True,
       install_requires=[
-          # -*- Extra requirements: -*-
+          "DendroPy >= 2.3.0",
+          "Baker >= 1.1",
       ],
       entry_points="""
       # -*- Entry points: -*-
