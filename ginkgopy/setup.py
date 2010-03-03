@@ -35,7 +35,7 @@ import sys
 import os
 import subprocess
 
-script_names = []
+script_names = ['ginkgogrid.py']
 setup(name='Ginkgo',
       version=PACKAGE_VERSION,
       author='Jeet Sukumaran and Mark T. Holder',
