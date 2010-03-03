@@ -8,7 +8,7 @@ from ginkgo import argparse
 
 
 _prog_usage = '%prog [options] NCOLS NROWS VAL1 VAL2'
-_prog_version = 'GINKGOGRID Version 1.0'
+_prog_version = 'GINKGO-ASCII-GRID Version 1.0'
 _prog_description = 'Generates ESRI ASCII format grid files (for use in the Ginkgo simulator).'
 _prog_author = 'Jeet Sukumaran'
 _prog_copyright = 'Copyright (C) 2010 Jeet Sukumaran.'
