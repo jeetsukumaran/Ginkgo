@@ -51,7 +51,7 @@ cellsize      50.0""").format(self.ncols, self.nrows)
                 v = self.values[x][y]
                 if isinstance(v, float):
                     row.append("{2}{0:>{1}.4}".format(v, max_field_len, leader))
-                elif isinstance(v):
+                else:
                     row.append("{2}{0:>{1}}".format(v, max_field_len, leader))
             rows.append("  ".join(row))
         return "\n".join(rows)
@@ -71,15 +71,17 @@ class IntGrid(Grid):
 ###############################################################################\\
 # Build and return the grids
 
-def random_gaussian_grid(ncols, nrows, mean=0, sd=1, output=sys.stdout):
+def random_gaussian_grid(ncols, nrows, mean=0, sd=1):
     return RealGrid(ncols, nrows, func = lambda x, y: random.gauss(mean, sd))
 
-def random_uniform_real_grid(ncols, nrows, a, b, output=sys.stdout):
-    return RealGrid(ncols, nrows, func = lambda x, y: random.gauss(a, b))
+def random_uniform_real_grid(ncols, nrows, a, b):
+    return RealGrid(ncols, nrows, func = lambda x, y: random.uniform(a, b))
 
-def random_uniform_int_grid(ncols, nrows, a, b, output=sys.stdout):
+def random_uniform_int_grid(ncols, nrows, a, b):
+    print a
+    print b
     return IntGrid(ncols, nrows, func = lambda x, y: random.randint(a, b))
 
-def fixed_value_grid(ncols, nrows, val, output=sys.stdout):
-    return IntGrid(ncols, nrows, func = lambda x, y: val)
+def fixed_value_grid(ncols, nrows, val):
+    return Grid(ncols, nrows, func = lambda x, y: val)
 

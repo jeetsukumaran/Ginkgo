@@ -35,7 +35,7 @@ import sys
 import os
 import subprocess
 
-script_names = ['gen-grid.py']
+script_names = ['gen-ascii-grid.py']
 setup(name='Ginkgo',
       version=PACKAGE_VERSION,
       author='Jeet Sukumaran and Mark T. Holder',
