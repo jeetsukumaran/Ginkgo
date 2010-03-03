@@ -14,25 +14,21 @@ _prog_author = 'Jeet Sukumaran'
 _prog_copyright = 'Copyright (C) 2010 Jeet Sukumaran.'
 
 def gen_rand_gauss(args):
-    g = ginkgogrid.random_gaussian_grid(args.ncols, args.nrows, args.mean, args.sd)
-    args.output.write(str(g))
+    return ginkgogrid.random_gaussian_grid(args.ncols, args.nrows, args.mean, args.sd)
 
 def gen_rand_unif_real(args):
-    g = ginkgogrid.random_uniform_real_grid(args.ncols, args.nrows, args.a, args.b)
-    args.output.write(str(g))
+    return ginkgogrid.random_uniform_real_grid(args.ncols, args.nrows, args.a, args.b)
 
 def gen_rand_unif_int(args):
-    g = ginkgogrid.random_uniform_int_grid(args.ncols, args.nrows, args.a, args.b)
-    args.output.write(str(g))
+    return ginkgogrid.random_uniform_int_grid(args.ncols, args.nrows, args.a, args.b)
 
 def gen_fixed_val(args):
-    g = ginkgogrid.fixed_value_grid(args.ncols, args.nrows, args.val)
-    args.output.write(str(g))
+    return ginkgogrid.fixed_value_grid(args.ncols, args.nrows, args.val)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
         description=_prog_description)
-    parser.add_argument('-o', '--output', default=sys.stdout)
+    parser.add_argument('-o', '--output-file', default=None)
     subparsers = parser.add_subparsers(title='grid types')
 #                                       description='valid subcommands',
 #                                       help='additional help')
@@ -69,4 +65,9 @@ if __name__ == '__main__':
     parse_fixed_val.set_defaults(func=gen_fixed_val)
 
     args = parser.parse_args()
-    args.func(args)
+    g = args.func(args)
+    if args.output_file is not None:
+        out = open(os.path.expandvars(os.path.expanduser(args.output_file)), 'w')
+    else:
+        out = sys.stdout
+    out.write(str(g))
