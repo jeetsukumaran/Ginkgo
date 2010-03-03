@@ -35,7 +35,7 @@ import sys
 import os
 import subprocess
 
-script_names = ['ginkgogrid.py']
+script_names = ['gen-grid.py']
 setup(name='Ginkgo',
       version=PACKAGE_VERSION,
       author='Jeet Sukumaran and Mark T. Holder',
@@ -56,7 +56,6 @@ A library to faciliate setting up runs and processing results of the GINKGO Biog
       zip_safe=True,
       install_requires=[
           "DendroPy >= 2.3.0",
-          "Baker >= 1.1",
       ],
       entry_points="""
       # -*- Entry points: -*-
