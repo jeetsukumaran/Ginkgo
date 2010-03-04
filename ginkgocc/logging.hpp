@@ -335,10 +335,16 @@ class Logger {
             return this->current_timestamp_;
         }
 
+        /**
+         * Return total logging time hours.
+         */
+        double get_hours_since_launched();
+
     private:
         LogStreamManager&               log_stream_manager_;
         std::vector<LogHandler>         log_handlers_;
-        time_t                          start_time_;
+        time_t                          launch_time_;
+        time_t                          registered_start_time_;
         char                            current_timestamp_[80];
         double                          elapsed_hours_;
         std::string                     elapsed_time_leader_;

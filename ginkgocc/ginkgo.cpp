@@ -110,8 +110,9 @@ int main(int argc, char* argv[]) {
         world.run();
 
         world.logger().hide_elapsed_time();
-        world.logger().info("Ending " + program_identity + ".");
-
+        std::ostringstream bbye;
+        bbye << "Ending " << program_identity << ", run on '" << args[0] << "'";
+        bbye << " with total run time of " << world.logger().get_hours_since_launched() << " hours.";
+        world.logger().info(bbye.str());
     }
-
 }

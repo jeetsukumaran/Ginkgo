@@ -124,6 +124,7 @@ Logger::Logger():
             log_stream_manager_(LogStreamManager::get_instance()),
             elapsed_time_leader_("T+"),
             is_show_elapsed_time_(true) {
+    time (&this->launch_time_);
     this->reset_elapsed_time();
 }
 
@@ -151,7 +152,7 @@ LogHandler& Logger::add_handler(std::ostream& dest, LogHandler::LoggingLevel log
 
 // resets the log start time
 void Logger::reset_elapsed_time() {
-    time (&this->start_time_);
+    time (&this->registered_start_time_);
 }
 
 // writes a debug message
@@ -231,8 +232,15 @@ void Logger::set_timestamps() {
     time ( &rawtime );
     struct tm * timeinfo = localtime ( &rawtime );
     strftime(this->current_timestamp_, 80, "%Y-%m-%d %H:%M:%S", timeinfo);
-    double elapsed_seconds = difftime(rawtime, this->start_time_);
+    double elapsed_seconds = difftime(rawtime, this->registered_start_time_);
     this->elapsed_hours_ = elapsed_seconds / 3600;
+}
+
+double Logger::get_hours_since_launched() {
+    time_t rawtime;
+    time ( &rawtime );
+    double elapsed_seconds = difftime(rawtime, this->launch_time_);
+    return elapsed_seconds / 3600;
 }
 
 // Logger
