@@ -57,11 +57,11 @@ const float DEFAULT_GLOBAL_SELECTION_STRENGTH = 1.0;
 
 //! The units for referencing cells on the landscape.
 #if defined(MINI)
-    typedef unsigned short          CellIndexType;
-    const unsigned int MAX_LANDSCAPE_SIZE = static_cast<unsigned int>(USHRT_MAX);
+    typedef unsigned char          CellIndexType;
+    const CellIndexType MAX_LANDSCAPE_SIZE = static_cast<CellIndexType>(UCHAR_MAX);
 #else
     typedef unsigned int           CellIndexType;
-    const unsigned int MAX_LANDSCAPE_SIZE = static_cast<unsigned int>(UINT_MAX);
+    const CellIndexType MAX_LANDSCAPE_SIZE = static_cast<CellIndexType>(UINT_MAX);
 #endif
 
 //! The carrying capacity type.

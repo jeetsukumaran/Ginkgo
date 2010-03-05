@@ -138,8 +138,17 @@ void ConfigurationFile::parse_system(World& world) {
 
 void ConfigurationFile::parse_landscape(World& world) {
     XmlElementType landscape_node = this->get_child_node(this->ginkgo_root_, "landscape");
-    world.generate_landscape( this->get_attribute<CellIndexType>(landscape_node, "ncols"),
-                              this->get_attribute<CellIndexType>(landscape_node, "nrows") );
+    long ncols = this->get_attribute<long>(landscape_node, "ncols");
+    long nrows = this->get_attribute<long>(landscape_node, "nrows");
+    assert(ncols > 0);
+    assert(nrows > 0);
+    if ( (nrows * ncols) > MAX_LANDSCAPE_SIZE ) {
+        std::ostringstream s;
+        s << "maximum number of cells on landscape allowed is " << MAX_LANDSCAPE_SIZE;
+        s << ", but requested " << (nrows * ncols) << " (" << nrows << " columns and " << ncols << " rows)";
+        throw ConfigurationError(s.str());
+    }
+    world.generate_landscape(static_cast<CellIndexType>(ncols), static_cast<CellIndexType>(nrows));
     world.set_global_cell_carrying_capacity(this->get_child_node_scalar<PopulationCountType>(landscape_node, "default_cell_carrying_capacity", 0));
 }
 
