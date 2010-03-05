@@ -236,7 +236,7 @@ void ConfigurationFile::parse_lineage(XmlElementType& lineage_node, World& world
 void ConfigurationFile::parse_initialization(World& world) {
     InitializationRegime  initialization_regime;
     XmlElementType initialization = this->get_child_node(this->ginkgo_root_, "initialization", true);
-    initialization_regime.max_cycles = this->get_attribute<long>(initialization, "max_cycles", 0);
+    initialization_regime.max_cycles = this->get_attribute<long>(initialization, "max_cycles", -1);
     XmlElementType env_node = this->get_child_node(initialization, "environment", false);
 
     if (!env_node.isEmpty()) {
