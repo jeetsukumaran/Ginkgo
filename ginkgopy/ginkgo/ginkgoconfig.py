@@ -305,7 +305,7 @@ class Sample(object):
         self.individuals_per_cell = kwargs.get('individuals_per_cell', None)
         self.cell_coordinates = kwargs.get('cell_coordinates', None)
         self.cell_indexes = kwargs.get('cell_indexes', None)
-        self.indent_level = kwargs.get('indent_level', 2)        
+        self.indent_level = kwargs.get('indent_level', 2)
 
     def __str__(self):
         top_indent = (self.indent_level * INDENT_SIZE) * ' '
@@ -313,13 +313,17 @@ class Sample(object):
             label = ' label="%s"' % self.label
         else:
             label = ''
-        parts = []
         if self.trees:
+            trees = ' trees="True"'
+        else:
+            trees = ' trees="False"'
+        if self.individuals_per_cell or self.cell_indexes or self.cell_coordinates:
             close = '>'
         else:
-            close = ' trees="False" />\n'
-        parts.append('%s<sample gen="%d" lineage="%s"%s%s' % (top_indent, self.gen, self.lineage_id, label, close))
-        if self.trees:
+            close = ' />\n'
+        parts = []
+        parts.append('%s<sample gen="%d" lineage="%s"%s%s%s' % (top_indent, self.gen, self.lineage_id, label, trees, close))
+        if self.individuals_per_cell or self.cell_indexes or self.cell_coordinates:
             sub_indent = ((self.indent_level + 1) * INDENT_SIZE) * ' '
             if self.individuals_per_cell:
                 parts.append('%s<individuals_per_cell>%s</individuals_per_cell>' % (sub_indent, self.individuals_per_cell))
