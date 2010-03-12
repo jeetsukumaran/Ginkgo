@@ -2,7 +2,7 @@
 # This file was written by hand (by mth using PAUP's configure.ac and http://autotoolset.sourceforge.net/tutorial.html as guides).
 
 AC_PREREQ(2.59)
-AC_INIT([ginkgo], [3.8.3], [jeet@ku.edu])
+AC_INIT([ginkgo], [3.8.4], [jeet@ku.edu])
 
 # AC_CONFIG_SRCDIR (UNIQUE-FILE-IN-SOURCE-DIR) UNIQUE-FILE-IN-SOURCE-DIR
 # is some file that is in the package's source directory; `configure'
@@ -114,62 +114,8 @@ if test -n "$with_label"; then
 fi
 AC_SUBST(PROGRAMLABEL)
 
-AC_ARG_WITH([desc],
-	AC_HELP_STRING([--with-desc],[add this to program self-description, typically VCS info or revision name]), , [with_desc=""])
-if test -n "$with_desc"; then
-	AC_MSG_NOTICE([
-	   *** NOTE: adding "$with_desc" to program description
-	   ])
-   AC_DEFINE_UNQUOTED(PROG_DESC,"${with_desc}", [program self-description, typically VCS info or revision name])
-else
-   AC_DEFINE(PROG_DESC, "", [program self-description, typically VCS info or revision name])
-fi
-
-# Compile openMP multithreaded version
-#AC_ARG_ENABLE(openmp,
-#	AC_HELP_STRING([--enable-openmp],[build OpenMP multithreaded version]), , [enable_openmp=no])
-#if test "$enable_openmp" = yes; then
-#	AC_MSG_NOTICE([
-#	   *** NOTE: compiling OpenMP multithreaded version
-#	   ])
-#fi
-
-# Mpi run forking version
-#AC_ARG_ENABLE(mpi,
-#	AC_HELP_STRING([--enable-mpi],[build MPI run distributing version]), , [enable_mpi=no])
-#if test "$enable_mpi" = yes; then
-#	AC_MSG_NOTICE([
-#	   *** NOTE: compiling MPI run distributing version
-#	   ])
-#fi
-
-# old Mpi wrapper version - run series of configs named run0.conf, run1.conf, etc
-#AC_ARG_ENABLE(oldmpi,
-#        AC_HELP_STRING([--enable-oldmpi],[build old MPI batch run version (YOU PROBABLY DON'T WANT THIS)]), , [enable_oldmpi=no])
-#if test "$enable_oldmpi" = yes; then
-#        AC_MSG_NOTICE([
-#           *** NOTE: compiling old MPI batch run version
-#           ])
-#fi
-
-# single precision version (still being tested)
-# AC_ARG_ENABLE(single-prec,
-#         AC_HELP_STRING([--enable-single-prec],[use single precision floating point variables (EXPERIMENTAL)]), , [enable_single_prec=no])
-# if test "$enable_single_prec" = yes; then
-#         AC_MSG_NOTICE([
-#            *** NOTE: compiling single precision floating point version
-#            ])
-# fi
-
 # Initialize optimization flag in case it doesn't get set below.
 CXXFLAGS_OPTIM_SPEED="-O"
-
-# "-g" may not work with some compilers, but end users shouldn't be
-if test "$enable_debugging" = yes; then
-	CXXFLAGS_OPTIM_SPEED="-O0"
-	CXXFLAGS="$CXXFLAGS -Wall -pedantic -ansi -g -Wreturn-type -Wunused -Wredundant-decls -Wcast-align -Wcomment -Wextra -DDEBUG"
-#	CXXFLAGS="$CXXFLAGS -Werror"
-fi
 
 if test  "$enable_asserts" = no; then
 	CXXFLAGS="$CXXFLAGS -DNDEBUG"
@@ -233,37 +179,6 @@ fi
 
 AC_LANG(C++)
 CXXFLAGS="$CXXFLAGS $CXXFLAGS_OPTIM_SPEED -DMARKUP_STDCONV"
-
-################################################################################
-#	By default, use the bundled ncl code from source,
-#		but let the --with-ncl argument override this.
-################################################################################
-#NCL_INC_DIR="/usr/local/include"
-#NCL_LIB_DIR="/usr/local/lib"
-#AC_ARG_WITH(
-#	[ncl],
-#	AC_HELP_STRING(
-#		[--with-ncl=DIR],
-#		[Specify the root directory for ncl library (parent of the include/ncl and lib directories). Omit this flag to build and use the bundled version of ncl.]
-#		),
-#	[
-#	if ! test "$withval" = "yes" -o "$withval" = "no" ; then
-#		NCL_INC_DIR="$withval/include"
-#		NCL_LIB_DIR="$withval/lib"
-#	fi
-#	])
-
-#if ! test -d "$NCL_INC_DIR/ncl" ; then
-#	AC_MSG_ERROR([NCL is a prerequisite for building Garli. Expecting a directory called $NCL_INC_DIR/ncl, verify that the argument to --with-ncl is correct. You may need to manually make the directory $NCL_INC_DIR/ncl copy all of the ncl headers into that directory if you are using NCL 2.0])
-#else
-#	if ! test -f "$NCL_INC_DIR/ncl/nxsdefs.h" ; then
-#		AC_MSG_ERROR([NCL is a prerequisite for building Garli. Expecting a directory called $NCL_INC_DIR/ncl, verify that the argument to --with-ncl is correct. You may need to manually make the directory $NCL_INC_DIR/ncl copy all of the ncl headers into that directory if you are using NCL 2.0])
-#	fi
-#fi
-
-#if ! test -d "$NCL_LIB_DIR" ; then
-#	AC_MSG_ERROR([NCL is a prerequisite for building Garli. Expecting a directory called $NCL_LIB_DIR, verify that the argument to --with-ncl is correct.])
-#fi
 
 #vcs_revision_desc="$(git symbolic-ref HEAD 2> /dev/null | cut -b 12-)-$(git log --pretty=format:'%h, %ad' -1)"
 #if test -n "${vcs_revision_desc}" ; then

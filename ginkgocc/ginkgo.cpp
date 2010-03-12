@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// GINKGO Biogeographical Evolution Simulator.
+// GINKGO Phylogeographical Evolution Simulator.
 //
 // Copyright 2009 Jeet Sukumaran and Mark T. Holder.
 //
@@ -39,6 +39,25 @@
 #include <cstring>
 #include <config.h>
 
+std::string get_program_identification() {
+    std::ostringstream s;
+    s << PACKAGE_NAME << " v" << PACKAGE_VERSION;
+#if defined(BUILDDESC) || defined(BUILDTIMESTAMP)
+    s << " (";
+    #ifdef BUILDDESC
+        s << BUILDDESC;
+        #ifdef BUILDTIMESTAMP
+            s << ", ";
+        #endif
+    #endif
+    #ifdef BUILDTIMESTAMP
+        s << BUILDTIMESTAMP;
+    #endif
+    s << ")";
+#endif
+    return  s.str();
+}
+
 int main(int argc, char* argv[]) {
 
     std::string config_filepath;
@@ -47,15 +66,11 @@ int main(int argc, char* argv[]) {
     bool validate_config_only = false;
     unsigned long rand_seed = 0;
     unsigned long log_freq = 10;
-    std::string program_identity = PACKAGE_STRING;
-
-    if (strcmp(PROG_DESC, "") != 0) {
-        program_identity = program_identity + " (" + PROG_DESC + ")";
-    }
+    std::string program_ident = get_program_identification();
 
     ginkgo::OptionParser parser = ginkgo::OptionParser(
-             program_identity.c_str(),
-            "Ginkgo Biogeographical Evolution Simulator",
+             program_ident.c_str(),
+            "GINKGO Phylogeographical Evolution Simulator",
             "%prog [options] <CONFIGURATION-FILEPATH>");
 
     parser.add_option<std::string>(&replicate_id, "-i", "--replicate-id",
@@ -74,7 +89,7 @@ int main(int argc, char* argv[]) {
     std::vector<std::string> args = parser.get_args();
 
     if (args.size() == 0) {
-        std::cerr << program_identity << std::endl << std::endl;
+        std::cerr << program_ident << std::endl << std::endl;
         parser.write_usage(std::cerr);
         exit(1);
     }
@@ -85,13 +100,13 @@ int main(int argc, char* argv[]) {
 
     ginkgo::confsys::configure_world(world, args[0]);
     if (validate_config_only) {
-        std::cout << program_identity << std::endl;
+        std::cout << program_ident << std::endl;
         std::cout << "World configured using: \"" + args[0] + "\"" << "." << std::endl;
         std::cout << "Configuration file validates." << std:: endl;
     } else {
         world.init_logger();
         world.logger().hide_elapsed_time();
-        world.logger().info("Starting " + program_identity);
+        world.logger().info("Starting " + program_ident);
         world.logger().info("World configured using: \"" + args[0] + "\"");
 
         std::ostringstream seed_info;
@@ -111,7 +126,7 @@ int main(int argc, char* argv[]) {
 
         world.logger().hide_elapsed_time();
         std::ostringstream bbye;
-        bbye << "Ending " << program_identity << ", run on '" << args[0] << "'";
+        bbye << "Ending " << program_ident << ", run on '" << args[0] << "'";
         bbye << " with total run time of " << world.logger().get_hours_since_launched() << " hours.";
         world.logger().info(bbye.str());
     }
