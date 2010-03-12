@@ -8,12 +8,12 @@
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation; either version 3 of the License, or
 // (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU General Public License along
 // with this program. If not, see <http://www.gnu.org/licenses/>.
 //
@@ -39,14 +39,14 @@ OptionArg::OptionArg(const char * help, const char * meta_var)
         this->set_meta_var(meta_var);
     }
 }
-  
-OptionArg::~OptionArg() {}
-  
 
-std::ostream& OptionArg::write_help(std::ostream& out) const {            
+OptionArg::~OptionArg() {}
+
+
+std::ostream& OptionArg::write_help(std::ostream& out) const {
     std::string help_str;
     help_str += "  ";
-    if (this->short_flag_.size() > 0) {               
+    if (this->short_flag_.size() > 0) {
         help_str += this->short_flag_;
         if (not this->is_switch_) {
             help_str += " ";
@@ -54,13 +54,13 @@ std::ostream& OptionArg::write_help(std::ostream& out) const {
                 help_str += "VALUE";
             } else {
                 help_str += this->meta_var_;
-            }                        
+            }
         }
         if (this->long_flag_.size() > 0) {
             help_str += ", ";
         }
     }
-    if (this->long_flag_.size() > 0) {            
+    if (this->long_flag_.size() > 0) {
         help_str += this->long_flag_;
         if (not this->is_switch_) {
             help_str += "=";
@@ -68,16 +68,16 @@ std::ostream& OptionArg::write_help(std::ostream& out) const {
                 help_str += "VALUE";
             } else {
                 help_str += this->meta_var_;
-            } 
+            }
         }
-    }            
+    }
     if (this->help_.size() > 0) {
         if (help_str.size() > CMDOPTS_OPTION_COL_WIDTH-2) {
             help_str += "\n";
         } else {
             while (help_str.size() < CMDOPTS_OPTION_COL_WIDTH) {
                 help_str += " ";
-            }                
+            }
         }
         std::string help_msg = this->help_;
         std::string::size_type defval = help_msg.find("%default");
@@ -89,8 +89,8 @@ std::ostream& OptionArg::write_help(std::ostream& out) const {
         help_str += help_msg;
         std::string help_desc = textutil::textwrap(help_str, CMDOPTS_LINE_WIDTH, 0, CMDOPTS_OPTION_COL_WIDTH);
         help_str = help_desc;
-    }                            
-    out << help_str; 
+    }
+    out << help_str;
     return out;
 }
 
@@ -107,7 +107,7 @@ void TypedOptionArg<std::string>::process_value_string(const std::string& val_st
 // OptionParser
 
 OptionParser::OptionParser(const char * version,
-        const char * description, 
+        const char * description,
         const char * usage)
     : show_help_(false),
       show_version_(false) {
@@ -121,17 +121,17 @@ OptionParser::OptionParser(const char * version,
     }
     if (version != NULL) {
         this->version_.assign(version);
-    }       
-    this->version_option_ = this->add_switch(&this->show_version_, NULL, "--version", "show program's version number and exit");    
+    }
+    this->version_option_ = this->add_switch(&this->show_version_, NULL, "--version", "show program's version number and exit");
     this->help_option_ = this->add_switch(&this->show_help_, "-h", "--help",  "show this help message and exit");
 }
-    
+
 OptionParser::~OptionParser() {
     for (std::vector<OptionArg *>::iterator oap = this->option_args_.begin();
             oap != this->option_args_.end();
             ++oap) {
-        delete *oap;                    
-    }                    
+        delete *oap;
+    }
 }
 
 std::ostream& OptionParser::write_usage(std::ostream& out) const {
@@ -139,7 +139,7 @@ std::ostream& OptionParser::write_usage(std::ostream& out) const {
         std::string usage = "Usage: " + this->usage_;
         std::string::size_type pos = usage.find("%prog");
         while (pos != std::string::npos) {
-            usage.replace(pos, 5, this->prog_filename_); 
+            usage.replace(pos, 5, this->prog_filename_);
             pos = usage.find("%prog");
         }
         out << usage << std::endl;
@@ -176,7 +176,7 @@ std::ostream& OptionParser::write_help(std::ostream& out) const {
 void OptionParser::parse(int argc, char * argv[]) {
 
     this->prog_filename_ = filesys::get_path_leaf(argv[0]).c_str();
-    for (int i = 1; i < argc; ++i) { 
+    for (int i = 1; i < argc; ++i) {
         if (argv[i][0] == '-') {
             std::string arg_name;
             std::string arg_value;
@@ -193,7 +193,7 @@ void OptionParser::parse(int argc, char * argv[]) {
                     } else {
                         arg_value += *a;
                     }
-                }                        
+                }
             } else if (argv[i][0] == '-') {
                 std::string arg(argv[i]);
                 if (arg.size() < 2) {
@@ -207,36 +207,41 @@ void OptionParser::parse(int argc, char * argv[]) {
                     arg_value = arg.substr(2, arg.size());
                 }
             }
-            
+
 //             std::map< std::string, OptionArg * >::iterator oai = this->key_opt_map_.find(arg_name);
 //             if ( oai == this->key_opt_map_.end() ) {
 //                 std::cerr << "unrecognized option \"" << arg_name << "\"" << std::endl;
 //                 exit(1);
 //             }
-            
+
             std::vector< std::string > matches;
             for (std::map< std::string, OptionArg * >::iterator oai = this->key_opt_map_.begin();
                  oai != this->key_opt_map_.end();
                  ++oai) {
                 const std::string& a = oai->first;
+                if (a == arg_name) {
+                    matches.clear();
+                    matches.push_back(a);
+                    break;
+                }
                 if (a.compare(0, arg_name.size(), arg_name) == 0 ) {
                     matches.push_back(a);
-                }                    
-            }                 
-            
+                }
+            }
+
             if (matches.size() == 0) {
                 std::cerr << "unrecognized option \"" << arg_name << "\"" << std::endl;
                 exit(1);
             } else if (matches.size() > 1) {
                 std::cerr << "multiple matches found for option beginning with \"" << arg_name << "\":" << std::endl;
                 for (std::vector<std::string>::iterator mi = matches.begin(); mi != matches.end(); ++mi) {
-                    std::cerr << *mi << std::endl; 
+                    std::cerr << *mi << std::endl;
                 }
                 exit(1);
             }
-            
+
             OptionArg& oa = *(this->key_opt_map_[matches[0]]);
-            
+
             if (not oa.is_switch()) {
                 if (arg_value.size() == 0) {
                     if (i == argc-1) {
@@ -245,36 +250,36 @@ void OptionParser::parse(int argc, char * argv[]) {
                     } else {
                         arg_value = argv[i+1];
                         i += 1;
-                    }                            
+                    }
                 }
                 try {
-                    oa.process_value_string(arg_value);                    
+                    oa.process_value_string(arg_value);
                 } catch(OptionValueTypeError& e) {
                     std::cerr << "Invalid value passed to option " << arg_name << ": ";
-                    std::cerr << "\"" << arg_value << "\"" << std::endl;                    
+                    std::cerr << "\"" << arg_value << "\"" << std::endl;
                     exit(1);
                 }
             } else {
                 TypedOptionArg<bool>* bool_opt = static_cast< TypedOptionArg<bool> *>(&oa);
-                bool_opt->process_value(true);            
+                bool_opt->process_value(true);
             }
-            
+
         } else {
             this->pos_args_.push_back(argv[i]);
         }
-        
-            
+
+
         // help option specified
         if (this->show_help_) {
             this->write_help(std::cout);
             exit(0);
         }
-        
+
         // show version
         if (this->show_version_) {
             this->write_version(std::cout);
             exit(0);
-        }          
+        }
     }
 }
 
