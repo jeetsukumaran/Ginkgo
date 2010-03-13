@@ -9,4 +9,3 @@ Contents:
 
     installing.rst
     running.rst
-    examples.rst
