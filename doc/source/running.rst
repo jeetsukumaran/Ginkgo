@@ -407,3 +407,16 @@ Once a configuration file is ready, executing Ginkgo is simply a matter of invok
 
     $ ginkgo scenario.xml
 
+Typically, a particular scenario will be run multiple times.
+Each of these replicates should be invoked with the ``-i`` or ``--replicate-id`` flag, so that the corresponding results can be disambiguated with an appropriate prefix::
+
+    $ ginkgo -i '_rep01' scenario.xml
+
+A random number seed can also be provided on invocation using the ``-z`` or ``--random-seed`` flag, and this will override the seed specified in the configuration file (if any)::
+
+    $ ginkgo -z 220001 scenario.xml
+
+By default, all output will be written to the current working directory. You can specify a different output directory by using the ``-o`` or ``--output-dir`` flags::
+
+    $ ginkgo -o results1/ scenario.xml
+

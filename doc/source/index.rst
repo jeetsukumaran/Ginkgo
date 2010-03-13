@@ -1,6 +1,6 @@
-###########################################
-Ginkgo Phylogeographic Simulator User Guide
-###########################################
+#######################################################
+Ginkgo Phylogeographical Evolution Simulator User Guide
+#######################################################
 
 Contents:
 
