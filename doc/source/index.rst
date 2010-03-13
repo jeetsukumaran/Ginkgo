@@ -7,7 +7,6 @@ Contents:
 .. toctree::
     :maxdepth: 2
 
-    building.rst
-    configuration.rst
+    installing.rst
     running.rst
     examples.rst
