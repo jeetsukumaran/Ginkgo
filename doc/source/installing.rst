@@ -3,7 +3,7 @@ Obtaining, Building, and Installing Ginkgo
 ******************************************
 
 Obtaining Ginkgo
-----------------
+================
 
 Ginkgo is available as a source distribution under the GNU General Public License (version 3) from the Git repository at:
 
@@ -18,7 +18,7 @@ or the entire project repository can be cloned using Git via::
     $ git git://github.com/jeetsukumaran/Ginkgo.git
 
 Building Ginkgo
-----------------
+===============
 
 At the top level of the project directory, run::
 
@@ -39,7 +39,7 @@ After that, build the package::
     $ make
 
 Installing Ginkgo
------------------
+=================
 
 To install the Ginkgo package, run::
 
