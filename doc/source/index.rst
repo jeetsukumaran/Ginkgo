@@ -24,7 +24,8 @@ Three kinds of output are produced by Ginkgo:
     - incidence or occurrence data, i.e., the numbers of individuals of each species occupying each cell of the landscape
     - fitness trait values and fitness scores for each individual
 
-Contents:
+More Information
+================
 
 .. toctree::
     :maxdepth: 2
