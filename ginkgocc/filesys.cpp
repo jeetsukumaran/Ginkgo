@@ -8,12 +8,12 @@
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation; either version 3 of the License, or
 // (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU General Public License along
 // with this program. If not, see <http://www.gnu.org/licenses/>.
 //
@@ -45,8 +45,8 @@ std::string get_path_leaf(const std::string& path) {
         } else {
             return path.substr(last_path_char+1);
         }
-    }    
-} 
+    }
+}
 
 // extracts directory from path
 std::string get_path_parent(const std::string& path) {
@@ -61,7 +61,7 @@ std::string get_path_parent(const std::string& path) {
         } else {
             return path.substr(0, last_path_char);
         }
-    }     
+    }
 }
 
 std::string get_path_leaf(const char * path) {
@@ -77,11 +77,6 @@ std::string compose_path(const std::string& parent, const std::string& child) {
     return parent + PATH_SEPARATOR + child;
 }
 
-// join rel_path to current working directory
-std::string abs_path_from_cwd(const std::string& rel_path) {
-    return current_path() + PATH_SEPARATOR + rel_path;
-}
-
 // check if path is absolute
 bool is_abs_path(const std::string& path) {
     if (path.size() > 0) {
@@ -89,16 +84,6 @@ bool is_abs_path(const std::string& path) {
     } else {
         return false;
     }
-}
-
-///////////////////////////////////////////////////////////////////////////////
-// OPERATING/FILE SYSTEM INTERACTIONS
-
-// returns current working directory
-std::string current_path() {
-    char cwd[1024];
-    ::getcwd(cwd, 1024);
-    return std::string(cwd);
 }
 
 } // filesys

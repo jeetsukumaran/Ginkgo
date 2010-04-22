@@ -8,12 +8,12 @@
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation; either version 3 of the License, or
 // (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU General Public License along
 // with this program. If not, see <http://www.gnu.org/licenses/>.
 //
@@ -26,7 +26,7 @@
 
 namespace ginkgo {
 namespace filesys {
-     
+
 ///////////////////////////////////////////////////////////////////////////////
 // PATH TEXT/STRING OPERATIONS
 
@@ -83,7 +83,7 @@ std::string compose_path(const std::string& parent, const std::string& child);
  * @param rel_path  path relative to current working directory
  * @return          absolute path
  */
-std::string abs_path_from_cwd(const std::string& rel_path); 
+std::string abs_path_from_cwd(const std::string& rel_path);
 
 /**
  * Returns <code>true</code> if path is absolute.
@@ -91,16 +91,7 @@ std::string abs_path_from_cwd(const std::string& rel_path);
  * @param path      file path
  * @return          <code>true</code> if path is absolute
  */
-bool is_abs_path(const std::string& path); 
-
-///////////////////////////////////////////////////////////////////////////////
-// OPERATING/FILE SYSTEM INTERACTIONS
-
-/**
- * Returns the current working directory.
- * @return      current working directory
- */
-std::string current_path();
+bool is_abs_path(const std::string& path);
 
 } // filesys
 
