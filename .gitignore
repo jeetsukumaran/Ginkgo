@@ -14,3 +14,5 @@ configure
 db_build/
 debug/
 tags
+GinkgoWin.layout
+
