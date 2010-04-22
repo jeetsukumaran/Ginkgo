@@ -48,7 +48,7 @@ std::ostream& OptionArg::write_help(std::ostream& out) const {
     help_str += "  ";
     if (this->short_flag_.size() > 0) {
         help_str += this->short_flag_;
-        if (not this->is_switch_) {
+        if (!this->is_switch_) {
             help_str += " ";
             if (this->meta_var_.size() == 0) {
                 help_str += "VALUE";
@@ -62,7 +62,7 @@ std::ostream& OptionArg::write_help(std::ostream& out) const {
     }
     if (this->long_flag_.size() > 0) {
         help_str += this->long_flag_;
-        if (not this->is_switch_) {
+        if (!this->is_switch_) {
             help_str += "=";
             if (this->meta_var_.size() == 0) {
                 help_str += "VALUE";
@@ -242,7 +242,7 @@ void OptionParser::parse(int argc, char * argv[]) {
 
             OptionArg& oa = *(this->key_opt_map_[matches[0]]);
 
-            if (not oa.is_switch()) {
+            if (!oa.is_switch()) {
                 if (arg_value.size() == 0) {
                     if (i == argc-1) {
                         std::cerr << "expecting value for option \"" << arg_name << "\"" << std::endl;

@@ -55,7 +55,7 @@ std::ofstream& LogStreamManager::create(const std::string& path) {
 // creates (opens) a new stream
 std::ofstream& LogStreamManager::create(const char * path) {
     std::ofstream * out = new std::ofstream(path);
-    if (not *out) {
+    if (!*out) {
         throw LoggerIOError(path);
     }
     this->ofstream_ptrs_.push_back(out);

@@ -275,8 +275,8 @@ void World::run_initialization_cycles() {
     bool all_coalesced = false;
     unsigned long cycle_count = 0;
     while (!all_coalesced
-            and (this->initialization_regime_.max_cycles < 0
-                    or cycle_count < static_cast<GenerationCountType>(this->initialization_regime_.max_cycles) )) {
+            && (this->initialization_regime_.max_cycles < 0
+                    || cycle_count < static_cast<GenerationCountType>(this->initialization_regime_.max_cycles) )) {
         cycle_count += 1;
         this->run_life_cycle();
         unsigned num_uncoalesced = 0;
@@ -294,7 +294,7 @@ void World::run_initialization_cycles() {
             log_msg << ": all " << ancestral_genes.size() << " loci haved coalesced -- terminating initialization cycles.";
             this->logger_.info(log_msg.str());
         } else if ( this->initialization_regime_.max_cycles > 0
-                and cycle_count >= static_cast<GenerationCountType>(this->initialization_regime_.max_cycles)) {
+                && cycle_count >= static_cast<GenerationCountType>(this->initialization_regime_.max_cycles)) {
             std::ostringstream msg;
             msg << "Reached initialization cycle limit of " << this->initialization_regime_.max_cycles;
             msg << ": terminating initialization cycles";
@@ -734,7 +734,7 @@ void World::save_trees(Species * sp_ptr,
 
 
 void World::init_logger() {
-    if (not this->logger_init_) {
+    if (!this->logger_init_) {
         this->logger_.reset_elapsed_time();
         if (this->is_log_to_screen_) {
             this->logger_.add_handler(std::cout, LogHandler::LOG_INFO);
@@ -973,7 +973,7 @@ void World::log_configuration() {
 void World::open_ofstream(std::ofstream& out, const std::string& fpath) {
     std::string full_fpath = filesys::compose_path(this->output_dir_, fpath);
     out.open(full_fpath.c_str());
-    if (not out) {
+    if (!out) {
         throw WorldIOError("cannot open file \"" + full_fpath + "\" for output");
     }
 }

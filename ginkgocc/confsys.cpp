@@ -259,7 +259,7 @@ void ConfigurationFile::parse_initialization(World& world) {
             XmlElementType cell_pop_node = cell_node.getChildNode("population", i);
             std::string lineage_id = this->get_attribute<std::string>(cell_pop_node, "lineage");
             PopulationCountType pop_size = this->get_attribute<PopulationCountType>(cell_pop_node, "size");
-            if (not world.has_species(lineage_id)) {
+            if (!world.has_species(lineage_id)) {
                 throw ConfigurationError("initialization: lineage \"" + lineage_id + "\" not defined");
             }
             Species * species_ptr = world.species_registry()[lineage_id];
@@ -301,7 +301,7 @@ void ConfigurationFile::parse_environments(World& world) {
 //            disp_event.probability = this->get_child_node_scalar<float>(disp_node, "probability", 1.0);
 //            std::string lineage_id = this->get_child_node_scalar<std::string>(disp_node, "lineage", "");
 //            if (lineage_id.size() > 0) {
-//                if (not world.has_species(lineage_id)) {
+//                if (!world.has_species(lineage_id)) {
 //                    throw ConfigurationError("dispersal: lineage \"" + lineage_id + "\" not defined");
 //                }
 //                disp_event.species_ptr = world.species_registry()[lineage_id];
@@ -324,7 +324,7 @@ void ConfigurationFile::parse_samplings(World& world) {
         XmlElementType sample_node = samplings.getChildNode("sample", i);
         GenerationCountType gen = this->get_attribute<GenerationCountType>(sample_node, "gen");
         std::string lineage_id = this->get_attribute<std::string>(sample_node, "lineage");
-        if (not world.has_species(lineage_id)) {
+        if (!world.has_species(lineage_id)) {
             throw ConfigurationError("sample: lineage \"" + lineage_id + "\" not defined");
         }
 
@@ -332,7 +332,7 @@ void ConfigurationFile::parse_samplings(World& world) {
         world.add_occurrence_sampling(gen, world.species_registry()[lineage_id]);
 
         // skip to next if trees not wanted
-        if (not this->get_attribute_bool(sample_node, "trees", true) ) {
+        if (!this->get_attribute_bool(sample_node, "trees", true) ) {
             continue;
         }
 
@@ -345,7 +345,7 @@ void ConfigurationFile::parse_samplings(World& world) {
         }
         world_sampling_regime.num_organisms_per_cell = this->get_child_node_scalar<PopulationCountType>(sample_node, "individuals_per_cell", 0);
         XmlElementType cell_nodes = sample_node.getChildNode("cells");
-        if (not cell_nodes.isEmpty()) {
+        if (!cell_nodes.isEmpty()) {
             for (int cnidx = 0; cnidx < cell_nodes.nChildNode("cell"); ++cnidx) {
                 XmlElementType sample_cell_node = cell_nodes.getChildNode("cell", cnidx);
                 CellIndexType cell_index = this->parse_cell_index_from_node(world, sample_cell_node);
@@ -376,7 +376,7 @@ EnvironmentSettings ConfigurationFile::parse_environment_settings(World& world, 
             environment_settings.fitness_trait_optima.insert(std::make_pair(eidx, gridfile));
         } else if (node_name == "movement_costs") {
             std::string lineage_id = this->get_attribute<std::string>(sub_node, "lineage");
-            if (not world.has_species(lineage_id)) {
+            if (!world.has_species(lineage_id)) {
                 throw ConfigurationError("movement costs: lineage \"" + lineage_id + "\" not defined");
             }
             Species * lineage = world.species_registry()[lineage_id];
@@ -385,7 +385,7 @@ EnvironmentSettings ConfigurationFile::parse_environment_settings(World& world, 
         }
 //        else if (node_name == "movement_probabilities") {
 //            std::string lineage_id = this->get_attribute<std::string>(sub_node, "lineage");
-//            if (not world.has_species(lineage_id)) {
+//            if (!world.has_species(lineage_id)) {
 //                throw ConfigurationError("movement probabilities: lineage \"" + lineage_id + "\" not defined");
 //            }
 //            Species * lineage = world.species_registry()[lineage_id];
@@ -400,13 +400,13 @@ CellIndexType ConfigurationFile::parse_cell_index_from_node(World& world, XmlEle
         bool has_x = this->has_attribute(cell_node, "x");
         bool has_y = this->has_attribute(cell_node, "y");
         bool has_index = this->has_attribute(cell_node, "index");
-        if ( (has_x or has_y) and has_index ) {
-            throw ConfigurationError("cannot specify cell by both coordinates ('x'/'y') and indexes ('index')");
-        } else if (has_x and not has_y) {
+        if ( (has_x || has_y) && has_index ) {
+            throw ConfigurationError("cannot specify cell by both coordinates ('x'/'y') && indexes ('index')");
+        } else if (has_x && !has_y) {
             throw ConfigurationError("'y' coordinate not specified for cell");
-        } else if (has_y and not has_x)  {
+        } else if (has_y && !has_x)  {
             throw ConfigurationError("'x' coordinate not specified for cell");
-        } else if (has_x and has_y) {
+        } else if (has_x && has_y) {
             CellIndexType x = this->get_attribute<CellIndexType>(cell_node, "x");
             CellIndexType y = this->get_attribute<CellIndexType>(cell_node, "y");
             return this->get_validated_cell_index(x, y, world, "cell coordinate");
@@ -428,7 +428,7 @@ template <class T>
 std::string ConfigurationFile::get_validated_grid_path(const std::string& grid_path, const World& world) {
     std::string top_dir = filesys::get_path_parent(this->config_filepath_);
     std::string full_grid_path;
-    if (filesys::is_abs_path(grid_path) or top_dir.size() == 0) {
+    if (filesys::is_abs_path(grid_path) || top_dir.size() == 0) {
         full_grid_path = grid_path;
     } else {
         full_grid_path = filesys::compose_path(top_dir, grid_path);

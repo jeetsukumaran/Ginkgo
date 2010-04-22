@@ -8,12 +8,12 @@
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation; either version 3 of the License, or
 // (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU General Public License along
 // with this program. If not, see <http://www.gnu.org/licenses/>.
 //
@@ -29,14 +29,14 @@
 
 #include "textutil.hpp"
 
-namespace ginkgo { 
+namespace ginkgo {
 namespace convert {
 
 /**
  * Exception thrown when conversion fails.
  */
 class ValueError : public std::runtime_error {
-    
+
     public:
         ValueError() : std::runtime_error("invalid literal for value type") {}
         ValueError(std::string value) : std::runtime_error("invalid literal for value type: \"" + value +"\"") {}
@@ -52,9 +52,9 @@ T to_scalar(U from) {
     std::ostringstream o;
     o << from;
     std::istringstream i(o.str());
-    T target;    
+    T target;
     i >> target;
-    if (i.fail() or not i.eof()) {
+    if (i.fail() || !i.eof()) {
         throw ValueError(o.str());
     }
     return target;
@@ -79,7 +79,7 @@ bool to_bool(U from) {
 
 /**
  * Converts from one simple streamable type to vector of streamable types.
- * @param from          representation of vector (e.g. "3 32 1 3 4", 
+ * @param from          representation of vector (e.g. "3 32 1 3 4",
  *                      "1.2,1.3,3.1", "dda;adf;da" etc.)
  * @param separator     element delimiter (e.g, ",", " ", etc.)
  * @return              value represented in type T
@@ -98,14 +98,14 @@ std::vector<T> to_vector(U from, const char * separator = " ", bool strip_whites
         }
         if (s.size() > 0) {
             results.push_back( to_scalar<T>(s) );
-        }                        
+        }
     }
     return results;
 }
 
 /**
  * Converts from one simple streamable type to vector of streamable types.
- * @param from          representation of vector (e.g. "3 32 1 3 4", 
+ * @param from          representation of vector (e.g. "3 32 1 3 4",
  *                      "1.2,1.3,3.1", "dda;adf;da" etc.)
  * @param separator     element delimiter (e.g, ",", " ", etc.)
  * @return              value represented in type T
@@ -124,7 +124,7 @@ std::vector<T> to_vector_on_any(U from, const char * separator = " \t\r\n", bool
         }
         if (s.size() > 0) {
             results.push_back( to_scalar<T>(s) );
-        }                        
+        }
     }
     return results;
 }

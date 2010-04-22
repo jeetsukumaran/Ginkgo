@@ -209,7 +209,7 @@ class AsciiGrid {
          * @return number of columns in grid
          */
         index_type get_ncols() {
-            if (not this->is_metadata_loaded_) {
+            if (! this->is_metadata_loaded_) {
                 this->parse_metadata_();
             }
             return this->ncols_;
@@ -220,7 +220,7 @@ class AsciiGrid {
          * @return number of rows in grid
          */
         index_type get_nrows() {
-            if (not this->is_metadata_loaded_) {
+            if (!this->is_metadata_loaded_) {
                 this->parse_metadata_();
             }
             return this->nrows_;
@@ -231,7 +231,7 @@ class AsciiGrid {
          * @return vector of values of cells loaded from grid
          */
         std::vector<T> get_cell_values() {
-            if (not this->is_cell_values_loaded_) {
+            if (!this->is_cell_values_loaded_) {
                 this->parse_cell_values_();
             }
             return this->cell_values_;
@@ -336,7 +336,7 @@ class AsciiGrid {
 template <class T>
 AsciiGrid<T>::AsciiGrid(std::istream& src)
         : src_(src) {
-    if (not this->src_) {
+    if (!this->src_) {
         throw AsciiGridIOError("invalid source stream");
     }
     this->init_();
@@ -346,7 +346,7 @@ template <class T>
 AsciiGrid<T>::AsciiGrid(const char * fpath)
         : fsrc_(fpath),
           src_(fsrc_) {
-    if (not this->src_) {
+    if (!this->src_) {
         std::ostringstream msg;
         msg << "invalid source \"" << fpath << "\"";
         throw AsciiGridIOError(msg.str());
@@ -358,7 +358,7 @@ template <class T>
 AsciiGrid<T>::AsciiGrid(const std::string& fpath)
         : fsrc_(fpath.c_str()),
           src_(fsrc_) {
-    if (not this->src_) {
+    if (!this->src_) {
         std::ostringstream msg;
         msg << "invalid source \"" << fpath << "\"";
         throw AsciiGridIOError(msg.str());
@@ -486,7 +486,7 @@ void AsciiGrid<T>::parse_metadata_() {
 template <class T>
 void AsciiGrid<T>::parse_cell_values_() {
 
-    if (not this->is_metadata_loaded_) {
+    if (!this->is_metadata_loaded_) {
         this->parse_metadata_();
     }
     assert(this->ncols_ != 0);
@@ -533,7 +533,7 @@ void AsciiGrid<T>::parse_cell_values_() {
 
     T cell_value;
     this->src_ >> cell_value;
-    while (not this->src_.eof()) {
+    while (!this->src_.eof()) {
         if (this->src_.fail()) {
             std::ostringstream msg;
             msg << "invalid value specified for cell (" << x << ", " << y << ") in file character position " << this->src_.tellg();

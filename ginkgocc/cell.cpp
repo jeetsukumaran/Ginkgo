@@ -97,7 +97,7 @@ void Cell::reproduction(bool evolve_fitness_components) {
 
         OrganismPointers& female_ptrs = pop.females();
         OrganismPointers& male_ptrs = pop.males();
-        if ( (female_ptrs.size() > 0) and (male_ptrs.size() > 0)) {
+        if ( (female_ptrs.size() > 0) && (male_ptrs.size() > 0)) {
             BreedingPopulation next_gen;
             unsigned num_offspring = sp->get_mean_reproductive_rate();
             for (OrganismPointers::iterator fi = female_ptrs.begin();
