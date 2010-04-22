@@ -18,7 +18,6 @@
 // with this program. If not, see <http://www.gnu.org/licenses/>.
 //
 ///////////////////////////////////////////////////////////////////////////////
-
 #include "ginkgo_defs.hpp"
 #include "confsys.hpp"
 #include "organism.hpp"
@@ -37,7 +36,11 @@
 #include <string>
 #include <sstream>
 #include <cstring>
-#include <config.h>
+#ifdef HAVE_CONFIG_H
+#	include <config.h>
+#else
+#	include "win_config.h"
+#endif
 
 std::string get_program_identification() {
     std::ostringstream s;

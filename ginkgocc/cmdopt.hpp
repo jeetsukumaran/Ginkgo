@@ -502,6 +502,16 @@ class OptionParser {
         std::string                                 prog_filename_;
 };
 
+
+///////////////////////////////////////////////////////////////////////////////
+// Specializations of TypedOptionArg
+
+template <>
+inline void TypedOptionArg<std::string>::process_value_string(const std::string& val_str) {
+    *this->store_ = val_str;
+    this->set_is_set(true);
+}
+
 } // namespace ginkgo
 
 #endif

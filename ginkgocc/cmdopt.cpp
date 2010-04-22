@@ -94,14 +94,6 @@ std::ostream& OptionArg::write_help(std::ostream& out) const {
     return out;
 }
 
-///////////////////////////////////////////////////////////////////////////////
-// Specializations of TypedOptionArg
-
-template <>
-void TypedOptionArg<std::string>::process_value_string(const std::string& val_str) {
-    *this->store_ = val_str;
-    this->set_is_set(true);
-}
 
 ///////////////////////////////////////////////////////////////////////////////
 // OptionParser
