@@ -3,14 +3,30 @@ AM_LDFLAGS  = @LDFLAGS@
 
 bindir = ${prefix}/@PACKAGE@/bin
 BUILDTIMESTAMP="`date`"
-BUILDDESC="`git symbolic-ref HEAD 2> /dev/null | cut -b 12-`-`git log --pretty=format:\"%h\" -1`"
 
 bin_PROGRAMS = ginkgo@PROGRAMLABEL@
 
 noinst_HEADERS = \
-	ginkgo_defs.hpp
+	ginkgo_defs.hpp \
+	asciigrid.hpp \
+	cell.hpp \
+	cmdopt.hpp \
+	confsys.hpp \
+	convert.hpp \
+	filesys.hpp \
+	landscape.hpp \
+	logging.hpp \
+	memcheck.hpp \
+	organism.hpp \
+	population.hpp \
+	randgen.hpp \
+	species.hpp \
+	textutil.hpp \
+	tree.hpp \
+	world.hpp \
+	xmlParser.h
 
-ginkgo@PROGRAMLABEL@_CPPFLAGS = -DBUILDDESC=\"${BUILDDESC}\" -DBUILDTIMESTAMP=\"${BUILDTIMESTAMP}\"
+ginkgo@PROGRAMLABEL@_CPPFLAGS = -DBUILDTIMESTAMP=\"${BUILDTIMESTAMP}\"
 ginkgo@PROGRAMLABEL@_SOURCES = \
     ginkgo.cpp \
     randgen.cpp \
