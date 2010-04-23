@@ -196,7 +196,6 @@ AC_SUBST(CPPFLAGS)
 AC_CONFIG_FILES([
 	Makefile 			\
 	ginkgocc/Makefile   \
-	ginkgocc/tests/Makefile		\
 	])
 
 AC_OUTPUT

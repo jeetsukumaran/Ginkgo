@@ -5,5 +5,4 @@ EXTRA_DIST = \
     ginkgopy \
 	README
 
-SUBDIRS = ginkgocc \
-          ginkgocc/tests
+SUBDIRS = ginkgocc
