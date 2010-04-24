@@ -271,12 +271,12 @@ class Landscape {
             y = this->index_to_y(i) + this->rng_.uniform_int(-1, 1); // to reflect: % this->size_y_;
             if (x < 0) {
                 x = 0;
-            } else if (x > this->max_x_) {
+            } else if (static_cast<CellIndexType>(x) > this->max_x_) {
                 x = this->max_x_;
             }
             if (y < 0) {
                 y = 0;
-            } else if (y > this->max_y_) {
+            } else if (static_cast<CellIndexType>(y) > this->max_y_) {
                 y = this->max_y_;
             }
             CellIndexType k = this->xy_to_index(x, y);
