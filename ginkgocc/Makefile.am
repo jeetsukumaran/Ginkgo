@@ -3,8 +3,8 @@ AM_LDFLAGS  = @LDFLAGS@
 
 bin_PROGRAMS = ginkgo@PROGRAMLABEL@
 
-BUILT_SOURCES = ginkgo_build_id.h
-EXTRA_DIST = echo_build_id.sh win_config.h
+BUILT_SOURCES = ginkgo_info.h
+EXTRA_DIST = echo_ginkgo_info.sh win_config.h
 
 noinst_HEADERS = \
 	ginkgo_defs.hpp \
@@ -45,5 +45,5 @@ ginkgo@PROGRAMLABEL@_SOURCES = \
     xmlParser.cpp \
     memcheck.cpp
 
-ginkgo_build_id.h: $(HEADERS) $(SOURCES)
-	$(top_srcdir)/ginkgocc/echo_build_id.sh > ginkgo_build_id.h
+ginkgo_info.h: $(HEADERS) $(SOURCES)
+	$(top_srcdir)/ginkgocc/echo_ginkgo_info.sh > ginkgo_info.h

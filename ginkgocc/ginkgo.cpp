@@ -38,7 +38,7 @@
 #include <cstring>
 #ifdef HAVE_CONFIG_H
 #	include <config.h>
-#   include "ginkgo_build_id.h"
+#   include "ginkgo_info.h"
 #else
 #	include "win_config.h"
 #endif
@@ -46,18 +46,10 @@
 std::string get_program_identification() {
     std::ostringstream s;
     s << PACKAGE_NAME << " v" << PACKAGE_VERSION;
-#if defined(BUILDDESC) || defined(BUILDTIMESTAMP)
-    s << " (";
-    #ifdef BUILDDESC
-        s << BUILDDESC;
-        #ifdef BUILDTIMESTAMP
-            s << ", ";
-        #endif
-    #endif
-    #ifdef BUILDTIMESTAMP
-        s << BUILDTIMESTAMP;
-    #endif
-    s << ")";
+#if defined(GINKGO_SOURCE_DESC)
+    s << " (" << GINKGO_SOURCE_DESC << ")";
+#else
+    s << " (" << __DATE__ << ")";
 #endif
     return  s.str();
 }
