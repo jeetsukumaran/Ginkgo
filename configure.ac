@@ -15,7 +15,7 @@ AC_CONFIG_HEADER([config.h])
 AC_CONFIG_AUX_DIR([config])
 
 #   Set default install prefix
-AC_PREFIX_DEFAULT([/opt])
+AC_PREFIX_DEFAULT([/usr/local])
 
 ################################################################################
 # Checks for build-platform and target info
