@@ -13,8 +13,9 @@ Pre-built Ginkgo binaries (executables) are available for the Apple OS X and Mic
 
 If you are running "Snow Leopard" (OS X 10.6) or higher, you want the :download:`64-bit OS X version </_downloads/ginkgo-3.9.0-bin-osx64.zip>`, otherwise you want the :download:`32-bit version </_downloads/ginkgo-3.9.0-bin-osx32.zip>`.
 
-As is typical for most other platforms, such as the various flavors of Linux, you would need from the source code.
+As is typical for most other platforms, such as the various flavors of Linux, you would need to build and install directly from the source code.
 See :ref:`below <ginkgo-from-source>` for details on how to :ref:`obtain, build and install Ginkgo directly from the source code <ginkgo-from-source>`.
+This should pose no problems, as most of our application (as opposed to development/testing) runs are on Linux systems, but if you face any difficulties, please do not hesitate to contact us.
 
 "Installing" the pre-built binaries involves nothing more than downloading the appropriate archive, unzipping the program, and copying the program to a suitable location.
 On the OS X platforms, a "suitable location" is typically "``/usr/local/bin``", so installing Ginkgo would entail something like the following::
