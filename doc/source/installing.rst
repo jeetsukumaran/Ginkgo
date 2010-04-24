@@ -13,7 +13,8 @@ Pre-built Ginkgo binaries (executables) are available for the Apple OS X and Mic
 
 If you are running "Snow Leopard" (OS X 10.6) or higher, you want the :download:`64-bit OS X version </_downloads/ginkgo-3.9.0-bin-osx64.zip>`, otherwise you want the :download:`32-bit version </_downloads/ginkgo-3.9.0-bin-osx32.zip>`.
 
-Other platforms, such as the various flavors of Linux, would need to build and install from the source code, as is typical; see below for details on how to go about doing this.
+As is typical for most other platforms, such as the various flavors of Linux, you would need from the source code.
+See :ref:`below <ginkgo-from-source>` for details on how to :ref:`obtain, build and install Ginkgo directly from the source code <ginkgo-from-source>`.
 
 "Installing" the pre-built binaries involves nothing more than downloading the appropriate archive, unzipping the program, and copying the program to a suitable location.
 On the OS X platforms, a "suitable location" is typically "``/usr/local/bin``", so installing Ginkgo would entail something like the following::
@@ -23,11 +24,12 @@ On the OS X platforms, a "suitable location" is typically "``/usr/local/bin``", 
     $ sudo mv ginkgo /usr/local/bin
 
 The "``sudo``" is necessary because you are copying the file to a system-wide directory.
-You do not actually need to do this, as Ginkgo runs quite well from any location, but by doing this you avoid the need to enter the full path (i.e., parent directories) when invoking Ginkgo
+You do not actually need to do this, as Ginkgo runs quite well from any location, but by doing this you avoid the need to enter the full path (i.e., parent directories) when invoking Ginkgo.
 
+.. _ginkgo-from-source:
 
-Building and Installing Ginkgo from the Source Code
-===================================================
+Obtaining, Building and Installing Ginkgo from the Source Code
+==============================================================
 
 Downloading the Source Code
 ---------------------------
@@ -88,5 +90,6 @@ Windows Users
 -------------
 
 None of the above really applies to Windows users.
-If you are feeling adventurous, you may could trying creating a Visual Studio project, importing all the files in the "``ginkgocc``" source directory, and building the result.
+If you are feeling adventurous, you could trying creating a Visual Studio project, importing all the files in the "``ginkgocc``" source directory, and building the result.
+It should work --- that is how the Windows binaries linked to on this page were built.
 However, it probably makes more sense to simply use one of the pre-built binaries.
