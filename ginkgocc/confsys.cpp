@@ -142,7 +142,7 @@ void ConfigurationFile::parse_landscape(World& world) {
     long nrows = this->get_attribute<long>(landscape_node, "nrows");
     assert(ncols > 0);
     assert(nrows > 0);
-    if ( (nrows * ncols) > MAX_LANDSCAPE_SIZE ) {
+    if ( static_cast<CellIndexType>(nrows * ncols) > MAX_LANDSCAPE_SIZE ) {
         std::ostringstream s;
         s << "maximum number of cells on landscape allowed is " << MAX_LANDSCAPE_SIZE;
         s << ", but requested " << (nrows * ncols) << " (" << nrows << " columns and " << ncols << " rows)";
