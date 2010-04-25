@@ -48,7 +48,8 @@ class Grid(object):
 nrows         {1}
 xllcorner     0.0
 yllcorner     0.0
-cellsize      50.0""").format(self.ncols, self.nrows)
+cellsize      50.0
+NODATA_value  -9999""").format(self.ncols, self.nrows)
 
     def __str__(self):
         rows = []
@@ -64,7 +65,7 @@ cellsize      50.0""").format(self.ncols, self.nrows)
                 v = fv[x][y]
                 row.append("{2}{0:>{1}}".format(v, self._max_formatted_value_len, leader))
             rows.append("  ".join(row))
-            rows.append("")
+            #rows.append("")
         return "\n".join(rows)
 
 ###############################################################################\\
