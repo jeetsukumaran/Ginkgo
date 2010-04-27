@@ -379,7 +379,7 @@ So, for example, with if the ``title`` attribute of the ``<ginkgo>`` element is 
 
 would produce the following files:
 
-    ``run1_G00010000_Sp1_occurrences.asc``
+    ``run1_G00010000_Sp1.occurrences.asc``
         The ESRI ASCII grid showing the number of individuals of lineage "Sp1" on the landscape.
     ``run1_G00010000_Sp1.haploid.tre``
         The genealogy for the haploid locus of organisms of lineage "Sp1".
