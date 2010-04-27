@@ -11,7 +11,7 @@ Pre-built Ginkgo binaries (executables) are available for the Apple OS X and Mic
     * :download:`Apple OS X (64-bit) </_downloads/ginkgo-3.9.0-bin-osx64.zip>`
     * :download:`Microsoft Windows </_downloads/ginkgo-3.9.0-bin-w32.zip>`
 
-If you are running "Snow Leopard" (OS X 10.6) or higher, you want the :download:`64-bit OS X version </_downloads/ginkgo-3.9.0-bin-osx64.zip>`, otherwise you want the :download:`32-bit version </_downloads/ginkgo-3.9.0-bin-osx32.zip>`.
+If you are running "Snow Leopard" (OS X 10.6) or higher, you want the :download:`64-bit OS X version </_downloads/ginkgo-3.9.0-bin-osx64.zip>`, otherwise you want the :download:`32-bit version </_downloads/ginkgo-3.9.0-bin-osx32.zip>`. The :download:`Microsoft Windows </_downloads/ginkgo-3.9.0-bin-w32.zip>` version should work on most versions of Windows.
 
 As is typical for most other platforms, such as the various flavors of Linux, you would need to build and install directly from the source code.
 See below for details on how to :ref:`obtain, build and install Ginkgo directly from the source code <ginkgo-from-source>`.
