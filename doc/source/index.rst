@@ -5,7 +5,7 @@ Ginkgo Phylogeographical Evolution Simulator User Guide
 Introduction
 ============
 
-Ginkgo is a agent-based forward-time simulation to produce gene genealogies and incidence (occurrence) data for multiple populations of multiple species in spatially-explicit and environmentally-heterogenous framework.
+Ginkgo is a agent-based forward-time simulation to produce gene genealogies and incidence (occurrence) data for multiple populations of multiple species in a spatially-explicit and environmentally-heterogenous framework.
 
 Features of Ginkgo include:
 
