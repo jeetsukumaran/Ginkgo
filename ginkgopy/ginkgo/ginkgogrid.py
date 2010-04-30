@@ -66,6 +66,8 @@ class Grid(object):
             parts = line.split(' ')
             self.values.extend([self.value_type(i) for i in parts])
 
+        return self.matrix_from_values()
+
     def matrix_from_values(self):
         assert len(self.values) == self.ncols * self.nrows
         self.matrix = []
@@ -124,10 +126,10 @@ NODATA_value  -9999""").format(self.ncols, self.nrows)
 ###############################################################################\\
 # Occurrences
 
-class Occurrences(object):
+class Occurrences(Grid):
 
     def __init__(self, filepath=None):
-
+        Grid.__init__(self)
         self.filepath = None
         if filepath is not None:
             self.read(open(filepath, "rU"))
