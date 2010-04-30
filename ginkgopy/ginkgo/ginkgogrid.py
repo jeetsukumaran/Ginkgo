@@ -5,23 +5,79 @@ import sys
 import os
 from ginkgo import argparse
 
-###############################################################################\\
-# Basic grids
+##############################################################################\\
+# Grid
 
 class Grid(object):
 
-    def __init__(self, ncols, nrows, **kwargs):
-        self.ncols = ncols
-        self.nrows = nrows
+    def __init__(self, **kwargs):
+        self.ncols = kwargs.get("ncols", None)
+        self.nrows = kwargs.get("nrows", None)
+        self.value_type = kwargs.get("value_type", int)
+        self.values = None
+        self.matrix = None
         if 'values' in kwargs:
             self.values = kwargs['values']
-        elif 'func' in kwargs:
-            self.populate(kwargs['func'])
+        elif 'pop_func' in kwargs:
+            self.populate(kwargs['pop_func'])
+        elif 'filepath' in kwargs:
+            self.read(open(kwargs['filepath'], "rU"))
+        elif 'stream' in kwargs:
+            self.read(kwargs['stream'])
         else:
             self.values = {}
         self._max_formatted_value_len = None
 
-    def formatted_values(self):
+    def __str__(self):
+        return self.as_string(include_header=True)
+
+    def populate(self, func):
+        self.values = {}
+        for x in range(self.ncols):
+            self.values[x] = {}
+            for y in range(self.nrows):
+                self.values[x][y] = func(x, y)
+
+    def read(self, src):
+        self.values = []
+        for line in src:
+            line = line.replace('\n', '').strip()
+            parts = line.split(' ',1)
+            kw = parts[0].lower()
+            if kw == 'ncols':
+                assert len(parts) == 2
+                self.ncols = int(parts[1])
+                continue
+            elif kw == 'nrows':
+                assert len(parts) == 2
+                self.nrows = int(parts[1])
+                continue
+            elif kw in ['xllcorner', 'yllcorner', 'cellsize', 'nodata_value']:
+                continue
+            else:
+                parts = line.split(' ')
+                self.values.extend([self.value_type(i) for i in parts])
+                break
+        assert self.ncols > 0
+        assert self.nrows > 0
+
+        for line in src:
+            line = line.replace('\n', '').strip()
+            parts = line.split(' ')
+            self.values.extend([self.value_type(i) for i in parts])
+
+    def matrix_from_values(self):
+        assert len(self.values) == self.ncols * self.nrows
+        self.matrix = []
+        for r in range(self.nrows):
+            self.matrix.append([])
+            for c in range(self.ncols):
+                self.matrix[r].append(self.values[(r * self.ncols) + c])
+            assert len(self.matrix[r]) == self.ncols
+        assert len(self.matrix) == self.nrows
+        return self.matrix
+
+    def formatted_value_matrix(self, cell_width=None):
         fv = {}
         fv_lens = []
         for x in range(self.ncols):
@@ -33,17 +89,13 @@ class Grid(object):
                 else:
                     fv[x][y] = "{0:>}".format(v)
                 fv_lens.append(len(fv[x][y]))
-        self._max_formatted_value_len = max(fv_lens)
+        if cell_width is None:
+            self._max_formatted_value_len = max(fv_lens)
+        else:
+            self._max_formatted_value_len = cell_width
         return fv
 
-    def populate(self, func):
-        self.values = {}
-        for x in range(self.ncols):
-            self.values[x] = {}
-            for y in range(self.nrows):
-                self.values[x][y] = func(x, y)
-
-    def grid_header(self):
+    def ascii_grid_header(self):
         return ("""ncols         {0}
 nrows         {1}
 xllcorner     0.0
@@ -51,10 +103,11 @@ yllcorner     0.0
 cellsize      50.0
 NODATA_value  -9999""").format(self.ncols, self.nrows)
 
-    def __str__(self):
+    def as_string(self, include_header=True, cell_width=None):
         rows = []
-        rows.append(self.grid_header())
-        fv = self.formatted_values()
+        if include_header:
+            rows.append(self.grid_header())
+        fv = self.formatted_value_matrix(cell_width=cell_width)
         for y in range(self.nrows):
             if y % 5 == 0:
                 rows.append("")
@@ -69,17 +122,34 @@ NODATA_value  -9999""").format(self.ncols, self.nrows)
         return "\n".join(rows)
 
 ###############################################################################\\
-# Build and return the grids
+# Occurrences
+
+class Occurrences(object):
+
+    def __init__(self, filepath=None):
+
+        self.filepath = None
+        if filepath is not None:
+            self.read(open(filepath, "rU"))
+
+    def __str__(self):
+        s = []
+        for r in range(self.nrows):
+            s.append(" ".join(["{0:>3}".format(self.matrix[r][c]) for c in range(self.ncols)]))
+        return "\n".join(s)
+
+###############################################################################\\
+# Input Grid Generation
 
 def random_gaussian_grid(ncols, nrows, mean=0, sd=1):
-    return Grid(ncols, nrows, func = lambda x, y: random.gauss(mean, sd))
+    return Grid(ncols=ncols, nrows=nrows, pop_func=lambda x, y: random.gauss(mean, sd))
 
 def random_uniform_real_grid(ncols, nrows, a, b):
-    return Grid(ncols, nrows, func = lambda x, y: random.uniform(a, b))
+    return Grid(ncols=ncols, nrows=nrows, pop_func=lambda x, y: random.uniform(a, b))
 
 def random_uniform_int_grid(ncols, nrows, a, b):
-    return Grid(ncols, nrows, func = lambda x, y: random.randint(a, b))
+    return Grid(ncols=ncols, nrows=nrows, pop_func=lambda x, y: random.randint(a, b))
 
 def fixed_value_grid(ncols, nrows, val):
-    return Grid(ncols, nrows, func = lambda x, y: val)
+    return Grid(ncols=ncols, nrows=nrows, pop_func=lambda x, y: val)
 
