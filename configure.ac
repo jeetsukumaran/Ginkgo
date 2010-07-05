@@ -101,19 +101,34 @@ if test "$enable_mini" = yes; then
 	   ])
 fi
 
-# program name decorator
+# locus and num traits
 
-NUM_NEUTRAL_LOCI="1"
+NUM_NEUTRAL_LOCI="10"
 AC_ARG_WITH(
 	[num-loci],
 	AC_HELP_STRING(
-		[--with-num-loci=#],
+		[--with-num-loci=NUMBER],
 		[Specify the number of neutral diploid loci tracked]
 		),
 	[
 	NUM_NEUTRAL_LOCI="$withval"
 	])
+
 AC_SUBST([NUM_NEUTRAL_LOCI])
+
+NUM_FITNESS_TRAITS="10"
+AC_ARG_WITH(
+	[num-traits],
+	AC_HELP_STRING(
+		[--with-num-traits=NUMBER],
+        [Specify the number of fitness traits tracked]
+		),
+	[
+	NUM_FITNESS_TRAITS="$withval"
+	])
+AC_SUBST([NUM_FITNESS_TRAITS])
+
+# program name decorator
 
 PROGRAMLABEL=""
 AC_ARG_WITH([label],
@@ -124,9 +139,13 @@ if test -n "$with_label"; then
 	   ])
    PROGRAMLABEL="${with_label}"
 fi
-PROGRAMLABEL="${PROGRAMLABEL}loci${NUM_NEUTRAL_LOCI}"
+if test "$NUM_NEUTRAL_LOCI" -ne 10; then
+    PROGRAMLABEL="${PROGRAMLABEL}-L${NUM_NEUTRAL_LOCI}"
+fi
+if test "$NUM_FITNESS_TRAITS" -ne 10; then
+    PROGRAMLABEL="${PROGRAMLABEL}-F${NUM_FITNESS_TRAITS}"
+fi
 AC_SUBST(PROGRAMLABEL)
-
 
 # Initialize optimization flag in case it doesn't get set below.
 CXXFLAGS_OPTIM_SPEED="-O"

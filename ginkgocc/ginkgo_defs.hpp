@@ -37,11 +37,15 @@ const unsigned long ORGANISM_MEMORY_MANAGER_DEFAULT_BLOCK_SIZE = 1000;
 //! The maximum number of fitness factors in the system. A "fitness factor"
 //! represents an environmental variable and a corresponding genotypic variable
 //! that together contribute to the fitness of an individual organism.
-const unsigned MAX_FITNESS_TRAITS = 10;
+#if ! defined GINKGO_NUM_TRAITS
+    const unsigned MAX_FITNESS_TRAITS = 10;
+#else
+    const unsigned MAX_FITNESS_TRAITS = GINKGO_NUM_TRAITS;
+#endif
 
 //! The number of neutral diploid loci to track
 #if ! defined GINKGO_NUM_LOCI
-    const unsigned NUM_NEUTRAL_DIPLOID_loci = 1;
+    const unsigned NUM_NEUTRAL_DIPLOID_loci = 10;
 #else
     const unsigned NUM_NEUTRAL_DIPLOID_loci = GINKGO_NUM_LOCI;
 #endif
