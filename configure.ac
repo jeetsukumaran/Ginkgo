@@ -113,7 +113,9 @@ AC_ARG_WITH(
 	[
 	NUM_NEUTRAL_LOCI="$withval"
 	])
-
+AC_MSG_NOTICE([
+           *** NOTE: Tracking $withval neutral diploid loci
+   ])
 AC_SUBST([NUM_NEUTRAL_LOCI])
 
 NUM_FITNESS_TRAITS="10"
@@ -126,6 +128,9 @@ AC_ARG_WITH(
 	[
 	NUM_FITNESS_TRAITS="$withval"
 	])
+AC_MSG_NOTICE([
+           *** NOTE: Tracking $withval fitness traits
+   ])
 AC_SUBST([NUM_FITNESS_TRAITS])
 
 # program name decorator
@@ -135,7 +140,7 @@ AC_ARG_WITH([label],
 	AC_HELP_STRING([--with-label],[decorate program name with label]), , [with_label=""])
 if test -n "$with_label"; then
 	AC_MSG_NOTICE([
-	   *** NOTE: adding "$with_label" to program name
+	       *** NOTE: adding "$with_label" to program name
 	   ])
    PROGRAMLABEL="${with_label}"
 fi
