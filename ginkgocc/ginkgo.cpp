@@ -51,6 +51,9 @@ std::string get_program_identification() {
 #else
     s << " (" << __DATE__ << ")";
 #endif
+    s << "\n";
+    s << "[Tracking: " << ginkgo::NUM_NEUTRAL_DIPLOID_loci << " neutral diploid locii";
+    s << ", " << ginkgo::MAX_FITNESS_TRAITS << " fitness traits]";
     return  s.str();
 }
 
