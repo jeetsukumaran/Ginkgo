@@ -144,11 +144,9 @@ if test -n "$with_label"; then
 	   ])
    PROGRAMLABEL="${with_label}"
 fi
-if test "$NUM_NEUTRAL_LOCI" -ne 10; then
+if test "$NUM_NEUTRAL_LOCI" -ne 10 -o "$NUM_FITNESS_TRAITS" -ne 10; then
     PROGRAMLABEL="${PROGRAMLABEL}-L${NUM_NEUTRAL_LOCI}"
-fi
-if test "$NUM_FITNESS_TRAITS" -ne 10; then
-    PROGRAMLABEL="${PROGRAMLABEL}-F${NUM_FITNESS_TRAITS}"
+    #PROGRAMLABEL="${PROGRAMLABEL}-F${NUM_FITNESS_TRAITS}"
 fi
 AC_SUBST(PROGRAMLABEL)
 
