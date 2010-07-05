@@ -103,6 +103,18 @@ fi
 
 # program name decorator
 
+NUM_NEUTRAL_LOCI="1"
+AC_ARG_WITH(
+	[num-loci],
+	AC_HELP_STRING(
+		[--with-num-loci=#],
+		[Specify the number of neutral diploid loci tracked]
+		),
+	[
+	NUM_NEUTRAL_LOCI="$withval"
+	])
+AC_SUBST([NUM_NEUTRAL_LOCI])
+
 PROGRAMLABEL=""
 AC_ARG_WITH([label],
 	AC_HELP_STRING([--with-label],[decorate program name with label]), , [with_label=""])
@@ -112,7 +124,9 @@ if test -n "$with_label"; then
 	   ])
    PROGRAMLABEL="${with_label}"
 fi
+PROGRAMLABEL="${PROGRAMLABEL}loci${NUM_NEUTRAL_LOCI}"
 AC_SUBST(PROGRAMLABEL)
+
 
 # Initialize optimization flag in case it doesn't get set below.
 CXXFLAGS_OPTIM_SPEED="-O"

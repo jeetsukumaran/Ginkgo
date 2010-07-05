@@ -40,7 +40,11 @@ const unsigned long ORGANISM_MEMORY_MANAGER_DEFAULT_BLOCK_SIZE = 1000;
 const unsigned MAX_FITNESS_TRAITS = 10;
 
 //! The number of neutral diploid loci to track
-const unsigned NUM_NEUTRAL_DIPLOID_loci = 10;
+#if ! defined GINKGO_NUM_LOCI
+    const unsigned NUM_NEUTRAL_DIPLOID_loci = 1;
+#else
+    const unsigned NUM_NEUTRAL_DIPLOID_loci = GINKGO_NUM_LOCI;
+#endif
 
 //! The value type of a fitness factor (both environmental and genotypic.
 typedef float                   FitnessTraitType;
