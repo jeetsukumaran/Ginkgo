@@ -114,7 +114,7 @@ AC_ARG_WITH(
 	NUM_NEUTRAL_LOCI="$withval"
 	])
 AC_MSG_NOTICE([
-           *** NOTE: Tracking $withval neutral diploid loci
+           *** NOTE: Tracking $NUM_NEUTRAL_LOCI neutral diploid loci
    ])
 AC_SUBST([NUM_NEUTRAL_LOCI])
 
@@ -129,7 +129,7 @@ AC_ARG_WITH(
 	NUM_FITNESS_TRAITS="$withval"
 	])
 AC_MSG_NOTICE([
-           *** NOTE: Tracking $withval fitness traits
+           *** NOTE: Tracking $NUM_FITNESS_TRAITS fitness traits
    ])
 AC_SUBST([NUM_FITNESS_TRAITS])
 
