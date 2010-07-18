@@ -267,18 +267,49 @@ class Landscape {
         CellIndexType random_neighbor(CellIndexType i) {
             static long x = 0;
             static long y = 0;
-            x = this->index_to_x(i) + this->rng_.uniform_int(-1, 1); // to reflect: % this->size_x_;
-            y = this->index_to_y(i) + this->rng_.uniform_int(-1, 1); // to reflect: % this->size_y_;
-            if (x < 0) {
-                x = 0;
-            } else if (static_cast<CellIndexType>(x) > this->max_x_) {
-                x = this->max_x_;
+            CellIndexType current_x = this->index_to_x(i) ;
+            CellIndexType current_y = this->index_to_y(i) ;
+
+            ///////////////////////////////////////////////////////////////////
+            // repeat till valid cell found
+            // bool invalid = true;
+            // while (invalid) {
+            //     x = current_x + this->rng_.uniform_int(-1, 1); // to reflect: % this->size_x_;
+            //     y = current_y + this->rng_.uniform_int(-1, 1); // to reflect: % this->size_y_;
+            //     if (x >= 0
+            //             && static_cast<CellIndexType>(x) <= this->max_x_
+            //             && y >= 0
+            //             && static_cast<CellIndexType>(y) <= this->max_y_) {
+            //         invalid = false;
+            //     }
+            // }
+
+            x = current_x + this->rng_.uniform_int(-1, 1); // to reflect: % this->size_x_;
+            y = current_y + this->rng_.uniform_int(-1, 1); // to reflect: % this->size_y_;
+
+            ///////////////////////////////////////////////////////////////////
+            //  "bounce" back to originating cell if out-of-bounds
+            if (x < 0
+                    || static_cast<CellIndexType>(x) > this->max_x_
+                    || y < 0
+                    || static_cast<CellIndexType>(y) > this->max_y_) {
+                return i;
             }
-            if (y < 0) {
-                y = 0;
-            } else if (static_cast<CellIndexType>(y) > this->max_y_) {
-                y = this->max_y_;
-            }
+
+            ///////////////////////////////////////////////////////////////////
+            //  "bounce" along individual axis if out-of-bounds on that axis
+            // -- out-of-bounds cell results in "bouncing" back along invalid axis or axes --
+            // if (x < 0) {
+            //     x = 0;
+            // } else if (static_cast<CellIndexType>(x) > this->max_x_) {
+            //     x = this->max_x_;
+            // }
+            // if (y < 0) {
+            //     y = 0;
+            // } else if (static_cast<CellIndexType>(y) > this->max_y_) {
+            //     y = this->max_y_;
+            // }
+
             CellIndexType k = this->xy_to_index(x, y);
             assert(k <= this->max_size_);
             return k;
