@@ -298,15 +298,15 @@ void ConfigurationFile::parse_dispersals(World& world) {
                     this->get_attribute<CellIndexType>(disp_node, "to_y"),
                     world,
                     item_desc.str().c_str());
-            disp_event.probability = this->get_child_node_scalar<float>(disp_node, "probability", 1.0);
-            std::string lineage_id = this->get_child_node_scalar<std::string>(disp_node, "lineage", "");
+            disp_event.probability = this->get_attribute<float>(disp_node, "probability", 1.0);
+            std::string lineage_id = this->get_attribute<std::string>(disp_node, "lineage", "");
             if (lineage_id.size() > 0) {
                 if (!world.has_species(lineage_id)) {
                     throw ConfigurationError("dispersal: lineage \"" + lineage_id + "\" not defined");
                 }
                 disp_event.species_ptr = world.species_registry()[lineage_id];
             } else {
-                disp_event.species_ptr = NULL;
+                throw ConfigurationError("dispersal: lineage not given");
             }
             world.add_dispersal_event(gen, disp_event);
         }
