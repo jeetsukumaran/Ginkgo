@@ -158,6 +158,21 @@ void Cell::migration() {
     }
 }
 
+void Cell::dispersal(Species *sp, float prob, CellIndexType dest) {
+        BreedingPopulation& current_pop = this->populations_[sp];
+        BreedingPopulation remaining_pop;
+        for (BreedingPopulation::iterator oi = current_pop.begin(); oi != current_pop.end(); ++oi) {
+            Organism * og_ptr = *oi;
+            float u = this->rng_.uniform_01();
+            if (u < prob) {
+                this->landscape_.add_migrant(og_ptr, dest);
+            } else {
+                remaining_pop.add(og_ptr);
+            }
+        }
+        this->populations_[sp] = remaining_pop;
+}
+
 PopulationCountType Cell::survival() {
     PopulationCountType num_survivors = 0;
     for (SpeciesRegistry::const_iterator spi = this->species_registry_.begin();

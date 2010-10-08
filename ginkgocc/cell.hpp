@@ -240,6 +240,11 @@ class Cell {
         void migration();
 
         /**
+         * Stochastic jump dispersal.
+         */
+        void dispersal(Species *sp, float prob, CellIndexType dest);
+
+        /**
          * Each organism in this cell is tested for survival given the
          * environment of the current cell, with the probability of survival
          * proportional to the fitness score of the organism.
