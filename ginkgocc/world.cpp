@@ -331,7 +331,7 @@ void World::run_main_cycles() {
         this->process_environment_settings();
 
         // process dispersal events
-        // this->process_dispersal_events();
+        this->process_dispersal_events();
 
         // run the life cycle
         if ( this->current_generation_ % this->log_frequency_ == 0) {
