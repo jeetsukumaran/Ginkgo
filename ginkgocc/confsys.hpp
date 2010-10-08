@@ -255,7 +255,7 @@ class ConfigurationFile {
         void parse_lineage(XmlElementType& lnode, World& world);
         void parse_initialization(World& world);
         void parse_environments(World& world);
-//        void parse_dispersals(World& world);
+        void parse_dispersals(World& world);
         void parse_samplings(World& world);
 
         EnvironmentSettings parse_environment_settings(World& world, const XmlElementType& env_node);
