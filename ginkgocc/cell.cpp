@@ -123,7 +123,7 @@ void Cell::reproduction(bool evolve_fitness_components) {
 
 }
 
-void Cell::migration() {
+void Cell::diffusion_dispersal() {
     for (SpeciesRegistry::const_iterator spi = this->species_registry_.begin();
             spi != this->species_registry_.end();
             ++spi) {
@@ -158,7 +158,7 @@ void Cell::migration() {
     }
 }
 
-void Cell::dispersal(Species *sp, float prob, CellIndexType dest) {
+void Cell::jump_dispersal(Species *sp, float prob, CellIndexType dest) {
         BreedingPopulation& current_pop = this->populations_[sp];
         BreedingPopulation remaining_pop;
         for (BreedingPopulation::iterator oi = current_pop.begin(); oi != current_pop.end(); ++oi) {

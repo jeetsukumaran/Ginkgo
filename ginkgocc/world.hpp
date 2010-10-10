@@ -55,45 +55,25 @@ class WorldIOError : public std::runtime_error {
 ///////////////////////////////////////////////////////////////////////////////
 
 ///////////////////////////////////////////////////////////////////////////////
-// Supporting Data
+// RecurringAction
 
+class RecurringAction {
 
-
-// [to be removed -------------------]
-
-/**
- * Seed colonies.
- */
-struct SeedPopulation {
     public:
-        CellIndexType       cell_index;
-        Species *           species_ptr;
-        PopulationCountType pop_size;
-        PopulationCountType ancestral_pop_size;
-        GenerationCountType ancestral_generations;
-    public:
-        SeedPopulation()
-            : cell_index(0),
-              species_ptr(NULL),
-              pop_size(0),
-              ancestral_pop_size(0),
-              ancestral_generations(0) { }
+        RecurringAction(GenerationCountType start_gen, GenerationCountType end_gen);
+        bool is_active(GenerationCountType current_gen);
 
-        SeedPopulation(CellIndexType cell_index,
-            Species * species_ptr,
-            PopulationCountType pop_size,
-            PopulationCountType ancestral_pop_size,
-            GenerationCountType ancestral_generations)
-            : cell_index(cell_index),
-              species_ptr(species_ptr),
-              pop_size(pop_size),
-              ancestral_pop_size(ancestral_pop_size),
-              ancestral_generations(ancestral_generations) { }
+    private:
+        GenerationCountType     start_gen_;
+        GenerationCountType     end_gen_;
+
 };
 
-// [to be removed ----------------------]
+// RecurringAction
+///////////////////////////////////////////////////////////////////////////////
 
-
+///////////////////////////////////////////////////////////////////////////////
+// supporting data
 
 /**
  * Sampling regime, tracking the number of organisms and list of cells to
@@ -751,7 +731,7 @@ class World {
         /** Collection of occurrence description directives (key = generation #). */
         std::multimap<GenerationCountType, Species *> occurrence_samples_;
         /** Collection of seed population directives. */
-        std::vector<SeedPopulation>             seed_populations_;
+        // std::vector<SeedPopulation>             seed_populations_;
         /** Track output filenames, so as to prevent clashes. */
         std::set<std::string>                   output_filenames_;
 

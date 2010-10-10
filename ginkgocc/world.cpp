@@ -40,6 +40,26 @@
 using namespace ginkgo;
 
 ///////////////////////////////////////////////////////////////////////////////
+// RecurringAction
+
+RecurringAction::RecurringAction(GenerationCountType start_gen, GenerationCountType end_gen)
+        : start_gen_(start_gen),
+          end_gen_(end_gen) {
+}
+
+bool RecurringAction::is_active(GenerationCountType current_gen) {
+    return (current_gen >= this->start_gen_) && (current_gen <= this->end_gen_);
+}
+
+// RecurringAction
+///////////////////////////////////////////////////////////////////////////////
+
+///////////////////////////////////////////////////////////////////////////////
+// Dispersal
+// RecurringAction
+///////////////////////////////////////////////////////////////////////////////
+
+///////////////////////////////////////////////////////////////////////////////
 // World
 
 // lifecycle ##################################################################
@@ -374,7 +394,7 @@ void World::run_life_cycle() {
 
     for (CellIndexType i = 0; i < this->landscape_.size(); ++i) {
         this->landscape_[i].reproduction();
-        this->landscape_[i].migration();
+        this->landscape_[i].diffusion_dispersal();
     }
 
     //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -451,7 +471,7 @@ void World::process_dispersal_events() {
     for (gen_disp_t::iterator di = this_gen_dispersals.first; di != this_gen_dispersals.second; ++di) {
         DispersalEvent& de = di->second;
         for (CellIndexType i = 0; i < this->landscape_.size(); ++i) {
-            this->landscape_[i].dispersal(de.species_ptr, de.probability, de.destination);
+            this->landscape_[i].jump_dispersal(de.species_ptr, de.probability, de.destination);
         }
         // std::ostringstream msg;
         // msg << "[Generation " << this->current_generation_ << "] Dispersal";

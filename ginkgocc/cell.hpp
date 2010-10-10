@@ -237,12 +237,12 @@ class Cell {
          * copied to landscape-wide container for insertion into destination
          * cells.
          */
-        void migration();
+        void diffusion_dispersal();
 
         /**
          * Stochastic jump dispersal.
          */
-        void dispersal(Species *sp, float prob, CellIndexType dest);
+        void jump_dispersal(Species *sp, float prob, CellIndexType dest);
 
         /**
          * Each organism in this cell is tested for survival given the
