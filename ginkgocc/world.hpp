@@ -62,14 +62,80 @@ class RecurringAction {
     public:
         RecurringAction(GenerationCountType start_gen, GenerationCountType end_gen);
         bool is_active(GenerationCountType current_gen);
+        GenerationCountType get_start_gen() {
+            return this->start_gen_;
+        }
+        void set_start_gen(GenerationCountType gen) {
+            this->start_gen_ = gen;
+        }
+        GenerationCountType get_end_gen() {
+            return this->end_gen_;
+        }
+        void set_end_gen(GenerationCountType gen) {
+            this->end_gen_ = gen;
+        }
 
     private:
         GenerationCountType     start_gen_;
         GenerationCountType     end_gen_;
-
 };
 
 // RecurringAction
+///////////////////////////////////////////////////////////////////////////////
+
+///////////////////////////////////////////////////////////////////////////////
+// JumpDispersalRegime
+
+class JumpDispersalRegime : public RecurringAction {
+
+    public:
+        JumpDispersalRegime(GenerationCountType start_gen,
+                GenerationCountType end_gen,
+                Species * sp_ptr,
+                float probability,
+                CellIndexType src_cell,
+                CellIndexType dest_cell);
+
+        Species *  get_species_ptr() {
+            return this->species_ptr_;
+        }
+        void set_species_ptr(Species *  sp_ptr) {
+            this->species_ptr_ = sp_ptr;
+        }
+
+        float get_probability() {
+            return this->probability_;
+        }
+        void set_probability(float prob) {
+            this->probability_ = prob;
+        }
+
+        CellIndexType get_src_cell() {
+            return this->src_cell_;
+        }
+        void set_src_cell(CellIndexType cell_idx) {
+            this->src_cell_ = cell_idx;
+        }
+
+        CellIndexType get_dest_cell() {
+            return this->dest_cell_;
+        }
+        void set_dest_cell(CellIndexType cell_idx) {
+            this->dest_cell_ = cell_idx;
+        }
+
+    private:
+        /** Pointer to species. */
+        Species *                   species_ptr_;
+        /** Probability of dispersal. */
+        float                       probability_;
+        /** Origin cell index. */
+        CellIndexType               src_cell_;
+        /** Destination cell index. */
+        CellIndexType               dest_cell_;
+};
+
+// JumpDispersalRegime
 ///////////////////////////////////////////////////////////////////////////////
 
 ///////////////////////////////////////////////////////////////////////////////

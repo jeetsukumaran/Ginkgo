@@ -55,8 +55,22 @@ bool RecurringAction::is_active(GenerationCountType current_gen) {
 ///////////////////////////////////////////////////////////////////////////////
 
 ///////////////////////////////////////////////////////////////////////////////
-// Dispersal
-// RecurringAction
+// JumpDispersalRegime
+
+JumpDispersalRegime::JumpDispersalRegime(GenerationCountType start_gen,
+        GenerationCountType end_gen,
+        Species * sp_ptr,
+        float probability,
+        CellIndexType src_cell,
+        CellIndexType dest_cell)
+    : RecurringAction(start_gen, end_gen),
+      species_ptr_(sp_ptr),
+      probability_(probability),
+      src_cell_(src_cell),
+      dest_cell_(dest_cell) {
+}
+
+// JumpDispersalRegime
 ///////////////////////////////////////////////////////////////////////////////
 
 ///////////////////////////////////////////////////////////////////////////////
