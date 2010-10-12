@@ -61,13 +61,17 @@ class RecurringAction {
 
     public:
         RecurringAction(GenerationCountType start_gen, GenerationCountType end_gen);
+
         bool is_active(GenerationCountType current_gen);
+        bool is_completed(GenerationCountType current_gen);
+
         GenerationCountType get_start_gen() {
             return this->start_gen_;
         }
         void set_start_gen(GenerationCountType gen) {
             this->start_gen_ = gen;
         }
+
         GenerationCountType get_end_gen() {
             return this->end_gen_;
         }
@@ -311,13 +315,12 @@ class World {
         void add_environment_settings(GenerationCountType generation, const EnvironmentSettings& environment_settings);
 
         /**
-         * Add a dispersal event.
+         * Add a jump dispersal regime.
          *
-         * @param   generation      generation number for this set of events
-         *                          to be activated
-         * @param   dispersal_event descripion of event
+         * @param   jump_dispersal  a JumpDispersalRegime object describing
+         *                          the regime.
          */
-        void add_dispersal_event(GenerationCountType generation, const DispersalEvent& dispersal_event);
+        void add_jump_dispersal_regime(const JumpDispersalRegime& jump_dispersal);
 
         /**
          * Add a directive to sample organisms and save a tree.
@@ -391,11 +394,6 @@ class World {
          * Configure world according to given environment.
          */
         void set_world_environment(EnvironmentSettings& env, const char * log_leader);
-
-        /**
-         * Process dispersal events for the current generation.
-         */
-        void process_dispersal_events();
 
         /**
          * Process tree building directives for the current generation.
@@ -790,8 +788,8 @@ class World {
         InitializationRegime                    initialization_regime_;
         /** Collection of events (key = generation #). */
         std::map<GenerationCountType, EnvironmentSettings>  environment_settings_;
-        /** Collection of dispersal events (key = generation #). */
-        std::multimap<GenerationCountType, DispersalEvent>  dispersal_events_;
+        /** Collection of jump dispersal regimes */
+        std::list<JumpDispersalRegime>          jump_dispersal_regimes_;
         /** Collection of tree building directives (key = generation #). */
         std::multimap<GenerationCountType, SamplingRegime> tree_samples_;
         /** Collection of occurrence description directives (key = generation #). */

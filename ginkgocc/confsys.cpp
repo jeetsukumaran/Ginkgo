@@ -282,33 +282,38 @@ void ConfigurationFile::parse_environments(World& world) {
 }
 
 void ConfigurationFile::parse_dispersals(World& world) {
-    XmlElementType dispersals = this->ginkgo_root_.getChildNode("dispersals");
+    XmlElementType dispersals = this->ginkgo_root_.getChildNode("jump-dispersals");
     if (!dispersals.isEmpty()) {
-        for (int i = 0; i < dispersals.nChildNode("dispersal"); ++i) {
-            XmlElementType disp_node = dispersals.getChildNode("dispersal", i);
-            GenerationCountType gen = this->get_attribute<GenerationCountType>(disp_node, "gen");
-            DispersalEvent disp_event;
+        for (int i = 0; i < dispersals.nChildNode("jump-dispersal"); ++i) {
+            XmlElementType disp_node = dispersals.getChildNode("jump-dispersal", i);
+            GenerationCountType start_gen = this->get_attribute<GenerationCountType>(disp_node, "start_gen");
+            GenerationCountType end_gen = this->get_attribute<GenerationCountType>(disp_node, "end_gen");
+
             std::ostringstream item_desc;
-            item_desc << "dispersal event " << i+1 << " in generation " << gen;
-            disp_event.source = this->get_validated_cell_index(this->get_attribute<CellIndexType>(disp_node, "from_x"),
+            item_desc << "jump-dispersal regime " << i+1 << ", from generations " << start_gen << " to " << end_gen;
+            CellIndexType src_cell = this->get_validated_cell_index(this->get_attribute<CellIndexType>(disp_node, "from_x"),
                     this->get_attribute<CellIndexType>(disp_node, "from_y"),
                     world,
                     item_desc.str().c_str());
-            disp_event.destination = this->get_validated_cell_index(this->get_attribute<CellIndexType>(disp_node, "to_x"),
+            CellIndexType dest_cell = this->get_validated_cell_index(this->get_attribute<CellIndexType>(disp_node, "to_x"),
                     this->get_attribute<CellIndexType>(disp_node, "to_y"),
                     world,
                     item_desc.str().c_str());
-            disp_event.probability = this->get_attribute<float>(disp_node, "probability", 1.0);
+
+            float probability = this->get_attribute<float>(disp_node, "probability", 1.0);
             std::string lineage_id = this->get_attribute<std::string>(disp_node, "lineage", "");
+            Species * species_ptr;
             if (lineage_id.size() > 0) {
                 if (!world.has_species(lineage_id)) {
-                    throw ConfigurationError("dispersal: lineage \"" + lineage_id + "\" not defined");
+                    throw ConfigurationError("jump-dispersal: lineage \"" + lineage_id + "\" not defined");
                 }
-                disp_event.species_ptr = world.species_registry()[lineage_id];
+                species_ptr = world.species_registry()[lineage_id];
             } else {
-                throw ConfigurationError("dispersal: lineage not given");
+                throw ConfigurationError("jump-dispersal: lineage not given");
             }
-            world.add_dispersal_event(gen, disp_event);
+
+            JumpDispersalRegime jdr(start_gen, end_gen, species_ptr, probability, src_cell, dest_cell);
+            world.add_jump_dispersal_regime(jdr);
         }
     }
 }

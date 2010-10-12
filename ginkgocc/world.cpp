@@ -51,6 +51,10 @@ bool RecurringAction::is_active(GenerationCountType current_gen) {
     return (current_gen >= this->start_gen_) && (current_gen <= this->end_gen_);
 }
 
+bool RecurringAction::is_completed(GenerationCountType current_gen) {
+    return current_gen > this->end_gen_;
+}
+
 // RecurringAction
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -163,10 +167,9 @@ void World::add_environment_settings(GenerationCountType generation, const Envir
     this->environment_settings_[generation] = environment_settings;
 }
 
-void World::add_dispersal_event(GenerationCountType generation, const DispersalEvent& dispersal_event) {
-    this->dispersal_events_.insert(std::make_pair(generation, dispersal_event));
+void World::add_jump_dispersal_regime(const JumpDispersalRegime& jump_dispersal) {
+    this->jump_dispersal_regimes_.push_back(jump_dispersal);
 }
-
 
 void World::add_tree_sampling(GenerationCountType generation, const SamplingRegime& sampling_regime) {
     this->tree_samples_.insert(std::make_pair(generation, sampling_regime));
@@ -175,14 +178,6 @@ void World::add_tree_sampling(GenerationCountType generation, const SamplingRegi
 void World::add_occurrence_sampling(GenerationCountType generation, Species * species_ptr) {
     this->occurrence_samples_.insert(std::make_pair(generation, species_ptr));
 }
-
-//void World::add_seed_population(CellIndexType cell_index,
-//        Species * species_ptr,
-//        PopulationCountType pop_size,
-//        PopulationCountType ancestral_pop_size,
-//        GenerationCountType ancestral_generations) {
-//    this->seed_populations_.push_back( SeedPopulation(cell_index, species_ptr, pop_size, ancestral_pop_size, ancestral_generations) );
-//}
 
 void World::set_initialization_regime(const InitializationRegime& initialization_regime) {
     this->initialization_regime_ = initialization_regime;
@@ -410,14 +405,18 @@ void World::run_life_cycle() {
         this->landscape_[i].reproduction();
         this->landscape_[i].diffusion_dispersal();
     }
-
-    //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    //!! TODO! SHOULD THIS GO HERE?????
-    //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    this->process_dispersal_events();
-
+    for (std::list<JumpDispersalRegime>::iterator jdi = this->jump_dispersal_regimes_.begin();
+            jdi != this->jump_dispersal_regimes_.end();
+            ++jdi)  {
+        if (jdi->is_completed(this->current_generation_)) {
+            this->jump_dispersal_regimes_.erase(jdi++);
+        } else {
+            this->landscape_[jdi->get_src_cell()].jump_dispersal(jdi->get_species_ptr(),
+                    jdi->get_probability(),
+                    jdi->get_dest_cell());
+            ++jdi;
+        }
+    }
     this->landscape_.process_migrants();
     for (CellIndexType i = 0; i < this->landscape_.size(); ++i) {
         this->landscape_[i].survival();
@@ -476,48 +475,6 @@ void World::set_world_environment(EnvironmentSettings& env, const char * log_lea
 //            mi->first->set_movement_probabilities(grid.get_cell_values());
 //        }
 //    }
-}
-
-void World::process_dispersal_events() {
-    typedef std::multimap<GenerationCountType, DispersalEvent> gen_disp_t;
-    typedef std::pair<gen_disp_t::iterator, gen_disp_t::iterator> gen_disp_iter_pair_t;
-    gen_disp_iter_pair_t this_gen_dispersals = this->dispersal_events_.equal_range(this->current_generation_);
-    for (gen_disp_t::iterator di = this_gen_dispersals.first; di != this_gen_dispersals.second; ++di) {
-        DispersalEvent& de = di->second;
-        for (CellIndexType i = 0; i < this->landscape_.size(); ++i) {
-            this->landscape_[i].jump_dispersal(de.species_ptr, de.probability, de.destination);
-        }
-        // std::ostringstream msg;
-        // msg << "[Generation " << this->current_generation_ << "] Dispersal";
-        // assert(de.species_ptr);
-        // msg << " of " << de.species_ptr->get_label();
-        // msg << " from (" << this->landscape_.index_to_x(de.source) << "," << this->landscape_.index_to_y(de.source) << ")";
-        // msg << " to (" << this->landscape_.index_to_x(de.destination) << "," << this->landscape_.index_to_y(de.destination) << ")";
-        // msg << " with probability " << de.probability << ": ";
-
-        // std::vector<const Organism *> organisms;
-        // this->landscape_[de.source].sample_organisms(de.species_ptr, organisms, de.num_organisms);
-        // this->landscape_.clear_migrants();
-        // unsigned long num_males = 0;
-        // unsigned long num_females = 0;
-        // for (std::vector<const Organism *>::iterator oi = organisms.begin();  oi != organisms.end(); ++oi) {
-        //     float u = this->rng().uniform_01();
-        //     if (u < de.probability) {
-        //         Organism* og = const_cast<Organism*>(*oi);
-        //         if (og->is_male()) {
-        //             ++num_males;
-        //         } else {
-        //             ++num_females;
-        //         }
-        //         this->landscape_.add_migrant(og, de.destination);
-        //         og->set_expired();
-        //     }
-        // }
-        // msg << " " << num_females << " females and " << num_males << " males.";
-        // this->landscape_[de.source].purge_expired_organisms();
-        // // this->landscape_.process_migrants();
-        // this->logger_.info(msg.str());
-    }
 }
 
 void World::process_tree_samplings() {
@@ -956,19 +913,17 @@ void World::log_configuration() {
     }
 
    out << std::endl;
-   out << "*** DISPERSALS ***" << std::endl;
-   out << "(" << this->dispersal_events_.size() << " dispersal events specified)" << std::endl;
-   out << std::endl;
-   for (std::map<GenerationCountType, DispersalEvent>::iterator di = this->dispersal_events_.begin(); di != this->dispersal_events_.end(); ++di) {
-       DispersalEvent& de = di->second;
-       out << "    GENERATION " << di->first << ": " << "Dispersal";
-       if (de.species_ptr != NULL) {
-           out << " of " << de.species_ptr->get_label();
-       }
-       out << " from (" << this->landscape_.index_to_x(de.source) << "," << this->landscape_.index_to_y(de.source) << ")";
-       out << " to (" << this->landscape_.index_to_x(de.destination) << "," << this->landscape_.index_to_y(de.destination) << ")";
-       out << " with probability " << de.probability << "." << std::endl;
-   }
+   out << "*** JUMP DISPERSALS ***" << std::endl;
+
+    for (std::list<JumpDispersalRegime>::iterator jdi = this->jump_dispersal_regimes_.begin();
+            jdi != this->jump_dispersal_regimes_.end();
+            ++jdi)  {
+        out << "Generations " << jdi->get_start_gen() << " to " << jdi->get_end_gen() << ": ";
+        out << "dispersal of " << jdi->get_species_ptr()->get_label() << " ";
+        out << " from (" << this->landscape_.index_to_x(jdi->get_src_cell()) << "," << this->landscape_.index_to_y(jdi->get_src_cell()) << ")";
+        out << " to (" << this->landscape_.index_to_x(jdi->get_dest_cell()) << "," << this->landscape_.index_to_y(jdi->get_dest_cell()) << ")";
+        out << " with probability " << jdi->get_probability() << "." << std::endl;
+    }
 
     out << std::endl;
     out << "*** OCCURRENCE SAMPLES ***";
