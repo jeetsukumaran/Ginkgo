@@ -109,7 +109,7 @@ void ConfigurationFile::configure(World& world) {
     this->parse_lineages(world);
     this->parse_initialization(world);
     this->parse_environments(world);
-    this->parse_dispersals(world);
+    this->parse_jump_dispersals(world);
     this->parse_samplings(world);
 }
 
@@ -281,7 +281,7 @@ void ConfigurationFile::parse_environments(World& world) {
     }
 }
 
-void ConfigurationFile::parse_dispersals(World& world) {
+void ConfigurationFile::parse_jump_dispersals(World& world) {
     XmlElementType dispersals = this->ginkgo_root_.getChildNode("jump-dispersals");
     if (!dispersals.isEmpty()) {
         for (int i = 0; i < dispersals.nChildNode("jump-dispersal"); ++i) {

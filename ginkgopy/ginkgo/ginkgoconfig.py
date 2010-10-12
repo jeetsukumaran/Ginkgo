@@ -43,6 +43,7 @@ class GinkgoConfiguration(object):
         self.initialization_regime = kwargs.get("initialization_regime", None)
         self.environments = kwargs.get("environments", [])
         self.samples = kwargs.get("samples", [])
+        self.jump_dispersal_regimes = kwargs.get("jump_dispersal_regime", None)
 
     def __str__(self):
         s = StringIO()
@@ -77,6 +78,11 @@ class GinkgoConfiguration(object):
             for environment in self.environments:
                 s.write(str(environment))
             s.write('%s</environments>\n' % sub_indent)
+        if self.jump_dispersal_regimes:
+            s.write('%s<jump-dispersals>\n' % sub_indent)
+            for jump_dispersal_regime in self.jump_dispersal_regimes:
+                s.write(str(jump_dispersal_regime))
+            s.write('%s</jump-dispersals>\n' % sub_indent)
         if self.samples:
             s.write('%s<samples>\n' % sub_indent)
             for sample in self.samples:
@@ -294,6 +300,29 @@ class InitializationRegime(object):
         parts.append('%s</populations>' % (sub_indent))
         parts.append("%s</initialization>\n" % top_indent)
         return "\n".join(parts)
+
+class JumpDispersalRegime(object):
+
+    def __init__(self, start_gen, end_gen, lineage_id, probability, from_cell, to_cell, **kwargs):
+        self.start_gen = start_gen
+        self.end_gen = end_gen
+        self.lineage_id = lineage_id
+        self.probability = probability
+        if isinstance(from_cell, list):
+            self.from_cell_x, self.from_cell_y = from_cell
+        else:
+            raise Exception("Expecting tuple of (x,y) values for 'from_cell'")
+        if isinstance(to_cell, list):
+            self.to_cell_x, self.to_cell_y = to_cell
+        else:
+            raise Exception("Expecting tuple of (x,y) values for 'to_cell'")
+        self.indent_level = kwargs.get('indent_level', 2)
+
+    def __str__(self):
+        top_indent = (self.indent_level * INDENT_SIZE) * ' '
+        return '<jump-dispersal start_gen="%s" end_gen="%s" lineage="%s" probability="%s" from_x="%s" from_y="%s" to_x="%s" to_y="%s" />' \
+                % (self.start_gen, self.end_gen, self.lineage_id, self.probability,
+                   self.from_x, self.from_y, self.to_x, self.to_y)
 
 class Sample(object):
 
