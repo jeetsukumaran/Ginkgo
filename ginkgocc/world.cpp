@@ -407,16 +407,16 @@ void World::run_life_cycle() {
     }
     for (std::list<JumpDispersalRegime>::iterator jdi = this->jump_dispersal_regimes_.begin(); \
             jdi != this->jump_dispersal_regimes_.end();) {
-        // if (jdi->is_completed(this->current_generation_)) {
-        //     this->jump_dispersal_regimes_.erase(jdi++);
-        // } else {
+        if (jdi->is_completed(this->current_generation_)) {
+            jdi = this->jump_dispersal_regimes_.erase(jdi);
+        } else {
             if (jdi->is_active(this->current_generation_)) {
                 this->landscape_[jdi->get_src_cell()].jump_dispersal(jdi->get_species_ptr(), \
                         jdi->get_probability(), \
                         jdi->get_dest_cell());
             }
             ++jdi;
-        // }
+        }
     }
     this->landscape_.process_migrants();
     for (CellIndexType i = 0; i < this->landscape_.size(); ++i) {
