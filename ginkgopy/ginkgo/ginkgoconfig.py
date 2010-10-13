@@ -320,8 +320,8 @@ class JumpDispersalRegime(object):
 
     def __str__(self):
         top_indent = (self.indent_level * INDENT_SIZE) * ' '
-        return '<jump-dispersal start_gen="%s" end_gen="%s" lineage="%s" probability="%s" from_x="%s" from_y="%s" to_x="%s" to_y="%s" />' \
-                % (self.start_gen, self.end_gen, self.lineage_id, self.probability,
+        return '%s<jump-dispersal start_gen="%s" end_gen="%s" lineage="%s" probability="%s" from_x="%s" from_y="%s" to_x="%s" to_y="%s" />\n' \
+                % (top_indent, self.start_gen, self.end_gen, self.lineage_id, self.probability,
                    self.from_x, self.from_y, self.to_x, self.to_y)
 
 class Sample(object):
