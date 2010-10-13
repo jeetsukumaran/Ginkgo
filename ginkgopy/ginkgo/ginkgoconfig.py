@@ -43,7 +43,7 @@ class GinkgoConfiguration(object):
         self.initialization_regime = kwargs.get("initialization_regime", None)
         self.environments = kwargs.get("environments", [])
         self.samples = kwargs.get("samples", [])
-        self.jump_dispersal_regimes = kwargs.get("jump_dispersal_regime", None)
+        self.jump_dispersal_regimes = kwargs.get("jump_dispersal_regime", [])
 
     def __str__(self):
         s = StringIO()
@@ -308,14 +308,14 @@ class JumpDispersalRegime(object):
         self.end_gen = end_gen
         self.lineage_id = lineage_id
         self.probability = probability
-        if isinstance(from_cell, list):
-            self.from_cell_x, self.from_cell_y = from_cell
+        if isinstance(from_cell, list) or isinstance(from_cell, tuple):
+            self.from_x, self.from_y = from_cell
         else:
-            raise Exception("Expecting tuple of (x,y) values for 'from_cell'")
-        if isinstance(to_cell, list):
-            self.to_cell_x, self.to_cell_y = to_cell
+            raise Exception("Expecting tuple of (x,y) values for 'from_cell' but found: %s" % type(from_cell))
+        if isinstance(to_cell, list) or isinstance(to_cell, tuple):
+            self.to_x, self.to_y = to_cell
         else:
-            raise Exception("Expecting tuple of (x,y) values for 'to_cell'")
+            raise Exception("Expecting tuple of (x,y) values for 'to_cell' but found: %s" % type(to_cell))
         self.indent_level = kwargs.get('indent_level', 2)
 
     def __str__(self):
