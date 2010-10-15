@@ -63,7 +63,7 @@ class RecurringAction {
         RecurringAction(GenerationCountType start_gen, GenerationCountType end_gen);
 
         bool is_active(GenerationCountType current_gen);
-        bool is_completed(GenerationCountType current_gen);
+        bool is_expired(GenerationCountType current_gen);
 
         GenerationCountType get_start_gen() {
             return this->start_gen_;
@@ -143,7 +143,7 @@ class JumpDispersalRegime : public RecurringAction {
 ///////////////////////////////////////////////////////////////////////////////
 
 ///////////////////////////////////////////////////////////////////////////////
-// JumpDispersalRegime
+// MigrationTrackingRegime
 
 class MigrationTrackingRegime : public RecurringAction {
 
@@ -160,11 +160,12 @@ class MigrationTrackingRegime : public RecurringAction {
         }
 
     private:
-        /** Pointer to species. */
         Species *                   species_ptr_;
+        GenerationCountType         num_gens_counted_;
+
 };
 
-// JumpDispersalRegime
+// MigrationTrackingRegime
 ///////////////////////////////////////////////////////////////////////////////
 
 ///////////////////////////////////////////////////////////////////////////////

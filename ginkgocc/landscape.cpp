@@ -125,6 +125,32 @@ void Landscape::count_organisms(Species * sp_ptr, std::vector<PopulationCountTyp
     }
 }
 
+std::vector<std::vector<float> > Landscape::census_organisms(Species * sp_ptr) const {
+    std::vector<std::vector<float> > landscape_migrant_freqs;
+    landscape_migrant_freqs.reserve(this->cells_.size());
+    for (std::vector<Cell *>::const_iterator ci = this->cells_.begin();
+            ci != this->cells_.end();
+            ++ci) {
+        Cell * cip = *ci;
+        PopulationCountType total_pop_size = cip->num_organisms(sp_ptr);
+        if (total_pop_size == 0) {
+            std::vector<float> cell_migrant_freqs(this->cells_.size(), 0.0);
+            landscape_migrant_freqs.push_back(cell_migrant_freqs);
+        } else {
+            std::vector<float> cell_migrant_freqs;
+            cell_migrant_freqs.reserve(this->cells_.size());
+            PopulationCensus census = (*ci)->get_census(sp_ptr);
+            for (std::vector<Cell *>::const_iterator cj = this->cells_.begin();
+                    cj != this->cells_.end();
+                    ++cj) {
+                // PopulationCountType sub_count = census.get_count(cj->get_index())
+                // cell_migrant_freqs.push_back(static_cast<float>(sub_count)/total_pop_size);
+            }
+        }
+    }
+    return landscape_migrant_freqs;
+}
+
 // --- debug output ---
 
 void Landscape::debug_dump_cell_xy(std::ostream& out) {

@@ -51,7 +51,7 @@ bool RecurringAction::is_active(GenerationCountType current_gen) {
     return (current_gen >= this->start_gen_) && (current_gen <= this->end_gen_);
 }
 
-bool RecurringAction::is_completed(GenerationCountType current_gen) {
+bool RecurringAction::is_expired(GenerationCountType current_gen) {
     return current_gen > this->end_gen_;
 }
 
@@ -81,7 +81,8 @@ MigrationTrackingRegime::MigrationTrackingRegime(GenerationCountType start_gen,
         GenerationCountType end_gen,
         Species * sp_ptr)
     : RecurringAction(start_gen, end_gen),
-      species_ptr_(sp_ptr) {
+      species_ptr_(sp_ptr),
+      num_gens_counted_(0) {
 }
 
 // JumpDispersalRegime
@@ -417,7 +418,7 @@ void World::run_life_cycle() {
     }
     for (std::list<JumpDispersalRegime>::iterator jdi = this->jump_dispersal_regimes_.begin(); \
             jdi != this->jump_dispersal_regimes_.end();) {
-        if (jdi->is_completed(this->current_generation_)) {
+        if (jdi->is_expired(this->current_generation_)) {
             jdi = this->jump_dispersal_regimes_.erase(jdi);
         } else {
             if (jdi->is_active(this->current_generation_)) {

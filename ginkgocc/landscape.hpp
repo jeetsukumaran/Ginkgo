@@ -128,6 +128,23 @@ class Landscape {
          */
         void count_organisms(Species * sp_ptr, std::vector<PopulationCountType>& counts) const;
 
+        /**
+         * Returns a vector of vector of floats representing the proportional
+         * geographical composition of individuals of the given species in each
+         * cell.
+         * The return value is essentially a two-dimensional matrix, M, where
+         * each element M_{ij} represents the proportion of individuals in cell
+         * i that are made up of individuals that originated (in the current
+         * generation) from cell j. The cell-of-origin is inferred from the
+         * geographical coordinate of the first allele of the first diploid
+         * locus of the individual (this value gets set to the current cell of
+         * a new individual produced during reproduction).
+         * @param sp_ptr    pointer to species
+         * @return vector of vector of floats, where element M_{i,j} represents
+         * the proportion of individuals in cell i that originated in cell j.
+         */
+        std::vector<std::vector<float> > census_organisms(Species * sp_ptr) const;
+
         // --- cell access and spatial mapping ---
 
         /**
