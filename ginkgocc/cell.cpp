@@ -314,8 +314,8 @@ PopulationCountType Cell::num_organisms(Species * sp_ptr) const {
     return num_females + num_males;
 }
 
-PopulationCensus Cell::get_census(Species * sp_ptr) {
-    return this->populations_[sp_ptr].get_census();
+OrganismProvenances Cell::get_organism_provenances(Species * sp_ptr) {
+    return this->populations_[sp_ptr].get_organism_provenances();
 }
 
 // Cell

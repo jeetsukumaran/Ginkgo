@@ -59,16 +59,16 @@ void deallocate_and_clear_organisms_(OrganismPointers& organism_ptrs) {
 ///////////////////////////////////////////////////////////////////////////////
 // Census
 
-PopulationCensus::PopulationCensus() { }
+OrganismProvenances::OrganismProvenances() { }
 
-void PopulationCensus::log(const OrganismPointer optr) {
+void OrganismProvenances::log(const OrganismPointer optr) {
     // TODO: make this safe (i.e. if no diploid nodes, default to haploid node.
     GenealogyNode * allele1 = optr->get_diploid_node1(0);
     CellIndexType origin_cell_idx =  allele1->get_cell_index();
     this->counts_[origin_cell_idx] += 1;
 }
 
-PopulationCountType PopulationCensus::get_count(CellIndexType cell_index) const {
+PopulationCountType OrganismProvenances::get_count(CellIndexType cell_index) const {
     std::map<CellIndexType, PopulationCountType>::const_iterator ci = this->counts_.find(cell_index);
     if (ci == this->counts_.end()) {
         return 0;
@@ -134,16 +134,16 @@ PopulationCountType BreedingPopulation::purge_expired_organisms() {
     return num_purged;
 }
 
-PopulationCensus BreedingPopulation::get_census() {
-    PopulationCensus census;
+OrganismProvenances BreedingPopulation::get_organism_provenances() {
+    OrganismProvenances provenances;
     OrganismPointers source;
     this->get_organism_ptrs(source);
     for (OrganismPointers::const_iterator optr = source.begin(); \
             optr != source.end(); \
             ++optr) {
-        census.log(*optr);
+        provenances.log(*optr);
     }
-    return census;
+    return provenances;
 }
 // BreedingPopulation
 ///////////////////////////////////////////////////////////////////////////////

@@ -44,10 +44,10 @@ typedef std::vector<OrganismPointer>   OrganismPointers;
  * Count of individuals based on cell of origin (as given by the geographical
  * location of the first allele of the first diploid locus).
  */
-class PopulationCensus {
+class OrganismProvenances {
 
     public:
-        PopulationCensus();
+        OrganismProvenances();
         void log(const OrganismPointer optr);
         PopulationCountType get_count(CellIndexType cell_index) const;
 
@@ -146,7 +146,7 @@ class BreedingPopulation {
          * Counts organisms in this population, recording their cell
          * of origin.
          */
-        PopulationCensus get_census();
+        OrganismProvenances get_organism_provenances();
 
 
         ///////////////////////////////////////////////////////////////////////

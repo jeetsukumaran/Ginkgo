@@ -129,9 +129,9 @@ class Landscape {
         void count_organisms(Species * sp_ptr, std::vector<PopulationCountType>& counts) const;
 
         /**
-         * Returns a vector of vector of floats representing the proportional
-         * geographical composition of individuals of the given species in each
-         * cell.
+         * Returns a vector of vector of floats representing the composition of
+         * individuals of the specified species in each cell in terms of the
+         * proportional frequencies of their cells-of-origin.
          * The return value is essentially a two-dimensional matrix, M, where
          * each element M_{ij} represents the proportion of individuals in cell
          * i that are made up of individuals that originated (in the current
@@ -143,7 +143,7 @@ class Landscape {
          * @return vector of vector of floats, where element M_{i,j} represents
          * the proportion of individuals in cell i that originated in cell j.
          */
-        std::vector<std::vector<float> > census_organisms(Species * sp_ptr) const;
+        std::vector<std::vector<float> > get_organism_provenances(Species * sp_ptr) const;
 
         // --- cell access and spatial mapping ---
 
