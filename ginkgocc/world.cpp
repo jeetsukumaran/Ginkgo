@@ -74,6 +74,16 @@ JumpDispersalRegime::JumpDispersalRegime(GenerationCountType start_gen,
       dest_cell_(dest_cell) {
 }
 
+///////////////////////////////////////////////////////////////////////////////
+// MigrationTrackingRegime
+
+MigrationTrackingRegime::MigrationTrackingRegime(GenerationCountType start_gen,
+        GenerationCountType end_gen,
+        Species * sp_ptr)
+    : RecurringAction(start_gen, end_gen),
+      species_ptr_(sp_ptr) {
+}
+
 // JumpDispersalRegime
 ///////////////////////////////////////////////////////////////////////////////
 

@@ -34,7 +34,33 @@
 namespace ginkgo {
 
 // collection of Organism pointers
-typedef std::vector<Organism *>   OrganismPointers;
+typedef Organism *                     OrganismPointer;
+typedef std::vector<OrganismPointer>   OrganismPointers;
+
+///////////////////////////////////////////////////////////////////////////////
+// Census
+
+/**
+ * Count of individuals based on cell of origin (in turn, based on the
+ * geographical location of the first (diploid) allele.
+ */
+class Census {
+
+    public:
+        Census(CellIndexType home_cell_idx,
+                Species * sp_ptr,
+                PopulationCountType pop_size);
+        void log_organism(const OrganismPointer optr);
+
+    private:
+        CellIndexType                   home_cell_idx_;
+        Species *                       sp_ptr_;
+        PopulationCountType             pop_size_;
+        std::map<CellIndexType, PopulationCountType>  counts_;
+
+};
+// Census
+///////////////////////////////////////////////////////////////////////////////
 
 ///////////////////////////////////////////////////////////////////////////////
 // Breeding Population

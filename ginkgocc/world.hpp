@@ -143,6 +143,31 @@ class JumpDispersalRegime : public RecurringAction {
 ///////////////////////////////////////////////////////////////////////////////
 
 ///////////////////////////////////////////////////////////////////////////////
+// JumpDispersalRegime
+
+class MigrationTrackingRegime : public RecurringAction {
+
+    public:
+        MigrationTrackingRegime(GenerationCountType start_gen,
+                GenerationCountType end_gen,
+                Species * sp_ptr);
+
+        Species *  get_species_ptr() {
+            return this->species_ptr_;
+        }
+        void set_species_ptr(Species *  sp_ptr) {
+            this->species_ptr_ = sp_ptr;
+        }
+
+    private:
+        /** Pointer to species. */
+        Species *                   species_ptr_;
+};
+
+// JumpDispersalRegime
+///////////////////////////////////////////////////////////////////////////////
+
+///////////////////////////////////////////////////////////////////////////////
 // supporting data
 
 /**

@@ -57,6 +57,25 @@ void deallocate_and_clear_organisms_(OrganismPointers& organism_ptrs) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+// Census
+Census::Census(CellIndexType home_cell_idx,
+        Species * sp_ptr,
+        PopulationCountType pop_size)
+        : home_cell_idx_(home_cell_idx),
+          sp_ptr_(sp_ptr),
+          pop_size_(pop_size) { }
+
+void Census::log_organism(const OrganismPointer optr) {
+    // TODO: make this safe (i.e. if no diploid nodes, default to haploid node.
+    GenealogyNode * allele1 = optr->get_diploid_node1(0);
+    CellIndexType origin_cell_idx =  allele1->get_cell_index();
+    this->counts_[origin_cell_idx] += 1;
+}
+
+// Census
+///////////////////////////////////////////////////////////////////////////////
+
+///////////////////////////////////////////////////////////////////////////////
 // BreedingPopulation
 
 // Returns pointers to all organisms.

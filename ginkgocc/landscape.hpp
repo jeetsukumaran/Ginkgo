@@ -22,12 +22,12 @@
 #if !defined(GINKGO_LANDSCAPE_H)
 #define GINKGO_LANDSCAPE_H
 
+#include <iostream>
+#include <set>
 #include "organism.hpp"
 #include "population.hpp"
 #include "species.hpp"
 #include "cell.hpp"
-#include <iostream>
-#include <set>
 
 namespace ginkgo {
 
