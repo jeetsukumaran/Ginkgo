@@ -143,8 +143,8 @@ std::vector<std::vector<float> > Landscape::census_organisms(Species * sp_ptr) c
             for (std::vector<Cell *>::const_iterator cj = this->cells_.begin();
                     cj != this->cells_.end();
                     ++cj) {
-                // PopulationCountType sub_count = census.get_count(cj->get_index())
-                // cell_migrant_freqs.push_back(static_cast<float>(sub_count)/total_pop_size);
+                PopulationCountType sub_count = census.get_count((*cj)->get_index());
+                cell_migrant_freqs.push_back(static_cast<float>(sub_count)/total_pop_size);
             }
         }
     }

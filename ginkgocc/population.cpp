@@ -68,6 +68,15 @@ void PopulationCensus::log(const OrganismPointer optr) {
     this->counts_[origin_cell_idx] += 1;
 }
 
+PopulationCountType PopulationCensus::get_count(CellIndexType cell_index) const {
+    std::map<CellIndexType, PopulationCountType>::const_iterator ci = this->counts_.find(cell_index);
+    if (ci == this->counts_.end()) {
+        return 0;
+    } else {
+        return ci->second;
+    }
+}
+
 // Census
 ///////////////////////////////////////////////////////////////////////////////
 

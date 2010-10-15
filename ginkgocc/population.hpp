@@ -41,14 +41,15 @@ typedef std::vector<OrganismPointer>   OrganismPointers;
 // Census
 
 /**
- * Count of individuals based on cell of origin (in turn, based on the
- * geographical location of the first (diploid) allele.
+ * Count of individuals based on cell of origin (as given by the geographical
+ * location of the first allele of the first diploid locus).
  */
 class PopulationCensus {
 
     public:
         PopulationCensus();
         void log(const OrganismPointer optr);
+        PopulationCountType get_count(CellIndexType cell_index) const;
 
     private:
         std::map<CellIndexType, PopulationCountType>  counts_;
