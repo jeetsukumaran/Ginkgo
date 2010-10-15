@@ -276,6 +276,10 @@ class Cell {
         void sample_organisms(Species * sp_ptr,
             std::vector<const Organism *>& samples, PopulationCountType num_organisms);
 
+        /**
+         * Returns PopulationCensus object for specfied species.
+         */
+        PopulationCensus get_census(Species * sp_ptr);
 
         BreedingPopulation& population(Species * sp) {
             return this->populations_[sp];

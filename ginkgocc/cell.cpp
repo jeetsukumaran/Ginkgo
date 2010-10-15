@@ -287,8 +287,6 @@ void Cell::competition() {
     assert(this->populations_.size() <= this->carrying_capacity_);
 }
 
-// --- for trees etc ---
-
 void Cell::sample_organisms(Species * sp_ptr,
         std::vector<const Organism *>& samples,
         PopulationCountType num_organisms) {
@@ -314,6 +312,10 @@ PopulationCountType Cell::num_organisms(Species * sp_ptr) const {
     PopulationCountType num_males = 0;
     this->num_organisms(sp_ptr, num_females, num_males);
     return num_females + num_males;
+}
+
+PopulationCensus Cell::get_census(Species * sp_ptr) {
+    return this->populations_[sp_ptr].get_census();
 }
 
 // Cell

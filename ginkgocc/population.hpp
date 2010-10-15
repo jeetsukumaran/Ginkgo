@@ -44,18 +44,13 @@ typedef std::vector<OrganismPointer>   OrganismPointers;
  * Count of individuals based on cell of origin (in turn, based on the
  * geographical location of the first (diploid) allele.
  */
-class Census {
+class PopulationCensus {
 
     public:
-        Census(CellIndexType home_cell_idx,
-                Species * sp_ptr,
-                PopulationCountType pop_size);
-        void log_organism(const OrganismPointer optr);
+        PopulationCensus();
+        void log(const OrganismPointer optr);
 
     private:
-        CellIndexType                   home_cell_idx_;
-        Species *                       sp_ptr_;
-        PopulationCountType             pop_size_;
         std::map<CellIndexType, PopulationCountType>  counts_;
 
 };
@@ -145,6 +140,13 @@ class BreedingPopulation {
          * Removes and deallocates all organisms marked for expiration.
          */
         PopulationCountType purge_expired_organisms();
+
+        /**
+         * Counts organisms in this population, recording their cell
+         * of origin.
+         */
+        PopulationCensus get_census();
+
 
         ///////////////////////////////////////////////////////////////////////
         // iteration support
