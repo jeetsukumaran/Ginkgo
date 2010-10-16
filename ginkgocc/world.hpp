@@ -163,6 +163,8 @@ class MigrationTrackingRegime : public RecurringAction {
 
         void log_provenances(const LandscapeOrganismProvenanceProportions& landscape_organism_provenances);
         LandscapeOrganismProvenanceProportions calc_mean_proportions() const;
+        float total_influx_rate(CellIndexType cur_cell_index,
+                const LandscapeOrganismProvenanceProportions& mean_proportions) const;
         void write(std::ofstream& out, const std::string& separator) const;
 
     private:

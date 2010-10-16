@@ -112,26 +112,38 @@ LandscapeOrganismProvenanceProportions MigrationTrackingRegime::calc_mean_propor
     return mean_proportions;
 }
 
+float MigrationTrackingRegime::total_influx_rate(CellIndexType cur_cell_index,
+        const LandscapeOrganismProvenanceProportions& mean_proportions) const {
+    float total_influx = 0.0;
+    for (CellIndexType j = 0; j < mean_proportions[cur_cell_index].size(); ++j) {
+        if (j != cur_cell_index) {
+            total_influx += mean_proportions[cur_cell_index][j] / this->num_gens_counted_;
+        }
+    }
+    return total_influx;
+}
+
 void MigrationTrackingRegime::write(std::ofstream& out, const std::string& separator) const {
     LandscapeOrganismProvenanceProportions mean_proportions = this->calc_mean_proportions();
 
     // header
-    out << "cell" << separator << "mig.rate";
+    out << "cell" << separator << "influx.rate";
     for (CellIndexType i = 0; i < mean_proportions.size(); ++i) {
-        out << separator << i;
+        out << separator << "from." << i;
     }
     out << std::endl;
 
     // main rows
     for (CellIndexType i = 0; i < mean_proportions.size(); ++i) {
-        out << i << separator;
+        out << i << separator << this->total_influx_rate(i, mean_proportions);
+        for (CellIndexType j = 0; j < mean_proportions.size(); ++j) {
+            out << separator << mean_proportions[i][j];
+        }
     }
-
-
 }
 
 
-// JumpDispersalRegime
+// MigrationTrackingRegime
 ///////////////////////////////////////////////////////////////////////////////
 
 ///////////////////////////////////////////////////////////////////////////////
