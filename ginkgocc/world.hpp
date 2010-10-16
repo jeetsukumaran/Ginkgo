@@ -168,7 +168,7 @@ class MigrationTrackingRegime : public RecurringAction {
         void write(std::ofstream& out, const std::string& separator) const;
 
     private:
-        const Landscape&                                  landscape_;
+        const Landscape&                            landscape_;
         Species *                                   species_ptr_;
         GenerationCountType                         num_gens_counted_;
         LandscapeOrganismProvenanceProportions      sum_of_proportions_;

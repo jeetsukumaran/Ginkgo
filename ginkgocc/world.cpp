@@ -488,7 +488,7 @@ void World::run_life_cycle() {
             mti != this->pre_reproduction_migration_tracking_regimes_.end();) {
         if (mti->is_expired(this->current_generation_)) {
             std::ostringstream gen_span;
-            gen_span << "SPAN";
+            gen_span << "prereprod-";
             gen_span << std::setw(8) << std::setfill('0') << mti->get_start_gen();
             gen_span << "-";
             gen_span << std::setw(8) << std::setfill('0') << mti->get_end_gen();

@@ -325,14 +325,14 @@ void ConfigurationFile::parse_migration_trackings(World& world) {
         for (int i = 0; i < migration_trackings.nChildNode("prereproduction-migration-tracking"); ++i) {
             MigrationTrackingRegime mt = this->build_migration_tracking_regime(
                     world,
-                    migration_trackings.getChildNode("prereproduction-migration-tracking"));
+                    migration_trackings.getChildNode("prereproduction-migration-tracking", i));
             world.add_pre_reproduction_migration_tracker(mt);
         }
         for (int i = 0; i < migration_trackings.nChildNode("postdispersal-migration-tracking"); ++i) {
             MigrationTrackingRegime mt = this->build_migration_tracking_regime(
                     world,
-                    migration_trackings.getChildNode("postdispersal-migration-tracking"));
-            world.add_pre_reproduction_migration_tracker(mt);
+                    migration_trackings.getChildNode("postdispersal-migration-tracking", i));
+            world.add_post_dispersal_migration_tracker(mt);
         }
     }
 }
@@ -341,7 +341,6 @@ MigrationTrackingRegime ConfigurationFile::build_migration_tracking_regime(World
                 const XmlElementType& mig_track_element) {
     GenerationCountType start_gen = this->get_attribute<GenerationCountType>(mig_track_element, "start_gen");
     GenerationCountType end_gen = this->get_attribute<GenerationCountType>(mig_track_element, "end_gen");
-    std::ostringstream item_desc;
     Species * species_ptr;
     std::string lineage_id = this->get_attribute<std::string>(mig_track_element, "lineage", "");
     if (lineage_id.size() > 0) {
