@@ -148,7 +148,9 @@ class JumpDispersalRegime : public RecurringAction {
 class MigrationTrackingRegime : public RecurringAction {
 
     public:
-        MigrationTrackingRegime(GenerationCountType start_gen,
+        MigrationTrackingRegime(
+                CellIndexType landscape_size,
+                GenerationCountType start_gen,
                 GenerationCountType end_gen,
                 Species * sp_ptr);
 
@@ -159,9 +161,15 @@ class MigrationTrackingRegime : public RecurringAction {
             this->species_ptr_ = sp_ptr;
         }
 
+        void log_provenances(const LandscapeOrganismProvenanceProportions& landscape_organism_provenances);
+        LandscapeOrganismProvenanceProportions calc_mean_proportions() const;
+        void write(std::ofstream& out, const std::string& separator) const;
+
     private:
-        Species *                   species_ptr_;
-        GenerationCountType         num_gens_counted_;
+        CellIndexType                               landscape_size_;
+        Species *                                   species_ptr_;
+        GenerationCountType                         num_gens_counted_;
+        LandscapeOrganismProvenanceProportions      sum_of_proportions_;
 
 };
 

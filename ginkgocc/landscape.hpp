@@ -31,7 +31,12 @@
 
 namespace ginkgo {
 
+// forward declaration of World
 class World;
+
+// types
+typedef std::vector<float>                              CellOrganismProvenanceProportions;
+typedef std::vector<CellOrganismProvenanceProportions>  LandscapeOrganismProvenanceProportions;
 
 ///////////////////////////////////////////////////////////////////////////////
 // Landscape

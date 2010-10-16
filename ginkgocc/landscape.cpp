@@ -125,8 +125,8 @@ void Landscape::count_organisms(Species * sp_ptr, std::vector<PopulationCountTyp
     }
 }
 
-std::vector<std::vector<float> > Landscape::get_organism_provenances(Species * sp_ptr) const {
-    std::vector<std::vector<float> > landscape_migrant_freqs;
+LandscapeOrganismProvenanceProportions Landscape::get_organism_provenances(Species * sp_ptr) const {
+    LandscapeOrganismProvenanceProportions landscape_migrant_freqs;
     landscape_migrant_freqs.reserve(this->cells_.size());
     for (std::vector<Cell *>::const_iterator ci = this->cells_.begin();
             ci != this->cells_.end();
@@ -134,7 +134,7 @@ std::vector<std::vector<float> > Landscape::get_organism_provenances(Species * s
         Cell * cip = *ci;
         PopulationCountType total_pop_size = cip->num_organisms(sp_ptr);
         if (total_pop_size == 0) {
-            std::vector<float> cell_migrant_freqs(this->cells_.size(), 0.0);
+            CellOrganismProvenanceProportions cell_migrant_freqs(this->cells_.size(), 0.0);
             landscape_migrant_freqs.push_back(cell_migrant_freqs);
         } else {
             std::vector<float> cell_migrant_freqs;

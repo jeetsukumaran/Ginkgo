@@ -77,13 +77,59 @@ JumpDispersalRegime::JumpDispersalRegime(GenerationCountType start_gen,
 ///////////////////////////////////////////////////////////////////////////////
 // MigrationTrackingRegime
 
-MigrationTrackingRegime::MigrationTrackingRegime(GenerationCountType start_gen,
+MigrationTrackingRegime::MigrationTrackingRegime(
+        CellIndexType landscape_size,
+        GenerationCountType start_gen,
         GenerationCountType end_gen,
         Species * sp_ptr)
     : RecurringAction(start_gen, end_gen),
+      landscape_size_(landscape_size),
       species_ptr_(sp_ptr),
-      num_gens_counted_(0) {
+      num_gens_counted_(0),
+      sum_of_proportions_(landscape_size, CellOrganismProvenanceProportions(landscape_size, 0)) {
 }
+
+void MigrationTrackingRegime::log_provenances(const LandscapeOrganismProvenanceProportions& landscape_organism_provenances) {
+    assert(landscape_organism_provenances.size() == this->sum_of_proportions_.size());
+    for (CellIndexType i = 0; i < this->sum_of_proportions_.size(); ++i) {
+        CellOrganismProvenanceProportions copp = landscape_organism_provenances[i];
+        assert(copp.size() == this->sum_of_proportions_[i].size());
+        for (CellIndexType j = 0; j < this->sum_of_proportions_.size(); ++j) {
+            this->sum_of_proportions_[i][j] += landscape_organism_provenances[i][j];
+        }
+    }
+    ++this->num_gens_counted_;
+}
+
+LandscapeOrganismProvenanceProportions MigrationTrackingRegime::calc_mean_proportions() const {
+    assert(this->num_gens_counted_ > 0);
+    LandscapeOrganismProvenanceProportions mean_proportions(this->landscape_size_, CellOrganismProvenanceProportions(this->landscape_size_, 0));
+    for (CellIndexType i = 0; i < this->sum_of_proportions_.size(); ++i) {
+        for (CellIndexType j = 0; j < this->sum_of_proportions_.size(); ++j) {
+            mean_proportions[i][j] = this->sum_of_proportions_[i][j] / this->num_gens_counted_;
+        }
+    }
+    return mean_proportions;
+}
+
+void MigrationTrackingRegime::write(std::ofstream& out, const std::string& separator) const {
+    LandscapeOrganismProvenanceProportions mean_proportions = this->calc_mean_proportions();
+
+    // header
+    out << "cell" << separator << "mig.rate";
+    for (CellIndexType i = 0; i < mean_proportions.size(); ++i) {
+        out << separator << i;
+    }
+    out << std::endl;
+
+    // main rows
+    for (CellIndexType i = 0; i < mean_proportions.size(); ++i) {
+        out << i << separator;
+    }
+
+
+}
+
 
 // JumpDispersalRegime
 ///////////////////////////////////////////////////////////////////////////////
