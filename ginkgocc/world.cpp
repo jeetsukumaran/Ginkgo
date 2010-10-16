@@ -483,28 +483,8 @@ void World::run_life_cycle() {
 //     }
 //     this->landscape_.process_migrants();
 
-    // Pre-reproduction migration tracking ...
-    for (std::list<MigrationTrackingRegime>::iterator mti = this->pre_reproduction_migration_tracking_regimes_.begin(); \
-            mti != this->pre_reproduction_migration_tracking_regimes_.end();) {
-        if (mti->is_expired(this->current_generation_)) {
-            std::ostringstream gen_span;
-            gen_span << "demo-mig-";
-            gen_span << std::setw(8) << std::setfill('0') << mti->get_start_gen();
-            gen_span << "-";
-            gen_span << std::setw(8) << std::setfill('0') << mti->get_end_gen();
-            std::ofstream migration_tracking_output;
-            this->open_ofstream(migration_tracking_output,
-                this->compose_output_filename(mti->get_species_ptr()->get_label(), "", gen_span.str() + ".tsv"));
-            mti->write(migration_tracking_output, "\t");
-            mti = this->pre_reproduction_migration_tracking_regimes_.erase(mti);
-        } else {
-            if (mti->is_active(this->current_generation_)) {
-                LandscapeOrganismProvenanceProportions landscape_organism_provenances = this->landscape_.get_organism_provenances(mti->get_species_ptr());
-                mti->log_provenances(landscape_organism_provenances);
-            }
-            ++mti;
-        }
-    }
+    // pre-reproduction migration tracking
+    this->process_migration_tracking(this->pre_reproduction_migration_tracking_regimes_, "dem-mig-");
 
     // reproduction
     for (CellIndexType i = 0; i < this->landscape_.size(); ++i) {
@@ -534,7 +514,10 @@ void World::run_life_cycle() {
     // process migrants
     this->landscape_.process_migrants();
 
-    // survival and compotetion
+    // post-dispersal migration tracking
+    this->process_migration_tracking(this->post_dispersal_migration_tracking_regimes_, "geo-mig-");
+
+    // survival and competition
     for (CellIndexType i = 0; i < this->landscape_.size(); ++i) {
         this->landscape_[i].survival();
         this->landscape_[i].competition();
@@ -601,6 +584,30 @@ void World::process_tree_samplings() {
     gen_sample_iter_pair_t this_gen_samples = this->tree_samples_.equal_range(this->current_generation_);
     for (gen_sample_t::iterator i = this_gen_samples.first; i != this_gen_samples.second; ++i) {
         this->save_trees(i->second.species_ptr, i->second.num_organisms_per_cell, i->second.cell_indexes, i->second.label);
+    }
+}
+
+void World::process_migration_tracking(std::list<MigrationTrackingRegime>& migration_tracking_regimes, const char * title_prefix) {
+    for (std::list<MigrationTrackingRegime>::iterator mti = migration_tracking_regimes.begin(); \
+            mti != migration_tracking_regimes.end();) {
+        if (mti->is_expired(this->current_generation_)) {
+            std::ostringstream gen_span;
+            gen_span << title_prefix;
+            gen_span << std::setw(8) << std::setfill('0') << mti->get_start_gen();
+            gen_span << "-";
+            gen_span << std::setw(8) << std::setfill('0') << mti->get_end_gen();
+            std::ofstream migration_tracking_output;
+            this->open_ofstream(migration_tracking_output,
+                this->compose_output_filename(mti->get_species_ptr()->get_label(), "", gen_span.str() + ".tsv"));
+            mti->write(migration_tracking_output, "\t");
+            mti = migration_tracking_regimes.erase(mti);
+        } else {
+            if (mti->is_active(this->current_generation_)) {
+                LandscapeOrganismProvenanceProportions landscape_organism_provenances = this->landscape_.get_organism_provenances(mti->get_species_ptr());
+                mti->log_provenances(landscape_organism_provenances);
+            }
+            ++mti;
+        }
     }
 }
 

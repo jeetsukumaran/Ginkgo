@@ -436,6 +436,11 @@ class World {
         void set_world_environment(EnvironmentSettings& env, const char * log_leader);
 
         /**
+         * Process migration tracking for the current generation.
+         */
+        void process_migration_tracking(std::list<MigrationTrackingRegime>& migration_tracking_regimes, const char * title_prefix);
+
+        /**
          * Process tree building directives for the current generation.
          */
         void process_tree_samplings();
