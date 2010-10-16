@@ -352,7 +352,7 @@ MigrationTrackingRegime ConfigurationFile::build_migration_tracking_regime(World
     } else {
         throw ConfigurationError("migration-tracking: lineage not given");
     }
-    return MigrationTrackingRegime(world.landscape().size(), start_gen, end_gen, species_ptr);
+    return MigrationTrackingRegime(world.landscape(), start_gen, end_gen, species_ptr);
 }
 
 

@@ -149,7 +149,7 @@ class MigrationTrackingRegime : public RecurringAction {
 
     public:
         MigrationTrackingRegime(
-                CellIndexType landscape_size,
+                const Landscape& landscape,
                 GenerationCountType start_gen,
                 GenerationCountType end_gen,
                 Species * sp_ptr);
@@ -168,7 +168,7 @@ class MigrationTrackingRegime : public RecurringAction {
         void write(std::ofstream& out, const std::string& separator) const;
 
     private:
-        CellIndexType                               landscape_size_;
+        const Landscape&                                  landscape_;
         Species *                                   species_ptr_;
         GenerationCountType                         num_gens_counted_;
         LandscapeOrganismProvenanceProportions      sum_of_proportions_;
