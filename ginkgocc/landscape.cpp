@@ -146,6 +146,7 @@ LandscapeOrganismProvenanceProportions Landscape::get_organism_provenances(Speci
                 PopulationCountType sub_count = provenances.get_count((*cj)->get_index());
                 cell_migrant_freqs.push_back(static_cast<float>(sub_count)/total_pop_size);
             }
+            landscape_migrant_freqs.push_back(cell_migrant_freqs);
         }
     }
     return landscape_migrant_freqs;
