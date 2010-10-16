@@ -488,13 +488,13 @@ void World::run_life_cycle() {
             mti != this->pre_reproduction_migration_tracking_regimes_.end();) {
         if (mti->is_expired(this->current_generation_)) {
             std::ostringstream gen_span;
-            gen_span << "prereprod-";
+            gen_span << "demo-mig-";
             gen_span << std::setw(8) << std::setfill('0') << mti->get_start_gen();
             gen_span << "-";
             gen_span << std::setw(8) << std::setfill('0') << mti->get_end_gen();
             std::ofstream migration_tracking_output;
             this->open_ofstream(migration_tracking_output,
-                this->compose_output_filename(mti->get_species_ptr()->get_label(), gen_span.str(), "migration.tsv"));
+                this->compose_output_filename(mti->get_species_ptr()->get_label(), "", gen_span.str() + ".tsv"));
             mti->write(migration_tracking_output, "\t");
             mti = this->pre_reproduction_migration_tracking_regimes_.erase(mti);
         } else {

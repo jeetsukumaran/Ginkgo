@@ -322,16 +322,16 @@ void ConfigurationFile::parse_jump_dispersals(World& world) {
 void ConfigurationFile::parse_migration_trackings(World& world) {
     XmlElementType migration_trackings = this->ginkgo_root_.getChildNode("migration-tracking");
     if (!migration_trackings.isEmpty()) {
-        for (int i = 0; i < migration_trackings.nChildNode("prereproduction-migration-tracking"); ++i) {
+        for (int i = 0; i < migration_trackings.nChildNode("demographic-migration-tracking"); ++i) {
             MigrationTrackingRegime mt = this->build_migration_tracking_regime(
                     world,
-                    migration_trackings.getChildNode("prereproduction-migration-tracking", i));
+                    migration_trackings.getChildNode("demographic-migration-tracking", i));
             world.add_pre_reproduction_migration_tracker(mt);
         }
-        for (int i = 0; i < migration_trackings.nChildNode("postdispersal-migration-tracking"); ++i) {
+        for (int i = 0; i < migration_trackings.nChildNode("geographic-migration-tracking"); ++i) {
             MigrationTrackingRegime mt = this->build_migration_tracking_regime(
                     world,
-                    migration_trackings.getChildNode("postdispersal-migration-tracking", i));
+                    migration_trackings.getChildNode("geographic-migration-tracking", i));
             world.add_post_dispersal_migration_tracker(mt);
         }
     }
