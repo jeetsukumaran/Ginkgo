@@ -148,7 +148,7 @@ class Landscape {
          * @return vector of vector of floats, where element M_{i,j} represents
          * the proportion of individuals in cell i that originated in cell j.
          */
-        std::vector<std::vector<float> > get_organism_provenances(Species * sp_ptr) const;
+        LandscapeOrganismProvenanceProportions get_organism_provenances(Species * sp_ptr) const;
 
         // --- cell access and spatial mapping ---
 

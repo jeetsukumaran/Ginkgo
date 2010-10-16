@@ -350,6 +350,10 @@ class World {
          */
         void add_environment_settings(GenerationCountType generation, const EnvironmentSettings& environment_settings);
 
+        void add_pre_reproduction_migration_tracker(const MigrationTrackingRegime& migration_tracking_regime);
+
+        void add_post_dispersal_migration_tracker(const MigrationTrackingRegime& migration_tracking_regime);
+
         /**
          * Add a jump dispersal regime.
          *
@@ -830,8 +834,10 @@ class World {
         std::multimap<GenerationCountType, SamplingRegime> tree_samples_;
         /** Collection of occurrence description directives (key = generation #). */
         std::multimap<GenerationCountType, Species *> occurrence_samples_;
-        /** Collection of seed population directives. */
-        // std::vector<SeedPopulation>             seed_populations_;
+        /** Collection of pre-reproduction migration rate tracking directives. */
+        std::list<MigrationTrackingRegime>      pre_reproduction_migration_tracking_regimes_;
+        /** Collection of post-dispersal migration rate tracking directives. */
+        std::list<MigrationTrackingRegime>      post_dispersal_migration_tracking_regimes_;
         /** Track output filenames, so as to prevent clashes. */
         std::set<std::string>                   output_filenames_;
 

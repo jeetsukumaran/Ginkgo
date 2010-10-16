@@ -139,6 +139,7 @@ void MigrationTrackingRegime::write(std::ofstream& out, const std::string& separ
         for (CellIndexType j = 0; j < mean_proportions.size(); ++j) {
             out << separator << mean_proportions[i][j];
         }
+        out << std::endl;
     }
 }
 
@@ -234,6 +235,14 @@ void World::generate_seed_population(CellIndexType cell_index,
 
 void World::add_environment_settings(GenerationCountType generation, const EnvironmentSettings& environment_settings) {
     this->environment_settings_[generation] = environment_settings;
+}
+
+void World::add_pre_reproduction_migration_tracker(const MigrationTrackingRegime& migration_tracking_regime) {
+    this->pre_reproduction_migration_tracking_regimes_.push_back(migration_tracking_regime);
+}
+
+void World::add_post_dispersal_migration_tracker(const MigrationTrackingRegime& migration_tracking_regime) {
+    this->post_dispersal_migration_tracking_regimes_.push_back(migration_tracking_regime);
 }
 
 void World::add_jump_dispersal_regime(const JumpDispersalRegime& jump_dispersal) {
@@ -470,10 +479,40 @@ void World::run_life_cycle() {
 //     }
 //     this->landscape_.process_migrants();
 
+    // Pre-reproduction migration tracking ...
+    for (std::list<MigrationTrackingRegime>::iterator mti = this->pre_reproduction_migration_tracking_regimes_.begin(); \
+            mti != this->pre_reproduction_migration_tracking_regimes_.end();) {
+        if (mti->is_expired(this->current_generation_)) {
+            std::ostringstream gen_span;
+            gen_span << "SPAN";
+            gen_span << std::setw(8) << std::setfill('0') << mti->get_start_gen();
+            gen_span << "-";
+            gen_span << std::setw(8) << std::setfill('0') << mti->get_end_gen();
+            std::ofstream migration_tracking_output;
+            this->open_ofstream(migration_tracking_output,
+                this->compose_output_filename(mti->get_species_ptr()->get_label(), gen_span.str(), "migration.tsv"));
+            mti->write(migration_tracking_output, "\t");
+            mti = this->pre_reproduction_migration_tracking_regimes_.erase(mti);
+        } else {
+            if (mti->is_active(this->current_generation_)) {
+                LandscapeOrganismProvenanceProportions landscape_organism_provenances = this->landscape_.get_organism_provenances(mti->get_species_ptr());
+                mti->log_provenances(landscape_organism_provenances);
+            }
+            ++mti;
+        }
+    }
+
+    // reproduction
     for (CellIndexType i = 0; i < this->landscape_.size(); ++i) {
         this->landscape_[i].reproduction();
+    }
+
+    // diffusion dispersal
+    for (CellIndexType i = 0; i < this->landscape_.size(); ++i) {
         this->landscape_[i].diffusion_dispersal();
     }
+
+    // jump dispersal
     for (std::list<JumpDispersalRegime>::iterator jdi = this->jump_dispersal_regimes_.begin(); \
             jdi != this->jump_dispersal_regimes_.end();) {
         if (jdi->is_expired(this->current_generation_)) {
@@ -487,11 +526,16 @@ void World::run_life_cycle() {
             ++jdi;
         }
     }
+
+    // process migrants
     this->landscape_.process_migrants();
+
+    // survival and compotetion
     for (CellIndexType i = 0; i < this->landscape_.size(); ++i) {
         this->landscape_[i].survival();
         this->landscape_[i].competition();
     }
+
 }
 
 void World::process_environment_settings() {
