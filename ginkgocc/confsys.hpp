@@ -162,13 +162,13 @@ class ConfigurationFile {
 
         void open(const char *fpath);
 
-        bool has_attribute(XmlElementType& xml, const char * attr_name) const {
+        bool has_attribute(const XmlElementType& xml, const char * attr_name) const {
             const char * attr_value = xml.getAttribute(attr_name);
             return attr_value != NULL;
         }
 
         template <typename T>
-        T get_attribute(XmlElementType& xml, const char * attr_name) const {
+        T get_attribute(const XmlElementType& xml, const char * attr_name) const {
             const char * attr_value = xml.getAttribute(attr_name);
             if (attr_value == NULL) {
                 std::ostringstream msg;
@@ -179,7 +179,7 @@ class ConfigurationFile {
         }
 
         template <typename T>
-        T get_attribute(XmlElementType& xml, const char * attr_name, T default_value) const {
+        T get_attribute(const XmlElementType& xml, const char * attr_name, T default_value) const {
             const char * attr_value = xml.getAttribute(attr_name);
             if (attr_value == NULL) {
                 return default_value;
@@ -187,7 +187,7 @@ class ConfigurationFile {
             return convert::to_scalar<T>(attr_value);
         }
 
-        bool get_attribute_bool(XmlElementType& xml, const char * attr_name, bool default_value) const {
+        bool get_attribute_bool(const XmlElementType& xml, const char * attr_name, bool default_value) const {
             const char * attr_value = xml.getAttribute(attr_name);
             if (attr_value == NULL) {
                 return default_value;
@@ -256,6 +256,9 @@ class ConfigurationFile {
         void parse_initialization(World& world);
         void parse_environments(World& world);
         void parse_jump_dispersals(World& world);
+        void parse_migration_trackings(World& world);
+        MigrationTrackingRegime build_migration_tracking_regime(World& world,
+                const XmlElementType& mig_track_element);
         void parse_samplings(World& world);
 
         EnvironmentSettings parse_environment_settings(World& world, const XmlElementType& env_node);

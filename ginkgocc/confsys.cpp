@@ -110,6 +110,7 @@ void ConfigurationFile::configure(World& world) {
     this->parse_initialization(world);
     this->parse_environments(world);
     this->parse_jump_dispersals(world);
+    this->parse_migration_trackings(world);
     this->parse_samplings(world);
 }
 
@@ -317,6 +318,43 @@ void ConfigurationFile::parse_jump_dispersals(World& world) {
         }
     }
 }
+
+void ConfigurationFile::parse_migration_trackings(World& world) {
+    XmlElementType migration_trackings = this->ginkgo_root_.getChildNode("migration-tracking");
+    if (!migration_trackings.isEmpty()) {
+        for (int i = 0; i < migration_trackings.nChildNode("prereproduction-migration-tracking"); ++i) {
+            MigrationTrackingRegime mt = this->build_migration_tracking_regime(
+                    world,
+                    migration_trackings.getChildNode("prereproduction-migration-tracking"));
+            world.add_pre_reproduction_migration_tracker(mt);
+        }
+        for (int i = 0; i < migration_trackings.nChildNode("postdispersal-migration-tracking"); ++i) {
+            MigrationTrackingRegime mt = this->build_migration_tracking_regime(
+                    world,
+                    migration_trackings.getChildNode("postdispersal-migration-tracking"));
+            world.add_pre_reproduction_migration_tracker(mt);
+        }
+    }
+}
+
+MigrationTrackingRegime ConfigurationFile::build_migration_tracking_regime(World& world,
+                const XmlElementType& mig_track_element) {
+    GenerationCountType start_gen = this->get_attribute<GenerationCountType>(mig_track_element, "start_gen");
+    GenerationCountType end_gen = this->get_attribute<GenerationCountType>(mig_track_element, "end_gen");
+    std::ostringstream item_desc;
+    Species * species_ptr;
+    std::string lineage_id = this->get_attribute<std::string>(mig_track_element, "lineage", "");
+    if (lineage_id.size() > 0) {
+        if (!world.has_species(lineage_id)) {
+            throw ConfigurationError("migration-tracking: lineage \"" + lineage_id + "\" not defined");
+        }
+        species_ptr = world.species_registry()[lineage_id];
+    } else {
+        throw ConfigurationError("migration-tracking: lineage not given");
+    }
+    return MigrationTrackingRegime(world.landscape().size(), start_gen, end_gen, species_ptr);
+}
+
 
 void ConfigurationFile::parse_samplings(World& world) {
     XmlElementType samplings = this->ginkgo_root_.getChildNode("samples");
