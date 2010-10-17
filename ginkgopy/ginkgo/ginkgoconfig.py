@@ -44,6 +44,8 @@ class GinkgoConfiguration(object):
         self.environments = kwargs.get("environments", [])
         self.samples = kwargs.get("samples", [])
         self.jump_dispersal_regimes = kwargs.get("jump_dispersal_regime", [])
+        self.demographic_migration_tracking_regimes = kwargs.get("demographic_migration_tracking_regimes", [])
+        self.geographic_migration_tracking_regimes = kwargs.get("geographic_migration_tracking_regimes", [])
 
     def __str__(self):
         s = StringIO()
@@ -83,6 +85,15 @@ class GinkgoConfiguration(object):
             for jump_dispersal_regime in self.jump_dispersal_regimes:
                 s.write(str(jump_dispersal_regime))
             s.write('%s</jump-dispersals>\n' % sub_indent)
+        if self.demographic_migration_tracking_regimes or self.geographic_migration_tracking_regimes:
+            s.write('%s<migration-tracking>\n' % sub_indent)
+            for demographic_migration_tracking_regime in self.demographic_migration_tracking_regimes:
+                demographic_migration_tracking_regime.phase = 'demographic-migration-tracking'
+                s.write(str(demographic_migration_tracking_regime))
+            for geographic_migration_tracking_regime in self.geographic_migration_tracking_regimes:
+                geographic_migration_tracking_regime.phase = 'geographic-migration-tracking'
+                s.write(str(geographic_migration_tracking_regime))
+            s.write('%s</migration-tracking>\n' % sub_indent)
         if self.samples:
             s.write('%s<samples>\n' % sub_indent)
             for sample in self.samples:
@@ -300,6 +311,20 @@ class InitializationRegime(object):
         parts.append('%s</populations>' % (sub_indent))
         parts.append("%s</initialization>\n" % top_indent)
         return "\n".join(parts)
+
+class MigrationTrackingRegime(object):
+
+    def __init__(self, start_gen, end_gen, lineage_id, **kwargs):
+        self.start_gen = start_gen
+        self.end_gen = end_gen
+        self.lineage_id = lineage_id
+        self.indent_level = kwargs.get('indent_level', 2)
+        self.phase = kwargs.get('phase', 'geographic-migration-tracking')
+
+    def __str__(self):
+        top_indent = (self.indent_level * INDENT_SIZE) * ' '
+        return '%s<%s start_gen="%s" end_gen="%s" lineage="%s" />\n' \
+                % (top_indent, self.phase, self.start_gen, self.end_gen, self.lineage_id)
 
 class JumpDispersalRegime(object):
 
