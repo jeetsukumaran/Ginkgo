@@ -26,12 +26,15 @@
 #include <ctime>
 #include <fstream>
 #include <iomanip>
+#include <vector>
+#include <algorithm>
 
 #include "asciigrid.hpp"
 #include "world.hpp"
 #include "filesys.hpp"
 #include "tree.hpp"
 #include "convert.hpp"
+#include "randgen.hpp"
 
 #if defined(MEMCHECK)
 #include "memcheck.hpp"
@@ -483,32 +486,56 @@ void World::run_life_cycle() {
 //     }
 //     this->landscape_.process_migrants();
 
-    // pre-reproduction migration tracking
-    this->process_migration_tracking(this->pre_reproduction_migration_tracking_regimes_, "dem-mig-");
-
-    // reproduction
-    for (CellIndexType i = 0; i < this->landscape_.size(); ++i) {
-        this->landscape_[i].reproduction();
+    // get cell indexes in random order
+    std::vector<CellIndexType> cell_indexes;
+    cell_indexes.reserve(this->landscape_.size());
+    for (CellIndexType i = 0; i != this->landscape_.size(); ++i) {
+        cell_indexes.push_back(i);
     }
+    RandomPointer cell_index_rp(this->rng_);
+    std::random_shuffle(cell_indexes.begin(), cell_indexes.end(), cell_index_rp);
 
-    // diffusion dispersal
-    for (CellIndexType i = 0; i < this->landscape_.size(); ++i) {
-        this->landscape_[i].diffusion_dispersal();
-    }
-
-    // jump dispersal
+    // get jump dispersals in random order
+    std::vector<JumpDispersalRegime *>  jump_dispersals_to_process;
     for (std::list<JumpDispersalRegime>::iterator jdi = this->jump_dispersal_regimes_.begin(); \
             jdi != this->jump_dispersal_regimes_.end();) {
         if (jdi->is_expired(this->current_generation_)) {
             jdi = this->jump_dispersal_regimes_.erase(jdi);
         } else {
             if (jdi->is_active(this->current_generation_)) {
-                this->landscape_[jdi->get_src_cell()].jump_dispersal(jdi->get_species_ptr(), \
-                        jdi->get_probability(), \
-                        jdi->get_dest_cell());
+                jump_dispersals_to_process.push_back(&(*jdi));
             }
             ++jdi;
         }
+    }
+    RandomPointer jump_dispersals_rp(this->rng_);
+    std::random_shuffle(jump_dispersals_to_process.begin(), jump_dispersals_to_process.end(), jump_dispersals_rp);
+
+    // pre-reproduction migration tracking
+    this->process_migration_tracking(this->pre_reproduction_migration_tracking_regimes_, "dem-mig-");
+
+    // reproduction
+    for (std::vector<CellIndexType>::iterator i = cell_indexes.begin();
+            i != cell_indexes.end();
+            ++i) {
+        this->landscape_[*i].reproduction();
+    }
+
+    // diffusion dispersal
+    for (std::vector<CellIndexType>::iterator i = cell_indexes.begin();
+            i != cell_indexes.end();
+            ++i) {
+        this->landscape_[*i].diffusion_dispersal();
+    }
+
+    // jump dispersal
+    for (std::vector<JumpDispersalRegime *>::iterator jdi = jump_dispersals_to_process.begin();
+            jdi != jump_dispersals_to_process.end();
+            ++jdi) {
+        JumpDispersalRegime& jd = *(*jdi);
+        this->landscape_[jd.get_src_cell()].jump_dispersal(jd.get_species_ptr(), \
+                jd.get_probability(), \
+                jd.get_dest_cell());
     }
 
     // process migrants
@@ -518,9 +545,11 @@ void World::run_life_cycle() {
     this->process_migration_tracking(this->post_dispersal_migration_tracking_regimes_, "geo-mig-");
 
     // survival and competition
-    for (CellIndexType i = 0; i < this->landscape_.size(); ++i) {
-        this->landscape_[i].survival();
-        this->landscape_[i].competition();
+    for (std::vector<CellIndexType>::iterator i = cell_indexes.begin();
+            i != cell_indexes.end();
+            ++i) {
+        this->landscape_[*i].survival();
+        this->landscape_[*i].competition();
     }
 
 }
