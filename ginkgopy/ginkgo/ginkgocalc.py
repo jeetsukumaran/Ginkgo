@@ -36,15 +36,70 @@ except:
 import dendropy
 from dendropy import treecalc
 
+class GeoreferencingError(Exception):
+    def __init__(self, err_type, text):
+        Exception.__init__(self, "%s: '%s'" % (err_type, text))
+
+class GeoreferencingParseError(GeoreferencingError):
+    def __init__(self, text):
+        GeoreferencingError.__init__(self, "Failed to parse coordinates", text)
+
+class GeoreferencingValueError(GeoreferencingError):
+    def __init__(self, text):
+        GeoreferencingError.__init__(self, "Invalid coordinate value(s)", text)
+
+class GeoreferencingIndexError(GeoreferencingError):
+    def __init__(self, text):
+        GeoreferencingError.__init__(self, "Insufficient or incomplete coordinates", text)
+
+_NODE_XY_PAT = re.compile(r"x([\d]+) y([\d]+)")
+_TAXON_XY_PAT = re.compile(r".* x([\d]+) y([\d]+) .*")
+_TAXON_CELL_INDEX_PAT = re.compile(".* i([\d]+) .*")
+
+def _process_xy_pattern(pattern, text):
+    xy_match = pattern.match(text)
+    if xy_match is None:
+        raise GeoreferencingParseError(text)
+    try:
+        return int(xy_match.group(1)), int(xy_match.group(2))
+    except ValueError:
+        raise GeoreferencingValueError(text)
+    except IndexError:
+        raise GeoreferencingIndexError(text)
+
 def georeference_taxa(taxon_set):
     """
     Decorates taxa with x and y cell coordinates as parsed from the taxon
     labels.
     """
     for taxon in taxon_set:
-        taxon.cell_index = int(re.match(".* i([\d]+) .*", taxon.label).groups(1)[0])
-        taxon.x = int(re.match(".* x([\d]+) .*", taxon.label).groups(1)[0])
-        taxon.y = int(re.match(".* y([\d]+) .*", taxon.label).groups(1)[0])
+        taxon.cell_index = int(_TAXON_CELL_INDEX_PAT.match(taxon.label).group(1))
+        taxon.x, taxon.y = _process_xy_pattern(_TAXON_XY_PAT, taxon.label)
+
+def georeference_nodes(tree, ignore_errors=False):
+    """
+    Decorates nodes with x and y cell coordinates, as parsed from the node
+    labels.
+    """
+    for nd in tree.postorder_node_iter():
+        if nd.label is not None:
+            label = nd.label
+            xypat = _NODE_XY_PAT
+        elif nd.taxon is not None:
+            label = nd.taxon.label
+            xypat = _TAXON_XY_PAT
+        else:
+            nd.x = None
+            nd.y = None
+            continue
+        try:
+            nd.x, nd.y = _process_xy_pattern(xypat, label)
+        except GeoreferencingError:
+            if not ignore_errors:
+                raise
+            else:
+                nd.x = None
+                nd.y = None
 
 class GeographicDistanceMatrix(object):
     """
