@@ -1,15 +1,15 @@
 # This file is processed by autoconf to create a Makefile for the GARLI
 # This file was written by hand (by mth using PAUP's configure.ac and http://autotoolset.sourceforge.net/tutorial.html as guides).
 
-AC_PREREQ(2.59)
-AC_INIT([ginkgo], [4.0.0], [jeet@ku.edu])
+AC_PREREQ([2.71])
+AC_INIT([ginkgo],[4.0.0],[jeet@ku.edu])
 
 # AC_CONFIG_SRCDIR (UNIQUE-FILE-IN-SOURCE-DIR) UNIQUE-FILE-IN-SOURCE-DIR
 # is some file that is in the package's source directory; `configure'
 # checks for this file's existence to make sure that the directory that it
 # is told contains the source code in fact does.
 AC_CONFIG_SRCDIR([ginkgocc/ginkgo.cpp])
-AC_CONFIG_HEADER([config.h])
+AC_CONFIG_HEADERS([config.h])
 
 #	Directory that contains install-sh and other auxiliary files
 AC_CONFIG_AUX_DIR([config])
@@ -44,7 +44,15 @@ AC_PROG_INSTALL
 # Checks for libraries.
 
 # Checks for header files.
-AC_HEADER_STDC
+m4_warn([obsolete],
+[The preprocessor macro `STDC_HEADERS' is obsolete.
+  Except in unusual embedded environments, you can safely include all
+  ISO C90 headers unconditionally.])dnl
+# Autoupdate added the next two lines to ensure that your configure
+# script's behavior did not change.  They are probably safe to remove.
+AC_CHECK_INCLUDES_DEFAULT
+AC_PROG_EGREP
+
 AC_CHECK_HEADERS([float.h malloc.h stddef.h stdlib.h sys/time.h])
 
 # Checks for typedefs, structures, and compiler characteristics.
@@ -67,7 +75,7 @@ AC_CHECK_FUNCS([floor memmove memset pow sqrt strchr strdup strtol])
 
 # Check for debugging mode.
 AC_ARG_ENABLE(debugging,
-	AC_HELP_STRING([--enable-debugging],[build for debugging]), , [enable_debugging=no])
+	AS_HELP_STRING([--enable-debugging],[build for debugging]), , [enable_debugging=no])
 if test "$enable_debugging" = yes; then
 	AC_MSG_NOTICE([
 	   *** NOTE: debugging is enabled; optimization is suppressed!
@@ -76,7 +84,7 @@ fi
 
 # Check for memcheck mode.
 AC_ARG_ENABLE(memcheck,
-	AC_HELP_STRING([--enable-memcheck],[build for memory-leak checking]), , [enable_memcheck=no])
+	AS_HELP_STRING([--enable-memcheck],[build for memory-leak checking]), , [enable_memcheck=no])
 if test "$enable_memcheck" = yes; then
 	AC_MSG_NOTICE([
 	   *** NOTE: memory checks will be run
@@ -85,7 +93,7 @@ fi
 
 # Check whether asserts should be allowed.
 AC_ARG_ENABLE(asserts,
-	AC_HELP_STRING([--enable-asserts],[build with asserts on (NDEBUG not defined)]), , [enable_asserts=no])
+	AS_HELP_STRING([--enable-asserts],[build with asserts on (NDEBUG not defined)]), , [enable_asserts=no])
 if test "$enable_asserts" = yes; then
 	AC_MSG_NOTICE([
 	   *** NOTE: compiling with assertions on (NDEBUG not defined)
@@ -94,7 +102,7 @@ fi
 
 # Check for mini mode.
 AC_ARG_ENABLE(mini,
-	AC_HELP_STRING([--enable-mini],[build mini version, landscape size limited to 255 cells]), , [enable_mini=no])
+	AS_HELP_STRING([--enable-mini],[build mini version, landscape size limited to 255 cells]), , [enable_mini=no])
 if test "$enable_mini" = yes; then
 	AC_MSG_NOTICE([
 	   *** NOTE: MINI mode: landscape limited to 255 cells
@@ -106,10 +114,8 @@ fi
 NUM_NEUTRAL_LOCI="10"
 AC_ARG_WITH(
 	[num-loci],
-	AC_HELP_STRING(
-		[--with-num-loci=NUMBER],
-		[Specify the number of neutral diploid loci tracked]
-		),
+	AS_HELP_STRING([--with-num-loci=NUMBER],[Specify the number of neutral diploid loci tracked
+		]),
 	[
 	NUM_NEUTRAL_LOCI="$withval"
 	])
@@ -121,10 +127,8 @@ AC_SUBST([NUM_NEUTRAL_LOCI])
 NUM_FITNESS_TRAITS="10"
 AC_ARG_WITH(
 	[num-traits],
-	AC_HELP_STRING(
-		[--with-num-traits=NUMBER],
-        [Specify the number of fitness traits tracked]
-		),
+	AS_HELP_STRING([--with-num-traits=NUMBER],[Specify the number of fitness traits tracked
+		]),
 	[
 	NUM_FITNESS_TRAITS="$withval"
 	])
@@ -137,7 +141,7 @@ AC_SUBST([NUM_FITNESS_TRAITS])
 
 PROGRAMLABEL=""
 AC_ARG_WITH([label],
-	AC_HELP_STRING([--with-label],[decorate program name with label]), , [with_label=""])
+	AS_HELP_STRING([--with-label],[decorate program name with label]), , [with_label=""])
 if test -n "$with_label"; then
 	AC_MSG_NOTICE([
 	       *** NOTE: adding "$with_label" to program name

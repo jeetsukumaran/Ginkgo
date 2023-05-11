@@ -16,3 +16,5 @@ debug/
 tags
 GinkgoWin.layout
 dev.sh
+configure~
+configure.ac~
